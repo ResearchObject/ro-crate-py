@@ -33,7 +33,7 @@ If you want to install manually from this code base, then try::
 
     pip install .
 
-..or if you use don't use `pip`:
+..or if you use don't use `pip`::
     
     python setup.py install
 

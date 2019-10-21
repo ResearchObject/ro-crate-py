@@ -60,6 +60,7 @@ setup(
      # 'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',  
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
     'Topic :: Internet',
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: System :: Archiving',
