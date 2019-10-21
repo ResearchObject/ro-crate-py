@@ -29,7 +29,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 
 setup(
-  name = 'ro-crate',
+  name = 'rocrate',
   packages = find_packages(exclude=['contrib', 'docs', 'tests']), # Required
   version = '0.0.1.dev0',
   description = 'RO-Crate metadata generator/parser',
