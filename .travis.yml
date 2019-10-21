@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.6"
+  - "pypy3"
+install:
+  - pip install -r requirements.txt
+  - pip install codecov python-coveralls pytest pytest-cov
+
+script:
+  - pytest --cov=./
+after_success:
+  - codecov    
+  - coveralls
