@@ -15,13 +15,15 @@
 ## limitations under the License.
 
 import unittest
+import datetime
+import time
 
 import rocrate
 
-
-class ROCrate(unittest.TestCase):
-    """Test minimal RO Crate"""
-    def testMinimal(self):
+"""Test minimal RO Crate"""
+class ROCrateMinimal(unittest.TestCase):
+    """Verify JSON-LD output"""
+    def testJsonLd(self):
         ro = rocrate.Metadata()
         jsonld = ro.as_jsonld()
 
@@ -42,3 +44,21 @@ class ROCrate(unittest.TestCase):
 
         root = by_id["./"]
         self.assertEquals("Dataset", root["@type"])
+        self.assertTrue(root["datePublished"])
+        self.assertNotEmpty(root["name"])
+        self.assertNotEmpty(root["author"])
+
+    def testProperties(self):
+        before = datetime.datetime.now()
+        time.sleep(0.5)
+        metadata = rocrate.Metadata()
+        time.sleep(0.5); 
+        after = datetime.datetime.now()
+        self.assertEquals("CreativeWork", metadata.type)
+        self.assertEquals(("CreativeWork",), metadata.types)
+        
+        ro = metadata.about
+        
+        self.assertIsInstance(ro.datePublished, datetime.datetime)
+        self.assertLess(before, ro.datePublished)
+        self.assertGreater(after, ro.datePublished)
