@@ -18,3 +18,16 @@ def first(iterable):
     for e in iterable:
         return e
     return None
+
+def flatten(single_or_multiple):
+    if len(single_or_multiple) == 1:
+        return single_or_multiple[0]
+    return single_or_multiple # might be empty!
+
+def as_list(list_or_other):
+    if list_or_other is None:
+        return []
+    if (isinstance(list_or_other, collections.Sequence) 
+        and not isinstance(list_or_other, basestring)):
+        return list_or_other
+    return [list_or_other]
