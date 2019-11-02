@@ -85,7 +85,7 @@ class ContextEntity(object):
                 # other objects we don't have etc.
                 # TODO: Support setting entities from other RO-Crates
                 raise ValueError("Adding entity from other RO-Crate not (yet) supported")
-            json.append({"@id": value.id}
+            json.append({"@id": value.id})
         instance[self.property] = flatten(json)
 
     def __get__(self, instance, owner=None):
@@ -145,10 +145,14 @@ class Metadata(_Entity):
     def _add_entity(self, entity):
         ## TODO: Check/merge duplicates? Valid by JSON-LD, but 
         # we won't find the second entry again above
-        self._jsonld["@graph"].add(entity)
+        self._jsonld["@graph"].append(entity)
         return entity # TODO: If we merged, return that instead here
 
-    about = ContextEntity(Dataset)
+    @property
+    def about(self):
+        return Dataset("./", self)
+    
+    #about = ContextEntity(Dataset) # FIXME, won't have "Dataset" class yet!
 
     @property
     def root(self):
@@ -174,7 +178,7 @@ class Dataset(_Entity):
     hasPart = ContextEntity(File)
 
     @property
-    def datePublished(self, date=None):
+    def datePublished(self):
         date = self.get("datePublished")
         return date and datetime.datetime.fromisoformat(date)
     
