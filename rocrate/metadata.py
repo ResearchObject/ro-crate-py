@@ -109,9 +109,8 @@ class ContextEntity(object):
         self.owner = owner
         self.property = name
         # Register plural _s variant 
-        # FIXME: probably wrong argument count!
         # TODO: Register plural _s variants
-        #setattr(owner, name+"s", property(self.getmany, self.setmany))
+        setattr(owner, name+"s", property(self.getmany, self.setmany))
         # TODO: Register _ids variants?
 
 class Metadata(_Entity):    

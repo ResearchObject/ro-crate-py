@@ -30,6 +30,6 @@ def as_list(list_or_other):
     if list_or_other is None:
         return []
     if (isinstance(list_or_other, collections.Sequence) 
-        and not isinstance(list_or_other, basestring)):
+        and not isinstance(list_or_other, str)): # FIXME: bytes?
         return list_or_other
     return [list_or_other]
