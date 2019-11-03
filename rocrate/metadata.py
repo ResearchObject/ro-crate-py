@@ -16,6 +16,21 @@
 
 import datetime
 import warnings
+import json
+import pkg_resources
+
+# FIXME: Avoid eager loading?
+_RO_CRATE = json.load(pkg_resources.resource_stream(__name__, "data/ro-crate.jsonld"))
+_SCHEMA = json.load(pkg_resources.resource_stream(__name__, "data/schema.jsonld"))
+_SCHEMA_MAP = dict( (e["@id"],e) for e in _SCHEMA["@graph"])
+
+def _term_to_uri(name):
+    # NOTE: Assumes RO-Crate's flat-style context
+    return _RO_CRATE["@context"][name]
+
+def _schema_doc(uri):
+    ## NOTE: Ensure rdfs:comment still appears in newer schema.org downloads
+    return _SCHEMA_MAP[uri].get("rdfs:comment", "")
 
 from .utils import *
 
@@ -68,10 +83,13 @@ class _Entity(object):
 class Thing(_Entity):
     pass
 
+    
+
 class ContextEntity(object):
 
     def __init__(self, entity_constructor=None):
         self.entity_constructor = entity_constructor or Thing
+        
     def getmany(self, instance):
         for json in as_list(instance.get(self.property)):
             # TODO: Support more advanced dispatching
@@ -108,16 +126,30 @@ class ContextEntity(object):
         ## TODO: Check if permitted to delete?
         instance[self.property] = [] # known property, empty in JSON
     def __set_name__(self, owner, name): # requires Py 3.6+
+        if not owner.__doc__:
+            _set_class_doc(owner)
         self.owner = owner
         self.property = name
-        doc = "http://schema.org/%s" % name
-        self.__doc__ = "Single contextual entity " + doc
+        uri = _term_to_uri(name)
+        doc = _schema_doc(uri)
+        self.__doc__ = "Single contextual entity %s\n%s" % (uri,doc)
         # Register plural _s variant 
         # TODO: Register plural _s variants
         setattr(owner, name+"s", 
             property(self.getmany, self.setmany, 
-                     doc="Multiple contextual entities " + doc))
+                     doc="Multiple contextual entities %s\n%s" % (uri,doc)))
         # TODO: Register _ids variants?
+
+def _set_class_doc(Class):
+    # set the class documentation
+    try:
+        # FIXME: avoid this hack here!
+        uri = _term_to_uri(Class.__name__)
+        doc = _schema_doc(uri)
+        Class.__doc__ = "Entity %s\n%s" % (uri,doc)
+    except KeyError:
+        pass ## Non-matching class name, ignore
+    
 
 class Metadata(_Entity):    
     def __init__(self):
@@ -173,6 +205,12 @@ class File(_Entity):
     def types(self):
         return ("File",) ## Hardcoded for now
 
+class Person(_Entity):
+    @property
+    def types(self):
+        return ("Person",) ## Hardcoded for now
+
+
 class Dataset(_Entity):
     def __init__(self, identifier, metadata):
         super().__init__(identifier, metadata)
@@ -183,6 +221,7 @@ class Dataset(_Entity):
         return ("Dataset",) ## Hardcoded for now
 
     hasPart = ContextEntity(File)
+    author = ContextEntity(Person)
 
     @property
     def datePublished(self):
