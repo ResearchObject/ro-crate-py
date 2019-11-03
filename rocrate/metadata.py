@@ -42,7 +42,8 @@ class _Entity(object):
         return {     
                     "@id": self.id,
                     "@type": self.type ## Assumes just one type
-               }        
+               }
+
     def __getitem__(self, key):
         return self._entity[key]
 
@@ -62,18 +63,19 @@ class _Entity(object):
 
     @property
     def types(self):
-        return (self.get("@type", "Thing"),) ## TODO: Avoid double-list!
+        return tuple(as_list(self.get("@type", "Thing")))
 
 class Thing(_Entity):
     pass
 
 class ContextEntity(object):
-    def __init__(self, expected_type=None):
-        self.expected_type = expected_type or Thing
+
+    def __init__(self, entity_constructor=None):
+        self.entity_constructor = entity_constructor or Thing
     def getmany(self, instance):
         for json in as_list(instance.get(self.property)):
             # TODO: Support more advanced dispatching
-            yield self.expected_type(json["@id"], instance._metadata)
+            yield self.entity_constructor(json["@id"], instance._metadata)
 
     def setmany(self, instance, values):
         json = []
@@ -108,9 +110,13 @@ class ContextEntity(object):
     def __set_name__(self, owner, name): # requires Py 3.6+
         self.owner = owner
         self.property = name
+        doc = "http://schema.org/%s" % name
+        self.__doc__ = "Single contextual entity " + doc
         # Register plural _s variant 
         # TODO: Register plural _s variants
-        setattr(owner, name+"s", property(self.getmany, self.setmany))
+        setattr(owner, name+"s", 
+            property(self.getmany, self.setmany, 
+                     doc="Multiple contextual entities " + doc))
         # TODO: Register _ids variants?
 
 class Metadata(_Entity):    
@@ -147,11 +153,13 @@ class Metadata(_Entity):
         self._jsonld["@graph"].append(entity)
         return entity # TODO: If we merged, return that instead here
 
-    @property
-    def about(self):
-        return Dataset("./", self)
+    #@property
+    #def about(self):
+    #    return Dataset("./", self)
     
-    #about = ContextEntity(Dataset) # FIXME, won't have "Dataset" class yet!
+    # Delayed access trick as we have not defined Dataset yet
+    """The dataset this is really about"""
+    about = ContextEntity(lambda id,metadata: Dataset(id,metadata))
 
     @property
     def root(self):
@@ -186,5 +194,5 @@ class Dataset(_Entity):
         if hasattr(date, "isoformat"): # datetime object
             self["datePublished"] = date.isoformat()
         else:
-            self["datePublished"] = date
+            self["datePublished"] = str(date)
 
