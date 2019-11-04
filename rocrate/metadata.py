@@ -30,6 +30,7 @@ def _term_to_uri(name):
 
 def _schema_doc(uri):
     ## NOTE: Ensure rdfs:comment still appears in newer schema.org downloads
+    # TODO: Support terms outside schema.org?
     return _SCHEMA_MAP[uri].get("rdfs:comment", "")
 
 from .utils import *
@@ -83,13 +84,11 @@ class _Entity(object):
 class Thing(_Entity):
     pass
 
-    
-
 class ContextEntity(object):
 
     def __init__(self, entity_constructor=None):
         self.entity_constructor = entity_constructor or Thing
-        
+
     def getmany(self, instance):
         for json in as_list(instance.get(self.property)):
             # TODO: Support more advanced dispatching
@@ -209,7 +208,6 @@ class Person(_Entity):
     @property
     def types(self):
         return ("Person",) ## Hardcoded for now
-
 
 class Dataset(_Entity):
     def __init__(self, identifier, metadata):
