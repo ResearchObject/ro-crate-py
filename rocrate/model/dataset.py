@@ -21,9 +21,10 @@ from .contextentity import ContextEntity
 from .creativework import CreativeWork
 from .file import File
 from .person import Person
+from . import metadata
 
 class Dataset(Entity):
-    def __init__(self, identifier, metadata):
+    def __init__(self, identifier, metadata: 'metadata.Metadata'):
         super().__init__(identifier, metadata)
         self.datePublished = datetime.datetime.now() ## TODO: pick it up from _metadata
 
