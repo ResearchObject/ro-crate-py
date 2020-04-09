@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-## Copyright 2019 The University of Manchester, UK
+## Copyright 2019-2020 The University of Manchester, UK
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.

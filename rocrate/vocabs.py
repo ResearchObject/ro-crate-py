@@ -14,19 +14,19 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-"""
-Create/parse RO-Crate metadata.
+import json
+import pkg_resources
 
-This module intends to help create or parse
-RO-Crate metadata, see rocrate_ 
+# FIXME: Avoid eager loading?
+RO_CRATE = json.load(pkg_resources.resource_stream(__name__, "data/ro-crate.jsonld"))
+SCHEMA = json.load(pkg_resources.resource_stream(__name__, "data/schema.jsonld"))
+SCHEMA_MAP = dict( (e["@id"],e) for e in SCHEMA["@graph"])
 
+def term_to_uri(name):
+    # NOTE: Assumes RO-Crate's flat-style context
+    return RO_CRATE["@context"][name]
 
-.. _rocrate: https://w3id.org/ro/crate/
-"""
-
-__author__      = "Stian Soiland-Reyes <http://orcid.org/0000-0001-9842-9718>"
-__copyright__   = "Copyright 2019-2020 The University of Manchester"
-__license__     = "Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>"
-
-# Convenience export of public functions/types
-from .model.metadata import Metadata
+def schema_doc(uri):
+    ## NOTE: Ensure rdfs:comment still appears in newer schema.org downloads
+    # TODO: Support terms outside schema.org?
+    return SCHEMA_MAP[uri].get("rdfs:comment", "")
