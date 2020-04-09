@@ -48,7 +48,6 @@ Example
 Creating a workflow RO-Crate
 
 ```
-
 from rocrate import rocrate_api
 wf_path = 'https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/deploy/workflows/4-Variation.ga'
 files_list = ['https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/4-Variation/SRR10903401.vcf.gz', 'https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/4-Variation/SRR11241255.vcf.gz'] 
@@ -61,6 +60,5 @@ wf_crate = rocrate_api.make_workflow_crate(wf_path,type='Galaxy',files_list)
 # Write to zip file
 zip_out_path = '/home/test_user/wf_crate.zip'
 wf_crate.write_zip(zip_out_path)
-
 ```
 
