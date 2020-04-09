@@ -14,22 +14,19 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-import collections
+import json
+import pkg_resources
 
-def first(iterable):
-    for e in iterable:
-        return e
-    return None
+# FIXME: Avoid eager loading?
+RO_CRATE = json.load(pkg_resources.resource_stream(__name__, "data/ro-crate.jsonld"))
+SCHEMA = json.load(pkg_resources.resource_stream(__name__, "data/schema.jsonld"))
+SCHEMA_MAP = dict( (e["@id"],e) for e in SCHEMA["@graph"])
 
-def flatten(single_or_multiple):
-    if len(single_or_multiple) == 1:
-        return single_or_multiple[0]
-    return single_or_multiple # might be empty!
+def term_to_uri(name):
+    # NOTE: Assumes RO-Crate's flat-style context
+    return RO_CRATE["@context"][name]
 
-def as_list(list_or_other):
-    if list_or_other is None:
-        return []
-    if (isinstance(list_or_other, collections.Sequence) 
-        and not isinstance(list_or_other, str)): # FIXME: bytes?
-        return list_or_other
-    return [list_or_other]
+def schema_doc(uri):
+    ## NOTE: Ensure rdfs:comment still appears in newer schema.org downloads
+    # TODO: Support terms outside schema.org?
+    return SCHEMA_MAP[uri].get("rdfs:comment", "")
