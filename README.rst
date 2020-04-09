@@ -41,3 +41,24 @@ If you want to install manually from this code base, then try::
 .. _rocrate: https://w3id.org/ro/crate
 .. _pip: https://docs.python.org/3/installing/
 
+
+Example
+-------
+
+Creating a workflow RO-Crate
+
+```python
+from rocrate import rocrate_api
+wf_path = 'https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/deploy/workflows/4-Variation.ga'
+files_list = ['https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/4-Variation/SRR10903401.vcf.gz', 'https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/4-Variation/SRR11241255.vcf.gz'] 
+# Create base package
+wf_crate = rocrate_api.make_workflow_crate(wf_path,type='Galaxy',files_list)
+
+# Add authors info
+# ....
+
+# Write to zip file
+zip_out_path = '/home/test_user/wf_crate.zip'
+wf_crate.write_zip(zip_out_path)
+```
+
