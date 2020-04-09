@@ -14,11 +14,13 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
+from typing import List
+
 from .. import vocabs
 from ..utils import *
 
 class Entity(object):
-    def __init__(self, identifier, metadata):
+    def __init__(self, identifier: str, metadata):
         self.id = identifier
         self._metadata = metadata
         self._entity = metadata._find_entity(identifier)
@@ -42,25 +44,25 @@ class Entity(object):
         }        
         return val
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         return self._entity[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value):
         # TODO: Disallow setting non-JSON values
         self._entity[key] = value
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str):
         del self._entity[key]
 
-    def get(self, key, default=None):
+    def get(self, key: str, default=None):
         return self._entity.get(key, default)
 
     @property
-    def type(self):
+    def type(self) -> str:
         return first(self.types)
 
     @property
-    def types(self):
+    def types(self)-> List[str]:
         return tuple(as_list(self.get("@type", "Thing")))
 
 class Thing(Entity):

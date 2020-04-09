@@ -18,6 +18,8 @@ import warnings
 import json
 import pkg_resources
 
+from typing import Dict
+
 from ..utils import *
 
 from .entity import Entity
@@ -54,26 +56,23 @@ class Metadata(Entity):
             ]
         }
 
-    def _find_entity(self, identifier):
+    def _find_entity(self, identifier: str) -> Entity:
         for item in self._jsonld["@graph"]:
             if item.get("@id", None) == identifier:
                 return item
 
-    def _add_entity(self, entity):
+    def _add_entity(self, entity: Entity) -> Entity:
         ## TODO: Check/merge duplicates? Valid by JSON-LD, but 
         # we won't find the second entry again above
         self._jsonld["@graph"].append(entity)
         return entity # TODO: If we merged, return that instead here
 
-    # Delayed access trick as we have not defined Dataset class yet
     """The dataset this is really about"""
-    about = ContextEntity(lambda id,metadata: Dataset(id,metadata))
+    about = ContextEntity(Dataset)
 
     @property
-    def root(self):
+    def root(self) -> Dataset:
         return self.about
 
-    def as_jsonld(self):
+    def as_jsonld(self) -> Dict:
         return self._jsonld
-
-
