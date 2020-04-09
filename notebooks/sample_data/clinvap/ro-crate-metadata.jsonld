@@ -1,0 +1,153 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.0/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.jsonld",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "nf-core/clinvap",
+      "description": "Clinical Variant Annotation Pipeline",
+      "author": "Bilge Sürün",
+      "url": "https://github.com/nf-core/clinvap",
+      "keywords": [
+        "nf-core, clinical, variant-annotation, annotation"
+      ],
+      "mainEntity": {
+        "@id": "main.nf"
+      },
+      "hasPart": [
+        {
+          "@id": "main.nf"
+        },
+        {
+          "@id": "bin/"
+        },
+        {
+          "@id": "assets/"
+        },
+        {
+          "@id": "nextflow.config"
+        },
+        {
+          "@id": "Dockerfile"
+        },
+        {
+          "@id": "conf/"
+        },
+        {
+          "@id": "LICENSE"
+        },
+        {
+          "@id": "docs/"
+        },
+        {
+          "@id": "Singularity"
+        },
+        {
+          "@id": "README.md"
+        },
+        {
+          "@id": "CHANGELOG.md"
+        },
+        {
+          "@id": "environment.yml"
+        },
+        {
+          "@id": "CODE_OF_CONDUCT.md"
+        }
+      ]
+    },
+    {
+      "@id": "main.nf",
+      "@type": [
+        "File",
+        "SoftwareSourceCode",
+        "Workflow"
+      ],
+      "programmingLanguage": {
+        "@id": "#nextflow"
+      },
+      "contentSize": 13300
+    },
+    {
+      "@id": "bin/",
+      "@type": "Dataset"
+    },
+    {
+      "@id": "assets/",
+      "@type": "Dataset"
+    },
+    {
+      "@id": "nextflow.config",
+      "@type": "File",
+      "contentSize": 3602
+    },
+    {
+      "@id": "Dockerfile",
+      "@type": "File",
+      "contentSize": 280
+    },
+    {
+      "@id": "conf/",
+      "@type": "Dataset"
+    },
+    {
+      "@id": "LICENSE",
+      "@type": "File",
+      "contentSize": 1065
+    },
+    {
+      "@id": "docs/",
+      "@type": "Dataset"
+    },
+    {
+      "@id": "Singularity",
+      "@type": "File",
+      "contentSize": 401
+    },
+    {
+      "@id": "README.md",
+      "@type": "File",
+      "contentSize": 1603
+    },
+    {
+      "@id": "CHANGELOG.md",
+      "@type": "File",
+      "contentSize": 141
+    },
+    {
+      "@id": "environment.yml",
+      "@type": "File",
+      "contentSize": 380
+    },
+    {
+      "@id": "CODE_OF_CONDUCT.md",
+      "@type": "File",
+      "contentSize": 3250
+    },
+    {
+      "@id": "#nextflow",
+      "@type": "ComputerLanguage",
+      "name": "Nextflow",
+      "identifier": {
+        "@id": "https://www.nextflow.io/"
+      },
+      "url": {
+        "@id": "https://www.nextflow.io/"
+      }
+    }
+  ]
+}
