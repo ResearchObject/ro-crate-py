@@ -1,0 +1,153 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.0/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.jsonld",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "nf-core/methylseq",
+      "description": "Methylation (Bisulfite-Sequencing) Best Practice analysis pipeline, part of the nf-core community.",
+      "author": "Phil Ewels",
+      "url": "https://github.com/nf-core/methylseq",
+      "keywords": [
+        "nf-core, bisulfite-sequencing, dna-methylation, methyl-seq"
+      ],
+      "mainEntity": {
+        "@id": "main.nf"
+      },
+      "hasPart": [
+        {
+          "@id": "main.nf"
+        },
+        {
+          "@id": "bin/"
+        },
+        {
+          "@id": "assets/"
+        },
+        {
+          "@id": "parameters.settings.json"
+        },
+        {
+          "@id": "nextflow.config"
+        },
+        {
+          "@id": "Dockerfile"
+        },
+        {
+          "@id": "conf/"
+        },
+        {
+          "@id": "LICENSE"
+        },
+        {
+          "@id": "docs/"
+        },
+        {
+          "@id": "README.md"
+        },
+        {
+          "@id": "CHANGELOG.md"
+        },
+        {
+          "@id": "environment.yml"
+        },
+        {
+          "@id": "CODE_OF_CONDUCT.md"
+        }
+      ]
+    },
+    {
+      "@id": "main.nf",
+      "@type": [
+        "File",
+        "SoftwareSourceCode",
+        "Workflow"
+      ],
+      "programmingLanguage": {
+        "@id": "#nextflow"
+      },
+      "contentSize": 49166
+    },
+    {
+      "@id": "bin/",
+      "@type": "Dataset"
+    },
+    {
+      "@id": "assets/",
+      "@type": "Dataset"
+    },
+    {
+      "@id": "parameters.settings.json",
+      "@type": "File",
+      "contentSize": 19923
+    },
+    {
+      "@id": "nextflow.config",
+      "@type": "File",
+      "contentSize": 5320
+    },
+    {
+      "@id": "Dockerfile",
+      "@type": "File",
+      "contentSize": 373
+    },
+    {
+      "@id": "conf/",
+      "@type": "Dataset"
+    },
+    {
+      "@id": "LICENSE",
+      "@type": "File",
+      "contentSize": 1062
+    },
+    {
+      "@id": "docs/",
+      "@type": "Dataset"
+    },
+    {
+      "@id": "README.md",
+      "@type": "File",
+      "contentSize": 5733
+    },
+    {
+      "@id": "CHANGELOG.md",
+      "@type": "File",
+      "contentSize": 6070
+    },
+    {
+      "@id": "environment.yml",
+      "@type": "File",
+      "contentSize": 633
+    },
+    {
+      "@id": "CODE_OF_CONDUCT.md",
+      "@type": "File",
+      "contentSize": 3234
+    },
+    {
+      "@id": "#nextflow",
+      "@type": "ComputerLanguage",
+      "name": "Nextflow",
+      "identifier": {
+        "@id": "https://www.nextflow.io/"
+      },
+      "url": {
+        "@id": "https://www.nextflow.io/"
+      }
+    }
+  ]
+}
