@@ -48,17 +48,25 @@ class _Entity(object):
         self.id = identifier
         self._metadata = metadata
         self._entity = metadata._find_entity(identifier)
-        if self._entity is None:            
+        if self._entity is None:
             self._entity = metadata._add_entity(self._empty())
 
     def __repr__(self):
         return "<%s %s>" % (self.id, self.type)
 
-    def _empty(self):        
-        return {     
-                    "@id": self.id,
-                    "@type": self.type ## Assumes just one type
-               }
+    @property
+    def _default_type(self):
+        clsName = self.__class__.__name__
+        if clsName in _RO_CRATE["@context"]:
+            return clsName
+        return "Thing"
+
+    def _empty(self):
+        val = {     
+            "@id": self.id,
+            "@type": self._default_type
+        }        
+        return val
 
     def __getitem__(self, key):
         return self._entity[key]
@@ -184,11 +192,7 @@ class Metadata(_Entity):
         self._jsonld["@graph"].append(entity)
         return entity # TODO: If we merged, return that instead here
 
-    #@property
-    #def about(self):
-    #    return Dataset("./", self)
-    
-    # Delayed access trick as we have not defined Dataset yet
+    # Delayed access trick as we have not defined Dataset class yet
     """The dataset this is really about"""
     about = ContextEntity(lambda id,metadata: Dataset(id,metadata))
 
@@ -200,26 +204,22 @@ class Metadata(_Entity):
         return self._jsonld
 
 class File(_Entity):
-    @property
-    def types(self):
-        return ("File",) ## Hardcoded for now
+    pass
+
+class CreativeWork(_Entity):
+    pass
 
 class Person(_Entity):
-    @property
-    def types(self):
-        return ("Person",) ## Hardcoded for now
+    pass
 
 class Dataset(_Entity):
     def __init__(self, identifier, metadata):
         super().__init__(identifier, metadata)
         self.datePublished = datetime.datetime.now() ## TODO: pick it up from _metadata
 
-    @property
-    def types(self):
-        return ("Dataset",) ## Hardcoded for now
-
     hasPart = ContextEntity(File)
     author = ContextEntity(Person)
+    license = ContextEntity(CreativeWork)
 
     @property
     def datePublished(self):
@@ -232,4 +232,3 @@ class Dataset(_Entity):
             self["datePublished"] = date.isoformat()
         else:
             self["datePublished"] = str(date)
-
