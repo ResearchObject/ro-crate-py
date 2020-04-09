@@ -47,7 +47,7 @@ Example
 
 Creating a workflow RO-Crate
 
-```python
+```
 
 from rocrate import rocrate_api
 wf_path = 'https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/deploy/workflows/4-Variation.ga'
