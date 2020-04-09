@@ -14,8 +14,8 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-from . import vocabs
-from .utils import *
+from .. import vocabs
+from ..utils import *
 
 class Entity(object):
     def __init__(self, identifier, metadata):

@@ -18,7 +18,8 @@ import warnings
 import json
 import pkg_resources
 
-from .utils import *
+from ..utils import *
+
 from .entity import Entity
 from .dataset import Dataset
 from .contextentity import ContextEntity

@@ -16,9 +16,10 @@
 
 import warnings
 
-from .utils import *
+from .. import vocabs
+from ..utils import *
+
 from .entity import Thing
-from . import vocabs
 
 class ContextEntity(object):
 
