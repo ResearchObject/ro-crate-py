@@ -57,11 +57,15 @@ Creating a workflow RO-Crate
     # Create base package
     wf_crate = rocrate_api.make_workflow_crate(wf_path,type="Galaxy",files_list)
     
-    # Add authors info
-    # ....
-    
     # Write to zip file
-    zip_out_path = "/home/test_user/wf_crate.zip"
-    wf_crate.write_zip(zip_out_path)
-
+    out_path = "/home/test_user/wf_crate"
+    wf_crate.archive_crate(out_path,'zip')
+    
+    # Add authors info
+    joe_metadata = {'name': 'Joe Bloggs'}
+    wf_crate.add_person('joe', joe_metadata)
+    
+    # write crate to disk
+    out_path = "/home/test_user/wf_crate_base"
+    wf.crate.write_crate(out_path)
 
