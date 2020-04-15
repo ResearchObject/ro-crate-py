@@ -1,16 +1,19 @@
-import rocrate as rclib
+#import rocrate as rclib
+import rocrate.model.contextentity as contextual_entities
+import rocrate.model.dataset as dataset
+from rocrate.model.metadata import Metadata
 import zipfile
 
 
 class ROCrate():
 
-    def __init__():
+    def __init__(self):
         self.create_dict = {}
         self.data_entities = []
         self.contextual_entities = []
         self.metadata = Metadata()
 
-    def add_file(self, path)
+    def add_file(self, path):
         entity = FileDataEntity()
         #...process path
         self._add_data_entity(entity)
@@ -25,8 +28,8 @@ class ROCrate():
     #def _remove_data_entity():
 
 
-    def write_crate(create_path):
-        # write crate to local dir
+    #def write_crate(create_path):
+    #    # write crate to local dir
 
     def archive_crate(crate_path,archiver='zip'):
         filename = '.'.join([os.path.basename(crate_path), archiver])
@@ -37,24 +40,26 @@ class ROCrate():
             zf.write(filepath, relpath)
 	    # iterate over data entities
             for data_entity in self._get_data_entities():
-                #if the data entity is a local file then copy it
-                filepath = data_entity. ....
-                #if data_entity is a file path:
-                if os.path.isfile(filepath):
-                    #filepath = os.path.normpath(os.path.join(dirpath, name))
-                    #relpath = os.path.relpath(filepath, os.path.dirname(bag_path))
+                if type(data_entity) == dataset.Dataset:
+                    #if the data entity is a local file then copy it
+                    filepath = '' #data_entity. ....
+                    #if data_entity is a file path:
+                    #if os.path.isfile(filepath):
+                        #filepath = os.path.normpath(os.path.join(dirpath, name))
+                        #relpath = os.path.relpath(filepath, os.path.dirname(bag_path))
             zf.close()
             archive = zf.filename
 
         return archive
 
     def add_person(person_dict):
-
+        new_person = roc.Person()
+        _add_context_entity(new_person)
 
 class ROCrateWorkflow(ROCrate):
 
     def __init__(self, main_workflow_file):
-        super().__init__(self)
+        super().__init__()
         self.main_workflow = main_workflow_file
 
 
