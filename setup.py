@@ -44,6 +44,7 @@ setup(
   keywords = "researchobject ro-crate ro metadata jsonld",
   # license_file= "LICENSE.txt", ## implied
   install_requires=[],
+  test_suite='test',
   classifiers=[
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     'Development Status :: 1 - Planning',
