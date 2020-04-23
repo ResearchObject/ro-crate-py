@@ -19,12 +19,13 @@ import warnings
 from .. import vocabs
 from ..utils import *
 
-from .entity import Thing
+#from .entity import Thing
 
 class ContextEntity(object):
 
     def __init__(self, entity_constructor=None):
-        self.entity_constructor = entity_constructor or Thing
+        #self.entity_constructor = entity_constructor or Thing
+        super().__init__()
 
     def getmany(self, instance):
         for json in as_list(instance.get(self.property)):

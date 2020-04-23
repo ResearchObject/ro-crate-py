@@ -1,9 +1,10 @@
-#import rocrate as rclib
-import rocrate.model.contextentity as contextual_entities
-import rocrate.model.dataset as dataset
-from rocrate.model.metadata import Metadata
+from .model import contextentity
+from .model import dataset
+from .model import file
+from .model.metadata import Metadata
 import zipfile
-
+import galaxy2cwl
+import tempfile
 
 class ROCrate():
 
@@ -22,7 +23,7 @@ class ROCrate():
         #self.preview = Preview('ro-crate-preview.html')
         #self.default_entities.append(self.preview)
 
-def _empty(self):
+    def _empty(self):
         val = {
             "@id": self.id,
             "@type": 'Dataset',
@@ -33,7 +34,7 @@ def _empty(self):
 
     def _get_root_jsonld(self):
         root_graph = self.metadata.get
-        root_json_ld self._get_root_jsonld() .serialize(format='json-ld', indent=4)
+        #root_json_ld self._get_root_jsonld() .serialize(format='json-ld', indent=4)
 
     # source: file object or path (str)
     def add_file(self, source, dest_path = None , properties = None):
@@ -71,10 +72,20 @@ def _empty(self):
         new_person = roc.Person()
         _add_context_entity(new_person)
 
+
 class ROCrateWorkflow(ROCrate):
 
-    def __init__(self, main_workflow_file):
+    def __init__(self, workflow_file):
         super().__init__()
-        self.main_workflow = main_workflow_file
+        self.add_file(workflow_file)
+        if wf_type == "Galaxy":
+            #create cwl_abstract
+            cwl_abstract = galaxy2cwl.main([workflow_file])
+            cwl_abstract_path = tempfile.TemporaryFile(mode="w")
+            json.dump(cwl_abstract, cwl_abstract_path)
+            # fix the dest_path of this
+            self.add_file(cwl_abstract_path)
+            
+        self.previewmain_workflow = main_workflow_file
 
 

@@ -24,7 +24,8 @@ from .person import Person
 from . import metadata
 
 class Dataset(Entity):
-    def __init__(self,source, dest_path = None , properties = None,  metadata: 'metadata.Metadata'):
+
+    def __init__(self,source, dest_path = None , properties = None,  metadata: 'metadata.Metadata'= None):
         if os.path.exists(source):
             self.source = source
             if not dest_path:
@@ -43,7 +44,6 @@ class Dataset(Entity):
         else:
             print('Not a directory or not accessible')
             return None
-    #hasPart = ContextEntity(File)
     #author = ContextEntity(Person)
     #license = ContextEntity(CreativeWork)
 
