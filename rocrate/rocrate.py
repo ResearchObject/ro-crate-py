@@ -37,8 +37,8 @@ def _empty(self):
 
     # source: file object or path (str)
     def add_file(self, source, dest_path = None , properties = None):
-        entity = FileDataEntity(source,dest_path,properties)
-        self._add_data_entity(entity)
+        file_entity = File(source,dest_path,properties,self.metadata)
+        self._add_data_entity(file_entity)
 
     def remove_file(self,file_id):
         #if file in data_entities:
@@ -46,8 +46,6 @@ def _empty(self):
 
     def _add_data_entity(self, data_entity):
         self.data_entities.append(data_entity)
-        # add to metadata
-        self.metadata._add_entity(data_entity)
 
     def _remove_data_entity():
         self.data_entities.remove(data_entity)
