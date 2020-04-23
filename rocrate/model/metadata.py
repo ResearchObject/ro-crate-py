@@ -39,7 +39,7 @@ class Metadata(Entity):
         self.dest_path = 'ro-crate-metadata.jsonld' 
         super().__init__("ro-crate-metadata.jsonld", self)
 
-    def _template(self):
+    def _empty(self):
         # Hard-coded bootstrap for now
         return {
             "@context": "https://w3id.org/ro/crate/1.0/context",

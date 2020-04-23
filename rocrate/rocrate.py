@@ -8,6 +8,7 @@ import zipfile
 class ROCrate():
 
     def __init__(self):
+        self.id = './'
         #self.crate_dict = {}
         self.default_entities = []
         self.data_entities = []
@@ -18,8 +19,17 @@ class ROCrate():
         #create root entity with id './' and add it to the default entities
         self.default_entities.append(Dataset('./', metadata=self.metadata))
         #create preview entity and add it to default_entities
+        #self.preview = Preview('ro-crate-preview.html')
+        #self.default_entities.append(self.preview)
 
-        self.default_entities.append(preview)
+def _empty(self):
+        val = {
+            "@id": self.id,
+            "@type": 'Dataset',
+            "@hasPart": []
+            #name contentSize dateModified encodingFormat identifier sameAs
+        }
+        return val
 
     def _get_root_jsonld(self):
         root_graph = self.metadata.get

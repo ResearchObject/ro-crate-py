@@ -26,27 +26,44 @@ from . import metadata
 class Dataset(Entity):
     def __init__(self,source, dest_path = None , properties = None,  metadata: 'metadata.Metadata'):
         if os.path.exists(source):
+            self.source = source
+            if not dest_path:
+                self.id = source
+            else:
+                self.id = dest_path
             #create Dataset entity
-            diretory_entries = []
-            identifier = os.path.dirname(source)
-            super().__init__(self,identifier, metadata)
+            super().__init__(identifier, metadata)
+            self.directory_entries = []
             # iterate over the dir contents to create entities with each file
             for subfile in os.listdir(directory):
-                directory_entries.append(File(subfile))
-                #should add to the metadata object
-            self.datePublished = datetime.datetime.now() ## TODO: pick it up from _metadata
+                subfile_entity = File(subfile)
+                directory_entries.append(subfile_entity)
+                self.add_subfile(subfile)
+            self._jsonld["datePublished"] = datetime.datetime.now() ## TODO: pick it up from _metadata
         else:
             print('Not a directory or not accessible')
+            return None
+    #hasPart = ContextEntity(File)
+    #author = ContextEntity(Person)
+    #license = ContextEntity(CreativeWork)
 
-    hasPart = ContextEntity(File)
-    author = ContextEntity(Person)
-    license = ContextEntity(CreativeWork)
+    def _empty(self):
+        val = {
+            "@id": self.id,
+            "@type": 'Dataset',
+            "@hasPart": []
+            #name contentSize dateModified encodingFormat identifier sameAs
+        }
+        return val
+
+    def add_subfile(file_entity):
+        self._jsonld['@hasPart'].append({"@id": subfile_entity.get_id()})
 
     @property
     def datePublished(self):
         date = self.get("datePublished")
         return date and datetime.datetime.fromisoformat(date)
-    
+
     @datePublished.setter
     def datePublished(self, date):
         if hasattr(date, "isoformat"): # datetime object
@@ -54,8 +71,8 @@ class Dataset(Entity):
         else:
             self["datePublished"] = str(date)
 
-    def write_to_file(self, base_path):
-        out_path = os.path.join(base_path, self.id)
+    def write(self, base_path):
+        out_path = os.path.join(base_path, self.dest)
         for file in self.directory_entries:
             out_path.write()
 

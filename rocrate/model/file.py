@@ -15,38 +15,44 @@
 ## limitations under the License.
 
 from .entity import Entity
+from shutil import copy
 
-
-default_properties =  {'@type':'File'}
 
 class File(Entity):
 
     def __init__(self, source, dest_path = None , properties = None, metadata = None):
         #...process source
-        if isinstance(source, io.IOBase):
-            # define destination path
-            if not dest_path:  #no name for path within the crate
-                dest = source.toString()
+
+        #this first case was aimed at handling File objects but dont think its necessary, only allowing a path is ok.
+        # if isinstance(source, io.IOBase):
+            # # define destination path
+            # if not dest_path:  #no name for path within the crate
+                # dest = source.toString()
+            # else:
+                # dest = dest_path
+            # #copy to dest by chunks
+        if os.path.isfile(source):
+            self.source = source
+            if not dest_path:
+                self.id = source
             else:
-                dest = dest_path
-            #copy to dest by chunks
-        elif os.path.isfile(source):
-                self.source = source
-                if not dest_path:
-                    dest = os.path.basename(source)
-                else:
-                    dest = dest_path
+                self.id = dest_path
         else:
             print('The source is not a File not a correct path')
+            return None
 
-        # should merge properties with the default properties of a file:
+        super.__init__(self,metadata)
         if properties:
-            properties.update(default_properties)
-        else:
-            properties = default_properties
-        #add to the metadata here or in the superclass
-        super.__init__(self, dest_path, properties)
+            # merge default and
+            self._jsonld.update(properties)
 
-    def write_to_file(self, base_path):
+    def _empty(self):
+        val = {
+            "@id": self.id,
+            "@type": 'File'
+        }
+        return val
+
+    def write(self, base_path):
         out_path = os.path.join(base_path, self.id)
-        out_path.write()
+        copy(self.source,out_path)
