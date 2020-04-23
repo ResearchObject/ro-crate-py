@@ -33,9 +33,10 @@ This object holds the data of an RO Crate Metadata File rocrate_
 
 .. _rocrate: https://w3id.org/ro/crate/1.0
 """
-class Metadata(Entity):    
+class Metadata(Entity):
     def __init__(self):
         self._jsonld = self._template()  ## bootstrap needed by the below!
+        self.dest_path = 'ro-crate-metadata.jsonld' 
         super().__init__("ro-crate-metadata.jsonld", self)
 
     def _template(self):
@@ -66,6 +67,12 @@ class Metadata(Entity):
         # we won't find the second entry again above
         self._jsonld["@graph"].append(entity)
         return entity # TODO: If we merged, return that instead here
+
+    def write(dest_base):
+        #writes itself 
+        dest_path = os.path.join(dest_base, self.dest_path)
+        with open(dest_path, 'w') as outfile:
+            json.dump(as_jsonld, outfile)
 
     """The dataset this is really about"""
     about = ContextEntity(Dataset)

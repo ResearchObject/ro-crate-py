@@ -24,9 +24,19 @@ from .person import Person
 from . import metadata
 
 class Dataset(Entity):
-    def __init__(self, identifier, metadata: 'metadata.Metadata'):
-        super().__init__(identifier, metadata)
-        self.datePublished = datetime.datetime.now() ## TODO: pick it up from _metadata
+    def __init__(self,source, dest_path = None , properties = None,  metadata: 'metadata.Metadata'):
+        if os.path.exists(source):
+            #create Dataset entity
+            diretory_entries = []
+            identifier = os.path.dirname(source)
+            super().__init__(self,identifier, metadata)
+            # iterate over the dir contents to create entities with each file
+            for subfile in os.listdir(directory):
+                directory_entries.append(File(subfile))
+                #should add to the metadata object
+            self.datePublished = datetime.datetime.now() ## TODO: pick it up from _metadata
+        else:
+            print('Not a directory or not accessible')
 
     hasPart = ContextEntity(File)
     author = ContextEntity(Person)
@@ -43,3 +53,9 @@ class Dataset(Entity):
             self["datePublished"] = date.isoformat()
         else:
             self["datePublished"] = str(date)
+
+    def write_to_file(self, base_path):
+        out_path = os.path.join(base_path, self.id)
+        for file in self.directory_entries:
+            out_path.write()
+

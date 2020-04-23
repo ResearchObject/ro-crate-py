@@ -1,0 +1,1 @@
+class Preview(File)

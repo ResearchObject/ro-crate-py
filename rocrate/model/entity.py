@@ -20,12 +20,13 @@ from .. import vocabs
 from ..utils import *
 
 class Entity(object):
-    def __init__(self, identifier: str, metadata):
+    def __init__(self, identifier: str, metadata = None):
         self.id = identifier
-        self._metadata = metadata
-        self._entity = metadata._find_entity(identifier)
-        if self._entity is None:
-            self._entity = metadata._add_entity(self._empty())
+        if metadata:
+            #self._metadata = metadata
+            self._jsonld = metadata._find_entity(identifier)
+            if self._jsonld is None:
+                self._jsonld = metadata._add_entity(self._empty())
 
     def __repr__(self):
         return "<%s %s>" % (self.id, self.type)
@@ -45,11 +46,11 @@ class Entity(object):
         return val
 
     def __getitem__(self, key: str):
-        return self._entity[key]
+        return self._jsonld[key]
 
     def __setitem__(self, key: str, value):
         # TODO: Disallow setting non-JSON values
-        self._entity[key] = value
+        self._jsonld[key] = value
 
     def __delitem__(self, key: str):
         del self._entity[key]
@@ -64,6 +65,3 @@ class Entity(object):
     @property
     def types(self)-> List[str]:
         return tuple(as_list(self.get("@type", "Thing")))
-
-class Thing(Entity):
-    pass
