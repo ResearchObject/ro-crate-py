@@ -51,8 +51,9 @@ Creating a workflow RO-Crate
 
     from rocrate import rocrate_api
     
-    wf_path = "https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/deploy/workflows/4-Variation.ga"
-    files_list = ["https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/4-Variation/SRR10903401.vcf.gz", "https://github.com/galaxyproject/SARS-CoV-2/blob/master/genomics/4-Variation/SRR11241255.vcf.gz"] 
+    wf_path = "test/test-data/test_galaxy_wf.ga"
+    files_list = ["test/test-data/test_file_galaxy.txt"]
+
     
     # Create base package
     wf_crate = rocrate_api.make_workflow_crate(wf_path,type="Galaxy",files_list)
