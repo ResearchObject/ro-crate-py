@@ -56,7 +56,7 @@ Creating a workflow RO-Crate
 
     
     # Create base package
-    wf_crate = rocrate_api.make_workflow_crate(wf_path,type="Galaxy",files_list)
+    wf_crate = rocrate_api.make_workflow_rocrate(wf_path, wf_type="Galaxy", incl_files=files_list)
     
     # Write to zip file
     out_path = "/home/test_user/wf_crate"
@@ -68,5 +68,5 @@ Creating a workflow RO-Crate
     
     # write crate to disk
     out_path = "/home/test_user/wf_crate_base"
-    wf.crate.write_crate(out_path)
+    wf_crate.crate.write_crate(out_path)
 
