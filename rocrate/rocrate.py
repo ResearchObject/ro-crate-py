@@ -3,7 +3,6 @@ from .model import dataset
 from .model import file
 from .model.metadata import Metadata
 import zipfile
-import galaxy2cwl
 import tempfile
 
 class ROCrate():
@@ -72,20 +71,16 @@ class ROCrate():
         new_person = roc.Person()
         _add_context_entity(new_person)
 
+    #TODO
+    #def fetch_all(self):
+        # fetch all files defined in the crate 
+
 
 class ROCrateWorkflow(ROCrate):
 
     def __init__(self, workflow_file):
         super().__init__()
         self.add_file(workflow_file)
-        if wf_type == "Galaxy":
-            #create cwl_abstract
-            cwl_abstract = galaxy2cwl.main([workflow_file])
-            cwl_abstract_path = tempfile.TemporaryFile(mode="w")
-            json.dump(cwl_abstract, cwl_abstract_path)
-            # fix the dest_path of this
-            self.add_file(cwl_abstract_path)
-            
         self.previewmain_workflow = main_workflow_file
 
 
