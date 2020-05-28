@@ -13,5 +13,5 @@ class BaseTest(unittest.TestCase):
 
         #copy test data
         shutil.copytree(os.path.abspath(os.path.join('test', 'test-data')), os.path.join(self.tmpdir, 'test-data'))
-        self.test_wf_dir = os.path.join(self.tmpdir, 'test-data', 'test-wf')
+        self.test_wf_dir = os.path.join(self.tmpdir, 'test-data')
         self.assertTrue(os.path.isdir(self.test_wf_dir))
