@@ -14,13 +14,15 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-from .entity import Entity
+import os
+
+from .data_entity import DataEntity
 from shutil import copy
 
 
-class File(Entity):
+class File(DataEntity):
 
-    def __init__(self, source, dest_path = None , properties = None, metadata = None):
+    def __init__(self, crate, source = None, dest_path = None , properties = None):
         #...process source
 
         #this first case was aimed at handling File objects but dont think its necessary, only allowing a path is ok.
@@ -31,20 +33,17 @@ class File(Entity):
             # else:
                 # dest = dest_path
             # #copy to dest by chunks
-        if os.path.isfile(source):
-            self.source = source
-            if not dest_path:
-                self.id = source
-            else:
-                self.id = dest_path
+        if dest_path:
+            identifier = dest_path
         else:
-            print('The source is not a File not a correct path')
-            return None
-
-        super.__init__(self,metadata)
-        if properties:
-            # merge default and
-            self._jsonld.update(properties)
+            identifier = source
+        if source and os.path.isfile(source):
+            self.source = source
+        #else:
+            #print('source is' + source)
+            #print('The source is not a File not a correct path')
+            #return None
+        super(File, self).__init__(crate, identifier, properties)
 
     def _empty(self):
         val = {

@@ -15,50 +15,49 @@
 ## limitations under the License.
 
 import datetime
+import os
 
-from .entity import Entity
+from .data_entity import DataEntity
 from .contextentity import ContextEntity
 from .creativework import CreativeWork
 from .file import File
 from .person import Person
 from . import metadata
 
-class Dataset(Entity):
+class Dataset(DataEntity):
 
-    def __init__(self,source, dest_path = None , properties = None,  metadata: 'metadata.Metadata'= None):
-        if os.path.exists(source):
-            self.source = source
-            if not dest_path:
-                self.id = source
-            else:
-                self.id = dest_path
-            #create Dataset entity
-            super().__init__(identifier, metadata)
-            self.directory_entries = []
-            # iterate over the dir contents to create entities with each file
-            for subfile in os.listdir(directory):
-                subfile_entity = File(subfile)
-                directory_entries.append(subfile_entity)
-                self.add_subfile(subfile)
-            self._jsonld["datePublished"] = datetime.datetime.now() ## TODO: pick it up from _metadata
+    def __init__(self, crate, source = None, dest_path = None , properties = None):
+        identifier = None
+        self.source = source
+        if not dest_path:
+            identifier = os.path.dirname(source)
         else:
-            print('Not a directory or not accessible')
-            return None
-    #author = ContextEntity(Person)
-    #license = ContextEntity(CreativeWork)
+            identifier = dest_path
+        if source and os.path.exists(source):
+            self.directory_entries = []
+            # iterate over the dir contents to create entries for each file
+            # TODO: for the moment I just save a tuple (source, relative_dest)
+            # source: full origin path
+            # relative_desth: file path relative to directory entity path (id)
+            for base,subd,f in os.walk(source):
+                for filename in f:
+                    file_source = os.path.join(base,filename)
+                    rel_path = os.path.relpath(source, file_source)
+                    file_entry = (file_source,rel_path)
+                    directory_entries.append(file_entry)
+        super().__init__(crate, identifier, properties)
 
     def _empty(self):
         val = {
             "@id": self.id,
-            "@type": 'Dataset',
-            "@hasPart": []
-            #name contentSize dateModified encodingFormat identifier sameAs
+            "@type": 'Dataset'
         }
         return val
 
-    def add_subfile(file_entity):
-        self._jsonld['@hasPart'].append({"@id": subfile_entity.get_id()})
+    def properties(self):
+        super().properties()
 
+    #name contentSize dateModified encodingFormat identifier sameAs
     @property
     def datePublished(self):
         date = self.get("datePublished")
@@ -72,7 +71,9 @@ class Dataset(Entity):
             self["datePublished"] = str(date)
 
     def write(self, base_path):
-        out_path = os.path.join(base_path, self.dest)
-        for file in self.directory_entries:
-            out_path.write()
+        if self.source:
+            out_path = os.path.join(base_path, self.dest)
+            # iterate over the entries
+            for file in self.directory_entries:
+                out_path.write()
 
