@@ -38,15 +38,88 @@ class ROCrate():
 
 
     # Properties
+    # missing? 
+        # input
+        # output
+        # programmingLanguage
+        # sdPublisher
+        # url
+        # version
 
     @property
-    def author(self):
-        return self.root_dataset['author']
+    def name(self):
+        return self.root_dataset['name']
 
-    @author.setter
-    def author(self, value):
-        # if isinstance(value, Person):
-        self.root_dataset['author'] = value
+    @name.setter
+    def name(self, value):
+        self.root_dataset['name'] = value
+
+    # dateCreated?
+    @property
+    def datePublished(self):
+        return self.root_dataset['datePublished']
+
+    @datePublished.setter
+    def datePublished(self, value):
+        self.root_dataset['datePublished'] = value
+
+    @property
+    def creator(self):
+        return self.root_dataset['creator']
+
+    @creator.setter
+    def creator(self, value):
+        self.root_dataset['creator'] = value
+
+    @property
+    def license(self):
+        return self.root_dataset['license']
+
+    @license.setter
+    def license(self, value):
+        self.root_dataset['license'] = value
+
+    @property
+    def description(self):
+        return self.root_dataset['description']
+
+    @description.setter
+    def description(self, value):
+        self.root_dataset['description'] = value
+
+    @property
+    def keywords(self):
+        return self.root_dataset['keywords']
+
+    @keywords.setter
+    def keywords(self, value):
+        self.root_dataset['keywords'] = value
+
+    @property
+    def publisher(self):
+        return self.root_dataset['publisher']
+
+    @publisher.setter
+    def publisher(self, value):
+        self.root_dataset['publisher'] = value
+
+    @property
+    def image(self):
+        return self.root_dataset['image']
+
+    @image.setter
+    def image(self, value):
+        self.root_dataset['image'] = value
+
+    @property
+    def CreativeWorkStatus(self):
+        return self.root_dataset['CreativeWorkStatus']
+
+    @CreativeWorkStatus.setter
+    def CreativeWorkStatus(self, value):
+        self.root_dataset['CreativeWorkStatus'] = value
+
+
 
 
     def resolve_id(self, relative_id):

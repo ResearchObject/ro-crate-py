@@ -47,8 +47,9 @@ class TestAPI(BaseTest):
         crate = ROCrate()
 
         new_person = crate.add_person('001' , {'name': 'Lee Ritenour'})
-        crate.author = new_person
-        self.assertIsInstance(crate.author, Person)
-        self.assertEqual(crate.author['name'], 'Lee Ritenour')
+        crate.creator = new_person
+        print(crate.creator.canonical_id())
+        self.assertIsInstance(crate.creator, Person)
+        self.assertEqual(crate.creator['name'], 'Lee Ritenour')
 
 

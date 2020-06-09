@@ -100,7 +100,10 @@ class Entity(object):
         return value
 
     def __getitem__(self, key: str):
-        return self.auto_dereference(self._jsonld[key])
+        if key in self._jsonld.keys():
+            return self.auto_dereference(self._jsonld[key])
+        else:
+            return None
 
     def __setitem__(self, key: str, value):
         if isinstance(object, list):
