@@ -19,13 +19,22 @@ import warnings
 from .. import vocabs
 from ..utils import *
 
-#from .entity import Thing
+from .entity import Entity
+from arcp import *
 
-class ContextEntity(object):
+class ContextEntity(Entity):
 
-    def __init__(self, entity_constructor=None):
+    # def __init__(self, entity_constructor=None):
         #self.entity_constructor = entity_constructor or Thing
-        super().__init__()
+        # super().__init__()
+
+    def format_id(self,identifier):
+        if is_arcp_uri(identifier):
+            return identifier
+        elif identifier.startswith('#'):
+            return identifier
+        else:
+            return '#' + identifier
 
     def getmany(self, instance):
         for json in as_list(instance.get(self.property)):
@@ -45,20 +54,20 @@ class ContextEntity(object):
             json.append({"@id": value.id})
         instance[self.property] = flatten(json)
 
-    def __get__(self, instance, owner=None):
-        if instance is None:
-            return self
-        result = None
-        for val in self.getmany(instance):
-            if result is not None:
-                warnings.warn("More than one value in %s.%s, returning first" % (self.owner, self.property))
-                break
-            result = val
-        return result
+    # def __get__(self, instance, owner=None):
+        # if instance is None:
+            # return self
+        # result = None
+        # for val in self.getmany(instance):
+            # if result is not None:
+                # warnings.warn("More than one value in %s.%s, returning first" % (self.owner, self.property))
+                # break
+            # result = val
+        # return result
 
-    def __set__(self, instance, value):
-        # TODO: Check if arrays are permitted
-        self.setmany(instance, as_list(value))
+    # def __set__(self, instance, value):
+        # # TODO: Check if arrays are permitted
+        # self.setmany(instance, as_list(value))
         
     def __delete__(self, instance):
         ## TODO: Check if permitted to delete?

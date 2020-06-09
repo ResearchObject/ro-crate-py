@@ -14,7 +14,16 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-from .entity import Entity
+from .contextentity import ContextEntity
 
-class Person(Entity):
-    pass
+class Person(ContextEntity):
+
+    def __init__(self, crate, identifier , properties = None):
+        super(Person, self).__init__(crate, identifier, properties)
+
+    def _empty(self):
+        val = {
+            "@id": self.id,
+            "@type": 'Person'
+        }
+        return val
