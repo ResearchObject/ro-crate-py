@@ -9,6 +9,9 @@ class RootDataset(Dataset):
         default_properties = {'datePublished': datetime.datetime.now()}
         super(RootDataset, self).__init__(crate,None,'./',default_properties)
 
+    def format_id(self,identifier):
+        return './'
+
     def _empty(self):
         # default properties of the metadata entry
         # Hard-coded bootstrap for now

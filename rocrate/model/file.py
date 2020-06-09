@@ -34,9 +34,9 @@ class File(DataEntity):
                 # dest = dest_path
             # #copy to dest by chunks
         if dest_path:
-            identifier = dest_path
+            identifier = dest_path  # relative path?
         else:
-            identifier = source
+            identifier = os.path.basename(source)
         if source and os.path.isfile(source):
             self.source = source
         #else:
@@ -44,6 +44,9 @@ class File(DataEntity):
             #print('The source is not a File not a correct path')
             #return None
         super(File, self).__init__(crate, identifier, properties)
+
+    # def format_id(identifier):
+        # return identifier.strip('./')
 
     def _empty(self):
         val = {

@@ -79,12 +79,12 @@ class Metadata(File):
         with open(write_path, 'w') as outfile:
             json.dump(as_jsonld, outfile, indent=4, sort_keys=True, default=str)
 
-    """The dataset this is really about"""
-    about = ContextEntity(Dataset)
+    # """The dataset this is really about"""
+    # about = ContextEntity(Dataset)
 
     @property
     def root(self) -> Dataset:
-        return self.about
+        return self.crate.root_dataset
 
     #def as_jsonld(self) -> Dict:
     #    return self._jsonld
