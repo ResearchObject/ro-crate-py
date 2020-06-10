@@ -48,8 +48,13 @@ class TestAPI(BaseTest):
 
         new_person = crate.add_person('001' , {'name': 'Lee Ritenour'})
         crate.creator = new_person
-        print(crate.creator.canonical_id())
         self.assertIsInstance(crate.creator, Person)
         self.assertEqual(crate.creator['name'], 'Lee Ritenour')
+
+        new_person2 = crate.add_person('002' , {'name': 'Lee Ritenour'})
+
+        crate.creator = [new_person,new_person2]
+        self.assertIsInstance(crate.creator,list)
+
 
 

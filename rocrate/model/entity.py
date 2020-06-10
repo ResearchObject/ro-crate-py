@@ -92,12 +92,24 @@ class Entity(object):
         if isinstance(value, list):
             return_list = []
             for entry in value:
-                return_list.append(self.auto_dereferenc(entry))
+                return_list.append(self.auto_dereference(entry))
             return return_list
         if isinstance(value,dict) and value['@id']:  #its a reference
             obj = self.crate.dereference(value['@id'])
             return obj
         return value
+
+    def auto_reference(self,value):
+        if isinstance(value, list):  #TODO: make it in a more pythonic way 
+            return_list = []
+            for entry in value:
+                return_list.append(self.auto_reference(entry))
+            return return_list
+        if isinstance(value, Entity): 
+            # add reference to an Entity
+            return value.reference()  # I assume it is already in the crate...
+        else:
+            return value
 
     def __getitem__(self, key: str):
         if key in self._jsonld.keys():
@@ -106,30 +118,10 @@ class Entity(object):
             return None
 
     def __setitem__(self, key: str, value):
-        if isinstance(object, list):
-            for item in value:
-                self.setitem(self,key,item)
-        if isinstance(value, Entity): 
-            # add reference to an Entity
-            self._jsonld[key] = value.reference()  # I assume it is already in the crate...
-        else:
-            self._jsonld[key] = value.reference()
+        self._jsonld[key] = self.auto_reference(value)
 
     def __delitem__(self, key: str):
         del self._jsonld[key]
-
-    # def getitem(self, key: str, default=None):
-        # return self._jsonld[key]
-
-    # def setitem(self, key: str, value):
-        # if isinstance(object, list):
-            # for item in value:
-                # self.setitem(self,key,item)
-        # if isinstance(value, Entity): 
-            # # add reference to an Entity
-            # self._jsonld[key] = value.reference()  # I assume it is already in the crate...
-        # else:
-            # self._jsonld[key] = value.reference()
 
     @property
     def type(self) -> str:
