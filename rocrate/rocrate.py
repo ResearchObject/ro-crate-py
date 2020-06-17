@@ -119,9 +119,6 @@ class ROCrate():
     def CreativeWorkStatus(self, value):
         self.root_dataset['CreativeWorkStatus'] = value
 
-
-
-
     def resolve_id(self, relative_id):
         return generate.arcp_random(relative_id.strip('./'), uuid=self.uuid)
 
@@ -153,7 +150,7 @@ class ROCrate():
         self._remove_data_entity(file_id)
 
     def add_directory(self, source, crate_path = None , properties = None):
-        dataset_entity = Dataset(source,crate_path,properties)
+        dataset_entity = Dataset(self,source,crate_path,properties)
         self._add_data_entity(dataset_entity)
 
     def remove_directory(self,dir_id):
@@ -191,6 +188,18 @@ class ROCrate():
     #####  ######
     ################################
 
+    def get_info(self):
+        #return dictionary with basic info to build a preview file
+        info_dict = {
+            'name': self.name,
+            'creator': self.creator,
+            'image': self.image
+        }
+        return info_dict
+
+
+
+
     # write crate to local dir
     def write_crate(self, base_path):
         Path(base_path).mkdir(parents=True, exist_ok=True)
@@ -198,18 +207,12 @@ class ROCrate():
         for writable_entity in self.data_entities + self.default_entities:
             writable_entity.write(base_path)
 
-    def write_zip(out_zip):
+    def write_zip(self,out_zip):
         zf = zipfile.ZipFile(out_zip, 'w', compression=zipfile.ZIP_DEFLATED, allowZip64=True)
-        write_crate(zf)
+        for writable_entity in self.data_entities + self.default_entities:
+            writable_entity.write_zip(zf)
         zf.close()
-        archive = zf.filename
-        return archive
+        return zf.filename
 
-# class ROCrateWorkflow(ROCrate):
-
-    # def __init__(self,workflow_file):
-        # super().__init__()
-        # self.add_file(workflow_file)
-        # self.previewmain_workflow = main_workflow_file
 
 

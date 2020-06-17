@@ -33,7 +33,9 @@ def make_workflow_rocrate(workflow_path,wf_type,include_files=[],cwl=None,diagra
             with open(cwl_abstract_path.name, 'w') as cwl_abstract_out:
                 with redirect_stdout(cwl_abstract_out):
                     get_cwl_interface.main(['1',workflow_path])
-            wf_file_entity = wf_crate.add_file(cwl_abstract_path.name, )
+            wf_file_entity = wf_crate.add_file(cwl_abstract_path.name )
+    for file_entry in include_files:
+        wf_crate.add_file(file_entry)
     return wf_crate
 
 
