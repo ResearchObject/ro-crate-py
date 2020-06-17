@@ -16,6 +16,8 @@
 
 import datetime
 import os
+import pathlib
+import shutil
 
 from .data_entity import DataEntity
 from .contextentity import ContextEntity
@@ -33,18 +35,6 @@ class Dataset(DataEntity):
             identifier = os.path.dirname(source)
         else:
             identifier = dest_path
-        if source and os.path.exists(source):
-            self.directory_entries = []
-            # iterate over the dir contents to create entries for each file
-            # TODO: for the moment I just save a tuple (source, relative_dest)
-            # source: full origin path
-            # relative_desth: file path relative to directory entity path (id)
-            for base,subd,f in os.walk(source):
-                for filename in f:
-                    file_source = os.path.join(base,filename)
-                    rel_path = os.path.relpath(source, file_source)
-                    file_entry = (file_source,rel_path)
-                    directory_entries.append(file_entry)
         super().__init__(crate, identifier, properties)
 
     def _empty(self):
@@ -70,10 +60,36 @@ class Dataset(DataEntity):
         else:
             self["datePublished"] = str(date)
 
-    def write(self, base_path):
-        if self.source:
-            out_path = os.path.join(base_path, self.dest)
-            # iterate over the entries
-            for file in self.directory_entries:
-                out_path.write()
+    def directory_entries(self, base_path=None):
+        # iterate over the source dir contents to list all entries
+        directory_entries = []
+        if self.source and os.path.exists(self.source):
+            for base,subd,f in os.walk(self.source):
+                for filename in f:
+                    file_source = os.path.join(base,filename)
+                    rel_path = os.path.relpath(file_source,self.source)
+                    if base_path:
+                        dest_path = os.path.join(base_path,rel_path)
+                    else:
+                        dest_path = rel_path
+                    file_entry = (file_source,dest_path)
+                    directory_entries.append(file_entry)
+        return directory_entries
 
+    def write(self, base_path):
+        out_path = self.filepath(base_path)
+        pathlib.Path(out_path).mkdir(parents=True, exist_ok=True) 
+        for file_src,file_dest in self.directory_entries(out_path):
+            if not os.path.exists(file_dest):
+                shutil.copyfile(file_src,file_dest)
+
+
+    def write_zip(self, zip_out):
+        out_path = self.filepath()
+        #create the dir in the zip
+        # zip_out.writestr(out_path, '')
+        # out_path = os.path.join(base_path, self.dest)
+        # iterate over the entries
+        for file_src,rel_path in self.directory_entries():
+            dest_path = os.path.join(out_path, rel_path) 
+            zip_out.write(file_src, dest_path)

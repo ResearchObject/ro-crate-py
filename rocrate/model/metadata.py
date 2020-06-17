@@ -18,6 +18,7 @@ import json
 import os
 import pkg_resources
 import warnings
+import tempfile
 
 from typing import Dict
 
@@ -37,8 +38,6 @@ This object holds the data of an RO Crate Metadata File rocrate_
 class Metadata(File):
     CONTEXT = "https://w3id.org/ro/crate/1.0/context"
     def __init__(self, crate):
-        #self._jsonld = self._empty()  ## bootstrap needed by the below!
-        #self.dest_path = 'ro-crate-metadata.jsonld'
         super().__init__(crate, None, "ro-crate-metadata.jsonld", None)
 
     def _empty(self):
@@ -49,20 +48,6 @@ class Metadata(File):
                     "about": {"@id": "./"}
                 }
         return val
-
-    # def _find_entity(self, identifier: str) -> Entity:
-        # print(self._jsonld.keys())
-        # for item in self._jsonld['@graph']:
-            # if item.get("@id", None) == identifier:
-                # return item
-
-    # def _add_entity(self, entity: Entity) -> Entity:
-        # ## TODO: Check/merge duplicates? Valid by JSON-LD, but 
-        # # we won't find the second entry again above
-        # self._jsonld["@graph"].append(entity)
-        # print('@graph keys are ', self._jsonld.keys())
-        # return entity # TODO: If we merged, return that instead here
-
 
     # Generate the crate's `ro-crate-metadata.jsonld`.
     # @return [String] The rendered JSON-LD as a "prettified" string.
@@ -79,12 +64,21 @@ class Metadata(File):
         with open(write_path, 'w') as outfile:
             json.dump(as_jsonld, outfile, indent=4, sort_keys=True, default=str)
 
+    def write_zip(self, zip_out):
+        write_path = self.filepath()
+        as_jsonld = self.generate()
+        # with open(write_path, 'w') as outfile:
+        # TODO: fix this, there is no need to use a tmp file
+        tmpfile_path = tempfile.NamedTemporaryFile()
+        tmpfile = open(tmpfile_path.name, 'w')
+        json.dump(as_jsonld, tmpfile, indent=4, sort_keys=True, default=str)
+        tmpfile.close()
+        zip_out.write(tmpfile_path.name,write_path)
+
+
     # """The dataset this is really about"""
     # about = ContextEntity(Dataset)
 
     @property
     def root(self) -> Dataset:
         return self.crate.root_dataset
-
-    #def as_jsonld(self) -> Dict:
-    #    return self._jsonld

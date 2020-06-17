@@ -41,18 +41,18 @@ class ContextEntity(Entity):
             # TODO: Support more advanced dispatching
             yield self.entity_constructor(json["@id"], instance._metadata)
 
-    def setmany(self, instance, values):
-        json = []
-        for value in values:
-            ## TODO: Check it has compatible @type?
-            if value._metadata != instance._metadata:
-                # Oh no, it might have different base URIs, 
-                # will need to be added to @graph, reference
-                # other objects we don't have etc.
-                # TODO: Support setting entities from other RO-Crates
-                raise ValueError("Adding entity from other RO-Crate not (yet) supported")
-            json.append({"@id": value.id})
-        instance[self.property] = flatten(json)
+    # def setmany(self, instance, values):
+        # json = []
+        # for value in values:
+            # ## TODO: Check it has compatible @type?
+            # if value._metadata != instance._metadata:
+                # # Oh no, it might have different base URIs, 
+                # # will need to be added to @graph, reference
+                # # other objects we don't have etc.
+                # # TODO: Support setting entities from other RO-Crates
+                # raise ValueError("Adding entity from other RO-Crate not (yet) supported")
+            # json.append({"@id": value.id})
+        # instance[self.property] = flatten(json)
 
     # def __get__(self, instance, owner=None):
         # if instance is None:

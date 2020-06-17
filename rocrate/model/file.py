@@ -18,7 +18,7 @@ import os
 
 from .data_entity import DataEntity
 from shutil import copy
-
+import pathlib
 
 class File(DataEntity):
 
@@ -56,5 +56,11 @@ class File(DataEntity):
         return val
 
     def write(self, base_path):
-        out_path = os.path.join(base_path, self.id)
-        copy(self.source,out_path)
+        out_file_path = os.path.join(base_path, self.id)
+        out_dir = pathlib.Path(os.path.dirname(out_file_path))
+        if not out_dir.exists():
+            os.mkdir(out_dir)
+        copy(self.source,out_file_path)
+
+    def write_zip(self,zip_out):
+        zip_out.write(self.source,self.id)
