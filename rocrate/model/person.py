@@ -18,7 +18,7 @@ from .contextentity import ContextEntity
 
 class Person(ContextEntity):
 
-    def __init__(self, crate, identifier , properties = None):
+    def __init__(self, crate, identifier, properties=None):
         super(Person, self).__init__(crate, identifier, properties)
 
     def _empty(self):
