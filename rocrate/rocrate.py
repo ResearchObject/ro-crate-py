@@ -9,6 +9,8 @@ from .model.file import File
 from .model.person import Person
 from .model.dataset import Dataset
 from .model.metadata import Metadata
+from .model.preview import Preview
+
 import zipfile
 import tempfile
 
@@ -33,8 +35,8 @@ class ROCrate():
         self.default_entities.append(self.root_dataset)
 
         #create preview entity and add it to default_entities
-        #self.preview = Preview('ro-crate-preview.html')
-        #self.default_entities.append(self.preview)
+        self.preview = Preview(self)
+        self.default_entities.append(self.preview)
 
 
     # Properties

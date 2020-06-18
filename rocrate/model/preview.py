@@ -16,9 +16,11 @@
 
 import os
 
-from string import Template
 from typing import Dict
 from ..utils import *
+import tempfile
+
+from jinja2 import Template
 
 from .file import File
 
@@ -42,16 +44,19 @@ class Preview(File):
                 }
         return val
 
-    def generate_html(sef):
+    def generate_html(self):
         info_dict = self.crate.get_info()
-        base_path = path.abspath(path.dirname(__file__))
-        template = open(os.path.join(base_path,'..' ,'templates', 'preview_template.html'))
-        template = Template(template.read())
-        out_html = src.substitute(info_dict)
+        # print(info_dict['name'])
+        # print(info_dict['creator'])
+        base_path = os.path.abspath(os.path.dirname(__file__))
+        template = open(os.path.join(base_path,'..' ,'templates', 'preview_template.html.j2'))
+        src = Template(template.read())
+        template.close()
+        out_html = src.render(crate=info_dict)
         return out_html
 
     def write(self, dest_base):
-        write_path = self.filepath()
+        write_path = self.filepath(dest_base)
         out_html = self.generate_html()
         with open(write_path, 'w') as outfile:
             outfile.write(out_html)
