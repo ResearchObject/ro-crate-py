@@ -15,18 +15,11 @@
 ## limitations under the License.
 
 import json
-import os
-import pkg_resources
-import warnings
 import tempfile
 
-from typing import Dict
-
 from ..utils import *
-
 from .file import File
 from .dataset import Dataset
-from .contextentity import ContextEntity
 
 """
 RO-Crate metadata file
@@ -35,6 +28,7 @@ This object holds the data of an RO Crate Metadata File rocrate_
 
 .. _rocrate: https://w3id.org/ro/crate/1.0
 """
+
 class Metadata(File):
     CONTEXT = "https://w3id.org/ro/crate/1.0/context"
     def __init__(self, crate):
@@ -42,11 +36,10 @@ class Metadata(File):
 
     def _empty(self):
         # default properties of the metadata entry
-        val = {
-                    "@id": "ro-crate-metadata.jsonld",
-                    "@type": "CreativeWork",
-                    "about": {"@id": "./"}
-                }
+        val = {"@id": "ro-crate-metadata.jsonld",
+               "@type": "CreativeWork",
+               "about": {"@id": "./"}
+              }
         return val
 
     # Generate the crate's `ro-crate-metadata.jsonld`.
@@ -57,9 +50,9 @@ class Metadata(File):
             graph.append(entity.properties())
         return {'@context': self.CONTEXT, '@graph': graph}
 
-    def write(self, dest_base):
+    def write(self, base_path):
         #writes itself in
-        write_path = self.filepath(dest_base)
+        write_path = self.filepath(base_path)
         as_jsonld = self.generate()
         with open(write_path, 'w') as outfile:
             json.dump(as_jsonld, outfile, indent=4, sort_keys=True, default=str)
@@ -73,11 +66,7 @@ class Metadata(File):
         tmpfile = open(tmpfile_path.name, 'w')
         json.dump(as_jsonld, tmpfile, indent=4, sort_keys=True, default=str)
         tmpfile.close()
-        zip_out.write(tmpfile_path.name,write_path)
-
-
-    # """The dataset this is really about"""
-    # about = ContextEntity(Dataset)
+        zip_out.write(tmpfile_path.name, write_path)
 
     @property
     def root(self) -> Dataset:
