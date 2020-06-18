@@ -20,15 +20,10 @@ import pathlib
 import shutil
 
 from .data_entity import DataEntity
-from .contextentity import ContextEntity
-from .creativework import CreativeWork
-from .file import File
-from .person import Person
-from . import metadata
 
 class Dataset(DataEntity):
 
-    def __init__(self, crate, source = None, dest_path = None , properties = None):
+    def __init__(self, crate, source=None, dest_path=None, properties=None):
         identifier = None
         self.source = source
         if not dest_path:
@@ -43,9 +38,6 @@ class Dataset(DataEntity):
             "@type": 'Dataset'
         }
         return val
-
-    def properties(self):
-        super().properties()
 
     #name contentSize dateModified encodingFormat identifier sameAs
     @property
@@ -64,24 +56,24 @@ class Dataset(DataEntity):
         # iterate over the source dir contents to list all entries
         directory_entries = []
         if self.source and os.path.exists(self.source):
-            for base,subd,f in os.walk(self.source):
-                for filename in f:
-                    file_source = os.path.join(base,filename)
-                    rel_path = os.path.relpath(file_source,self.source)
+            for base, subd, filenames in os.walk(self.source):
+                for filename in filenames:
+                    file_source = os.path.join(base, filename)
+                    rel_path = os.path.relpath(file_source, self.source)
                     if base_path:
-                        dest_path = os.path.join(base_path,rel_path)
+                        dest_path = os.path.join(base_path, rel_path)
                     else:
                         dest_path = rel_path
-                    file_entry = (file_source,dest_path)
+                    file_entry = (file_source, dest_path)
                     directory_entries.append(file_entry)
         return directory_entries
 
     def write(self, base_path):
         out_path = self.filepath(base_path)
-        pathlib.Path(out_path).mkdir(parents=True, exist_ok=True) 
-        for file_src,file_dest in self.directory_entries(out_path):
+        pathlib.Path(out_path).mkdir(parents=True, exist_ok=True)
+        for file_src, file_dest in self.directory_entries(out_path):
             if not os.path.exists(file_dest):
-                shutil.copyfile(file_src,file_dest)
+                shutil.copyfile(file_src, file_dest)
 
 
     def write_zip(self, zip_out):
@@ -90,6 +82,6 @@ class Dataset(DataEntity):
         # zip_out.writestr(out_path, '')
         # out_path = os.path.join(base_path, self.dest)
         # iterate over the entries
-        for file_src,rel_path in self.directory_entries():
-            dest_path = os.path.join(out_path, rel_path) 
+        for file_src, rel_path in self.directory_entries():
+            dest_path = os.path.join(out_path, rel_path)
             zip_out.write(file_src, dest_path)
