@@ -1,3 +1,19 @@
+#!/usr/bin/env python
+
+## Copyright 2019-2020 The University of Manchester, UK
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+
 import io
 import json
 import os
@@ -29,11 +45,11 @@ def make_workflow_rocrate(workflow_path,wf_type,include_files=[],cwl=None,diagra
             cwl_abstract = wf_crate.add_file(cwl)  # should add it in a special path within the crate?
         elif wf_type == 'Galaxy':
             #create cwl_abstract
-            cwl_abstract_path = tempfile.NamedTemporaryFile()
+            cwl_abstract_path = tempfile.NamedTemporaryFile(delete=False)
             with open(cwl_abstract_path.name, 'w') as cwl_abstract_out:
                 with redirect_stdout(cwl_abstract_out):
                     get_cwl_interface.main(['1',workflow_path])
-            wf_file_entity = wf_crate.add_file(cwl_abstract_path.name )
+            wf_file_entity = wf_crate.add_file(cwl_abstract_path.name, 'abstract_wf.cwl')
     for file_entry in include_files:
         wf_crate.add_file(file_entry)
     return wf_crate
