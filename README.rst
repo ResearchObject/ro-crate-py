@@ -68,5 +68,5 @@ Creating a workflow RO-Crate
     
     # write crate to disk
     out_path = "/home/test_user/wf_crate_base"
-    wf_crate.crate.write(out_path)
+    wf_crate.write_crate(out_path)
 
