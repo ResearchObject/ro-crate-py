@@ -27,6 +27,8 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
   long_description = f.read()
 
+with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    required = f.read().splitlines()
 
 setup(
   name = 'rocrate',
@@ -43,7 +45,7 @@ setup(
   #download_url = 'https://github.com/researchobject/ro-crate-py/archive/0.1.0.tar.gz',
   keywords = "researchobject ro-crate ro metadata jsonld",
   # license_file= "LICENSE.txt", ## implied
-  install_requires=[],
+  install_requires=[required],
   test_suite='test',
   classifiers=[
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
