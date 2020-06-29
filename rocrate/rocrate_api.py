@@ -26,7 +26,7 @@ from galaxy2cwl import get_cwl_interface
 # Exposed functions
 
 def load_rocrate_zip(zip_path):
-    rocrate = ROCrate()
+    rocrate = roc.ROCrate()
     return rocrate
 
 def load_rocrate_dir(crate_path):
@@ -37,7 +37,7 @@ def load_rocrate_dir(crate_path):
         # ….from this entity’s about object keep the @id URI as variable root
         # For each entity in @graph array
         # .. if the entity has an @id URI that matches root return it
-    rocrate = ROCrate()
+    rocrate = roc.ROCrate()
     return rocrate
 
 def make_workflow_rocrate(workflow_path,wf_type,include_files=[],cwl=None,diagram=None):
