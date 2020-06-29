@@ -38,6 +38,7 @@ class Metadata(File):
         # default properties of the metadata entry
         val = {"@id": "ro-crate-metadata.jsonld",
                "@type": "CreativeWork",
+               "conformsTo": {"@id": "https://w3id.org/ro/crate/1.0"},
                "about": {"@id": "./"}
               }
         return val

@@ -28,7 +28,7 @@ class ContextEntity(Entity):
         #self.entity_constructor = entity_constructor or Thing
         # super().__init__()
 
-    def format_id(self,identifier):
+    def format_id(self, identifier):
         if is_arcp_uri(identifier):
             return identifier
         elif identifier.startswith('#'):

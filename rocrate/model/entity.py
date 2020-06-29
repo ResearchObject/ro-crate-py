@@ -16,14 +16,13 @@
 
 from typing import List
 import uuid
+
 from .. import vocabs
 from ..utils import *
 
 class Entity(object):
 
-    # identifier: String
-    # properties: dict. Properties of this Entity entry.
-    def __init__(self, crate, identifier = None, properties = None):
+    def __init__(self, crate, identifier=None, properties=None):
         self.crate = crate
         if identifier:
             self.id = self.format_id(identifier)
@@ -33,21 +32,10 @@ class Entity(object):
             empty = self._empty()
             empty.update(properties)
             self._jsonld = empty
-            # print('properties are ' + self.as_jsonld())
         else:
-            # this would only occur when calling from a sublcass that calls super() with no properties, or initializing from Entity class directly.
             self._jsonld = self._empty()
-        # if metadata:
-            # #self._metadata = metadata
-            # print('adding to metadata of item:', self.id)
-            # self._jsonld = metadata._find_entity(identifier)  # ******IF THE ENTITY IS THE METADATA ENTITY THEN JSONLD shouldnt be assigned because it contains all the elements
 
-            # print("jsonld is now ",self._jsonld)
-            # print("metadata is ", metadata._jsonld)
-            # if self._jsonld is None:
-                # self._jsonld = metadata._add_entity(self._empty())
-
-     ##
+    ##
     # Format the given ID with rules appropriate for this type.
     # For example:
     #  * contextual entities MUST be absolute URIs, or begin with: #
@@ -88,7 +76,7 @@ class Entity(object):
         }
         return val
 
-    def auto_dereference(self,value):
+    def auto_dereference(self, value):
         if isinstance(value, list):
             return_list = []
             for entry in value:
@@ -99,7 +87,7 @@ class Entity(object):
             return obj
         return value
 
-    def auto_reference(self,value):
+    def auto_reference(self, value):
         if isinstance(value, list):  #TODO: make it in a more pythonic way 
             return_list = []
             for entry in value:
