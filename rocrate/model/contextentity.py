@@ -24,9 +24,8 @@ from arcp import is_arcp_uri
 
 class ContextEntity(Entity):
 
-    def __init__(self, entity_constructor=None):
-        self.entity_constructor = entity_constructor
-        super().__init__()
+    def __init__(self, crate, identifier, properties=None):
+        super(ContextEntity, self).__init__(crate, identifier, properties)
 
     def format_id(self, identifier):
         if is_arcp_uri(identifier):
