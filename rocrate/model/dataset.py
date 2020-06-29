@@ -42,7 +42,7 @@ class Dataset(DataEntity):
     #name contentSize dateModified encodingFormat identifier sameAs
     @property
     def datePublished(self):
-        date = self.get("datePublished")
+        date = self["datePublished"]
         return date and datetime.datetime.fromisoformat(date)
 
     @datePublished.setter

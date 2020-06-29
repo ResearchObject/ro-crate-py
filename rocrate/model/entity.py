@@ -131,5 +131,5 @@ class Entity(object):
     # def types(self)-> List[str]:
         # return tuple(as_list(self.get("@type", "Thing")))
 
-    def filepath():
+    def filepath(self):
         return self.id
