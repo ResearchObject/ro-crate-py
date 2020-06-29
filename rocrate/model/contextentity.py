@@ -20,13 +20,13 @@ from .. import vocabs
 from ..utils import *
 
 from .entity import Entity
-from arcp import *
+from arcp import is_arcp_uri
 
 class ContextEntity(Entity):
 
-    # def __init__(self, entity_constructor=None):
-        #self.entity_constructor = entity_constructor or Thing
-        # super().__init__()
+    def __init__(self, entity_constructor=None):
+        self.entity_constructor = entity_constructor
+        super().__init__()
 
     def format_id(self, identifier):
         if is_arcp_uri(identifier):
@@ -84,7 +84,7 @@ class ContextEntity(Entity):
         # Register plural _s variant 
         # TODO: Register plural _s variants
         setattr(owner, name+"s", 
-            property(self.getmany, self.setmany, 
+            property(self.getmany, # self.setmany, 
                      doc="Multiple contextual entities %s\n%s" % (uri,doc)))
         # TODO: Register _ids variants?
 

@@ -38,7 +38,7 @@ setup(
   long_description=long_description,
   author = 'Stian Soiland-Reyes',
   author_email = 'stain@apache.org',
-  
+  package_data={'': ['data/*.jsonld']},
   # https://www.apache.org/licenses/LICENSE-2.0
   license = "Apache-2.0", ## SPDX, pending https://github.com/pombredanne/spdx-pypi-pep/pull/2
   #url = 'http://ro-crate.readthedocs.io/',
