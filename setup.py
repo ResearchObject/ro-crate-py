@@ -60,7 +60,7 @@ setup(
      # aboveis misleading, see https://github.com/pypa/pypi-legacy/issues/564
      # and https://github.com/pombredanne/spdx-pypi-pep/pull/2
      #'License :: OSI Approved',
-     # 'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',  
+     # 'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
