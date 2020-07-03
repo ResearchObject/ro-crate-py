@@ -57,15 +57,13 @@ def make_workflow_rocrate(workflow_path,wf_type,include_files=[],cwl=None,diagra
     if wf_type != 'CWL':
         if cwl:
             #add cwl file to crate
-            cwl_abstract = wf_crate.add_file(cwl)  # should add it in a special path within the crate?
+            wf_crate.add_file(cwl)  # should add it in a special path within the crate?
         elif wf_type == 'Galaxy':
             #create cwl_abstract
-            cwl_abstract_path = tempfile.NamedTemporaryFile(delete=False)
-            with open(cwl_abstract_path.name, 'w') as cwl_abstract_out:
+            with tempfile.NamedTemporaryFile(mode='w', delete=False) as cwl_abstract_out:
                 with redirect_stdout(cwl_abstract_out):
                     get_cwl_interface.main(['1',workflow_path])
-            wf_file_entity = wf_crate.add_file(cwl_abstract_path.name, 'abstract_wf.cwl')
-            os.remove(cwl_abstract_path)
+            wf_crate.add_file(cwl_abstract_out.name, 'abstract_wf.cwl')
 
     for file_entry in include_files:
         wf_crate.add_file(file_entry)
