@@ -1,3 +1,5 @@
+![Python package](https://github.com/ResearchObject/ro-crate-py/workflows/Python%20package/badge.svg)
+
 ro-crate-py
 ===========
 
