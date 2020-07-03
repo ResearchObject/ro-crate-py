@@ -13,7 +13,6 @@ class TestAPI(BaseTest):
 
     def test_file_writing(self):
         crate = ROCrate()
-
         # dereference added files
         sample_file = os.path.join(self.test_data_dir, 'sample_file.txt')
         file_returned = crate.add_file(sample_file)
@@ -21,12 +20,21 @@ class TestAPI(BaseTest):
         test_dir_path = os.path.join(self.test_data_dir,'test_add_dir')
         test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
         out_path = os.path.join(tempfile.gettempdir(),'ro_crate_out')
+
+        crate.name = 'Test crate'
+
+        new_person = crate.add_person('001' , {'name': 'Lee Ritenour'})
+        crate.creator = new_person
+
         if not os.path.exists(out_path):
             os.mkdir(out_path)
         crate.write_crate(out_path)
 
         metadata_path = pathlib.Path(os.path.join(out_path, 'ro-crate-metadata.jsonld'))
         self.assertTrue(metadata_path.exists())
+
+        preview_path = pathlib.Path(os.path.join(out_path, 'ro-crate-preview.html'))
+        self.assertTrue(preview_path.exists())
         file1 = pathlib.Path(os.path.join(out_path, 'sample_file.txt'))
         file2 = pathlib.Path(os.path.join(out_path, 'subdir','sample_file2.csv'))
         file_subdir = pathlib.Path(os.path.join(out_path, 'test_add_dir','sample_file_subdir.txt'))
@@ -51,4 +59,3 @@ class TestAPI(BaseTest):
         read_zip = zipfile.ZipFile(zip_path, mode='r')
         self.assertEqual(read_zip.getinfo('sample_file.txt').file_size, 12)
         self.assertEqual(read_zip.getinfo('test_add_dir/sample_file_subdir.txt').file_size, 18)
-        self.assertEqual(read_zip.getinfo('sample_file_subdir.txt').file_size, 18)
