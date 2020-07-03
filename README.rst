@@ -27,7 +27,7 @@ Submitted contributions are assumed to be covered by section 5 of the Apache Lic
 Installing
 ----------
 
-You will need Python 3.4 or later (Recommended: 3.7).
+You will need Python 3.6 or later (Recommended: 3.7).
 
 If you want to install manually from this code base, then try::
 
