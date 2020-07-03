@@ -54,8 +54,9 @@ class TestAPI(BaseTest):
         test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
 
         #write to zip
-        zip_path = tempfile.NamedTemporaryFile(suffix='.zip')
+        zip_path = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.zip')
         crate.write_zip(zip_path.name)
-        read_zip = zipfile.ZipFile(zip_path, mode='r')
+        zip_path.close()
+        read_zip = zipfile.ZipFile(zip_path.name, mode='r')
         self.assertEqual(read_zip.getinfo('sample_file.txt').file_size, 12)
         self.assertEqual(read_zip.getinfo('test_add_dir/sample_file_subdir.txt').file_size, 18)
