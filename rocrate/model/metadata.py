@@ -14,6 +14,7 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
+import os
 import json
 import tempfile
 
@@ -63,11 +64,12 @@ class Metadata(File):
         as_jsonld = self.generate()
         # with open(write_path, 'w') as outfile:
         # TODO: fix this, there is no need to use a tmp file
-        tmpfile_path = tempfile.NamedTemporaryFile()
-        tmpfile = open(tmpfile_path.name, 'w')
-        json.dump(as_jsonld, tmpfile, indent=4, sort_keys=True, default=str)
+        tmpfile = tempfile.NamedTemporaryFile(mode='w', delete=False)
+        tmpfile_path = tmpfile.name
+        json.dump(as_jsonld, tmpfile, indent=4, sort_keys=True, default=json_serial)
         tmpfile.close()
-        zip_out.write(tmpfile_path.name, write_path)
+        zip_out.write(tmpfile_path, write_path)
+        os.remove(tmpfile_path)
 
     @property
     def root(self) -> Dataset:

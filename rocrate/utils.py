@@ -15,6 +15,7 @@
 ## limitations under the License.
 
 import collections
+from datetime import date, datetime
 
 def first(iterable):
     for e in iterable:
@@ -33,3 +34,10 @@ def as_list(list_or_other):
         and not isinstance(list_or_other, str)): # FIXME: bytes?
         return list_or_other
     return [list_or_other]
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
