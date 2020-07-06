@@ -1,4 +1,4 @@
-![Python package](https://github.com/ResearchObject/ro-crate-py/workflows/Python%20package/badge.svg)
+[![Python package](https://github.com/ResearchObject/ro-crate-py/workflows/Python%20package/badge.svg)](https://github.com/ResearchObject/ro-crate-py/actions?query=workflow%3A%22Python+package%22)
 
 # ro-crate-py
 
