@@ -1,0 +1,58 @@
+{
+    "@context": "https://w3id.org/ro/crate/1.0/context",
+    "@graph": [
+        {
+            "@id": "ro-crate-metadata.jsonld",
+            "@type": "CreativeWork",
+            "about": {
+                "@id": "./"
+            }
+        },
+        {
+            "@id": "./",
+            "@type": "CreativeWork",
+            "about": {
+                "@id": "./"
+            },
+            "datePublished": "2020-06-25 17:03:04.098286",
+            "hasPart": [
+                {
+                    "@id": "test_galaxy_wf.ga"
+                },
+                {
+                    "@id": "abstract_wf.cwl"
+                },
+                {
+                    "@id": "test_file_galaxy.txt"
+                }
+            ],
+            "mainEntity": {
+                "@id": "test_galaxy_wf.ga"
+            }
+        },
+        {
+            "@id": "ro-crate-preview.html",
+            "@type": "CreativeWork",
+            "about": {
+                "@id": "./"
+            }
+        },
+        {
+            "@id": "test_galaxy_wf.ga",
+            "@type": "File"
+        },
+        {
+            "@id": "abstract_wf.cwl",
+            "@type": "File"
+        },
+        {
+            "@id": "test_file_galaxy.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "#joe",
+            "@type": "Person",
+            "name": "Joe Bloggs"
+        }
+    ]
+}
