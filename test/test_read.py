@@ -19,7 +19,6 @@ class TestAPI(BaseTest):
 
         crate = ROCrate(crate_dir, load_preview=True)
 
-        crate.write_crate('/home/ignacio/test_read_out')
 
         # TODO TESTS:
         # check if the entity properties are set correctly
