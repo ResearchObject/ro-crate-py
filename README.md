@@ -33,10 +33,23 @@ python setup.py install
 .. _rocrate: https://w3id.org/ro/crate
 .. _pip: https://docs.python.org/3/installing/
 
+## General usage
+The package contains a 
+The standard use case is by instantiating ROCrate class. This can be a new one: 
+crate = ROCrate() 
+or an existing RO-crate package can be load from a directory or zip file:
+```python
+crate = ROCrate('/path/to/crate/')
+```
 
-## Example
+```python
+crate = ROCrate('/path/to/crate/file.zip')
+```
 
-Creating a workflow RO-Crate
+In addition, there is a set of higher level functions in the form of an interface to help users create some predefined types of crates. 
+As an example here is the code to create a workflow RO-Crate, containing a workflow template.
+This is a good starting point if you want to wrap up a workflow template to register at workflowhub.eu
+
 
 ```python
 from rocrate import rocrate_api
@@ -52,13 +65,39 @@ wf_crate = rocrate_api.make_workflow_rocrate(workflow_path=wf_path,wf_type="Gala
 out_path = "/home/test_user/wf_crate"
 wf_crate.write_zip(out_path)
 
+```
+
+Independently of the initialization method, once an instance of ROCrate is created it can be manipulated to extend the content and metadata.
+
+Data entities can be added with:
+
+```python
+## adding a File entity:
+sample_file = '/path/to/sample_file.txt'
+file_entity = crate.add_file(sample_file)
+
+# adding a Dataset
+sample_dir = '/path/to/dir'
+dataset_entity = crate.add_directory(sample_dir, 'relative/rocrate/path')
+```
+
+Contextual entities are used in a ro-crate to adequately describe a Data Entity. The following example shows how to add them to the RO-Crate root:
+```python
 # Add authors info
 joe_metadata = {'name': 'Joe Bloggs'}
-wf_crate.add_person('joe', joe_metadata)
+crate.add_person('joe', joe_metadata)
+```
+
+In order to write the crate object contents to a zip file package or a decompressed directory, there are 2 write methods that can be used:
+
+```python
+# Write to zip file
+out_path = "/home/test_user/crate"
+crate.write_zip(out_path)
 
 # write crate to disk
-out_path = "/home/test_user/wf_crate_base"
-wf_crate.write_crate(out_path)
+out_path = "/home/test_user/crate_base"
+crate.write_crate(out_path)
 ```
 
 ## License
