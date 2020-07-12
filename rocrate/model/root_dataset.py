@@ -21,8 +21,10 @@ from .dataset import Dataset
 
 class RootDataset(Dataset):
 
-    def __init__(self, crate):
+    def __init__(self, crate, properties = None):
         default_properties = {'datePublished': datetime.datetime.now()}
+        if properties:
+            default_properties.update(properties)
         super(RootDataset, self).__init__(crate,None,'./',default_properties)
 
     def format_id(self,identifier):

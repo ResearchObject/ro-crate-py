@@ -42,6 +42,22 @@ class TestAPI(BaseTest):
         self.assertTrue(file2.exists())
         self.assertTrue(file_subdir.exists())
 
+    def test_remote_uri(self):
+        crate = ROCrate()
+        url = 'https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/sample_file.txt'
+        file_returned = crate.add_file(source=url, fetch_remote = True)
+        file_returned = crate.add_file(source=url, fetch_remote = False)
+        out_path = os.path.join(tempfile.gettempdir(),'ro_crate_out')
+
+        if not os.path.exists(out_path):
+            os.mkdir(out_path)
+        crate.write_crate(out_path)
+
+        metadata_path = pathlib.Path(os.path.join(out_path, 'ro-crate-metadata.jsonld'))
+        self.assertTrue(metadata_path.exists())
+
+        file1 = pathlib.Path(os.path.join(out_path, 'sample_file.txt'))
+        self.assertTrue(file1.exists())
 
     def test_write_zip(self):
         crate = ROCrate()

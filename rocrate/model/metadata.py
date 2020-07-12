@@ -33,7 +33,7 @@ This object holds the data of an RO Crate Metadata File rocrate_
 class Metadata(File):
     CONTEXT = "https://w3id.org/ro/crate/1.0/context"
     def __init__(self, crate):
-        super().__init__(crate, None, "ro-crate-metadata.jsonld", None)
+        super().__init__(crate, None, "ro-crate-metadata.jsonld", False, None)
 
     def _empty(self):
         # default properties of the metadata entry

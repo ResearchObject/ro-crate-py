@@ -73,7 +73,7 @@ class ContextEntity(Entity):
     # def __set__(self, instance, value):
         # # TODO: Check if arrays are permitted
         # self.setmany(instance, as_list(value))
-        
+
     def __delete__(self, instance):
         ## TODO: Check if permitted to delete?
         instance[self.property] = [] # known property, empty in JSON

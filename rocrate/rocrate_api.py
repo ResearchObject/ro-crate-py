@@ -23,23 +23,6 @@ from contextlib import redirect_stdout
 import rocrate.rocrate as roc
 from galaxy2cwl import get_cwl_interface
 
-# Exposed functions
-
-def load_rocrate_zip(zip_path):
-    rocrate = roc.ROCrate()
-    return rocrate
-
-def load_rocrate_dir(crate_path):
-    #find root entity
-    # Consumers processing the RO-Crate as an JSON-LD graph can thus reliably find the the Root Data Entity by following this algorithm:
-        # For each entity in @graph array
-        # ..if the conformsTo property is a URI that starts with https://w3id.org/ro/crate/
-        # ….from this entity’s about object keep the @id URI as variable root
-        # For each entity in @graph array
-        # .. if the entity has an @id URI that matches root return it
-    rocrate = roc.ROCrate()
-    return rocrate
-
 def make_workflow_rocrate(workflow_path,wf_type,include_files=[],cwl=None,diagram=None):
 
     #returns a complete ROCrate object corresponding to a Workflow template file
