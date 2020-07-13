@@ -76,6 +76,9 @@ Data entities can be added with:
 sample_file = '/path/to/sample_file.txt'
 file_entity = crate.add_file(sample_file)
 
+# Adding a File entity with a reference to an external 
+remote_file = crate.add_file('https://github.com/ResearchObject/ro-crate-py/blob/master/test/test-data/test_galaxy_wf.ga', fetch_remote = False)
+
 # adding a Dataset
 sample_dir = '/path/to/dir'
 dataset_entity = crate.add_directory(sample_dir, 'relative/rocrate/path')
