@@ -88,7 +88,7 @@ Contextual entities are used in a ro-crate to adequately describe a Data Entity.
 ```python
 # Add authors info
 joe_metadata = {'name': 'Joe Bloggs'}
-crate.add_person('joe', joe_metadata)
+crate.add_person('#joe', joe_metadata)
 ```
 
 In order to write the crate object contents to a zip file package or a decompressed directory, there are 2 write methods that can be used:
