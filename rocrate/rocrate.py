@@ -42,7 +42,7 @@ class ROCrate():
         self.default_entities = []
         self.data_entities = []
         self.contextual_entities = []
-        self.uuid = uuid.uuid4()
+        self.uuid = uuid.uuid4()  # TODO: add this as @base in the context? at least for cases where I'm loading from zip
         self.metadata = Metadata(self)  # metadata init already includes itself into the root metadata
         self.default_entities.append(self.metadata)
 
@@ -69,9 +69,10 @@ class ROCrate():
                 ## TODO: load root dataset properties 
 
     def entities_from_metadata(self, metadata_path):
-        # Creates a dictionary of id, entity dict from the metadata file
+        # Creates a dictionary {id: entity} from the metadata file
         with open(metadata_path) as metadata_file:
             metadata_jsonld = json.load(metadata_file)
+        ### TODO: should validate the json-ld
         if '@graph' in metadata_jsonld.keys():
             entities_dict = {}
             for entity in metadata_jsonld['@graph']:
@@ -106,7 +107,16 @@ class ROCrate():
             data_entity_id = data_entity_ref['@id']
             # print(data_entity_id)
             entity = entities[data_entity_id]
-            if entity['@type'] == 'File':
+            # basic checks should be moved to a separate function
+            if '@type' not in entity.keys():
+                raise Exception("Entity with @id:" + data_entity_id + " has no type defined")
+
+            # Data entities can have an array as @type
+            # so far I just parse them as File class if File is in the list
+            # for further extensions (e.g if a class Workflow is created) I can add extra cases or create a mapping table for specific combinations
+            # see https://github.com/ResearchObject/ro-crate/issues/83
+            entity_types = entity['@type'] if isinstance(entity['@type'], list) else [entity['@type']]
+            if 'File' in entity_types:
                 file_path = os.path.join(source,entity['@id'])
                 # print(file_path)
                 # print(entity)
@@ -122,7 +132,7 @@ class ROCrate():
                         instance = File(self, identifier, properties=entity)
                     except requests.ConnectionError as exception:
                         print("Source is not a valid URI")
-            if entity['@type'] == 'Dataset':
+            if 'Dataset' in entity_types:
                 dir_path = os.path.join(source,entity['@id'])
                 if os.path.exists(dir_path):
                     instance = Dataset(self, dir_path, entity['@id'], entity.pop('@id', None))
@@ -135,12 +145,10 @@ class ROCrate():
         prebuilt_entities = ['./', 'ro-crate-metadata.jsonld', 'ro-crate-preview.html']  # also, filter out the entity with id= ro-crate-metadata.jsonld   and the root dataset: can assume id='./' or '.'
         for identifier, entity in entities.items():
             if identifier not in added_entities + prebuilt_entities:
-                ## TODO: should create a specialized contextual entity of tipe  entity['@type']
                 entity.pop('@id',None)  #this should be done in the extract entities?
-                # print([cls.__name__ for cls in contextentity.ContextEntity.__subclasses__()])
+                # contextual entities should not have @type array (see https://github.com/ResearchObject/ro-crate/issues/83)
                 if entity['@type'] in [cls.__name__ for cls in contextentity.ContextEntity.__subclasses__()]:
                     module_name = 'rocrate.model.' + entity['@type'].lower()
-                    # print(module_name)
                     SubClass = getattr(importlib.import_module(module_name, package=None), entity['@type'])
                     instance = SubClass(self, identifier, entity)
                 else:
@@ -148,14 +156,14 @@ class ROCrate():
                 self._add_context_entity(instance)
 
 
-    # Properties
-    # missing? 
-        # input
-        # output
-        # programmingLanguage
-        # sdPublisher
-        # url
-        # version
+    #TODO: add contextual entities
+    # def add_contact_point(id, properties = {})
+    # def add_organization(id, properties = {})
+
+    # add properties:
+    # name datePublished author license identifier distribution contactPoint publisher funder description url hasPart]
+    # publisher should be an Organization though it MAY be a Person.
+    # funder should reference an Organization
 
     @property
     def name(self):
@@ -165,7 +173,7 @@ class ROCrate():
     def name(self, value):
         self.root_dataset['name'] = value
 
-    # dateCreated?
+    # TODO: should change to dateCreated or that is only for workflowhub?
     @property
     def datePublished(self):
         return self.root_dataset['datePublished']
