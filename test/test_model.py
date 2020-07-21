@@ -40,8 +40,11 @@ class TestAPI(BaseTest):
 
     def test_contextual_entities(self):
         crate = ROCrate()
-        new_person = crate.add_person('joe' , {'name': 'Joe pesci'})
+        new_person = crate.add_person('joe' , {'name': 'Joe Pesci'})
         person_dereference = crate.dereference('#joe')
+        person_prop = person_dereference.properties()
+        self.assertEqual(person_prop['@type'], 'Person')
+        self.assertEqual(person_prop['name'], 'Joe Pesci')
 
     def test_properties(self):
         crate = ROCrate()

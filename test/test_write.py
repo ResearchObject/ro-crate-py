@@ -1,3 +1,4 @@
+import io
 import unittest
 import os
 from rocrate.rocrate import ROCrate
@@ -9,7 +10,7 @@ import pathlib
 import zipfile
 import shutil
 
-class TestAPI(BaseTest):
+class TestWrite(BaseTest):
 
     def test_file_writing(self):
         crate = ROCrate()
@@ -41,6 +42,29 @@ class TestAPI(BaseTest):
         self.assertTrue(file1.exists())
         self.assertTrue(file2.exists())
         self.assertTrue(file_subdir.exists())
+
+    def test_file_stringio(self):
+        crate = ROCrate()
+        # dereference added files
+        file_content = 'This will be the content of the file'
+        file_stringio = io.StringIO(file_content)
+        file_returned = crate.add_file(file_stringio,'test_file.txt')
+        # out_path = os.path.join(tempfile.gettempdir(),'ro_crate_out')
+        out_path = os.path.join('/home/ignacio/testing_stringio','ro_crate_out')
+        crate.name = 'Test crate'
+
+        if not os.path.exists(out_path):
+            os.mkdir(out_path)
+        crate.write_crate(out_path)
+
+        metadata_path = pathlib.Path(os.path.join(out_path, 'ro-crate-metadata.jsonld'))
+        self.assertTrue(metadata_path.exists())
+
+        preview_path = pathlib.Path(os.path.join(out_path, 'ro-crate-preview.html'))
+        self.assertTrue(preview_path.exists())
+        file1 = pathlib.Path(os.path.join(out_path, 'test_file.txt'))
+        self.assertTrue(file1.exists())
+        self.assertEqual(os.path.getsize(file1), 36)
 
     def test_remote_uri(self):
         crate = ROCrate()

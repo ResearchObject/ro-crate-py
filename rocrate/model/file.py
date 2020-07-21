@@ -19,6 +19,7 @@ import pathlib
 import shutil
 import urllib
 
+from io import IOBase
 from shutil import copy
 from urllib.error import URLError, HTTPError
 from urllib.parse import urlparse
@@ -35,7 +36,7 @@ class File(DataEntity):
             # the entity is refrencing a path relative to the ro-crate root
             identifier = dest_path  # relative path?
         else:
-            # if there is no dest_path there must be a source 
+            # if there is no dest_path there must be a URI/local path as source
             if os.path.isfile(source):
                 # local source -> becomes local reference = reference relative to ro-crate root
                 identifier = os.path.basename(source)
@@ -77,28 +78,30 @@ class File(DataEntity):
         return val
 
     def write(self, base_path):
+        out_file_path = os.path.join(base_path, self.id)
+        out_dir = pathlib.Path(os.path.dirname(out_file_path))
         # check if its local or remote URI
-        if os.path.isfile(self.source):
-            out_file_path = os.path.join(base_path, self.id)
-            out_dir = pathlib.Path(os.path.dirname(out_file_path))
+        if isinstance(self.source,IOBase):
             if not out_dir.exists():
                 os.mkdir(out_dir)
-            copy(self.source, out_file_path)
+            with open(out_file_path, 'w') as out_file:
+                out_file.write(self.source.getvalue())
         else:
-            if self.fetch_remote:
-                out_file_path = os.path.join(base_path, self.id)
-                out_dir = pathlib.Path(os.path.dirname(out_file_path))
+            if os.path.isfile(self.source):
                 if not out_dir.exists():
                     os.mkdir(out_dir)
-                try:
-                    #Legacy version
-                    # urllib.request.urlretrieve(self.source, out_file_path)
-                    # can check that the encodingFormat and contentSize matches the request data? i.e response.getheader('Content-Length') == self._jsonld['contentSize']
-                    # this would help check if the dataset to be retrieved is in fact what was registered in the first place. 
-                    with urllib.request.urlopen(self.source) as response, open(out_file_path, 'wb') as out_file:
-                        shutil.copyfileobj(response, out_file)
-                except: # requests.ConnectionError as exception:
-                    print("URI does not exists or can't be accessed")
+                copy(self.source, out_file_path)
+            else:
+                if self.fetch_remote:
+                    try:
+                        #Legacy version
+                        # urllib.request.urlretrieve(self.source, out_file_path)
+                        # can check that the encodingFormat and contentSize matches the request data? i.e response.getheader('Content-Length') == self._jsonld['contentSize']
+                        # this would help check if the dataset to be retrieved is in fact what was registered in the first place. 
+                        with urllib.request.urlopen(self.source) as response, open(out_file_path, 'wb') as out_file:
+                            shutil.copyfileobj(response, out_file)
+                    except: # requests.ConnectionError as exception:
+                        print("URI does not exists or can't be accessed")
 
     def write_zip(self, zip_out):
         zip_out.write(self.source, self.id)
