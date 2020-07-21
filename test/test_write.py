@@ -49,8 +49,7 @@ class TestWrite(BaseTest):
         file_content = 'This will be the content of the file'
         file_stringio = io.StringIO(file_content)
         file_returned = crate.add_file(file_stringio,'test_file.txt')
-        # out_path = os.path.join(tempfile.gettempdir(),'ro_crate_out')
-        out_path = os.path.join('/home/ignacio/testing_stringio','ro_crate_out')
+        out_path = os.path.join(tempfile.gettempdir(),'ro_crate_out')
         crate.name = 'Test crate'
 
         if not os.path.exists(out_path):
