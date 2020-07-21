@@ -24,6 +24,9 @@
                 },
                 {
                     "@id": "test_file_galaxy.txt"
+                },
+                {
+                    "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/sample_file.txt"
                 }
             ],
             "mainEntity": {
@@ -39,7 +42,7 @@
         },
         {
             "@id": "test_galaxy_wf.ga",
-            "@type": "File"
+            "@type": ["File","Workflow"]
         },
         {
             "@id": "abstract_wf.cwl",
@@ -53,6 +56,11 @@
             "@id": "#joe",
             "@type": "Person",
             "name": "Joe Bloggs"
+        },
+        {
+            "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/sample_file.txt",
+            "@type": "File"
         }
+
     ]
 }
