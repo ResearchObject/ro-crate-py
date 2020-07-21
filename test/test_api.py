@@ -12,6 +12,11 @@ class TestAPI(BaseTest):
         wc_crate = roc_api.make_workflow_rocrate(wf_path,wf_type = 'Galaxy')
         self.assertIsInstance(wc_crate, ROCrate)
 
+    def test_cwl_wf_crate(self):
+        wf_path = os.path.join(self.test_data_dir, 'sample_cwl_wf.cwl')
+        wc_crate = roc_api.make_workflow_rocrate(wf_path,wf_type = 'CWL')
+        self.assertIsInstance(wc_crate, ROCrate)
+
     def test_create_wf_include(self):
         wf_path = os.path.join(self.test_data_dir, 'test_galaxy_wf.ga')
         extra_file1 = os.path.join(self.test_data_dir, 'test_file_galaxy.txt')

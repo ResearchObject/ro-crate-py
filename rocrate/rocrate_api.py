@@ -66,22 +66,22 @@ def make_workflow_rocrate(workflow_path,wf_type,include_files=[],fetch_remote=Fa
     file_name = os.path.basename(workflow_path)
     wf_file = wf_crate.add_file(workflow_path,file_name)  # should I add it in a special path within the crate?
     wf_crate.set_main_entity(wf_file)
-    #print(wf_file.id)
-    if wf_type != 'CWL':
-        if cwl:
+    if wf_type == 'CWL':
             programming_language_entity = entity.Entity(wf_crate,'https://www.commonwl.org/v1.1/', properties={"@type": ["ComputerLanguage", "SoftwareApplication"], 'name':'CWL', 'url':'https://www.commonwl.org/v1.1/', 'version':'1.1'})
-        elif wf_type == 'Galaxy':
+    if wf_type == 'Galaxy':
+        if not cwl:
             #create cwl_abstract
             with tempfile.NamedTemporaryFile(mode='w', delete=False) as cwl_abstract_out:
                 with redirect_stdout(cwl_abstract_out):
                     get_cwl_interface.main(['1',workflow_path])
-            programming_language_entity = entity.Entity(wf_crate,'https://galaxyproject.org/')
             wf_file = wf_crate.add_file(cwl_abstract_out.name, 'abstract_wf.cwl', properties={"@type": ["ComputerLanguage", "SoftwareApplication"]})
+        programming_language_entity = entity.Entity(wf_crate,'https://galaxyproject.org/')
 
     ### SET PROPERTIES
     # A contextual entity representing a SoftwareApplication or ComputerLanguage MUST have a name, url and version,
     # which should indicate a known version the workflow/script was developed or tested with
-    wf_file['programmingLanguage'] = programming_language_entity
+    if programming_language_entity:
+        wf_file['programmingLanguage'] = programming_language_entity
 
     # based on ro-crate specification. for workflows: @type is an array with at least File and Workflow as values.
     wf_type = wf_file['@type']
