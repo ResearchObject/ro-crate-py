@@ -60,10 +60,13 @@ class ROCrate():
                 # load from zip
                 pass
             else: 
-                # load from dir
-                metadata_path = os.path.join(source_path,'ro-crate-metadata.jsonld')
+                # Try first *.json then *jsonld variant
+                # https://www.researchobject.org/ro-crate/1.1-DRAFT/#ro-crate-metadata-file-ro-crate-metadatajson
+                metadata_path = os.path.join(source_path,'ro-crate-metadata.json')
+                if not os.path.isfile(metadata_path): 
+                    metadata_path = os.path.join(source_path,'ro-crate-metadata.jsonld')
                 if not os.path.isfile(metadata_path):
-                    raise ValueError('The directory is not a valid RO-crate')
+                    raise ValueError('The directory is not a valid RO-crate, missing ro-crate-metadata.json')
                 entities = self.entities_from_metadata(metadata_path)
                 self.build_crate(entities, source_path,load_preview)
                 ## TODO: load root dataset properties 
