@@ -214,7 +214,6 @@ class ROCrate():
     def keywords(self, value):
         self.root_dataset['keywords'] = value
 
-
     @property
     def publisher(self):
         return self.root_dataset['publisher']
