@@ -1,10 +1,9 @@
 import io
 from rocrate.rocrate import ROCrate
 from test.test_common import BaseTest
-import tempfile
 import pathlib
 import zipfile
-
+from tempfile import NamedTemporaryFile
 
 class TestWrite(BaseTest):
 
@@ -21,14 +20,14 @@ class TestWrite(BaseTest):
         test_dir_path = self.test_data_dir / 'test_add_dir'
         test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
         self.assertTrue(test_dir_entity is None)  # is this intended?
-        out_path = pathlib.Path(tempfile.gettempdir()) / 'ro_crate_out'
+        out_path = self.tmpdir / 'ro_crate_out'
+        out_path.mkdir()
 
         crate.name = 'Test crate'
 
         new_person = crate.add_person('001', {'name': 'Lee Ritenour'})
         crate.creator = new_person
 
-        out_path.mkdir(exist_ok=True)
         crate.write_crate(out_path)
 
         metadata_path = out_path / 'ro-crate-metadata.jsonld'
@@ -50,10 +49,10 @@ class TestWrite(BaseTest):
         file_stringio = io.StringIO(file_content)
         file_returned = crate.add_file(file_stringio, 'test_file.txt')
         self.assertEqual(file_returned.id, 'test_file.txt')
-        out_path = pathlib.Path(tempfile.gettempdir()) / 'ro_crate_out'
-        crate.name = 'Test crate'
+        out_path = self.tmpdir / 'ro_crate_out'
+        out_path.mkdir()
 
-        out_path.mkdir(exist_ok=True)
+        crate.name = 'Test crate'
         crate.write_crate(out_path)
 
         metadata_path = out_path / 'ro-crate-metadata.jsonld'
@@ -73,9 +72,9 @@ class TestWrite(BaseTest):
         self.assertEqual(file_returned.id, 'sample_file.txt')
         file_returned = crate.add_file(source=url, fetch_remote=False)
         self.assertEqual(file_returned.id, url)
-        out_path = pathlib.Path(tempfile.gettempdir()) / 'ro_crate_out'
+        out_path = self.tmpdir / 'ro_crate_out'
+        out_path.mkdir()
 
-        out_path.mkdir(exist_ok=True)
         crate.write_crate(out_path)
 
         metadata_path = out_path / 'ro-crate-metadata.jsonld'
@@ -99,11 +98,8 @@ class TestWrite(BaseTest):
         test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
         self.assertTrue(test_dir_entity is None)  # is this intended?
         # write to zip
-        zip_path = tempfile.NamedTemporaryFile(
-            mode='w', delete=False, suffix='.zip'
-        )
-        crate.write_zip(zip_path.name)
-        zip_path.close()
+        with NamedTemporaryFile(mode='w', delete=False, suffix='.zip') as zip_path:
+            crate.write_zip(zip_path.name)
         read_zip = zipfile.ZipFile(zip_path.name, mode='r')
         self.assertEqual(read_zip.getinfo('sample_file.txt').file_size, 12)
         self.assertEqual(

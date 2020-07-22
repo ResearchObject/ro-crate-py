@@ -1,6 +1,5 @@
 from rocrate.rocrate import ROCrate
 from test.test_common import BaseTest
-import tempfile
 import pathlib
 
 
@@ -22,8 +21,8 @@ class TestAPI(BaseTest):
         self.assertEqual(author_prop['name'], 'Joe Bloggs')
 
         # write the crate in a different directory
-        out_path = pathlib.Path(tempfile.gettempdir()) / 'crate_read_out'
-        out_path.mkdir(exist_ok=True)
+        out_path = self.tmpdir / 'crate_read_out'
+        out_path.mkdir()
         crate.write_crate(out_path)
 
         metadata_path = out_path / 'ro-crate-metadata.jsonld'
