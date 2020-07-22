@@ -41,13 +41,13 @@ setup(
   author_email = 'stain@apache.org',
   package_data={'': ['data/*.jsonld','templates/*.j2']},
   license = "Apache-2.0", ## SPDX, pending https://github.com/pombredanne/spdx-pypi-pep/pull/2
-  #url = 'http://ro-crate.readthedocs.io/',
+  url = 'https://github.com/ResearchObject/ro-crate-py/',
   #download_url = 'https://github.com/researchobject/ro-crate-py/archive/0.1.0.tar.gz',
   keywords = "researchobject ro-crate ro metadata jsonld",
   install_requires=[required],
   test_suite='test',
   classifiers=[
-    'Operating System :: OS Independent'
+    'Operating System :: OS Independent',
     'Development Status :: 3 - Alpha'
     'Intended Audience :: Developers',
     'Intended Audience :: Information Technology',
