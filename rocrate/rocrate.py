@@ -214,13 +214,6 @@ class ROCrate():
     def keywords(self, value):
         self.root_dataset['keywords'] = value
 
-    @property
-    def isBasedOn(self):
-        return self.root_dataset['isBasedOn']
-
-    @isBasedOn.setter
-    def isBasedOn(self, value):
-        self.root_dataset['isBasedOn'] = value
 
     @property
     def publisher(self):
