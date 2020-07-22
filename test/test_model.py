@@ -1,4 +1,3 @@
-import os
 from rocrate.rocrate import ROCrate
 from rocrate.model.file import File
 from rocrate.model.person import Person
@@ -17,7 +16,7 @@ class TestAPI(BaseTest):
         self.assertEqual(metadata_entity, crate.metadata)
 
         # dereference added files
-        sample_file = os.path.join(self.test_data_dir, 'sample_file.txt')
+        sample_file = self.test_data_dir / 'sample_file.txt'
         file_returned = crate.add_file(sample_file)
         self.assertIsInstance(file_returned, File)
         dereference_file = crate.dereference("sample_file.txt")

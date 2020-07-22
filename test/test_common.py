@@ -1,21 +1,19 @@
-import os
+import pathlib
 import shutil
 import tempfile
 import unittest
 
 
+THIS_DIR = pathlib.Path(__file__).absolute().parent
+TEST_DATA_NAME = 'test-data'
+
+
 class BaseTest(unittest.TestCase):
 
     def setUp(self):
-        self.tmpdir = tempfile.mkdtemp(prefix="rocrate_test_")
-
-        # copy test data
-        shutil.copytree(
-            os.path.abspath(os.path.join('test', 'test-data')),
-            os.path.join(self.tmpdir, 'test-data')
-        )
-        self.test_data_dir = os.path.join(self.tmpdir, 'test-data')
-        self.assertTrue(os.path.isdir(self.test_data_dir))
+        self.tmpdir = pathlib.Path(tempfile.mkdtemp(prefix="rocrate_test_"))
+        self.test_data_dir = self.tmpdir / TEST_DATA_NAME
+        shutil.copytree(THIS_DIR / TEST_DATA_NAME, self.test_data_dir)
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)

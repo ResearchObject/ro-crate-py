@@ -1,4 +1,3 @@
-import os
 from rocrate.rocrate import ROCrate
 from test.test_common import BaseTest
 import tempfile
@@ -9,7 +8,7 @@ class TestAPI(BaseTest):
 
     def test_crate_dir_loading(self):
         # load crate from directory
-        crate_dir = os.path.join(self.test_data_dir, 'read_crate')
+        crate_dir = self.test_data_dir / 'read_crate'
         crate = ROCrate(crate_dir, load_preview=True)
 
         # check loaded entities and properties
@@ -23,12 +22,9 @@ class TestAPI(BaseTest):
         self.assertEqual(author_prop['name'], 'Joe Bloggs')
 
         # write the crate in a different directory
-        out_path = os.path.join(tempfile.gettempdir(), 'crate_read_out')
-        if not os.path.exists(out_path):
-            os.mkdir(out_path)
+        out_path = pathlib.Path(tempfile.gettempdir()) / 'crate_read_out'
+        out_path.mkdir(exist_ok=True)
         crate.write_crate(out_path)
 
-        metadata_path = pathlib.Path(
-            os.path.join(out_path, 'ro-crate-metadata.jsonld')
-        )
+        metadata_path = out_path / 'ro-crate-metadata.jsonld'
         self.assertTrue(metadata_path.exists())

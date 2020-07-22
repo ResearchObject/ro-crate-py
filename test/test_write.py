@@ -1,5 +1,4 @@
 import io
-import os
 from rocrate.rocrate import ROCrate
 from test.test_common import BaseTest
 import tempfile
@@ -12,43 +11,34 @@ class TestWrite(BaseTest):
     def test_file_writing(self):
         crate = ROCrate()
         # dereference added files
-        sample_file = os.path.join(self.test_data_dir, 'sample_file.txt')
+        sample_file = self.test_data_dir / 'sample_file.txt'
         file_returned = crate.add_file(sample_file)
         self.assertEqual(file_returned.id, 'sample_file.txt')
         file_returned_subdir = crate.add_file(
             sample_file, 'subdir/sample_file2.csv'
         )
         self.assertEqual(file_returned_subdir.id, 'subdir/sample_file2.csv')
-        test_dir_path = os.path.join(self.test_data_dir, 'test_add_dir')
+        test_dir_path = self.test_data_dir / 'test_add_dir'
         test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
         self.assertTrue(test_dir_entity is None)  # is this intended?
-        out_path = os.path.join(tempfile.gettempdir(), 'ro_crate_out')
+        out_path = pathlib.Path(tempfile.gettempdir()) / 'ro_crate_out'
 
         crate.name = 'Test crate'
 
         new_person = crate.add_person('001', {'name': 'Lee Ritenour'})
         crate.creator = new_person
 
-        if not os.path.exists(out_path):
-            os.mkdir(out_path)
+        out_path.mkdir(exist_ok=True)
         crate.write_crate(out_path)
 
-        metadata_path = pathlib.Path(
-            os.path.join(out_path, 'ro-crate-metadata.jsonld')
-        )
+        metadata_path = out_path / 'ro-crate-metadata.jsonld'
         self.assertTrue(metadata_path.exists())
 
-        preview_path = pathlib.Path(
-            os.path.join(out_path, 'ro-crate-preview.html')
-        )
+        preview_path = out_path / 'ro-crate-preview.html'
         self.assertTrue(preview_path.exists())
-        file1 = pathlib.Path(os.path.join(out_path, 'sample_file.txt'))
-        file2 = pathlib.Path(
-            os.path.join(out_path, 'subdir', 'sample_file2.csv')
-        )
-        file_subdir = pathlib.Path(
-            os.path.join(out_path, 'test_add_dir', 'sample_file_subdir.txt')
-        )
+        file1 = out_path / 'sample_file.txt'
+        file2 = out_path / 'subdir' / 'sample_file2.csv'
+        file_subdir = out_path / 'test_add_dir' / 'sample_file_subdir.txt'
         self.assertTrue(file1.exists())
         self.assertTrue(file2.exists())
         self.assertTrue(file_subdir.exists())
@@ -60,25 +50,20 @@ class TestWrite(BaseTest):
         file_stringio = io.StringIO(file_content)
         file_returned = crate.add_file(file_stringio, 'test_file.txt')
         self.assertEqual(file_returned.id, 'test_file.txt')
-        out_path = os.path.join(tempfile.gettempdir(), 'ro_crate_out')
+        out_path = pathlib.Path(tempfile.gettempdir()) / 'ro_crate_out'
         crate.name = 'Test crate'
 
-        if not os.path.exists(out_path):
-            os.mkdir(out_path)
+        out_path.mkdir(exist_ok=True)
         crate.write_crate(out_path)
 
-        metadata_path = pathlib.Path(
-            os.path.join(out_path, 'ro-crate-metadata.jsonld')
-        )
+        metadata_path = out_path / 'ro-crate-metadata.jsonld'
         self.assertTrue(metadata_path.exists())
 
-        preview_path = pathlib.Path(
-            os.path.join(out_path, 'ro-crate-preview.html')
-        )
+        preview_path = out_path / 'ro-crate-preview.html'
         self.assertTrue(preview_path.exists())
-        file1 = pathlib.Path(os.path.join(out_path, 'test_file.txt'))
+        file1 = out_path / 'test_file.txt'
         self.assertTrue(file1.exists())
-        self.assertEqual(os.path.getsize(file1), 36)
+        self.assertEqual(file1.stat().st_size, 36)
 
     def test_remote_uri(self):
         crate = ROCrate()
@@ -88,32 +73,29 @@ class TestWrite(BaseTest):
         self.assertEqual(file_returned.id, 'sample_file.txt')
         file_returned = crate.add_file(source=url, fetch_remote=False)
         self.assertEqual(file_returned.id, url)
-        out_path = os.path.join(tempfile.gettempdir(), 'ro_crate_out')
+        out_path = pathlib.Path(tempfile.gettempdir()) / 'ro_crate_out'
 
-        if not os.path.exists(out_path):
-            os.mkdir(out_path)
+        out_path.mkdir(exist_ok=True)
         crate.write_crate(out_path)
 
-        metadata_path = pathlib.Path(
-            os.path.join(out_path, 'ro-crate-metadata.jsonld')
-        )
+        metadata_path = out_path / 'ro-crate-metadata.jsonld'
         self.assertTrue(metadata_path.exists())
 
-        file1 = pathlib.Path(os.path.join(out_path, 'sample_file.txt'))
+        file1 = out_path / 'sample_file.txt'
         self.assertTrue(file1.exists())
 
     def test_write_zip(self):
         crate = ROCrate()
 
         # dereference added files
-        sample_file = os.path.join(self.test_data_dir, 'sample_file.txt')
+        sample_file = self.test_data_dir / 'sample_file.txt'
         file_returned = crate.add_file(sample_file)
         self.assertEqual(file_returned.id, 'sample_file.txt')
         file_returned_subdir = crate.add_file(
             sample_file, 'subdir/sample_file2.csv'
         )
         self.assertEqual(file_returned_subdir.id, 'subdir/sample_file2.csv')
-        test_dir_path = os.path.join(self.test_data_dir, 'test_add_dir')
+        test_dir_path = self.test_data_dir / 'test_add_dir'
         test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
         self.assertTrue(test_dir_entity is None)  # is this intended?
         # write to zip
