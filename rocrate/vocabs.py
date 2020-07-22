@@ -28,8 +28,8 @@ def _pkg_json(rel_path):
         ## Workaround needed for Python <=3.5
         return json.loads(json_str)
 
-RO_CRATE = _pkg_json("data/ro-crate.jsonld")
-SCHEMA = _pkg_json("data/schema.jsonld")
+RO_CRATE = json.loads(pkg_resources.resource_string(__name__, "data/ro-crate.jsonld"))
+SCHEMA = json.loads(pkg_resources.resource_string(__name__, "data/schema.jsonld"))
 SCHEMA_MAP = dict( (e["@id"],e) for e in SCHEMA["@graph"])
 
 def term_to_uri(name):
