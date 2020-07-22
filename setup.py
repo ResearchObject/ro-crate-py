@@ -33,7 +33,7 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
 setup(
   name = 'rocrate',
   packages = find_packages(exclude=['contrib', 'docs', 'tests']),
-  version = '0.0.1',
+  version = '0.1.0',
   description = 'RO-Crate metadata generator/parser',
   long_description=long_description,
   author = 'Stian Soiland-Reyes',
@@ -48,7 +48,7 @@ setup(
   test_suite='test',
   classifiers=[
     'Operating System :: OS Independent'
-    'Development Status :: 4 - Beta'
+    'Development Status :: 3 - Alpha'
     'Intended Audience :: Developers',
     'Intended Audience :: Information Technology',
     'Topic :: Software Development :: Libraries',
