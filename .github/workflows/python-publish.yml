@@ -5,7 +5,7 @@ name: Upload Python Package
 
 on:
   release:
-    types: [created]
+    types: [created, released]
 
 jobs:
   deploy:
@@ -30,7 +30,11 @@ jobs:
           echo Please update rocrate/_version.py
           false
        fi
+    - name: Test
+      run: |
+        python setup.py test
     - name: Build and publish
+      if: "${{ github.event.action == 'released' }}"
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
