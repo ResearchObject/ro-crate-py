@@ -38,7 +38,7 @@ setup(
   long_description_content_type='text/markdown',
   long_description=long_description,
   author = 'Stian Soiland-Reyes',
-  python_requires='>=3.6',
+  python_requires='>=3.5',
   author_email = 'stain@apache.org',
   package_data={'': ['data/*.jsonld','templates/*.j2']},
   license = "Apache-2.0", ## SPDX, pending https://github.com/pombredanne/spdx-pypi-pep/pull/2
