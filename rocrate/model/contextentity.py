@@ -60,7 +60,7 @@ The corresponding plural setter supports any iterable (e.g. list):
     person2 = Person("#person2", metadata)
     dataset.creators = [person1, person2]
 """
-class ContextEntity(object):
+class ContextEntity(Entity):
 
     def __init__(self, crate, identifier, properties=None):
         super(ContextEntity, self).__init__(crate, identifier, properties)
