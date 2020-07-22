@@ -48,7 +48,7 @@ setup(
   test_suite='test',
   classifiers=[
     'Operating System :: OS Independent',
-    'Development Status :: 3 - Alpha'
+    'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
     'Intended Audience :: Information Technology',
     'Topic :: Software Development :: Libraries',
