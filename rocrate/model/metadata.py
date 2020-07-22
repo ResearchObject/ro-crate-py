@@ -14,17 +14,13 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-import warnings
+import os
 import json
-import pkg_resources
-
-from typing import Dict
+import tempfile
 
 from ..utils import *
-
-from .entity import Entity
+from .file import File
 from .dataset import Dataset
-from .contextentity import ContextEntity
 
 """
 RO-Crate metadata file
@@ -33,46 +29,48 @@ This object holds the data of an RO Crate Metadata File rocrate_
 
 .. _rocrate: https://w3id.org/ro/crate/1.0
 """
-class Metadata(Entity):    
-    def __init__(self):
-        self._jsonld = self._template()  ## bootstrap needed by the below!
-        super().__init__("ro-crate-metadata.jsonld", self)
 
-    def _template(self):
-        # Hard-coded bootstrap for now
-        return {
-            "@context": "https://w3id.org/ro/crate/1.0/context",
-            "@graph": [
-                {
-                    "@id": "ro-crate-metadata.jsonld",
-                    "@type": "CreativeWork",
-                    "identifier": "ro-crate-metadata.jsonld",
-                    "about": {"@id": "./"}
-                },
-                {
-                    "@id": "./",
-                    "@type": "Dataset"
-                }
-            ]
-        }
+class Metadata(File):
+    CONTEXT = "https://w3id.org/ro/crate/1.0/context"
+    def __init__(self, crate):
+        super().__init__(crate, None, "ro-crate-metadata.jsonld", False, None)
 
-    def _find_entity(self, identifier: str) -> Entity:
-        for item in self._jsonld["@graph"]:
-            if item.get("@id", None) == identifier:
-                return item
+    def _empty(self):
+        # default properties of the metadata entry
+        val = {"@id": "ro-crate-metadata.jsonld",
+               "@type": "CreativeWork",
+               "conformsTo": {"@id": "https://w3id.org/ro/crate/1.0"},
+               "about": {"@id": "./"}
+              }
+        return val
 
-    def _add_entity(self, entity: Entity) -> Entity:
-        ## TODO: Check/merge duplicates? Valid by JSON-LD, but 
-        # we won't find the second entry again above
-        self._jsonld["@graph"].append(entity)
-        return entity # TODO: If we merged, return that instead here
+    # Generate the crate's `ro-crate-metadata.jsonld`.
+    # @return [String] The rendered JSON-LD as a "prettified" string.
+    def generate(self):
+        graph = []
+        for entity in self.crate.get_entities():
+            graph.append(entity.properties())
+        return {'@context': self.CONTEXT, '@graph': graph}
 
-    """The dataset this is really about"""
-    about = ContextEntity(Dataset)
+    def write(self, base_path):
+        #writes itself in
+        write_path = self.filepath(base_path)
+        as_jsonld = self.generate()
+        with open(write_path, 'w') as outfile:
+            json.dump(as_jsonld, outfile, indent=4, sort_keys=True, default=str)
+
+    def write_zip(self, zip_out):
+        write_path = self.filepath()
+        as_jsonld = self.generate()
+        # with open(write_path, 'w') as outfile:
+        # TODO: fix this, there is no need to use a tmp file
+        tmpfile = tempfile.NamedTemporaryFile(mode='w', delete=False)
+        tmpfile_path = tmpfile.name
+        json.dump(as_jsonld, tmpfile, indent=4, sort_keys=True, default=json_serial)
+        tmpfile.close()
+        zip_out.write(tmpfile_path, write_path)
+        os.remove(tmpfile_path)
 
     @property
     def root(self) -> Dataset:
-        return self.about
-
-    def as_jsonld(self) -> Dict:
-        return self._jsonld
+        return self.crate.root_dataset

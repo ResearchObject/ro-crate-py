@@ -1,3 +1,6 @@
+jupyter
+requests
 rdflib
 rdflib-jsonld
+pyshacl
 bagit

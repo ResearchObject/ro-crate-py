@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> {{ crate.name or  "New RO Crate" }} </title>
+  <meta name="keywords" content="RO Crate">
+</head>
+<body>
+  <h1> {{ crate.name or  "New RO Crate" }} </h1>
+  {% if crate.url is not none %}
+  <a href="{{ crate.url }}" target="{{crate.url}}"></a>
+  {% else %}
+    NONE
+  {%endif %}
+  <dl>
+      {% if crate.creator is not none %}
+      <dt>Author</dt>
+      <dd>{{ crate.creator }}</dd>
+      {% endif %}
+  </dl>
+
+</body>
+</html>

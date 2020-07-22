@@ -15,20 +15,43 @@
 ## limitations under the License.
 
 from typing import List
+import uuid
 
 from .. import vocabs
 from ..utils import *
 
 class Entity(object):
-    def __init__(self, identifier: str, metadata):
-        self.id = identifier
-        self._metadata = metadata
-        self._entity = metadata._find_entity(identifier)
-        if self._entity is None:
-            self._entity = metadata._add_entity(self._empty())
+
+    def __init__(self, crate, identifier=None, properties=None):
+        self.crate = crate
+        if identifier:
+            self.id = self.format_id(identifier)
+        else:
+            self.id = uuid.uuid1()
+        if properties:
+            empty = self._empty()
+            empty.update(properties)
+            self._jsonld = empty
+        else:
+            self._jsonld = self._empty()
+
+    ##
+    # Format the given ID with rules appropriate for this type.
+    # For example:
+    #  * contextual entities MUST be absolute URIs, or begin with: #
+    #  * files MUST NOT begin with ./
+    #  * directories MUST NOT begin with ./ (except for the crate itself), and MUST end with /
+    def format_id(self, identifier):
+        return identifier.strip('./')
 
     def __repr__(self):
         return "<%s %s>" % (self.id, self.type)
+
+    def properties(self):
+        return self._jsonld
+
+    def as_jsonld(self):
+        return self._jsonld
 
     @property
     def _default_type(self):
@@ -37,33 +60,64 @@ class Entity(object):
             return clsName
         return "Thing"
 
+    def reference(self):
+        return {'@id': self.id }
+
+    def canonical_id(self):
+        return self.crate.resolve_id(self.id)
+
+    def hash(self):
+        hash(self.canonical_id)
+
     def _empty(self):
-        val = {     
+        val = {
             "@id": self.id,
             "@type": self._default_type
-        }        
+        }
         return val
 
+    def auto_dereference(self, value):
+        if isinstance(value, list):
+            return_list = []
+            for entry in value:
+                return_list.append(self.auto_dereference(entry))
+            return return_list
+        if isinstance(value,dict) and value['@id']:  #its a reference
+            obj = self.crate.dereference(value['@id'])
+            return obj
+        return value
+
+    def auto_reference(self, value):
+        if isinstance(value, list):  #TODO: make it in a more pythonic way 
+            return_list = []
+            for entry in value:
+                return_list.append(self.auto_reference(entry))
+            return return_list
+        if isinstance(value, Entity): 
+            # add reference to an Entity
+            return value.reference()  # I assume it is already in the crate...
+        else:
+            return value
+
     def __getitem__(self, key: str):
-        return self._entity[key]
+        if key in self._jsonld.keys():
+            return self.auto_dereference(self._jsonld[key])
+        else:
+            return None
 
     def __setitem__(self, key: str, value):
-        # TODO: Disallow setting non-JSON values
-        self._entity[key] = value
+        self._jsonld[key] = self.auto_reference(value)
 
     def __delitem__(self, key: str):
-        del self._entity[key]
-
-    def get(self, key: str, default=None):
-        return self._entity.get(key, default)
+        del self._jsonld[key]
 
     @property
     def type(self) -> str:
-        return first(self.types)
+        return self['@type']
 
-    @property
-    def types(self)-> List[str]:
-        return tuple(as_list(self.get("@type", "Thing")))
+    # @property
+    # def types(self)-> List[str]:
+        # return tuple(as_list(self.get("@type", "Thing")))
 
-class Thing(Entity):
-    pass
+    def filepath(self):
+        return self.id

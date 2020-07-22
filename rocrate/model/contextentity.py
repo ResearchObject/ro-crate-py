@@ -14,12 +14,14 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
+from urllib.parse import urlparse
 import warnings
 
 from .. import vocabs
 from ..utils import *
 
-from .entity import Thing
+from .entity import Entity
+from arcp import is_arcp_uri
 
 """
 A property class that can be used during class declaration
@@ -60,42 +62,55 @@ The corresponding plural setter supports any iterable (e.g. list):
 """
 class ContextEntity(object):
 
-    def __init__(self, entity_constructor=None):
-        self.entity_constructor = entity_constructor or Thing
+    def __init__(self, crate, identifier, properties=None):
+        super(ContextEntity, self).__init__(crate, identifier, properties)
+
+    def format_id(self, identifier):
+        if is_arcp_uri(identifier):
+            return identifier
+        else:
+            # check if it's an absolute URL
+            url = urlparse(identifier)
+            if all([url.scheme, url.netloc, url.path]):
+                return identifier
+            elif identifier.startswith('#'):
+                return identifier
+            else:
+                return '#' + identifier
 
     def getmany(self, instance):
         for json in as_list(instance.get(self.property)):
             # TODO: Support more advanced dispatching
             yield self.entity_constructor(json["@id"], instance._metadata)
 
-    def setmany(self, instance, values):
-        json = []
-        for value in values:
-            ## TODO: Check it has compatible @type?
-            if value._metadata != instance._metadata:
-                # Oh no, it might have different base URIs, 
-                # will need to be added to @graph, reference
-                # other objects we don't have etc.
-                # TODO: Support setting entities from other RO-Crates
-                raise ValueError("Adding entity from other RO-Crate not (yet) supported")
-            json.append({"@id": value.id})
-        instance[self.property] = flatten(json)
+    # def setmany(self, instance, values):
+        # json = []
+        # for value in values:
+            # ## TODO: Check it has compatible @type?
+            # if value._metadata != instance._metadata:
+                # # Oh no, it might have different base URIs, 
+                # # will need to be added to @graph, reference
+                # # other objects we don't have etc.
+                # # TODO: Support setting entities from other RO-Crates
+                # raise ValueError("Adding entity from other RO-Crate not (yet) supported")
+            # json.append({"@id": value.id})
+        # instance[self.property] = flatten(json)
 
-    def __get__(self, instance, owner=None):
-        if instance is None:
-            return self
-        result = None
-        for val in self.getmany(instance):
-            if result is not None:
-                warnings.warn("More than one value in %s.%s, returning first" % (self.owner, self.property))
-                break
-            result = val
-        return result
+    # def __get__(self, instance, owner=None):
+        # if instance is None:
+            # return self
+        # result = None
+        # for val in self.getmany(instance):
+            # if result is not None:
+                # warnings.warn("More than one value in %s.%s, returning first" % (self.owner, self.property))
+                # break
+            # result = val
+        # return result
 
-    def __set__(self, instance, value):
-        # TODO: Check if arrays are permitted
-        self.setmany(instance, as_list(value))
-        
+    # def __set__(self, instance, value):
+        # # TODO: Check if arrays are permitted
+        # self.setmany(instance, as_list(value))
+
     def __delete__(self, instance):
         ## TODO: Check if permitted to delete?
         instance[self.property] = [] # known property, empty in JSON
@@ -111,7 +126,7 @@ class ContextEntity(object):
         # Register plural _s variant 
         # TODO: Register plural _s variants
         setattr(owner, name+"s", 
-            property(self.getmany, self.setmany, 
+            property(self.getmany, # self.setmany, 
                      doc="Multiple contextual entities %s\n%s" % (uri,doc)))
         # TODO: Register _ids variants?
 

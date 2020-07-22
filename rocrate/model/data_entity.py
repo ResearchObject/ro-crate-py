@@ -14,16 +14,16 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-from .contextentity import ContextEntity
+import os
 
-class Person(ContextEntity):
+from .entity import Entity
 
-    def __init__(self, crate, identifier, properties=None):
-        super(Person, self).__init__(crate, identifier, properties)
 
-    def _empty(self):
-        val = {
-            "@id": self.id,
-            "@type": 'Person'
-        }
-        return val
+class DataEntity(Entity):
+
+
+    def filepath(self, base_path=None):
+        if base_path:
+            return os.path.join(base_path,self.id)
+        else:
+            return self.id
