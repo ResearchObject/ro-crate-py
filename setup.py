@@ -37,8 +37,8 @@ setup(
   description = 'RO-Crate metadata generator/parser',
   long_description_content_type='text/markdown',
   long_description=long_description,
-  author = 'Stian Soiland-Reyes',
-  python_requires='>=3.6',
+  author = 'Bert Droesbeke, Ignacio Eguinoa, Stian Soiland-Reyes, Laura Rodríguez Navas, Alban Gaignard',
+  python_requires='>=3.5',
   author_email = 'stain@apache.org',
   package_data={'': ['data/*.jsonld','templates/*.j2']},
   license = "Apache-2.0", ## SPDX, pending https://github.com/pombredanne/spdx-pypi-pep/pull/2
@@ -54,6 +54,7 @@ setup(
     'Intended Audience :: Information Technology',
     'Topic :: Software Development :: Libraries',
     'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
