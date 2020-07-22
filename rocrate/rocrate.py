@@ -223,6 +223,14 @@ class ROCrate():
         self.root_dataset['publisher'] = value
 
     @property
+    def isBasedOn(self):
+        return self.root_dataset['isBasedOn']
+
+    @isBasedOn.setter
+    def isBasedOn(self, value):
+        self.root_dataset['isBasedOn'] = value
+
+    @property
     def image(self):
         return self.root_dataset['image']
 
