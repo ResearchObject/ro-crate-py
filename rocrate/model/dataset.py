@@ -72,8 +72,10 @@ class Dataset(DataEntity):
         out_path = self.filepath(base_path)
         pathlib.Path(out_path).mkdir(parents=True, exist_ok=True)
         for file_src, file_dest in self.directory_entries(out_path):
-            if not os.path.exists(file_dest):
-                shutil.copyfile(file_src, file_dest)
+            file_dest_path = os.path.dirname(file_dest)
+            if not os.path.exists(file_dest_path):
+                os.makedirs(file_dest_path)
+            shutil.copyfile(file_src, file_dest)
 
 
     def write_zip(self, zip_out):
