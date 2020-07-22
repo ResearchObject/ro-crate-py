@@ -18,8 +18,8 @@ import json
 import pkg_resources
 
 # FIXME: Avoid eager loading?
-RO_CRATE = json.loads(pkg_resources.resource_stream(__name__, "data/ro-crate.jsonld").decode('utf-8'))
-SCHEMA = json.loads(pkg_resources.resource_stream(__name__, "data/schema.jsonld").decode('utf-8'))
+RO_CRATE = json.loads(pkg_resources.resource_stream(__name__, "data/ro-crate.jsonld"))
+SCHEMA = json.loads(pkg_resources.resource_stream(__name__, "data/schema.jsonld"))
 SCHEMA_MAP = dict( (e["@id"],e) for e in SCHEMA["@graph"])
 
 def term_to_uri(name):
