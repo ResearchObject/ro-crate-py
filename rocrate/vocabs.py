@@ -18,6 +18,16 @@ import json
 import pkg_resources
 
 # FIXME: Avoid eager loading?
+
+def _pkg_json(rel_path):
+    """Load a JSON file from package resources
+    """
+    with pkg_resources.resource_stream(__name__, rel_path) as f:
+        json_bytes = f.read()
+        json_str = json_bytes.decode("utf-8")
+        ## Workaround needed for Python <=3.5
+        return json.loads(json_str)
+
 RO_CRATE = json.loads(pkg_resources.resource_string(__name__, "data/ro-crate.jsonld"))
 SCHEMA = json.loads(pkg_resources.resource_string(__name__, "data/schema.jsonld"))
 SCHEMA_MAP = dict( (e["@id"],e) for e in SCHEMA["@graph"])
