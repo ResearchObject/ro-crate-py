@@ -27,11 +27,11 @@ RO-Crate metadata file
 
 This object holds the data of an RO Crate Metadata File rocrate_
 
-.. _rocrate: https://w3id.org/ro/crate/1.0
+.. _rocrate: https://w3id.org/ro/crate/1.1
 """
 
 class Metadata(File):
-    CONTEXT = "https://w3id.org/ro/crate/1.0/context"
+    CONTEXT = "https://w3id.org/ro/crate/1.1/context"
     def __init__(self, crate):
         super().__init__(crate, None, "ro-crate-metadata.jsonld", False, None)
 
@@ -39,7 +39,7 @@ class Metadata(File):
         # default properties of the metadata entry
         val = {"@id": "ro-crate-metadata.jsonld",
                "@type": "CreativeWork",
-               "conformsTo": {"@id": "https://w3id.org/ro/crate/1.0"},
+               "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
                "about": {"@id": "./"}
               }
         return val
