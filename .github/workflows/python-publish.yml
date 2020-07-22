@@ -25,7 +25,8 @@ jobs:
     - name: Check tag name matches setup.py version
       run: |
        ver=`python setup.py --version`
-       if [[ "$ver" != $GITHUB_REF ]] 
+       tag="refs/tags/$ver"
+       if [[ "$tag" != $GITHUB_REF ]] 
           then echo Tag $GITHUB_REF does not match $ver from setup.py >&2
           echo Please update rocrate/_version.py
           false
