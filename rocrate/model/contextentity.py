@@ -23,6 +23,43 @@ from ..utils import *
 from .entity import Entity
 from arcp import is_arcp_uri
 
+"""
+A property class that can be used during class declaration
+to make getter/setter properties.
+
+The class name under construction is assumed to be a valid class name
+in schema.org as referenced from the RO-Crate JSON-LD context, 
+and likewise the class properties defined using this 
+are assumed to be valid schema.org properties.
+
+The setters handle any Entity by picking up their @id instead
+of nesting their objects.
+
+Likewise the getter will construct the typed Entity subclass 
+instead of returning only the identifiers.
+
+The name of the property is provided by the class under construction, 
+which will call our __set_name__.
+
+The singular getter will always return the first value set (or None), 
+while the plural versions of the getter return a generator that yields all values.
+
+So for instance:
+
+    class Dataset(Entity):
+        author = ContextEntity(Person)
+
+    dataset = Dataset()
+
+will have both dataset.author that return Person instance,
+and dataset.authors, which return generator of Person instances.
+
+The corresponding plural setter supports any iterable (e.g. list):
+
+    person1 = Person("#person1", metadata)
+    person2 = Person("#person2", metadata)
+    dataset.creators = [person1, person2]
+"""
 class ContextEntity(Entity):
 
     def __init__(self, crate, identifier, properties=None):
@@ -93,6 +130,9 @@ class ContextEntity(Entity):
                      doc="Multiple contextual entities %s\n%s" % (uri,doc)))
         # TODO: Register _ids variants?
 
+"""
+Set class documentation from schema.org definitions
+"""
 def _set_class_doc(Class):
     # set the class documentation
     try:
