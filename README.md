@@ -17,6 +17,19 @@ or an issue at <https://github.com/researchobject/ro-crate-py/issues>.
 
 Submitted contributions are assumed to be covered by section 5 of the Apache License 2.0.
 
+For development, you can build a [Docker](https://www.docker.com/) image with:
+
+```
+docker build -t ro-crate-py .
+```
+
+And then run it interactively with:
+
+```
+docker run --rm -it --name ro-crate-py ro-crate-py bash
+```
+
+
 ## Installing
 
 You will need Python 3.6 or later (Recommended: 3.7).
