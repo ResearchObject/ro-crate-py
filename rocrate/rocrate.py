@@ -323,7 +323,7 @@ class ROCrate():
             writable_entity.write(base_path)
 
     def write_zip(self,out_zip):
-        if out_zip.endswith('.zip'):
+        if str(out_zip).endswith('.zip'):
             out_file_path = out_zip
         else:
             out_file_path = out_zip + '.zip'
