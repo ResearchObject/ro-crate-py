@@ -19,7 +19,6 @@ import json
 import os
 import uuid
 import requests
-import tempfile
 import zipfile
 
 from pathlib import Path
