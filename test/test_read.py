@@ -26,5 +26,8 @@ class TestAPI(BaseTest):
         out_path.mkdir(exist_ok=True)
         crate.write_crate(out_path)
 
-        metadata_path = out_path / 'ro-crate-metadata.jsonld'
-        self.assertTrue(metadata_path.exists())
+        # Ensure RO-Crate 1.0 was updated to 1.1
+        metadata_path_1_0 = out_path / 'ro-crate-metadata.jsonld'
+        metadata_path_1_1 = out_path / 'ro-crate-metadata.json'
+        self.assertFalse(metadata_path_1_0.exists())
+        self.assertTrue(metadata_path_1_1.exists())
