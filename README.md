@@ -105,7 +105,9 @@ crate.write_crate(out_path)
 
 ## License
 
-© 2019 Stian Soiland-Reyes <http://orcid.org/0000-0001-9842-9718>, The University of Manchester, UK
+© 2019-2020 The University of Manchester, UK
+© 2020 Vlaams Instituut voor Biotechnologie (VIB), DE
+© 2020 Barcelona Supercomputing Center (BSC), ES
 
 Licensed under the 
 Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>, 
