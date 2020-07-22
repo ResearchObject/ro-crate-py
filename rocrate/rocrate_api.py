@@ -87,8 +87,8 @@ def make_workflow_rocrate(workflow_path,wf_type,include_files=[],fetch_remote=Fa
     wf_type = wf_file['@type']
     if not isinstance(wf_type, list):
         wf_type = [wf_type]
-    if 'Workflow' not in wf_type:
-        wf_type.append('Workflow')
+    if 'ComputationalWorkflow' not in wf_type:
+        wf_type.append('ComputationalWorkflow')
     if 'SoftwareSourceCode' not in wf_type:
         wf_type.append('SoftwareSourceCode')
     wf_file['@type'] = wf_type
