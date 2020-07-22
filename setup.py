@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-## Copyright 2019 The University of Manchester, UK
+## Copyright 2019-2020 The University of Manchester, UK
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -25,6 +25,11 @@ __license__     = "Apache License, version 2.0 (https://www.apache.org/licenses/
 from setuptools import setup, find_packages
 from codecs import open
 from os import path
+import re
+
+# https://www.python.org/dev/peps/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions
+PEP440_PATTERN = r"([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?"
+
 
 here = path.abspath(path.dirname(__file__))
 
@@ -34,10 +39,22 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     required = f.read().splitlines()
 
+with open(path.join(here, 'rocrate', '_version.py'), encoding='utf-8') as f:
+    # "parse" rocrate/_version.py which MUST have this pattern
+    # __version__ = "0.1.1"
+    # see https://www.python.org/dev/peps/pep-0440
+    v = f.read().strip()
+    m = re.match(r'^__version__ = "(' + PEP440_PATTERN + ')"$', v)
+    if not m:
+        msg = 'rocrate/_version.py did not match pattern __version__ = "0.1.2"  (see PEP440):\n' + v
+        raise Exception(msg)
+    __version__ = m.group(1)
+
+
 setup(
   name = 'rocrate',
   packages = find_packages(exclude=['contrib', 'docs', 'tests']),
-  version = '0.1.0',
+  version = __version__, ## update in rocrate/_version.py
   description = 'RO-Crate metadata generator/parser',
   long_description_content_type='text/markdown',
   long_description=long_description,

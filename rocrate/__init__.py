@@ -30,3 +30,4 @@ __license__     = "Apache License, version 2.0 <https://www.apache.org/licenses/
 
 # Convenience export of public functions/types
 from .model.metadata import Metadata
+from ._version import __version__
