@@ -1,4 +1,4 @@
-[![Python package](https://github.com/ResearchObject/ro-crate-py/workflows/Python%20package/badge.svg)](https://github.com/ResearchObject/ro-crate-py/actions?query=workflow%3A%22Python+package%22)
+[![Python package](https://github.com/ResearchObject/ro-crate-py/workflows/Python%20package/badge.svg)](https://github.com/ResearchObject/ro-crate-py/actions?query=workflow%3A%22Python+package%22) [![Upload Python Package](https://github.com/ResearchObject/ro-crate-py/workflows/Upload%20Python%20Package/badge.svg)](https://github.com/ResearchObject/ro-crate-py/actions?query=workflow%3A%22Upload+Python+Package%22) [![PyPI version](https://badge.fury.io/py/rocrate.svg)](https://pypi.org/project/rocrate/)
 
 # ro-crate-py
 
@@ -19,6 +19,12 @@ Submitted contributions are assumed to be covered by section 5 of the Apache Lic
 ## Installing
 
 You will need Python 3.6 or later (Recommended: 3.7).
+
+The easiest way to install the package is through PyPI:
+
+```
+pip install rocrate
+```
 
 If you want to install manually from this code base, then try:
 ```
