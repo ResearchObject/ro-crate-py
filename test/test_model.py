@@ -14,7 +14,7 @@ class TestAPI(BaseTest):
         root_dataset = crate.dereference('./')
         self.assertEqual(crate.root_dataset, root_dataset)
 
-        metadata_entity = crate.dereference('./ro-crate-metadata.jsonld')
+        metadata_entity = crate.dereference('./ro-crate-metadata.json')
         self.assertEqual(metadata_entity, crate.metadata)
 
         # dereference added files
@@ -33,9 +33,9 @@ class TestAPI(BaseTest):
         root_dataset = crate.dereference('')
         self.assertEqual(crate.root_dataset, root_dataset)
 
-        metadata_entity = crate.dereference('./ro-crate-metadata.jsonld')
+        metadata_entity = crate.dereference('./ro-crate-metadata.json')
         self.assertEqual(metadata_entity, crate.metadata)
-        metadata_entity = crate.dereference('ro-crate-metadata.jsonld')
+        metadata_entity = crate.dereference('ro-crate-metadata.json')
         self.assertEqual(metadata_entity, crate.metadata)
 
     def test_contextual_entities(self):
