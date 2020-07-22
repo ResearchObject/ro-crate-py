@@ -19,9 +19,9 @@ import json
 import os
 import tempfile
 from contextlib import redirect_stdout
+from pathlib import Path
 
 import rocrate.rocrate as roc
-
 from rocrate.model import entity
 from galaxy2cwl import get_cwl_interface
 
@@ -71,10 +71,13 @@ def make_workflow_rocrate(workflow_path,wf_type,include_files=[],fetch_remote=Fa
     if wf_type == 'Galaxy':
         if not cwl:
             #create cwl_abstract
-            with tempfile.NamedTemporaryFile(mode='w', delete=False) as cwl_abstract_out:
-                with redirect_stdout(cwl_abstract_out):
-                    get_cwl_interface.main(['1',workflow_path])
-            wf_file = wf_crate.add_file(cwl_abstract_out.name, 'abstract_wf.cwl', properties={"@type": ["ComputerLanguage", "SoftwareApplication"]})
+            try:
+                with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".cwl") as cwl_abstract_out:
+                    with redirect_stdout(cwl_abstract_out):
+                        get_cwl_interface.main(['1',workflow_path])
+                wf_file = wf_crate.add_file(cwl_abstract_out.name, 'abstract_wf.cwl', properties={"@type": ["ComputerLanguage", "SoftwareApplication"]})
+            finally:
+                Path(cwl_abstract_out.name).unlink()
         programming_language_entity = entity.Entity(wf_crate,'https://galaxyproject.org/')
 
     ### SET PROPERTIES
