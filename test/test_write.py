@@ -98,9 +98,10 @@ class TestWrite(BaseTest):
         test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
         self.assertTrue(test_dir_entity is None)  # is this intended?
         # write to zip
-        with NamedTemporaryFile(mode='w', delete=False, suffix='.zip') as zip_path:
-            crate.write_zip(zip_path.name)
-        read_zip = zipfile.ZipFile(zip_path.name, mode='r')
+        zip_path = self.tmpdir / "crate.zip"
+        with open(zip_path, mode='w') as f:
+            crate.write_zip(zip_path)
+        read_zip = zipfile.ZipFile(zip_path, mode='r')
         self.assertEqual(read_zip.getinfo('sample_file.txt').file_size, 12)
         self.assertEqual(
             read_zip.getinfo('test_add_dir/sample_file_subdir.txt').file_size,
