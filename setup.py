@@ -32,38 +32,30 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
 
 setup(
   name = 'rocrate',
-  packages = find_packages(exclude=['contrib', 'docs', 'tests']), # Required
-  version = '0.0.1.dev0',
+  packages = find_packages(exclude=['contrib', 'docs', 'tests']),
+  version = '0.1.0',
   description = 'RO-Crate metadata generator/parser',
   long_description=long_description,
   author = 'Stian Soiland-Reyes',
+  python_requires='>=3.6',
   author_email = 'stain@apache.org',
   package_data={'': ['data/*.jsonld','templates/*.j2']},
-  # https://www.apache.org/licenses/LICENSE-2.0
   license = "Apache-2.0", ## SPDX, pending https://github.com/pombredanne/spdx-pypi-pep/pull/2
   #url = 'http://ro-crate.readthedocs.io/',
   #download_url = 'https://github.com/researchobject/ro-crate-py/archive/0.1.0.tar.gz',
   keywords = "researchobject ro-crate ro metadata jsonld",
-  # license_file= "LICENSE.txt", ## implied
   install_requires=[required],
   test_suite='test',
   classifiers=[
-    # https://pypi.python.org/pypi?%3Aaction=list_classifiers
-    'Development Status :: 1 - Planning',
-    #'Development Status :: 2 - Pre-Alpha',  ## TODO
-
+    'Operating System :: OS Independent'
+    'Development Status :: 3 - Alpha'
     'Intended Audience :: Developers',
     'Intended Audience :: Information Technology',
     'Topic :: Software Development :: Libraries',
-
-     # 'License :: OSI Approved :: Apache Software License',
-     # aboveis misleading, see https://github.com/pypa/pypi-legacy/issues/564
-     # and https://github.com/pombredanne/spdx-pypi-pep/pull/2
-     #'License :: OSI Approved',
-     # 'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'Topic :: Internet',
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: System :: Archiving',
