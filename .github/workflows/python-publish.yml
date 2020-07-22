@@ -22,6 +22,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel twine
+    - name: Check tag name matches setup.py version
+      run: |
+       ver=`python setup.py --version`
+       if [[ "$ver" != $GITHUB_REF ]] 
+          then echo Tag $GITHUB_REF does not match $ver from setup.py >&2
+          echo Please update rocrate/_version.py
+          false
+       fi
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
