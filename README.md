@@ -2,12 +2,13 @@
 
 # ro-crate-py
 
-Create/parse rocrate_ (Research Object Crate) metadata.
+Create/parse [RO-Crate](https://w3id.org/ro/crate) (Research Object Crate) metadata.
 
-Note: **Under development**
+Supports specification: [RO-Crate 1.0](https://w3id.org/ro/crate/1.0)
+
+Status: **Alpha**
 
 ## Contribute
-
 
 Source code: <https://github.com/researchobject/ro-crate-py>
 
@@ -20,13 +21,14 @@ Submitted contributions are assumed to be covered by section 5 of the Apache Lic
 
 You will need Python 3.6 or later (Recommended: 3.7).
 
-The easiest way to install the package is through PyPI:
+This library is easiest to install using [pip](https://docs.python.org/3/installing/):
 
 ```
 pip install rocrate
 ```
 
 If you want to install manually from this code base, then try:
+
 ```
 pip install .
 ```
@@ -36,14 +38,15 @@ pip install .
 python setup.py install
 ```
 
-.. _rocrate: https://w3id.org/ro/crate
-.. _pip: https://docs.python.org/3/installing/
-
 ## General usage
-The package contains a 
-The standard use case is by instantiating ROCrate class. This can be a new one: 
+
+The standard use case is by instantiating `ROCrate`. This can be a new one: 
+
+```python
 crate = ROCrate() 
-or an existing RO-crate package can be load from a directory or zip file:
+```
+
+or an existing RO-Crate package can be load from a directory or zip file:
 ```python
 crate = ROCrate('/path/to/crate/')
 ```
@@ -53,8 +56,8 @@ crate = ROCrate('/path/to/crate/file.zip')
 ```
 
 In addition, there is a set of higher level functions in the form of an interface to help users create some predefined types of crates. 
-As an example here is the code to create a workflow RO-Crate, containing a workflow template.
-This is a good starting point if you want to wrap up a workflow template to register at workflowhub.eu
+As an example here is the code to create a [workflow RO-Crate](https://about.workflowhub.eu/Workflow-RO-Crate/), containing a workflow template.
+This is a good starting point if you want to wrap up a workflow template to register at [workflowhub.eu](https://about.workflowhub.eu/):
 
 
 ```python
@@ -73,9 +76,9 @@ wf_crate.write_zip(out_path)
 
 ```
 
-Independently of the initialization method, once an instance of ROCrate is created it can be manipulated to extend the content and metadata.
+Independently of the initialization method, once an instance of `ROCrate` is created it can be manipulated to extend the content and metadata.
 
-Data entities can be added with:
+[Data entities](https://www.researchobject.org/ro-crate/1.0/#core-metadata-for-data-entities) can be added with:
 
 ```python
 ## adding a File entity:
@@ -90,7 +93,8 @@ sample_dir = '/path/to/dir'
 dataset_entity = crate.add_directory(sample_dir, 'relative/rocrate/path')
 ```
 
-Contextual entities are used in a ro-crate to adequately describe a Data Entity. The following example shows how to add them to the RO-Crate root:
+[Contextual entities](https://www.researchobject.org/ro-crate/1.0/#representing-contextual-entities) are used in an RO-Crate to adequately describe a Data Entity. The following example shows how to add them to the RO-Crate root:
+
 ```python
 # Add authors info
 joe_metadata = {'name': 'Joe Bloggs'}
@@ -117,4 +121,4 @@ crate.write_crate(out_path)
 
 Licensed under the 
 Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>, 
-see the file LICENSE.txt for details.
+see the file `LICENSE.txt` for details.
