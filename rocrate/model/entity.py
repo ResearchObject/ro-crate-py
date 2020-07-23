@@ -27,7 +27,7 @@ class Entity(object):
         if identifier:
             self.id = self.format_id(identifier)
         else:
-            self.id = uuid.uuid1()
+            self.id = "#%s" % uuid.uuid4()
         if properties:
             empty = self._empty()
             empty.update(properties)
@@ -42,7 +42,7 @@ class Entity(object):
     #  * files MUST NOT begin with ./
     #  * directories MUST NOT begin with ./ (except for the crate itself), and MUST end with /
     def format_id(self, identifier):
-        return identifier.strip('./')
+        return str(identifier).strip('./')
 
     def __repr__(self):
         return "<%s %s>" % (self.id, self.type)
