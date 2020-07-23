@@ -1,24 +1,23 @@
 #!/usr/bin/env python
 
-## Copyright 2019-2020 The University of Manchester, UK
-##
-## Licensed under the Apache License, Version 2.0 (the "License");
-## you may not use this file except in compliance with the License.
-## You may obtain a copy of the License at
-##
-##     http://www.apache.org/licenses/LICENSE-2.0
-##
-## Unless required by applicable law or agreed to in writing, software
-## distributed under the License is distributed on an "AS IS" BASIS,
-## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-## See the License for the specific language governing permissions and
-## limitations under the License.
+# Copyright 2019-2020 The University of Manchester, UK
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-from typing import List
 import uuid
 
 from .. import vocabs
-from ..utils import *
+
 
 class Entity(object):
 
@@ -35,12 +34,12 @@ class Entity(object):
         else:
             self._jsonld = self._empty()
 
-    ##
     # Format the given ID with rules appropriate for this type.
     # For example:
     #  * contextual entities MUST be absolute URIs, or begin with: #
     #  * files MUST NOT begin with ./
-    #  * directories MUST NOT begin with ./ (except for the crate itself), and MUST end with /
+    #  * directories MUST NOT begin with ./ (except for the crate itself),
+    #    and MUST end with /
     def format_id(self, identifier):
         return str(identifier).strip('./')
 
@@ -61,7 +60,7 @@ class Entity(object):
         return "Thing"
 
     def reference(self):
-        return {'@id': self.id }
+        return {'@id': self.id}
 
     def canonical_id(self):
         return self.crate.resolve_id(self.id)
@@ -82,18 +81,18 @@ class Entity(object):
             for entry in value:
                 return_list.append(self.auto_dereference(entry))
             return return_list
-        if isinstance(value,dict) and value['@id']:  #its a reference
+        if isinstance(value, dict) and value['@id']:  # its a reference
             obj = self.crate.dereference(value['@id'])
             return obj
         return value
 
     def auto_reference(self, value):
-        if isinstance(value, list):  #TODO: make it in a more pythonic way 
+        if isinstance(value, list):  # TODO: make it in a more pythonic way
             return_list = []
             for entry in value:
                 return_list.append(self.auto_reference(entry))
             return return_list
-        if isinstance(value, Entity): 
+        if isinstance(value, Entity):
             # add reference to an Entity
             return value.reference()  # I assume it is already in the crate...
         else:
