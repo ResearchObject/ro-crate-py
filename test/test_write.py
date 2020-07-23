@@ -1,9 +1,8 @@
 import io
 from rocrate.rocrate import ROCrate
 from test.test_common import BaseTest
-import pathlib
 import zipfile
-from tempfile import NamedTemporaryFile
+
 
 class TestWrite(BaseTest):
 
@@ -99,8 +98,7 @@ class TestWrite(BaseTest):
         self.assertTrue(test_dir_entity is None)  # is this intended?
         # write to zip
         zip_path = self.tmpdir / "crate.zip"
-        with open(zip_path, mode='w') as f:
-            crate.write_zip(zip_path)
+        crate.write_zip(zip_path)
         read_zip = zipfile.ZipFile(zip_path, mode='r')
         self.assertEqual(read_zip.getinfo('sample_file.txt').file_size, 12)
         self.assertEqual(
