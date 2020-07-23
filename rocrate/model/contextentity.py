@@ -62,7 +62,7 @@ The corresponding plural setter supports any iterable (e.g. list):
 """
 class ContextEntity(Entity):
 
-    def __init__(self, crate, identifier, properties=None):
+    def __init__(self, crate, identifier=None, properties=None):
         super(ContextEntity, self).__init__(crate, identifier, properties)
 
     def format_id(self, identifier):
