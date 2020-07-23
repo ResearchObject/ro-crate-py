@@ -1,6 +1,5 @@
 from rocrate.rocrate import ROCrate
 from test.test_common import BaseTest
-import pathlib
 
 
 class TestAPI(BaseTest):
