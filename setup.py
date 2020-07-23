@@ -58,7 +58,7 @@ setup(
   description = 'RO-Crate metadata generator/parser',
   long_description_content_type='text/markdown',
   long_description=long_description,
-  author = 'Bert Droesbeke, Ignacio Eguinoa, Stian Soiland-Reyes, Laura Rodríguez Navas, Alban Gaignard',
+  author = 'Bert Droesbeke, Ignacio Eguinoa, Stian Soiland-Reyes, Laura Rodríguez-Navas, Alban Gaignard',
   python_requires='>=3.6',
   author_email = 'stain@apache.org',
   package_data={'': ['data/*.jsonld','templates/*.j2']},
