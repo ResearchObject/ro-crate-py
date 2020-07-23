@@ -32,12 +32,10 @@ class RootDataset(Dataset):
         return './'
 
     def _empty(self):
-        # default properties of the metadata entry
         # Hard-coded bootstrap for now
         val = {
             "@id": "./",
-            "@type": "CreativeWork",
-            "about": {"@id": "./"}
+            "@type": "Dataset",
         }
         return val
 
