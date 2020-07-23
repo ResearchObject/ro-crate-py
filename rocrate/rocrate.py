@@ -265,8 +265,10 @@ class ROCrate():
         return None
 
     # source: file object or path (str)
-    def add_file(self, source, crate_path = None , fetch_remote = False, properties = None):
-        file_entity = File(self, source,crate_path,fetch_remote, properties)
+    def add_file(self, source, crate_path= None, fetch_remote=False, properties={}, **kwargs):
+        props = dict(properties)
+        props.update(kwargs) 
+        file_entity = File(self, source,crate_path, fetch_remote, props)
         self._add_data_entity(file_entity)
         return file_entity
 
@@ -274,8 +276,10 @@ class ROCrate():
         #if file in data_entities:
         self._remove_data_entity(file_id)
 
-    def add_directory(self, source, crate_path = None , properties = None):
-        dataset_entity = Dataset(self,source,crate_path,properties)
+    def add_directory(self, source, crate_path=None, properties={}, **kwargs):
+        props = dict(properties)
+        props.update(kwargs)
+        dataset_entity = Dataset(self,source,crate_path,props)
         self._add_data_entity(dataset_entity)
 
     def remove_directory(self,dir_id):
@@ -300,8 +304,10 @@ class ROCrate():
         if entity in self.contextual_entities: self.contextual_entities.remove(entity)
         self.contextual_entities.append(entity)
 
-    def add_person(self, identifier, properties = {}):
-        new_person = Person(self, identifier,properties)
+    def add_person(self, identifier=None, properties={}, **kwargs):
+        props = dict(properties)
+        props.update(kwargs)
+        new_person = Person(self, identifier, props)
         self._add_context_entity(new_person)
         return new_person
 
