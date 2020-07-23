@@ -95,7 +95,7 @@
         <a class="data-entity-link" href="{{ entry['@id'] }}">{{ entry['@id'] }}</a>
         <p>Type: {{ entry['@type'] }}</p>
         {% if entry['programmingLanguage'] %}
-        <p>Type: {{ entry['programmingLanguage']['@id'] }}</p>
+        <p>ProgrammingLanguage: {{ entry['programmingLanguage']['@id'] }}</p>
         {% endif %}
       </div>
     {% endfor %}
