@@ -1,47 +1,43 @@
 #!/usr/bin/env python
 
-## Copyright 2019-2020 The University of Manchester, UK
-##
-## Licensed under the Apache License, Version 2.0 (the "License");
-## you may not use this file except in compliance with the License.
-## You may obtain a copy of the License at
-##
-##     http://www.apache.org/licenses/LICENSE-2.0
-##
-## Unless required by applicable law or agreed to in writing, software
-## distributed under the License is distributed on an "AS IS" BASIS,
-## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-## See the License for the specific language governing permissions and
-## limitations under the License.
+# Copyright 2019-2020 The University of Manchester, UK
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os
-
-from typing import Dict
-from ..utils import *
 import tempfile
 
 from jinja2 import Template
-
 from .file import File
 
-"""
-RO-Crate preview file
 
-This object holds a preview of an RO Crate in HTML format_
-
-.. _rocrate: https://w3id.org/ro/crate/1.0
-"""
 class Preview(File):
-    def __init__(self, crate, source = None):
+    """
+    RO-Crate preview file
+    This object holds a preview of an RO Crate in HTML format_
+    .. _rocrate: https://w3id.org/ro/crate/1.0
+    """
+
+    def __init__(self, crate, source=None):
         super().__init__(crate, source, "ro-crate-preview.html", None)
 
     def _empty(self):
         # default properties of the metadata entry
         val = {
-                    "@id": "ro-crate-preview.html",
-                    "@type": "CreativeWork",
-                    "about": {"@id": "./"}
-                }
+            "@id": "ro-crate-preview.html",
+            "@type": "CreativeWork",
+            "about": {"@id": "./"}
+        }
         return val
 
     def generate_html(self):
@@ -80,5 +76,3 @@ class Preview(File):
         zip_out.write(tmpfile_path, write_path)
         os.remove(tmpfile_path)
         
-
-
