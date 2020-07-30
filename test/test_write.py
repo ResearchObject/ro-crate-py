@@ -1,4 +1,5 @@
 import io
+from rocrate.model.dataset import Dataset
 from rocrate.rocrate import ROCrate
 from test.test_common import BaseTest
 import zipfile
@@ -18,7 +19,7 @@ class TestWrite(BaseTest):
         self.assertEqual(file_returned_subdir.id, 'subdir/sample_file2.csv')
         test_dir_path = self.test_data_dir / 'test_add_dir'
         test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
-        self.assertTrue(test_dir_entity is None)  # is this intended?
+        self.assertIsInstance(test_dir_entity, Dataset)
         out_path = self.tmpdir / 'ro_crate_out'
         out_path.mkdir()
 
@@ -95,7 +96,7 @@ class TestWrite(BaseTest):
         self.assertEqual(file_returned_subdir.id, 'subdir/sample_file2.csv')
         test_dir_path = self.test_data_dir / 'test_add_dir'
         test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
-        self.assertTrue(test_dir_entity is None)  # is this intended?
+        self.assertIsInstance(test_dir_entity, Dataset)
         # write to zip
         zip_path = self.tmpdir / "crate.zip"
         crate.write_zip(zip_path)

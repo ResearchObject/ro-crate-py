@@ -305,6 +305,7 @@ class ROCrate():
         props.update(kwargs)
         dataset_entity = Dataset(self, source, crate_path, properties)
         self._add_data_entity(dataset_entity)
+        return dataset_entity
 
     def remove_directory(self, dir_id):
         # if file in data_entities:
