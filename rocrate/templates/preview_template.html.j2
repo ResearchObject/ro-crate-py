@@ -1,22 +1,105 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> {{ crate.name or  "New RO Crate" }} </title>
+  <title>{{ crate.name or  "New RO Crate" }}</title>
   <meta name="keywords" content="RO Crate">
+  <style type="text/css">
+    html {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: sans-serif;
+      color: #333;
+      font-size: 14px;
+      background: #eee;
+      margin: 0;
+      padding: 0;
+    }
+
+    .main {
+      max-width: 1200px;
+      margin: auto;
+      background: #fff;
+      padding: 1em;
+    }
+
+    .data-entity {
+      margin: 0.5em 0;
+      background: #fafafa;
+      border-left: 3px solid #ddd;
+      padding: 0.5em;
+    }
+    dt {
+      font-weight: bold;
+    }
+    dd {
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1> {{ crate.name or  "New RO Crate" }} </h1>
-  {% if crate.url is not none %}
-  <a href="{{ crate.url }}" target="{{crate.url}}"></a>
-  {% else %}
-    NONE
+<div class='main'>
+  <h1>{{ crate.name or  "New RO Crate" }}</h1>
+  <p>
+  {% if crate.description %}
+    {{ crate.description }}
   {%endif %}
+  </p>
+
+  {% if crate.image %}
+    <img src="{{ crate.image }}" style="width: 100%;"/>
+  {%endif %}
+  
   <dl>
-      {% if crate.creator is not none %}
-      <dt>Author</dt>
-      <dd>{{ crate.creator }}</dd>
-      {% endif %}
+  {% for entry in context %}
+    <dt>{{ entry['@type'] }}</dt>
+    <dd>{{ entry['name'] }}</dd>
+  {% endfor %}
+  {% if crate.url %}
+    <dt>URL</dt>
+    <dd><a href="{{ crate.url }}" target="{{ crate.url }}"></a></dd>
+  {%endif %}
+  {% if crate.creator %}
+    <dt>Creator</dt>
+    <dd>{{ crate.creator }}</dd>
+  {%endif %}
+  {% if crate.license %}
+    <dt>License</dt>
+    <dd>{{ crate.license }}</dd>
+  {%endif %}
+  {% if crate.keywords %}
+    <dt>Keywords</dt>
+    <dd>{{ crate.keywords }}</dd>
+  {%endif %}
+  {% if crate.isBasedOn %}
+    <dt>isBasedOn</dt>
+    <dd>{{ crate.isBasedOn }}</dd>
+  {%endif %}
+  {% if crate.datePublished %}
+    <dt>datePublished</dt>
+    <dd>{{ crate.datePublished }}</dd>
+  {%endif %}
+  {% if crate.creator %}
+    <dt>Creator</dt>
+    <dd>{{ crate.creator }}</dd>
+  {%endif %}  
   </dl>
 
+  <h2>Contents</h2>
+  <div id="contents">
+    {% for entry in data %}
+      <div class="data-entity" id="">
+          <strong>Data entity</strong>
+        <a class="data-entity-link" href="{{ entry['@id'] }}">{{ entry['@id'] }}</a>
+        <p>Type: {{ entry['@type'] }}</p>
+        {% if entry['programmingLanguage'] %}
+        <p>ProgrammingLanguage: {{ entry['programmingLanguage']['@id'] }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
 </body>
 </html>
