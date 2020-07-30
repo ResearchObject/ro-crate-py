@@ -121,10 +121,6 @@
     <dt>URL</dt>
     <dd><a href="{{ crate.url }}" target="{{ crate.url }}"></a></dd>
   {%endif %}
-  {% if crate.creator %}
-    <dt>Creator</dt>
-    <dd>{{ crate.creator }}</dd>
-  {%endif %}
   {% if crate.license %}
     <dt>License</dt>
     <dd>{{ crate.license }}</dd>
@@ -144,6 +140,14 @@
   {% if crate.datePublished %}
     <dt>datePublished</dt>
     <dd>{{ crate.datePublished }}</dd>
+  {%endif %}
+  {% if crate.publisher %}
+    <dt>publisher</dt>
+    <dd>{{ crate.publisher }}</dd>
+  {%endif %}
+  {% if crate.CreativeWorkStatus %}
+    <dt>CreativeWorkStatus</dt>
+    <dd>{{ crate.CreativeWorkStatus }}</dd>
   {%endif %}
   {% if crate.creator %}
     <dt>Creator</dt>
