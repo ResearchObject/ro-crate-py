@@ -133,11 +133,7 @@
   {%endif %}
   {% if crate.keywords %}
     <dt>Keywords</dt>
-    {% if crate.keywords is string %}
-    <dd>{{ crate.keywords }}</dd>
-    {%else %}
     <dd>{{ stringify(crate.keywords) }}</dd>
-    {%endif %}
   {%endif %}
   {% if crate.isBasedOn %}
     <dt>isBasedOn</dt>
