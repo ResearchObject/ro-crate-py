@@ -43,12 +43,35 @@ class Preview(File):
         return val
 
     def generate_html(self):
-        # info_dict = self.crate.get_info()
-        # print(info_dict['name'])
-        # print(info_dict['creator'])
         base_path = os.path.abspath(os.path.dirname(__file__))
         template = open(os.path.join(base_path,'..' ,'templates', 'preview_template.html.j2'))
         src = Template(template.read())
+
+        def template_function(func):
+            src.globals[func.__name__] = func
+            return func
+        
+        @template_function
+        def stringify(a):
+            if type(a) is list:
+                return ', '.join(a)
+            elif type(a) is str:
+                return a
+            else:
+                if a._jsonld and a._jsonld['name']:
+                    return  a._jsonld['name']
+                else:
+                    return a
+
+        @template_function
+        def is_object_list(a):
+            if type(a) is list:
+                for obj in a:
+                    if obj is not str:
+                        return True
+            else:
+                return False
+
         template.close()
         context_entities = []
         data_entities = []
