@@ -43,9 +43,6 @@ class Preview(File):
         return val
 
     def generate_html(self):
-        # info_dict = self.crate.get_info()
-        # print(info_dict['name'])
-        # print(info_dict['creator'])
         base_path = os.path.abspath(os.path.dirname(__file__))
         template = open(os.path.join(base_path,'..' ,'templates', 'preview_template.html.j2'))
         src = Template(template.read())

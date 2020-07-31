@@ -338,15 +338,6 @@ class ROCrate():
     # def fetch_all(self):
         # fetch all files defined in the crate
 
-    def get_info(self):
-        # return dictionary with basic info to build a preview file
-        info_dict = {
-            'name': self.name,
-            'creator': self.creator,
-            'image': self.image
-        }
-        return info_dict
-
     # write crate to local dir
     def write_crate(self, base_path):
         Path(base_path).mkdir(parents=True, exist_ok=True)
