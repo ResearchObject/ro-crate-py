@@ -130,7 +130,7 @@
     {% if crate.keywords is string %}
     <dd>{{ crate.keywords }}</dd>
     {%else %}
-    <dd>{{ crate.keywords|join(', ') }}</dd>
+    <dd>{{ stringify(crate.keywords) }}</dd>
     {%endif %}
   {%endif %}
   {% if crate.isBasedOn %}
@@ -151,11 +151,7 @@
   {%endif %}
   {% if crate.creator %}
     <dt>Creator</dt>
-    {% if crate.creator is string %}
-    <dd>{{ crate.creator }}</dd>
-    {%else %}
-    <dd>{{ crate.creator|join(', ') }}</dd>
-    {%endif %}
+    <dd>{{ stringify(crate.creator) }}</dd>
   {%endif %}  
   </dl>
 
@@ -165,11 +161,7 @@
       <div class="data-entity" id="">
           <strong>Data entity</strong>
         <a class="data-entity-link" href="{{ entry['@id'] }}">{{ entry['@id'] }}</a>
-        {% if entry['@type'] is string %}
-          <p>Type: {{ entry['@type'] }}</p>
-        {%else %}
-          <p>Type: {{ entry['@type']|join(', ') }}</p>
-        {%endif %}
+        <p>Type: {{ stringify(entry['@type']) }}</p>
         {% if entry['programmingLanguage'] %}
           <p>ProgrammingLanguage: {{ entry['programmingLanguage']['@id'] }}</p>
         {% endif %}
