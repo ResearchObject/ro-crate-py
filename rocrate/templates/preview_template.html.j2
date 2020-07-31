@@ -111,50 +111,61 @@
   {% if crate.image %}
     <img src="{{ crate.image }}" class="wf_image"/>
   {%endif %}
-  
+
   <dl>
-  {% if context %}
-    <dt>Author(s)</dt>
-    {% for entry in context %}
-      {% if entry['name'] %}
-      <dd>{{ entry['name'] }}</dd>
-      {% else %}
-      <dd>{{ entry }}</dd>
-      {% endif %}
-    {% endfor %}
-  {% endif %}
+  {% if crate.creator %}
+    {% if is_object_list %}
+    <dt>Creators</dt>
+      {% for obj in crate.creator %}
+    <dd>{{ stringify(obj) }}</dd>
+      {% endfor %}
+    {% else %}
+    <dt>Creator</dt>
+    <dd>{{ stringify(crate.creator) }}</dd>
+    {%endif %}  
+  {%endif %}  
+
+  {% if crate.publisher %}
+    {% if is_object_list %}
+    <dt>Publishers</dt>
+      {% for obj in crate.publisher %}
+    <dd>{{ stringify(obj) }}</dd>
+      {% endfor %}
+    {% else %}
+    <dt>Publisher</dt>
+    <dd>{{ stringify(crate.publisher) }}</dd>
+    {%endif %}  
+  {%endif %} 
+
   {% if crate.url %}
     <dt>URL</dt>
     <dd><a href="{{ crate.url }}" target="{{ crate.url }}"></a></dd>
   {%endif %}
+
   {% if crate.license %}
     <dt>License</dt>
     <dd>{{ crate.license }}</dd>
   {%endif %}
+
   {% if crate.keywords %}
-    <dt>Keywords</dt>
+    <dt>Keyword(s)</dt>
     <dd>{{ stringify(crate.keywords) }}</dd>
   {%endif %}
+
   {% if crate.isBasedOn %}
     <dt>isBasedOn</dt>
     <dd>{{ crate.isBasedOn }}</dd>
   {%endif %}
+
   {% if crate.datePublished %}
     <dt>datePublished</dt>
     <dd>{{ crate.datePublished }}</dd>
   {%endif %}
-  {% if crate.publisher %}
-    <dt>publisher</dt>
-    <dd>{{ stringify(crate.publisher) }}</dd>
-  {%endif %}
+
   {% if crate.CreativeWorkStatus %}
     <dt>CreativeWorkStatus</dt>
     <dd>{{ crate.CreativeWorkStatus }}</dd>
   {%endif %}
-  {% if crate.creator %}
-    <dt>Creator</dt>
-    <dd>{{ stringify(crate.creator) }}</dd>
-  {%endif %}  
   </dl>
 
   <h2>Contents</h2>
