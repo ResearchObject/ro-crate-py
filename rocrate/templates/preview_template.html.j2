@@ -113,10 +113,16 @@
   {%endif %}
   
   <dl>
-  {% for entry in context %}
-    <dt>{{ entry['@type'] }}</dt>
-    <dd>{{ entry['name'] }}</dd>
-  {% endfor %}
+  {% if context %}
+    <dt>Author(s)</dt>
+    {% for entry in context %}
+      {% if entry['name'] %}
+      <dd>{{ entry['name'] }}</dd>
+      {% else %}
+      <dd>{{ entry }}</dd>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
   {% if crate.url %}
     <dt>URL</dt>
     <dd><a href="{{ crate.url }}" target="{{ crate.url }}"></a></dd>

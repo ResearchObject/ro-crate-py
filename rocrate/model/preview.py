@@ -61,10 +61,10 @@ class Preview(File):
             elif type(a) is str:
                 return a
             else:
-                if a._jsonld:
-                    return f"Object:{a._jsonld}" 
+                if a._jsonld and a._jsonld['name']:
+                    return  a._jsonld['name']
                 else:
-                    return "BAd boy"
+                    return a
 
         template.close()
         context_entities = []
