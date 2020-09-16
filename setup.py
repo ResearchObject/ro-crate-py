@@ -71,7 +71,6 @@ setup(
                   f'{__version__}.tar.gz'),
     keywords="researchobject ro-crate ro metadata jsonld",
     install_requires=[required],
-    test_suite='test',
     classifiers=[
         'Operating System :: OS Independent',
         'Development Status :: 3 - Alpha',
