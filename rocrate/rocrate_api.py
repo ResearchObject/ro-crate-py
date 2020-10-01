@@ -87,11 +87,11 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
                 ) as cwl_abstract_out:
                     with redirect_stdout(cwl_abstract_out):
                         get_cwl_interface.main(['1', workflow_path])
-                wf_file = wf_crate.add_file(
+                wf_crate.add_file(
                     cwl_abstract_out.name,
                     'abstract_wf.cwl',
                     properties={
-                        "@type": ["ComputerLanguage", "SoftwareApplication"]
+                        "@type": ["File", "SoftwareSourceCode", "Workflow"]
                     }
                 )
             finally:
