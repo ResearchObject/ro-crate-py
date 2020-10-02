@@ -291,8 +291,8 @@ class ROCrate():
     def add_file(self, source, crate_path=None, fetch_remote=False,
                  properties={}, **kwargs):
         props = dict(properties)
-        props.update(kwargs) 
-        file_entity = File(self, source, crate_path, fetch_remote, properties)
+        props.update(kwargs)
+        file_entity = File(self, source=source, dest_path=crate_path, fetch_remote=fetch_remote, properties=props)
         self._add_data_entity(file_entity)
         return file_entity
 
