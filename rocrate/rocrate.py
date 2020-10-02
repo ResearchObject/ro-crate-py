@@ -141,9 +141,8 @@ class ROCrate():
             if 'Dataset' in entity_types:
                 dir_path = os.path.join(source, entity['@id'])
                 if os.path.exists(dir_path):
-                    instance = Dataset(
-                        self, dir_path, entity['@id'], entity.pop('@id', None)
-                    )
+                    props = {k: v for k, v in entity.items() if k != '@id'}
+                    instance = Dataset(self, dir_path, entity['@id'], props)
                 else:
                     raise Exception('Directory not found')
             self._add_data_entity(instance)

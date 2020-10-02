@@ -27,6 +27,9 @@
                 },
                 {
                     "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/sample_file.txt"
+                },
+                {
+                    "@id": "examples/"
                 }
             ],
             "mainEntity": {
@@ -74,7 +77,10 @@
         {
             "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/sample_file.txt",
             "@type": "File"
+        },
+        {
+            "@id": "examples/",
+            "@type": "Dataset"
         }
-
     ]
 }
