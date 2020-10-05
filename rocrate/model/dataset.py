@@ -40,6 +40,10 @@ class Dataset(DataEntity):
         }
         return val
 
+    # SHOULD end with /
+    def format_id(self, identifier):
+        return identifier.rstrip("/") + "/"
+
     # name contentSize dateModified encodingFormat identifier sameAs
     @property
     def datePublished(self):
