@@ -39,15 +39,15 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers):
     wf_prop = main_wf.properties()
     assert wf_prop['@id'] == 'test_galaxy_wf.ga'
     assert wf_prop['@id'] == main_wf.id
-    # assert set(wf_prop['@type']) == helpers.WORKFLOW_TYPES
-    # assert wf_prop['@programmingLanguage'] == {"@id": "https://galaxyproject.org"}
-    # assert wf_prop["subjectOf"] == {"@id": "abstract_wf.cwl"}
+    assert set(wf_prop['@type']) == helpers.WORKFLOW_TYPES
+    assert wf_prop['programmingLanguage'] == {'@id': 'https://galaxyproject.org'}
+    assert wf_prop['subjectOf'] == {'@id': 'abstract_wf.cwl'}
 
     abs_wf = crate.dereference('abstract_wf.cwl')
     abs_wf_prop = abs_wf.properties()
     assert abs_wf_prop['@id'] == 'abstract_wf.cwl'
     assert abs_wf_prop['@id'] == abs_wf.id
-    # assert set(abs_wf_prop['@type']) == helpers.WORKFLOW_TYPES
+    assert set(abs_wf_prop['@type']) == helpers.WORKFLOW_TYPES
 
     wf_author = crate.dereference('#joe')
     author_prop = wf_author.properties()
