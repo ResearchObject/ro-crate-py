@@ -6,14 +6,14 @@
             "@type": "CreativeWork",
             "about": {
                 "@id": "./"
+            },
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate/1.0"
             }
         },
         {
             "@id": "./",
-            "@type": "CreativeWork",
-            "about": {
-                "@id": "./"
-            },
+            "@type": "Dataset",
             "datePublished": "2020-06-25 17:03:04.098286",
             "hasPart": [
                 {
@@ -27,6 +27,9 @@
                 },
                 {
                     "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/sample_file.txt"
+                },
+                {
+                    "@id": "examples/"
                 }
             ],
             "mainEntity": {
@@ -42,11 +45,25 @@
         },
         {
             "@id": "test_galaxy_wf.ga",
-            "@type": ["File","Workflow"]
+            "@type": [
+                "File",
+                "Workflow",
+                "SoftwareSourceCode"
+            ],
+            "programmingLanguage": {
+                "@id": "https://galaxyproject.org"
+            },
+            "subjectOf": {
+                "@id": "abstract_wf.cwl"
+            }
         },
         {
             "@id": "abstract_wf.cwl",
-            "@type": "File"
+            "@type": [
+                "File",
+                "SoftwareSourceCode",
+                "Workflow"
+            ]
         },
         {
             "@id": "test_file_galaxy.txt",
@@ -60,7 +77,10 @@
         {
             "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/sample_file.txt",
             "@type": "File"
+        },
+        {
+            "@id": "examples/",
+            "@type": "Dataset"
         }
-
     ]
 }
