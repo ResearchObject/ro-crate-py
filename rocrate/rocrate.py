@@ -130,7 +130,7 @@ class ROCrate():
                 identifier = entity.pop('@id', None)
                 if os.path.exists(file_path):
                     # referencing a file path relative to crate-root
-                    instance = File(self, file_path, identifier, entity)
+                    instance = File(self, file_path, identifier, properties=entity)
                 else:
                     # check if it is a valid absolute URI
                     try:
