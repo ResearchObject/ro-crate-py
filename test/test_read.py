@@ -1,13 +1,16 @@
+import pytest
+
 from rocrate.rocrate import ROCrate
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
 
 
-def test_crate_dir_loading(test_data_dir, tmpdir, helpers):
+@pytest.mark.parametrize("load_preview", [False, True])
+def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview):
     # load crate from directory
     crate_dir = test_data_dir / 'read_crate'
-    crate = ROCrate(crate_dir, load_preview=True)
+    crate = ROCrate(crate_dir, load_preview=load_preview)
 
     # check loaded entities and properties
     root = crate.dereference('./')
@@ -34,6 +37,10 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers):
     assert preview_prop['@id'] == preview.id
     assert preview_prop['@type'] == 'CreativeWork'
     assert preview_prop['about'] == {'@id': './'}
+    if load_preview:
+        assert preview.source == str(crate_dir / 'ro-crate-preview.html')
+    else:
+        assert not preview.source
 
     main_wf = crate.dereference('test_galaxy_wf.ga')
     wf_prop = main_wf.properties()
