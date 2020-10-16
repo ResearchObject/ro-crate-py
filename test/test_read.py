@@ -38,7 +38,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview):
     assert preview_prop['@type'] == 'CreativeWork'
     assert preview_prop['about'] == {'@id': './'}
     if load_preview:
-        assert preview.source == str(crate_dir / 'ro-crate-preview.html')
+        assert (crate_dir / 'ro-crate-preview.html').samefile(preview.source)
     else:
         assert not preview.source
 
@@ -85,3 +85,11 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview):
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
+
+    if load_preview:
+        preview_out_path = out_path / 'ro-crate-preview.html'
+        with open(preview_out_path, "rb") as f:
+            preview_out_content = f.read()
+        with open(preview.source, "rb") as f:
+            preview_content = f.read()
+        assert preview_out_content == preview_content

@@ -81,14 +81,15 @@ class Preview(File):
             data_entities.append(entity._jsonld)
         out_html = src.render(crate=self.crate, context=context_entities, data=data_entities)
         return out_html
-    
-    # TODO:should take into account the case if a readed preview file. in this case there is a source of it:
-    # no need to generate it, just copy the html and any files present in ro-crate-preview_files/ (if this dir exists)
+
     def write(self, dest_base):
-        write_path = self.filepath(dest_base)
-        out_html = self.generate_html()
-        with open(write_path, 'w') as outfile:
-            outfile.write(out_html)
+        if self.source:
+            super().write(dest_base)
+        else:
+            write_path = self.filepath(dest_base)
+            out_html = self.generate_html()
+            with open(write_path, 'w') as outfile:
+                outfile.write(out_html)
 
     def write_zip(self, zip_out):
         write_path = self.filepath()
@@ -100,5 +101,3 @@ class Preview(File):
         tmpfile.close()
         zip_out.write(tmpfile_path, write_path)
         os.remove(tmpfile_path)
-        
-        
