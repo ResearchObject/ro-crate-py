@@ -1,13 +1,16 @@
+import pytest
+
 from rocrate.rocrate import ROCrate
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
 
 
-def test_crate_dir_loading(test_data_dir, tmpdir, helpers):
+@pytest.mark.parametrize("load_preview", [False, True])
+def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview):
     # load crate from directory
     crate_dir = test_data_dir / 'read_crate'
-    crate = ROCrate(crate_dir, load_preview=True)
+    crate = ROCrate(crate_dir, load_preview=load_preview)
 
     # check loaded entities and properties
     root = crate.dereference('./')
@@ -34,6 +37,10 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers):
     assert preview_prop['@id'] == preview.id
     assert preview_prop['@type'] == 'CreativeWork'
     assert preview_prop['about'] == {'@id': './'}
+    if load_preview:
+        assert (crate_dir / 'ro-crate-preview.html').samefile(preview.source)
+    else:
+        assert not preview.source
 
     main_wf = crate.dereference('test_galaxy_wf.ga')
     wf_prop = main_wf.properties()
@@ -78,3 +85,11 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers):
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
+
+    if load_preview:
+        preview_out_path = out_path / 'ro-crate-preview.html'
+        with open(preview_out_path, "rb") as f:
+            preview_out_content = f.read()
+        with open(preview.source, "rb") as f:
+            preview_content = f.read()
+        assert preview_out_content == preview_content
