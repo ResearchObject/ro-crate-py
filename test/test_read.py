@@ -77,6 +77,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview):
     dataset_prop = dataset.properties()
     assert dataset_prop['@id'] == 'examples/'
     assert dataset_prop['@id'] == dataset.id
+    assert crate.examples_dir is dataset
 
     # write the crate in a different directory
     out_path = tmpdir / 'crate_read_out'

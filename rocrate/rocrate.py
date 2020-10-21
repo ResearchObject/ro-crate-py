@@ -266,6 +266,20 @@ class ROCrate():
     def CreativeWorkStatus(self, value):
         self.root_dataset['CreativeWorkStatus'] = value
 
+    @property
+    def test_dir(self):
+        rval = self.dereference("test")
+        if rval and "Dataset" in rval.type:
+            return rval
+        return None
+
+    @property
+    def examples_dir(self):
+        rval = self.dereference("examples")
+        if rval and "Dataset" in rval.type:
+            return rval
+        return None
+
     def resolve_id(self, relative_id):
         return generate.arcp_random(relative_id.strip('./'), uuid=self.uuid)
 
