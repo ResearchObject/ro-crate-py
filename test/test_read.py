@@ -73,11 +73,17 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview):
     assert remote_file_prop['@id'] == _URL
     assert remote_file_prop['@id'] == remote_file.id
 
-    dataset = crate.dereference('examples/')
-    dataset_prop = dataset.properties()
-    assert dataset_prop['@id'] == 'examples/'
-    assert dataset_prop['@id'] == dataset.id
-    assert crate.examples_dir is dataset
+    examples_dataset = crate.dereference('examples/')
+    examples_dataset_prop = examples_dataset.properties()
+    assert examples_dataset_prop['@id'] == 'examples/'
+    assert examples_dataset_prop['@id'] == examples_dataset.id
+    assert crate.examples_dir is examples_dataset
+
+    test_dataset = crate.dereference('test/')
+    test_dataset_prop = test_dataset.properties()
+    assert test_dataset_prop['@id'] == 'test/'
+    assert test_dataset_prop['@id'] == test_dataset.id
+    assert crate.test_dir is test_dataset
 
     # write the crate in a different directory
     out_path = tmpdir / 'crate_read_out'
