@@ -1,0 +1,19 @@
+{
+    "tmpformat": "ro/workflow/test-metadata/0.1",
+    "@id": "test-metadata.json",
+    "test": [
+        {
+            "name": "test1",
+            "instance": [
+                {
+                    "name": "example_jenkins",
+                    "service": {
+                        "type": "jenkins",
+                        "url": "http://example.org/jenkins",
+                        "resource": "job/tests/"
+                    }
+                }
+            ]
+        }
+    ]
+}

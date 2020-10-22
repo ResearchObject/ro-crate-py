@@ -30,6 +30,9 @@
                 },
                 {
                     "@id": "examples/"
+                },
+                {
+                    "@id": "test/"
                 }
             ],
             "mainEntity": {
@@ -80,6 +83,10 @@
         },
         {
             "@id": "examples/",
+            "@type": "Dataset"
+        },
+        {
+            "@id": "test/",
             "@type": "Dataset"
         }
     ]

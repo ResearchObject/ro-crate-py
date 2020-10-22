@@ -35,6 +35,9 @@ from .model.preview import Preview
 from arcp import generate
 
 
+TEST_METADATA_BASENAME = "test-metadata.json"
+
+
 class ROCrate():
 
     def __init__(self, source_path=None, load_preview=False):
@@ -265,6 +268,26 @@ class ROCrate():
     @CreativeWorkStatus.setter
     def CreativeWorkStatus(self, value):
         self.root_dataset['CreativeWorkStatus'] = value
+
+    @property
+    def test_dir(self):
+        rval = self.dereference("test")
+        if rval and "Dataset" in rval.type:
+            return rval
+        return None
+
+    @property
+    def examples_dir(self):
+        rval = self.dereference("examples")
+        if rval and "Dataset" in rval.type:
+            return rval
+        return None
+
+    @property
+    def test_metadata_path(self):
+        if self.test_dir is None:
+            return None
+        return Path(self.test_dir.filepath()) / TEST_METADATA_BASENAME
 
     def resolve_id(self, relative_id):
         return generate.arcp_random(relative_id.strip('./'), uuid=self.uuid)
