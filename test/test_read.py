@@ -1,4 +1,5 @@
 import pytest
+import shutil
 from pathlib import Path
 
 from rocrate.rocrate import ROCrate, TEST_METADATA_BASENAME
@@ -7,11 +8,15 @@ _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
 
 
-@pytest.mark.parametrize("load_preview", [False, True])
-def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview):
-    # load crate from directory
+@pytest.mark.parametrize("load_preview,from_zip", [(False, False), (True, False), (True, True)])
+def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zip):
+    # load crate
     crate_dir = test_data_dir / 'read_crate'
-    crate = ROCrate(crate_dir, load_preview=load_preview)
+    if from_zip:
+        zip_source = shutil.make_archive(tmpdir / "read_crate.crate", "zip", crate_dir)
+        crate = ROCrate(zip_source, load_preview=load_preview)
+    else:
+        crate = ROCrate(crate_dir, load_preview=load_preview)
 
     # check loaded entities and properties
     root = crate.dereference('./')
@@ -39,7 +44,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview):
     assert preview_prop['@type'] == 'CreativeWork'
     assert preview_prop['about'] == {'@id': './'}
     if load_preview:
-        assert (crate_dir / 'ro-crate-preview.html').samefile(preview.source)
+        assert Path(preview.source).name == 'ro-crate-preview.html'
     else:
         assert not preview.source
 
