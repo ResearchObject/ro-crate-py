@@ -31,7 +31,7 @@ from .model.root_dataset import RootDataset
 from .model.file import File
 from .model.person import Person
 from .model.dataset import Dataset
-from .model.metadata import Metadata
+from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
 
 
@@ -50,9 +50,6 @@ class ROCrate():
         # TODO: add this as @base in the context? At least when loading
         # from zip
         self.uuid = uuid.uuid4()
-        # metadata init already includes itself into the root metadata
-        self.metadata = Metadata(self)
-        self.default_entities.append(self.metadata)
 
         # TODO: default_properties must include name, description,
         # datePublished, license
@@ -61,28 +58,29 @@ class ROCrate():
             self.preview = Preview(self)
             self.default_entities.append(self.preview)
         if not source_path:
+            # create a new ro-crate
             self.root_dataset = RootDataset(self)
             self.default_entities.append(self.root_dataset)
+            self.metadata = Metadata(self)
+            self.default_entities.append(self.metadata)
         else:
-            # find root entity
-            jsonld_filename = 'ro-crate-metadata.json'
+            # load an existing ro-crate
             if zipfile.is_zipfile(source_path):
-                # load from zip
                 zip_path = tempfile.mkdtemp(prefix="ro", suffix="crate")
                 atexit.register(shutil.rmtree, zip_path)
                 with zipfile.ZipFile(source_path, "r") as zip_file:
                     zip_file.extractall(zip_path)
                 source_path = zip_path
-
-            # load from dir
-            metadata_path = os.path.join(
-                source_path, jsonld_filename
-            )
+            metadata_path = os.path.join(source_path, Metadata.BASENAME)
+            MetadataClass = Metadata
             if not os.path.isfile(metadata_path):
-                metadata_path = os.path.join(source_path, 'ro-crate-metadata.jsonld')
+                metadata_path = os.path.join(source_path, LegacyMetadata.BASENAME)
+                MetadataClass = LegacyMetadata
             if not os.path.isfile(metadata_path):
                 raise ValueError('The directory is not a valid RO-crate, '
-                                 'missing ro-crate-metadata.json')
+                                 f'missing {Metadata.BASENAME}')
+            self.metadata = MetadataClass(self)
+            self.default_entities.append(self.metadata)
             entities = self.entities_from_metadata(metadata_path)
             self.build_crate(entities, source_path, load_preview)
             # TODO: load root dataset properties
@@ -120,10 +118,9 @@ class ROCrate():
                     return (entity["@id"], entity["about"]["@id"])
         # ..fall back to a generous look up by filename,
         for candidate in (
-                # RO-Crate 1.1 (*.json) first
-                "ro-crate-metadata.json", "ro-crate-metadata.jsonld",
-                # .. and the unstandard ./ forms later
-                "./ro-crate-metadata.json", "./ro-crate-metadata.jsonld"):
+                Metadata.BASENAME, LegacyMetadata.BASENAME,
+                f"./{Metadata.BASENAME}", f"./{LegacyMetadata.BASENAME}"
+        ):
             metadata_file = entities.get(candidate)
             if metadata_file and "about" in metadata_file:
                 return (metadata_file["@id"], metadata_file["about"]["@id"])
@@ -204,8 +201,6 @@ class ROCrate():
         prebuilt_entities = [
             root_id, metadata_id, 'ro-crate-preview.html'
         ]
-        # also, filter out the entity with id=ro-crate-metadata.json and the
-        # root dataset: can assume id='./' or '.'
         for identifier, entity in entities.items():
             if identifier not in added_entities + prebuilt_entities:
                 # should this be done in the extract entities?

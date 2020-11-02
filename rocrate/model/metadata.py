@@ -29,10 +29,11 @@ class Metadata(File):
 
     This object holds the data of an RO Crate Metadata File rocrate_
     """
+    BASENAME = "ro-crate-metadata.json"
     CONTEXT = "https://w3id.org/ro/crate/1.1/context"
 
     def __init__(self, crate):
-        super().__init__(crate, None, "ro-crate-metadata.json", False, None)
+        super().__init__(crate, None, self.BASENAME, False, None)
 
     def _empty(self):
         # default properties of the metadata entry
@@ -74,3 +75,17 @@ class Metadata(File):
     @property
     def root(self) -> Dataset:
         return self.crate.root_dataset
+
+
+class LegacyMetadata(Metadata):
+
+    BASENAME = "ro-crate-metadata.jsonld"
+    CONTEXT = "https://w3id.org/ro/crate/1.0/context"
+
+    def _empty(self):
+        return {
+            "@id": "ro-crate-metadata.jsonld",
+            "@type": "CreativeWork",
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.0"},
+            "about": {"@id": "./"}
+        }

@@ -15,7 +15,7 @@ LEGACY_VERSION = '1.0'
 class Helpers:
 
     PROFILE = f"{BASE_URL}/{VERSION}"
-    LEGACY_PROFILE = f"{BASE_URL}/${LEGACY_VERSION}"
+    LEGACY_PROFILE = f"{BASE_URL}/{LEGACY_VERSION}"
     METADATA_FILE_NAME = 'ro-crate-metadata.json'
     LEGACY_METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
     WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "ComputationalWorkflow"}

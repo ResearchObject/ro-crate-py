@@ -121,11 +121,8 @@ def test_legacy_crate(test_data_dir, tmpdir, helpers):
     crate = ROCrate(crate_dir)
     md_prop = crate.metadata.properties()
 
-    # # metadata properties are currently hardcoded in the Metadata class
-    # assert crate.dereference(helpers.LEGACY_METADATA_FILE_NAME) is crate.metadata
-    # assert md_prop['conformsTo'] == {'@id': helpers.LEGACY_PROFILE}
-    assert crate.dereference(helpers.METADATA_FILE_NAME) is crate.metadata
-    assert md_prop['conformsTo'] == {'@id': helpers.PROFILE}
+    assert crate.dereference(helpers.LEGACY_METADATA_FILE_NAME) is crate.metadata
+    assert md_prop['conformsTo'] == {'@id': helpers.LEGACY_PROFILE}
 
     main_wf = crate.dereference('test_galaxy_wf.ga')
     wf_prop = main_wf.properties()
