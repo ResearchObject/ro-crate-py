@@ -10,7 +10,7 @@ def test_dereferencing(test_data_dir):
     root_dataset = crate.dereference('./')
     assert crate.root_dataset == root_dataset
 
-    metadata_entity = crate.dereference('./ro-crate-metadata.jsonld')
+    metadata_entity = crate.dereference('./ro-crate-metadata.json')
     assert metadata_entity == crate.metadata
 
     # dereference added files
@@ -30,9 +30,9 @@ def test_dereferencing_equivalent_id():
     root_dataset = crate.dereference('')
     assert crate.root_dataset == root_dataset
 
-    metadata_entity = crate.dereference('./ro-crate-metadata.jsonld')
+    metadata_entity = crate.dereference('./ro-crate-metadata.json')
     assert metadata_entity == crate.metadata
-    metadata_entity = crate.dereference('ro-crate-metadata.jsonld')
+    metadata_entity = crate.dereference('ro-crate-metadata.json')
     assert metadata_entity == crate.metadata
 
 

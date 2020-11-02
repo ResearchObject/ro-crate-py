@@ -11,9 +11,11 @@ TEST_DATA_NAME = 'test-data'
 
 class Helpers:
 
-    CONTEXT = "https://w3id.org/ro/crate/1.0/context"
-    METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
-    WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "Workflow"}
+    CONTEXT = "https://w3id.org/ro/crate/1.1/context"
+    METADATA_FILE_NAME = 'ro-crate-metadata.json'
+    LEGACY_METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
+    WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "ComputationalWorkflow"}
+    LEGACY_WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "Workflow"}
 
     @classmethod
     def read_json_entities(cls, crate_base_path):

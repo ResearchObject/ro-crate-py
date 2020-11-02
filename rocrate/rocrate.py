@@ -65,7 +65,7 @@ class ROCrate():
             self.default_entities.append(self.root_dataset)
         else:
             # find root entity
-            jsonld_filename = 'ro-crate-metadata.jsonld'
+            jsonld_filename = 'ro-crate-metadata.json'
             if zipfile.is_zipfile(source_path):
                 # load from zip
                 zip_path = tempfile.mkdtemp(prefix="ro", suffix="crate")
@@ -79,7 +79,10 @@ class ROCrate():
                 source_path, jsonld_filename
             )
             if not os.path.isfile(metadata_path):
-                raise ValueError('The directory is not a valid RO-crate')
+                metadata_path = os.path.join(source_path, 'ro-crate-metadata.jsonld')
+            if not os.path.isfile(metadata_path):
+                raise ValueError('The directory is not a valid RO-crate, '
+                                 'missing ro-crate-metadata.json')
             entities = self.entities_from_metadata(metadata_path)
             self.build_crate(entities, source_path, load_preview)
             # TODO: load root dataset properties
@@ -98,9 +101,47 @@ class ROCrate():
         else:
             raise ValueError('The metadata file has no @graph')
 
+    def find_root_entity_id(self, entities):
+        """Find Metadata file and Root Data Entity in RO-Crate.
+
+        Returns a tuple of the @id identifiers (metadata, root)
+        """
+        # Note that for all cases below we will deliberately
+        # throw KeyError if "about" exists but it has no "@id"
+
+        # First let's try conformsTo algorithm in
+        # <https://www.researchobject.org/ro-crate/1.0/#core-metadata-for-the-root-data-entity>
+        for entity in entities.values():
+            conformsTo = entity.get("conformsTo")
+            if conformsTo and "@id" in conformsTo:
+                conformsTo = conformsTo["@id"]
+            if conformsTo and conformsTo.startswith("https://w3id.org/ro/crate/"):
+                if "about" in entity:
+                    return (entity["@id"], entity["about"]["@id"])
+        # ..fall back to a generous look up by filename,
+        for candidate in (
+                # RO-Crate 1.1 (*.json) first
+                "ro-crate-metadata.json", "ro-crate-metadata.jsonld",
+                # .. and the unstandard ./ forms later
+                "./ro-crate-metadata.json", "./ro-crate-metadata.jsonld"):
+            metadata_file = entities.get(candidate)
+            if metadata_file and "about" in metadata_file:
+                return (metadata_file["@id"], metadata_file["about"]["@id"])
+        # No luck! Is there perhaps a root dataset directly in here?
+        root = entities.get("./", {})
+        # FIXME: below will work both for
+        # "@type": "Dataset"
+        # "@type": ["Dataset"]
+        # ..but also the unlikely
+        # "@type": "DatasetSomething"
+        if root and "Dataset" in root.get("@type", []):
+            return (None, "./")
+        # Uh oh..
+        raise KeyError("Can't find Root Data Entity in RO-Crate, see https://w3id.org/ro/crate/1.0#core-metadata-for-the-root-data-entity")
+
     def build_crate(self, entities, source, load_preview):
         # add data and contextual entities to the crate
-        root_id = entities['ro-crate-metadata.jsonld']['about']['@id']
+        (metadata_id, root_id) = self.find_root_entity_id(entities)
         root_entity = entities[root_id]
         root_entity_parts = root_entity['hasPart']
 
@@ -161,9 +202,9 @@ class ROCrate():
 
         # the rest of the entities must be contextual entities
         prebuilt_entities = [
-            './', 'ro-crate-metadata.jsonld', 'ro-crate-preview.html'
+            root_id, metadata_id, 'ro-crate-preview.html'
         ]
-        # also, filter out the entity with id=ro-crate-metadata.jsonld and the
+        # also, filter out the entity with id=ro-crate-metadata.json and the
         # root dataset: can assume id='./' or '.'
         for identifier, entity in entities.items():
             if identifier not in added_entities + prebuilt_entities:

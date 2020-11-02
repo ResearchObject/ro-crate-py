@@ -33,7 +33,8 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
     assert md_prop['@id'] == helpers.METADATA_FILE_NAME
     assert md_prop['@type'] == 'CreativeWork'
     assert md_prop['about'] == {'@id': './'}
-    assert md_prop['conformsTo'] == {'@id': 'https://w3id.org/ro/crate/1.0'}
+    # conformsTo is currently hardcoded in the Metadata class, not read from the crate
+    assert md_prop['conformsTo'] == {'@id': 'https://w3id.org/ro/crate/1.1'}
     assert metadata.root is root
 
     preview = crate.dereference('ro-crate-preview.html')
@@ -52,7 +53,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
     wf_prop = main_wf.properties()
     assert wf_prop['@id'] == 'test_galaxy_wf.ga'
     assert wf_prop['@id'] == main_wf.id
-    assert set(wf_prop['@type']) == helpers.WORKFLOW_TYPES
+    assert set(wf_prop['@type']) == helpers.LEGACY_WORKFLOW_TYPES
     assert wf_prop['programmingLanguage'] == {'@id': 'https://galaxyproject.org'}
     assert wf_prop['subjectOf'] == {'@id': 'abstract_wf.cwl'}
 
@@ -60,7 +61,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
     abs_wf_prop = abs_wf.properties()
     assert abs_wf_prop['@id'] == 'abstract_wf.cwl'
     assert abs_wf_prop['@id'] == abs_wf.id
-    assert set(abs_wf_prop['@type']) == helpers.WORKFLOW_TYPES
+    assert set(abs_wf_prop['@type']) == helpers.LEGACY_WORKFLOW_TYPES
 
     wf_author = crate.dereference('#joe')
     author_prop = wf_author.properties()
@@ -99,6 +100,8 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
+    legacy_metadata_path = out_path / helpers.LEGACY_METADATA_FILE_NAME
+    assert not legacy_metadata_path.exists()
 
     if load_preview:
         preview_out_path = out_path / 'ro-crate-preview.html'

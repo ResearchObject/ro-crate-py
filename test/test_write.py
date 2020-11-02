@@ -25,7 +25,7 @@ def test_file_writing(test_data_dir, tmpdir):
 
     crate.write_crate(out_path)
 
-    metadata_path = out_path / 'ro-crate-metadata.jsonld'
+    metadata_path = out_path / 'ro-crate-metadata.json'
     assert metadata_path.exists()
 
     preview_path = out_path / 'ro-crate-preview.html'
@@ -51,7 +51,7 @@ def test_file_stringio(tmpdir):
     crate.name = 'Test crate'
     crate.write_crate(out_path)
 
-    metadata_path = out_path / 'ro-crate-metadata.jsonld'
+    metadata_path = out_path / 'ro-crate-metadata.json'
     assert metadata_path.exists()
 
     preview_path = out_path / 'ro-crate-preview.html'
@@ -76,7 +76,7 @@ def test_remote_uri(tmpdir):
 
     crate.write_crate(out_path)
 
-    metadata_path = out_path / 'ro-crate-metadata.jsonld'
+    metadata_path = out_path / 'ro-crate-metadata.json'
     assert metadata_path.exists()
 
     file1 = out_path / 'sample_file.txt'
