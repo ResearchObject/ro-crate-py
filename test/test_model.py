@@ -4,13 +4,13 @@ from rocrate.model.person import Person
 import uuid
 
 
-def test_dereferencing(test_data_dir):
+def test_dereferencing(test_data_dir, helpers):
     crate = ROCrate()
     # verify default entities
     root_dataset = crate.dereference('./')
     assert crate.root_dataset == root_dataset
 
-    metadata_entity = crate.dereference('./ro-crate-metadata.json')
+    metadata_entity = crate.dereference(helpers.METADATA_FILE_NAME)
     assert metadata_entity == crate.metadata
 
     # dereference added files
@@ -22,7 +22,7 @@ def test_dereferencing(test_data_dir):
     assert file_returned == dereference_file
 
 
-def test_dereferencing_equivalent_id():
+def test_dereferencing_equivalent_id(helpers):
     crate = ROCrate()
 
     root_dataset = crate.dereference('./')
@@ -30,9 +30,9 @@ def test_dereferencing_equivalent_id():
     root_dataset = crate.dereference('')
     assert crate.root_dataset == root_dataset
 
-    metadata_entity = crate.dereference('./ro-crate-metadata.json')
+    metadata_entity = crate.dereference(helpers.METADATA_FILE_NAME)
     assert metadata_entity == crate.metadata
-    metadata_entity = crate.dereference('ro-crate-metadata.json')
+    metadata_entity = crate.dereference(f'./{helpers.METADATA_FILE_NAME}')
     assert metadata_entity == crate.metadata
 
 
