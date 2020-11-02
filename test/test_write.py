@@ -4,7 +4,7 @@ from rocrate.rocrate import ROCrate
 import zipfile
 
 
-def test_file_writing(test_data_dir, tmpdir):
+def test_file_writing(test_data_dir, tmpdir, helpers):
     crate = ROCrate()
     # dereference added files
     sample_file = test_data_dir / 'sample_file.txt'
@@ -25,7 +25,7 @@ def test_file_writing(test_data_dir, tmpdir):
 
     crate.write_crate(out_path)
 
-    metadata_path = out_path / 'ro-crate-metadata.jsonld'
+    metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
 
     preview_path = out_path / 'ro-crate-preview.html'
@@ -38,7 +38,7 @@ def test_file_writing(test_data_dir, tmpdir):
     assert file_subdir.exists()
 
 
-def test_file_stringio(tmpdir):
+def test_file_stringio(tmpdir, helpers):
     crate = ROCrate()
     # dereference added files
     file_content = 'This will be the content of the file'
@@ -51,7 +51,7 @@ def test_file_stringio(tmpdir):
     crate.name = 'Test crate'
     crate.write_crate(out_path)
 
-    metadata_path = out_path / 'ro-crate-metadata.jsonld'
+    metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
 
     preview_path = out_path / 'ro-crate-preview.html'
@@ -63,7 +63,7 @@ def test_file_stringio(tmpdir):
     assert stat.st_size == 36
 
 
-def test_remote_uri(tmpdir):
+def test_remote_uri(tmpdir, helpers):
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
            'master/test/test-data/sample_file.txt')
@@ -76,7 +76,7 @@ def test_remote_uri(tmpdir):
 
     crate.write_crate(out_path)
 
-    metadata_path = out_path / 'ro-crate-metadata.jsonld'
+    metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
 
     file1 = out_path / 'sample_file.txt'

@@ -31,7 +31,7 @@ from .model.root_dataset import RootDataset
 from .model.file import File
 from .model.person import Person
 from .model.dataset import Dataset
-from .model.metadata import Metadata
+from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
 
 
@@ -50,9 +50,6 @@ class ROCrate():
         # TODO: add this as @base in the context? At least when loading
         # from zip
         self.uuid = uuid.uuid4()
-        # metadata init already includes itself into the root metadata
-        self.metadata = Metadata(self)
-        self.default_entities.append(self.metadata)
 
         # TODO: default_properties must include name, description,
         # datePublished, license
@@ -61,25 +58,29 @@ class ROCrate():
             self.preview = Preview(self)
             self.default_entities.append(self.preview)
         if not source_path:
+            # create a new ro-crate
             self.root_dataset = RootDataset(self)
             self.default_entities.append(self.root_dataset)
+            self.metadata = Metadata(self)
+            self.default_entities.append(self.metadata)
         else:
-            # find root entity
-            jsonld_filename = 'ro-crate-metadata.jsonld'
+            # load an existing ro-crate
             if zipfile.is_zipfile(source_path):
-                # load from zip
                 zip_path = tempfile.mkdtemp(prefix="ro", suffix="crate")
                 atexit.register(shutil.rmtree, zip_path)
                 with zipfile.ZipFile(source_path, "r") as zip_file:
                     zip_file.extractall(zip_path)
                 source_path = zip_path
-
-            # load from dir
-            metadata_path = os.path.join(
-                source_path, jsonld_filename
-            )
+            metadata_path = os.path.join(source_path, Metadata.BASENAME)
+            MetadataClass = Metadata
             if not os.path.isfile(metadata_path):
-                raise ValueError('The directory is not a valid RO-crate')
+                metadata_path = os.path.join(source_path, LegacyMetadata.BASENAME)
+                MetadataClass = LegacyMetadata
+            if not os.path.isfile(metadata_path):
+                raise ValueError('The directory is not a valid RO-crate, '
+                                 f'missing {Metadata.BASENAME}')
+            self.metadata = MetadataClass(self)
+            self.default_entities.append(self.metadata)
             entities = self.entities_from_metadata(metadata_path)
             self.build_crate(entities, source_path, load_preview)
             # TODO: load root dataset properties
@@ -98,9 +99,46 @@ class ROCrate():
         else:
             raise ValueError('The metadata file has no @graph')
 
+    def find_root_entity_id(self, entities):
+        """Find Metadata file and Root Data Entity in RO-Crate.
+
+        Returns a tuple of the @id identifiers (metadata, root)
+        """
+        # Note that for all cases below we will deliberately
+        # throw KeyError if "about" exists but it has no "@id"
+
+        # First let's try conformsTo algorithm in
+        # <https://www.researchobject.org/ro-crate/1.0/#core-metadata-for-the-root-data-entity>
+        for entity in entities.values():
+            conformsTo = entity.get("conformsTo")
+            if conformsTo and "@id" in conformsTo:
+                conformsTo = conformsTo["@id"]
+            if conformsTo and conformsTo.startswith("https://w3id.org/ro/crate/"):
+                if "about" in entity:
+                    return (entity["@id"], entity["about"]["@id"])
+        # ..fall back to a generous look up by filename,
+        for candidate in (
+                Metadata.BASENAME, LegacyMetadata.BASENAME,
+                f"./{Metadata.BASENAME}", f"./{LegacyMetadata.BASENAME}"
+        ):
+            metadata_file = entities.get(candidate)
+            if metadata_file and "about" in metadata_file:
+                return (metadata_file["@id"], metadata_file["about"]["@id"])
+        # No luck! Is there perhaps a root dataset directly in here?
+        root = entities.get("./", {})
+        # FIXME: below will work both for
+        # "@type": "Dataset"
+        # "@type": ["Dataset"]
+        # ..but also the unlikely
+        # "@type": "DatasetSomething"
+        if root and "Dataset" in root.get("@type", []):
+            return (None, "./")
+        # Uh oh..
+        raise KeyError("Can't find Root Data Entity in RO-Crate, see https://w3id.org/ro/crate/1.0#core-metadata-for-the-root-data-entity")
+
     def build_crate(self, entities, source, load_preview):
         # add data and contextual entities to the crate
-        root_id = entities['ro-crate-metadata.jsonld']['about']['@id']
+        (metadata_id, root_id) = self.find_root_entity_id(entities)
         root_entity = entities[root_id]
         root_entity_parts = root_entity['hasPart']
 
@@ -161,10 +199,8 @@ class ROCrate():
 
         # the rest of the entities must be contextual entities
         prebuilt_entities = [
-            './', 'ro-crate-metadata.jsonld', 'ro-crate-preview.html'
+            root_id, metadata_id, 'ro-crate-preview.html'
         ]
-        # also, filter out the entity with id=ro-crate-metadata.jsonld and the
-        # root dataset: can assume id='./' or '.'
         for identifier, entity in entities.items():
             if identifier not in added_entities + prebuilt_entities:
                 # should this be done in the extract entities?

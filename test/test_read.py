@@ -33,7 +33,8 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
     assert md_prop['@id'] == helpers.METADATA_FILE_NAME
     assert md_prop['@type'] == 'CreativeWork'
     assert md_prop['about'] == {'@id': './'}
-    assert md_prop['conformsTo'] == {'@id': 'https://w3id.org/ro/crate/1.0'}
+    # conformsTo is currently hardcoded in the Metadata class, not read from the crate
+    assert md_prop['conformsTo'] == {'@id': helpers.PROFILE}
     assert metadata.root is root
 
     preview = crate.dereference('ro-crate-preview.html')
@@ -99,6 +100,8 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
+    legacy_metadata_path = out_path / helpers.LEGACY_METADATA_FILE_NAME
+    assert not legacy_metadata_path.exists()
 
     if load_preview:
         preview_out_path = out_path / 'ro-crate-preview.html'
@@ -107,3 +110,20 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
         with open(preview.source, "rb") as f:
             preview_content = f.read()
         assert preview_out_content == preview_content
+
+
+# according to the 1.1 spec, the legacy .jsonld file is still supported for
+# crates conforming to version <= 1.0.
+def test_legacy_crate(test_data_dir, tmpdir, helpers):
+    crate_dir = test_data_dir / 'read_crate'
+    # Remove the metadata file, leaving only the legacy one
+    (crate_dir / helpers.METADATA_FILE_NAME).unlink()
+    crate = ROCrate(crate_dir)
+    md_prop = crate.metadata.properties()
+
+    assert crate.dereference(helpers.LEGACY_METADATA_FILE_NAME) is crate.metadata
+    assert md_prop['conformsTo'] == {'@id': helpers.LEGACY_PROFILE}
+
+    main_wf = crate.dereference('test_galaxy_wf.ga')
+    wf_prop = main_wf.properties()
+    assert set(wf_prop['@type']) == helpers.LEGACY_WORKFLOW_TYPES

@@ -26,8 +26,6 @@ class Preview(File):
     RO-Crate preview file
     
     This object holds a preview of an RO Crate in HTML format_
-    
-    .. _rocrate: https://w3id.org/ro/crate/1.0
     """
 
     def __init__(self, crate, source=None):

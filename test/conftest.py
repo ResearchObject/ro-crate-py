@@ -7,13 +7,19 @@ import pytest
 
 THIS_DIR = pathlib.Path(__file__).absolute().parent
 TEST_DATA_NAME = 'test-data'
+BASE_URL = 'https://w3id.org/ro/crate'
+VERSION = '1.1'
+LEGACY_VERSION = '1.0'
 
 
 class Helpers:
 
-    CONTEXT = "https://w3id.org/ro/crate/1.0/context"
-    METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
-    WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "Workflow"}
+    PROFILE = f"{BASE_URL}/{VERSION}"
+    LEGACY_PROFILE = f"{BASE_URL}/{LEGACY_VERSION}"
+    METADATA_FILE_NAME = 'ro-crate-metadata.json'
+    LEGACY_METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
+    WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "ComputationalWorkflow"}
+    LEGACY_WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "Workflow"}
 
     @classmethod
     def read_json_entities(cls, crate_base_path):
