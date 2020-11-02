@@ -30,16 +30,16 @@ class Metadata(File):
     This object holds the data of an RO Crate Metadata File rocrate_
     """
     BASENAME = "ro-crate-metadata.json"
-    CONTEXT = "https://w3id.org/ro/crate/1.1/context"
+    PROFILE = "https://w3id.org/ro/crate/1.1"
 
     def __init__(self, crate):
         super().__init__(crate, None, self.BASENAME, False, None)
 
     def _empty(self):
         # default properties of the metadata entry
-        val = {"@id": "ro-crate-metadata.json",
+        val = {"@id": self.BASENAME,
                "@type": "CreativeWork",
-               "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+               "conformsTo": {"@id": self.PROFILE},
                "about": {"@id": "./"}}
         return val
 
@@ -49,7 +49,7 @@ class Metadata(File):
         graph = []
         for entity in self.crate.get_entities():
             graph.append(entity.properties())
-        return {'@context': self.CONTEXT, '@graph': graph}
+        return {'@context': f'{self.PROFILE}/context', '@graph': graph}
 
     def write(self, base_path):
         # writes itself in
@@ -80,12 +80,4 @@ class Metadata(File):
 class LegacyMetadata(Metadata):
 
     BASENAME = "ro-crate-metadata.jsonld"
-    CONTEXT = "https://w3id.org/ro/crate/1.0/context"
-
-    def _empty(self):
-        return {
-            "@id": "ro-crate-metadata.jsonld",
-            "@type": "CreativeWork",
-            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.0"},
-            "about": {"@id": "./"}
-        }
+    PROFILE = "https://w3id.org/ro/crate/1.0"
