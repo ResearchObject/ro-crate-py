@@ -108,7 +108,7 @@ class ROCrate():
         # throw KeyError if "about" exists but it has no "@id"
 
         # First let's try conformsTo algorithm in
-        # <https://www.researchobject.org/ro-crate/1.0/#core-metadata-for-the-root-data-entity>
+        # <https://www.researchobject.org/ro-crate/1.1/root-data-entity.html#finding-the-root-data-entity>
         for entity in entities.values():
             conformsTo = entity.get("conformsTo")
             if conformsTo and "@id" in conformsTo:
@@ -134,7 +134,7 @@ class ROCrate():
         if root and "Dataset" in root.get("@type", []):
             return (None, "./")
         # Uh oh..
-        raise KeyError("Can't find Root Data Entity in RO-Crate, see https://w3id.org/ro/crate/1.0#core-metadata-for-the-root-data-entity")
+        raise KeyError("Can't find Root Data Entity in RO-Crate, see https://www.researchobject.org/ro-crate/1.1/root-data-entity.html")
 
     def build_crate(self, entities, source, load_preview):
         # add data and contextual entities to the crate

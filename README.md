@@ -4,7 +4,7 @@
 
 Python library to create/parse [RO-Crate](https://w3id.org/ro/crate) (Research Object Crate) metadata.
 
-Supports specification: [RO-Crate 1.0](https://w3id.org/ro/crate/1.0)
+Supports specification: [RO-Crate 1.1](https://w3id.org/ro/crate/1.1)
 
 Status: **Alpha**
 
@@ -89,7 +89,7 @@ Independently of the initialization method, once an instance of `ROCrate` is cre
 
 ### Data entities
 
-[Data entities](https://www.researchobject.org/ro-crate/1.0/#core-metadata-for-data-entities) can be added with:
+[Data entities](https://www.researchobject.org/ro-crate/1.1/data-entities.html) can be added with:
 
 ```python
 ## adding a File entity:
@@ -106,7 +106,7 @@ dataset_entity = crate.add_directory(sample_dir, 'relative/rocrate/path')
 
 ### Contextual entities
 
-[Contextual entities](https://www.researchobject.org/ro-crate/1.0/#representing-contextual-entities) are used in an RO-Crate to adequately describe a Data Entity. The following example shows how to add the person contextual entity to the RO-Crate root:
+[Contextual entities](https://www.researchobject.org/ro-crate/1.1/contextual-entities.html) are used in an RO-Crate to adequately describe a Data Entity. The following example shows how to add the person contextual entity to the RO-Crate root:
 
 ```python
 # Add authors info
