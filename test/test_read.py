@@ -37,15 +37,15 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
     assert md_prop['conformsTo'] == {'@id': helpers.PROFILE}
     assert metadata.root is root
 
-    preview = crate.dereference('ro-crate-preview.html')
+    preview = crate.dereference(helpers.PREVIEW_FILE_NAME)
     assert preview == crate.preview
     preview_prop = preview.properties()
-    assert preview_prop['@id'] == 'ro-crate-preview.html'
+    assert preview_prop['@id'] == helpers.PREVIEW_FILE_NAME
     assert preview_prop['@id'] == preview.id
     assert preview_prop['@type'] == 'CreativeWork'
     assert preview_prop['about'] == {'@id': './'}
     if load_preview:
-        assert Path(preview.source).name == 'ro-crate-preview.html'
+        assert Path(preview.source).name == helpers.PREVIEW_FILE_NAME
     else:
         assert not preview.source
 
@@ -104,7 +104,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
     assert not legacy_metadata_path.exists()
 
     if load_preview:
-        preview_out_path = out_path / 'ro-crate-preview.html'
+        preview_out_path = out_path / helpers.PREVIEW_FILE_NAME
         with open(preview_out_path, "rb") as f:
             preview_out_content = f.read()
         with open(preview.source, "rb") as f:

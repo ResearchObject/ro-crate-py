@@ -28,7 +28,7 @@ def test_file_writing(test_data_dir, tmpdir, helpers):
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
 
-    preview_path = out_path / 'ro-crate-preview.html'
+    preview_path = out_path / helpers.PREVIEW_FILE_NAME
     assert preview_path.exists()
     file1 = out_path / 'sample_file.txt'
     file2 = out_path / 'subdir' / 'sample_file2.csv'
@@ -54,7 +54,7 @@ def test_file_stringio(tmpdir, helpers):
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
 
-    preview_path = out_path / 'ro-crate-preview.html'
+    preview_path = out_path / helpers.PREVIEW_FILE_NAME
     assert preview_path.exists()
     file1 = out_path / 'test_file.txt'
     assert file1.exists()
