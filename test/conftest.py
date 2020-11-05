@@ -20,6 +20,7 @@ class Helpers:
     LEGACY_METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
     WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "ComputationalWorkflow"}
     LEGACY_WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "Workflow"}
+    PREVIEW_FILE_NAME = "ro-crate-preview.html"
 
     @classmethod
     def read_json_entities(cls, crate_base_path):

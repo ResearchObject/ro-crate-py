@@ -27,14 +27,15 @@ class Preview(File):
     
     This object holds a preview of an RO Crate in HTML format_
     """
+    BASENAME = "ro-crate-preview.html"
 
     def __init__(self, crate, source=None):
-        super().__init__(crate, source, "ro-crate-preview.html", None)
+        super().__init__(crate, source, self.BASENAME, None)
 
     def _empty(self):
         # default properties of the metadata entry
         val = {
-            "@id": "ro-crate-preview.html",
+            "@id": self.BASENAME,
             "@type": "CreativeWork",
             "about": {"@id": "./"}
         }

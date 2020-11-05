@@ -6,12 +6,14 @@ import uuid
 
 def test_dereferencing(test_data_dir, helpers):
     crate = ROCrate()
+
     # verify default entities
     root_dataset = crate.dereference('./')
     assert crate.root_dataset == root_dataset
-
     metadata_entity = crate.dereference(helpers.METADATA_FILE_NAME)
     assert metadata_entity == crate.metadata
+    preview_entity = crate.dereference(helpers.PREVIEW_FILE_NAME)
+    assert preview_entity == crate.preview
 
     # dereference added files
     sample_file = test_data_dir / 'sample_file.txt'
