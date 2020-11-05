@@ -1,10 +1,13 @@
 import io
-from rocrate.model.dataset import Dataset
-from rocrate.rocrate import ROCrate
+import pytest
 import zipfile
 
+from rocrate.model.dataset import Dataset
+from rocrate.rocrate import ROCrate
 
-def test_file_writing(test_data_dir, tmpdir, helpers):
+
+@pytest.mark.parametrize("to_zip", [False, True])
+def test_file_writing(test_data_dir, tmpdir, helpers, to_zip):
     crate = ROCrate()
     crate_name = 'Test crate'
     crate.name = crate_name
@@ -29,8 +32,14 @@ def test_file_writing(test_data_dir, tmpdir, helpers):
     assert isinstance(test_dir_entity, Dataset)
 
     out_path = tmpdir / 'ro_crate_out'
-    out_path.mkdir()
-    crate.write_crate(out_path)
+    if to_zip:
+        zip_path = tmpdir / 'ro_crate_out.crate.zip'
+        crate.write_zip(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(out_path)
+    else:
+        out_path.mkdir()
+        crate.write_crate(out_path)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
@@ -80,51 +89,29 @@ def test_file_stringio(tmpdir, helpers):
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
-    preview_path = out_path / helpers.PREVIEW_FILE_NAME
-    assert preview_path.exists()
     file1 = out_path / test_file_id
     assert file1.exists()
     with open(file1) as f:
         assert f.read() == file_content
 
 
-def test_remote_uri(tmpdir, helpers):
+@pytest.mark.parametrize("fetch_remote", [False, True])
+def test_remote_uri(tmpdir, helpers, fetch_remote):
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
            'master/test/test-data/sample_file.txt')
-    file_returned = crate.add_file(source=url, fetch_remote=True)
-    assert file_returned.id == 'sample_file.txt'
-    file_returned = crate.add_file(source=url, fetch_remote=False)
-    assert file_returned.id == url
+    file_returned = crate.add_file(source=url, fetch_remote=fetch_remote)
+    if fetch_remote:
+        assert file_returned.id == 'sample_file.txt'
+    else:
+        assert file_returned.id == url
+
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-
     crate.write_crate(out_path)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
-
     file1 = out_path / 'sample_file.txt'
-    assert file1.exists()
-
-
-def test_write_zip(test_data_dir, tmpdir):
-    crate = ROCrate()
-
-    # dereference added files
-    sample_file = test_data_dir / 'sample_file.txt'
-    file_returned = crate.add_file(sample_file)
-    assert file_returned.id == 'sample_file.txt'
-    file_returned_subdir = crate.add_file(
-        sample_file, 'subdir/sample_file2.csv'
-    )
-    assert file_returned_subdir.id == 'subdir/sample_file2.csv'
-    test_dir_path = test_data_dir / 'test_add_dir'
-    test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
-    assert isinstance(test_dir_entity, Dataset)
-    # write to zip
-    zip_path = tmpdir / "crate.zip"
-    crate.write_zip(zip_path)
-    read_zip = zipfile.ZipFile(zip_path, mode='r')
-    assert read_zip.getinfo('sample_file.txt').file_size == 12
-    assert read_zip.getinfo('test_add_dir/sample_file_subdir.txt').file_size == 18
+    if fetch_remote:
+        assert file1.exists()
