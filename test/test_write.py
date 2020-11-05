@@ -6,8 +6,11 @@ import zipfile
 
 def test_file_writing(test_data_dir, tmpdir, helpers):
     crate = ROCrate()
-    crate.name = 'Test crate'
-    new_person = crate.add_person('001', {'name': 'Lee Ritenour'})
+    crate_name = 'Test crate'
+    crate.name = crate_name
+    creator_id = '001'
+    creator_name = 'Lee Ritenour'
+    new_person = crate.add_person(creator_id, {'name': creator_name})
     crate.creator = new_person
 
     sample_file_id = 'sample_file.txt'
@@ -49,31 +52,40 @@ def test_file_writing(test_data_dir, tmpdir, helpers):
 
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_crate(json_entities, data_entity_ids=data_entity_ids)
+    root = json_entities["./"]
+    assert root["name"] == crate_name
+    assert "datePublished" in root
+    formatted_creator_id = f"#{creator_id}"
+    assert root["creator"] == {"@id": formatted_creator_id}
+    assert formatted_creator_id in json_entities
+    assert json_entities[formatted_creator_id]["name"] == creator_name
+    assert helpers.PREVIEW_FILE_NAME in json_entities
+    preview = json_entities[helpers.PREVIEW_FILE_NAME]
+    assert preview["@type"] == "CreativeWork"
+    assert preview["about"] == {"@id": "./"}
 
 
 def test_file_stringio(tmpdir, helpers):
     crate = ROCrate()
-    # dereference added files
+
+    test_file_id = 'test_file.txt'
     file_content = 'This will be the content of the file'
     file_stringio = io.StringIO(file_content)
-    file_returned = crate.add_file(file_stringio, 'test_file.txt')
-    assert file_returned.id == 'test_file.txt'
+    file_returned = crate.add_file(file_stringio, test_file_id)
+    assert file_returned.id == test_file_id
+
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-
-    crate.name = 'Test crate'
     crate.write_crate(out_path)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
-
     preview_path = out_path / helpers.PREVIEW_FILE_NAME
     assert preview_path.exists()
-    file1 = out_path / 'test_file.txt'
+    file1 = out_path / test_file_id
     assert file1.exists()
-    # assert file1.stat().st_size == 36
-    stat = file1.stat()
-    assert stat.st_size == 36
+    with open(file1) as f:
+        assert f.read() == file_content
 
 
 def test_remote_uri(tmpdir, helpers):
