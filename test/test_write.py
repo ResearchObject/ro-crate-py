@@ -14,6 +14,7 @@ def test_file_writing(test_data_dir, tmpdir, helpers):
     sample_file2_id = 'subdir/sample_file2.csv'
     test_dir_id = 'test_add_dir/'
     data_entity_ids = [sample_file_id, sample_file2_id, test_dir_id]
+    file_subdir_id = 'sample_file_subdir.txt'
 
     sample_file = test_data_dir / sample_file_id
     file_returned = crate.add_file(sample_file)
@@ -34,10 +35,17 @@ def test_file_writing(test_data_dir, tmpdir, helpers):
     assert preview_path.exists()
     file1 = out_path / sample_file_id
     file2 = out_path / sample_file2_id
-    file_subdir = out_path / test_dir_id / 'sample_file_subdir.txt'
+    file_subdir = out_path / test_dir_id / file_subdir_id
     assert file1.exists()
+    with open(sample_file) as f1, open(file1) as f2:
+        sample_file_content = f1.read()
+        assert sample_file_content == f2.read()
     assert file2.exists()
+    with open(file2) as f:
+        assert sample_file_content == f.read()
     assert file_subdir.exists()
+    with open(test_dir_path / file_subdir_id) as f1, open(file_subdir) as f2:
+        assert f1.read() == f2.read()
 
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_crate(json_entities, data_entity_ids=data_entity_ids)
