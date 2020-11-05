@@ -6,36 +6,41 @@ import zipfile
 
 def test_file_writing(test_data_dir, tmpdir, helpers):
     crate = ROCrate()
-    # dereference added files
-    sample_file = test_data_dir / 'sample_file.txt'
-    file_returned = crate.add_file(sample_file)
-    assert file_returned.id == 'sample_file.txt'
-    file_returned_subdir = crate.add_file(sample_file, 'subdir/sample_file2.csv')
-    assert file_returned_subdir.id == 'subdir/sample_file2.csv'
-    test_dir_path = test_data_dir / 'test_add_dir'
-    test_dir_entity = crate.add_directory(test_dir_path, 'test_add_dir')
-    assert isinstance(test_dir_entity, Dataset)
-    out_path = tmpdir / 'ro_crate_out'
-    out_path.mkdir()
-
     crate.name = 'Test crate'
-
     new_person = crate.add_person('001', {'name': 'Lee Ritenour'})
     crate.creator = new_person
 
+    sample_file_id = 'sample_file.txt'
+    sample_file2_id = 'subdir/sample_file2.csv'
+    test_dir_id = 'test_add_dir/'
+    data_entity_ids = [sample_file_id, sample_file2_id, test_dir_id]
+
+    sample_file = test_data_dir / sample_file_id
+    file_returned = crate.add_file(sample_file)
+    assert file_returned.id == sample_file_id
+    file_returned_subdir = crate.add_file(sample_file, sample_file2_id)
+    assert file_returned_subdir.id == sample_file2_id
+    test_dir_path = test_data_dir / test_dir_id
+    test_dir_entity = crate.add_directory(test_dir_path, test_dir_id)
+    assert isinstance(test_dir_entity, Dataset)
+
+    out_path = tmpdir / 'ro_crate_out'
+    out_path.mkdir()
     crate.write_crate(out_path)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
-
     preview_path = out_path / helpers.PREVIEW_FILE_NAME
     assert preview_path.exists()
-    file1 = out_path / 'sample_file.txt'
-    file2 = out_path / 'subdir' / 'sample_file2.csv'
-    file_subdir = out_path / 'test_add_dir' / 'sample_file_subdir.txt'
+    file1 = out_path / sample_file_id
+    file2 = out_path / sample_file2_id
+    file_subdir = out_path / test_dir_id / 'sample_file_subdir.txt'
     assert file1.exists()
     assert file2.exists()
     assert file_subdir.exists()
+
+    json_entities = helpers.read_json_entities(out_path)
+    helpers.check_crate(json_entities, data_entity_ids=data_entity_ids)
 
 
 def test_file_stringio(tmpdir, helpers):

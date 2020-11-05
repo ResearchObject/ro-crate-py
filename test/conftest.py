@@ -30,8 +30,24 @@ class Helpers:
         return {_["@id"]: _ for _ in json_data["@graph"]}
 
     @classmethod
-    def check_wf_crate(cls, json_entities, wf_file_name):
-        assert json_entities["./"]["mainEntity"]["@id"] == wf_file_name
+    def check_crate(cls, json_entities, root_id="./", data_entity_ids=None):
+        assert root_id in json_entities
+        root = json_entities[root_id]
+        assert root["@type"] == "Dataset"
+        assert cls.METADATA_FILE_NAME in json_entities
+        metadata = json_entities[cls.METADATA_FILE_NAME]
+        assert metadata["@type"] == "CreativeWork"
+        assert metadata["conformsTo"] == {"@id": cls.PROFILE}
+        assert metadata["about"] == {"@id": root_id}
+        if data_entity_ids:
+            data_entity_ids = set(data_entity_ids)
+            assert data_entity_ids.issubset(json_entities)
+            assert "hasPart" in root
+            assert data_entity_ids.issubset([_["@id"] for _ in root["hasPart"]])
+
+    @classmethod
+    def check_wf_crate(cls, json_entities, wf_file_name, root_id="./"):
+        assert json_entities[root_id]["mainEntity"]["@id"] == wf_file_name
         assert wf_file_name in json_entities
         wf_entity = json_entities[wf_file_name]
         assert isinstance(wf_entity["@type"], list)
