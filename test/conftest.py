@@ -47,6 +47,7 @@ class Helpers:
 
     @classmethod
     def check_wf_crate(cls, json_entities, wf_file_name, root_id="./"):
+        cls.check_crate(json_entities, root_id=root_id)
         assert json_entities[root_id]["mainEntity"]["@id"] == wf_file_name
         assert wf_file_name in json_entities
         wf_entity = json_entities[wf_file_name]
