@@ -22,8 +22,8 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     with open(wf_path) as f1, open(wf_out_path) as f2:
         assert f1.read() == f2.read()
 
-    # abstract_wf_out_path = out_path / abstract_wf_id
-    # assert abstract_wf_out_path.exists()
+    abstract_wf_out_path = out_path / abstract_wf_id
+    assert abstract_wf_out_path.exists()
 
 
 def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
