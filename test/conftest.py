@@ -52,7 +52,7 @@ class Helpers:
         assert wf_file_name in json_entities
         wf_entity = json_entities[wf_file_name]
         assert isinstance(wf_entity["@type"], list)
-        assert set(wf_entity["@type"]) == cls.WORKFLOW_TYPES
+        assert cls.WORKFLOW_TYPES.issubset(wf_entity["@type"])
         assert "programmingLanguage" in wf_entity
 
 

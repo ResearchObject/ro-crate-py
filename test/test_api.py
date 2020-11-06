@@ -11,11 +11,19 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     wf_crate.write_crate(out_path)
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_wf_crate(json_entities, wf_path.name)
+    wf_entity = json_entities[wf_path.name]
+    assert "subjectOf" in wf_entity
+    abstract_wf_id = wf_entity["subjectOf"]["@id"]
+    abstract_wf_entity = json_entities[abstract_wf_id]
+    assert helpers.WORKFLOW_TYPES.issubset(abstract_wf_entity["@type"])
 
     wf_out_path = out_path / wf_path.name
     assert wf_out_path.exists()
     with open(wf_path) as f1, open(wf_out_path) as f2:
         assert f1.read() == f2.read()
+
+    # abstract_wf_out_path = out_path / abstract_wf_id
+    # assert abstract_wf_out_path.exists()
 
 
 def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
