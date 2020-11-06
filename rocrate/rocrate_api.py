@@ -18,9 +18,11 @@ import atexit
 import os
 import tempfile
 from contextlib import redirect_stdout
+from pathlib import Path
 
 import rocrate.rocrate as roc
 from rocrate.model import entity
+from rocrate.model.workflow import Workflow
 from galaxy2cwl import get_cwl_interface
 
 
@@ -60,12 +62,11 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     # diagram: an image/graphical workflow representation.
     # If a CWL/CWLAbstract file is provided, this is generated using cwltool
 
-    # abs_path = os.path.abspath(workflow_path)
     wf_crate = roc.ROCrate()
-    # add main workflow file
-    file_name = os.path.basename(workflow_path)
+    wf_path = Path(workflow_path)
     # should this be added in a special path within the crate?
-    wf_file = wf_crate.add_file(workflow_path, file_name)
+    wf_file = Workflow(wf_crate, str(wf_path), wf_path.name)
+    wf_crate._add_data_entity(wf_file)
     wf_crate.set_main_entity(wf_file)
     if wf_type == 'CWL':
         programming_language_entity = entity.Entity(
@@ -85,42 +86,20 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
                 with redirect_stdout(f):
                     get_cwl_interface.main(['1', workflow_path])
             atexit.register(os.unlink, f.name)
-            abstract_wf_file = wf_crate.add_file(
-                f.name,
-                'abstract_wf.cwl',
-                properties={
-                    "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"]
-                }
-            )
+            abstract_wf_id = wf_path.with_suffix(".cwl").name
+            abstract_wf_file = Workflow(wf_crate, f.name, abstract_wf_id)
+            wf_crate._add_data_entity(abstract_wf_file)
             wf_file["subjectOf"] = abstract_wf_file
         programming_language_entity = entity.Entity(
             wf_crate, 'https://galaxyproject.org/'
         )
-
-    # SET PROPERTIES
-
-    # A contextual entity representing a SoftwareApplication or
-    # ComputerLanguage MUST have a name, url and version, which should
-    # indicate a known version the workflow/script was developed or tested
-    # with
     if programming_language_entity:
         wf_file['programmingLanguage'] = programming_language_entity
-
-    # based on ro-crate specification. For workflows: @type is an array
-    # with at least File and Workflow as values.
-    wf_type = wf_file['@type']
-    if not isinstance(wf_type, list):
-        wf_type = [wf_type]
-    if 'ComputationalWorkflow' not in wf_type:
-        wf_type.append('ComputationalWorkflow')
-    if 'SoftwareSourceCode' not in wf_type:
-        wf_type.append('SoftwareSourceCode')
-    wf_file['@type'] = wf_type
 
     # if the source is a remote URL then add https://schema.org/codeRepository
     # property to it this can be checked by checking if the source is a URL
     # instead of a local path
-    if 'url' in wf_file.properties().keys():
+    if 'url' in wf_file.properties():
         wf_file['codeRepository'] = wf_file['url']
 
     # add extra files
