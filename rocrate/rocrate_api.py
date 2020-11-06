@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import atexit
 import os
 import tempfile
 from contextlib import redirect_stdout
-from pathlib import Path
 
 import rocrate.rocrate as roc
 from rocrate.model import entity
@@ -81,21 +81,17 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     if wf_type == 'Galaxy':
         if not cwl:
             # create cwl_abstract
-            try:
-                with tempfile.NamedTemporaryFile(
-                        mode='w', delete=False, suffix=".cwl"
-                ) as cwl_abstract_out:
-                    with redirect_stdout(cwl_abstract_out):
-                        get_cwl_interface.main(['1', workflow_path])
-                abstract_wf_file = wf_crate.add_file(
-                    cwl_abstract_out.name,
-                    'abstract_wf.cwl',
-                    properties={
-                        "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"]
-                    }
-                )
-            finally:
-                Path(cwl_abstract_out.name).unlink()
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".cwl") as f:
+                with redirect_stdout(f):
+                    get_cwl_interface.main(['1', workflow_path])
+            atexit.register(os.unlink, f.name)
+            abstract_wf_file = wf_crate.add_file(
+                f.name,
+                'abstract_wf.cwl',
+                properties={
+                    "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"]
+                }
+            )
             wf_file["subjectOf"] = abstract_wf_file
         programming_language_entity = entity.Entity(
             wf_crate, 'https://galaxyproject.org/'
