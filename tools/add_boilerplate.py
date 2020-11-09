@@ -38,6 +38,7 @@ THIS_YEAR = str(datetime.date.today().year)
 BOILERPLATE_START = "Copyright [yyyy] [name of copyright owner]"
 COPYRIGHT_PATTERN = re.compile(r"#\s*Copyright\s+(\d+)(-\d+)?\s+(.*)")
 EXCLUDE_DIRS = {"build", "dist", "venv"}
+EXCLUDE_FILES = {"_version.py"}
 
 
 def copyright_lines():
@@ -107,6 +108,8 @@ def main():
         dirs[:] = [_ for _ in dirs if not _.startswith(".") and not _ in EXCLUDE_DIRS]
         for name in files:
             if not name.endswith(".py"):
+                continue
+            if name in EXCLUDE_FILES:
                 continue
             path = join(root, name)
             print(path)
