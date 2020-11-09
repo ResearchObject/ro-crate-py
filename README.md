@@ -126,7 +126,7 @@ wf_crate.creator = [ creator, publisher ]
 
 ### Other metadata
 
-Several metadata fields on root level are supported for the workflow
+Several metadata fields on root level are supported for the workflow RO-crate:
 
 ```
 wf_crate.license = 'MIT'
