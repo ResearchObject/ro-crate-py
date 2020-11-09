@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 # Copyright 2019-2020 The University of Manchester, UK
+# Copyright 2020 Vlaams Instituut voor Biotechnologie (VIB), BE
+# Copyright 2020 Barcelona Supercomputing Center (BSC), ES
+# Copyright 2020 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +16,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-__author__ = "Stian Soiland-Reyes <http://orcid.org/0000-0001-9842-9718>"
-__copyright__ = """© 2019-2020 The University of Manchester, UK
-© 2020 Vlaams Instituut voor Biotechnologie (VIB), DE
-© 2020 Barcelona Supercomputing Center (BSC), ES
-"""
-__license__ = ("Apache License, version 2.0 "
-               "(https://www.apache.org/licenses/LICENSE-2.0)")
 
 from setuptools import setup, find_packages
 from codecs import open
@@ -60,7 +55,7 @@ setup(
     long_description_content_type='text/markdown',
     long_description=long_description,
     author=('Bert Droesbeke, Ignacio Eguinoa, Stian Soiland-Reyes, '
-            'Laura Rodríguez-Navas, Alban Gaignard'),
+            'Laura Rodríguez-Navas, Alban Gaignard, Simone Leo'),
     python_requires='>=3.6',
     author_email='stain@apache.org',
     package_data={'': ['data/*.jsonld', 'templates/*.j2']},
@@ -71,7 +66,6 @@ setup(
                   f'{__version__}.tar.gz'),
     keywords="researchobject ro-crate ro metadata jsonld",
     install_requires=[required],
-    test_suite='test',
     classifiers=[
         'Operating System :: OS Independent',
         'Development Status :: 3 - Alpha',

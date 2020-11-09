@@ -17,8 +17,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .entity import Entity
+import os
+
+from .file import File
 
 
-class CreativeWork(Entity):
-    pass
+class Workflow(File):
+    """\
+    A scientific workflow that was used (or can be used) to analyze or
+    generate files in the RO-Crate.
+    """
+    TYPES = ["File", "SoftwareSourceCode", "ComputationalWorkflow"]
+
+    def _empty(self):
+        return {
+            "@id": self.id,
+            "@type": self.TYPES,
+            "name": os.path.splitext(self.id)[0],
+        }
+
+
+class LegacyWorkflow(Workflow):
+
+    TYPES = ["File", "SoftwareSourceCode", "Workflow"]

@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 # Copyright 2019-2020 The University of Manchester, UK
+# Copyright 2020 Vlaams Instituut voor Biotechnologie (VIB), BE
+# Copyright 2020 Barcelona Supercomputing Center (BSC), ES
+# Copyright 2020 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,6 +42,10 @@ class Dataset(DataEntity):
             "@type": 'Dataset'
         }
         return val
+
+    # SHOULD end with /
+    def format_id(self, identifier):
+        return identifier.rstrip("/") + "/"
 
     # name contentSize dateModified encodingFormat identifier sameAs
     @property

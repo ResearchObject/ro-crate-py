@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 # Copyright 2019-2020 The University of Manchester, UK
+# Copyright 2020 Vlaams Instituut voor Biotechnologie (VIB), BE
+# Copyright 2020 Barcelona Supercomputing Center (BSC), ES
+# Copyright 2020 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,17 +29,16 @@ class Preview(File):
     RO-Crate preview file
     
     This object holds a preview of an RO Crate in HTML format_
-    
-    .. _rocrate: https://w3id.org/ro/crate/1.0
     """
+    BASENAME = "ro-crate-preview.html"
 
     def __init__(self, crate, source=None):
-        super().__init__(crate, source, "ro-crate-preview.html", None)
+        super().__init__(crate, source, self.BASENAME, None)
 
     def _empty(self):
         # default properties of the metadata entry
         val = {
-            "@id": "ro-crate-preview.html",
+            "@id": self.BASENAME,
             "@type": "CreativeWork",
             "about": {"@id": "./"}
         }
@@ -81,14 +83,15 @@ class Preview(File):
             data_entities.append(entity._jsonld)
         out_html = src.render(crate=self.crate, context=context_entities, data=data_entities)
         return out_html
-    
-    # TODO:should take into account the case if a readed preview file. in this case there is a source of it:
-    # no need to generate it, just copy the html and any files present in ro-crate-preview_files/ (if this dir exists)
+
     def write(self, dest_base):
-        write_path = self.filepath(dest_base)
-        out_html = self.generate_html()
-        with open(write_path, 'w') as outfile:
-            outfile.write(out_html)
+        if self.source:
+            super().write(dest_base)
+        else:
+            write_path = self.filepath(dest_base)
+            out_html = self.generate_html()
+            with open(write_path, 'w') as outfile:
+                outfile.write(out_html)
 
     def write_zip(self, zip_out):
         write_path = self.filepath()
@@ -100,5 +103,3 @@ class Preview(File):
         tmpfile.close()
         zip_out.write(tmpfile_path, write_path)
         os.remove(tmpfile_path)
-        
-        

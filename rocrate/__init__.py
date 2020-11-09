@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 # Copyright 2019-2020 The University of Manchester, UK
+# Copyright 2020 Vlaams Instituut voor Biotechnologie (VIB), BE
+# Copyright 2020 Barcelona Supercomputing Center (BSC), ES
+# Copyright 2020 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,8 +26,20 @@ RO-Crate metadata, see rocrate_
 .. _rocrate: https://w3id.org/ro/crate/
 """
 
-__author__ = "Stian Soiland-Reyes <http://orcid.org/0000-0001-9842-9718>"
-__copyright__ = "Copyright 2019-2020 The University of Manchester"
+__author__ = ", ".join((
+    'Bert Droesbeke',
+    'Ignacio Eguinoa',
+    'Alban Gaignard',
+    'Simone Leo'
+    'Laura Rodríguez-Navas',
+    'Stian Soiland-Reyes'
+))
+__copyright__ = """\
+Copyright 2019-2020 The University of Manchester, UK
+Copyright 2020 Vlaams Instituut voor Biotechnologie (VIB), DE
+Copyright 2020 Barcelona Supercomputing Center (BSC), ES
+Copyright 2020 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+"""
 __license__ = ("Apache License, version 2.0 "
                "<https://www.apache.org/licenses/LICENSE-2.0>")
 

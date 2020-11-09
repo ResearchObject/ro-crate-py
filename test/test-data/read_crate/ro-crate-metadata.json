@@ -1,14 +1,14 @@
 {
-    "@context": "https://w3id.org/ro/crate/1.0/context",
+    "@context": "https://w3id.org/ro/crate/1.1/context",
     "@graph": [
         {
-            "@id": "ro-crate-metadata.jsonld",
+            "@id": "ro-crate-metadata.json",
             "@type": "CreativeWork",
             "about": {
                 "@id": "./"
             },
             "conformsTo": {
-                "@id": "https://w3id.org/ro/crate/1.0"
+                "@id": "https://w3id.org/ro/crate/1.1"
             }
         },
         {
@@ -50,7 +50,7 @@
             "@id": "test_galaxy_wf.ga",
             "@type": [
                 "File",
-                "Workflow",
+                "ComputationalWorkflow",
                 "SoftwareSourceCode"
             ],
             "programmingLanguage": {
@@ -65,7 +65,7 @@
             "@type": [
                 "File",
                 "SoftwareSourceCode",
-                "Workflow"
+                "ComputationalWorkflow"
             ]
         },
         {

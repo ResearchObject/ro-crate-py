@@ -2,9 +2,9 @@
 
 # ro-crate-py
 
-Create/parse [RO-Crate](https://w3id.org/ro/crate) (Research Object Crate) metadata.
+Python library to create/parse [RO-Crate](https://w3id.org/ro/crate) (Research Object Crate) metadata.
 
-Supports specification: [RO-Crate 1.0](https://w3id.org/ro/crate/1.0)
+Supports specification: [RO-Crate 1.1](https://w3id.org/ro/crate/1.1)
 
 Status: **Alpha**
 
@@ -53,13 +53,15 @@ python setup.py install
 
 ## General usage
 
-The standard use case is by instantiating `ROCrate`. This can be a new one: 
+### The RO-crate object
+
+In general you will want to start by instantiating the `ROCrate` object. This can be a new one: 
 
 ```python
 crate = ROCrate() 
 ```
 
-or an existing RO-Crate package can be load from a directory or zip file:
+or an existing RO-Crate package can be loaded from a directory or zip file:
 ```python
 crate = ROCrate('/path/to/crate/')
 ```
@@ -79,19 +81,15 @@ from rocrate import rocrate_api
 wf_path = "test/test-data/test_galaxy_wf.ga"
 files_list = ["test/test-data/test_file_galaxy.txt"]
 
-
 # Create base package
 wf_crate = rocrate_api.make_workflow_rocrate(workflow_path=wf_path,wf_type="Galaxy",include_files=files_list)
-
-# Write to zip file
-out_path = "/home/test_user/wf_crate"
-wf_crate.write_zip(out_path)
-
 ```
 
 Independently of the initialization method, once an instance of `ROCrate` is created it can be manipulated to extend the content and metadata.
 
-[Data entities](https://www.researchobject.org/ro-crate/1.0/#core-metadata-for-data-entities) can be added with:
+### Data entities
+
+[Data entities](https://www.researchobject.org/ro-crate/1.1/data-entities.html) can be added with:
 
 ```python
 ## adding a File entity:
@@ -106,13 +104,41 @@ sample_dir = '/path/to/dir'
 dataset_entity = crate.add_directory(sample_dir, 'relative/rocrate/path')
 ```
 
-[Contextual entities](https://www.researchobject.org/ro-crate/1.0/#representing-contextual-entities) are used in an RO-Crate to adequately describe a Data Entity. The following example shows how to add them to the RO-Crate root:
+### Contextual entities
+
+[Contextual entities](https://www.researchobject.org/ro-crate/1.1/contextual-entities.html) are used in an RO-Crate to adequately describe a Data Entity. The following example shows how to add the person contextual entity to the RO-Crate root:
 
 ```python
 # Add authors info
-joe_metadata = {'name': 'Joe Bloggs'}
-crate.add_person('#joe', joe_metadata)
+crate.add_person('#joe', {'name': 'Joe Bloggs'})
+
+# wf_crate example
+publisher = wf_crate.add_person('001', {'name': 'Bert Verlinden'})
+
+creator = wf_crate.add_person('002', {'name': 'Lee Ritenour'})
+
+# These contextual entities can be assigned to other metadata properties:
+
+wf_crate.publisher = publisher
+wf_crate.creator = [ creator, publisher ]
+
 ```
+
+### Other metadata
+
+Several metadata fields on root level are supported for the workflow RO-crate:
+
+```
+wf_crate.license = 'MIT'
+wf_crate.isBasedOn = "https://climate.usegalaxy.eu/u/annefou/w/workflow-constructed-from-history-climate-101"
+wf_crate.name = 'Climate 101'
+wf_crate.keywords = ['GTN', 'climate']
+wf_crate.image = "climate_101_workflow.svg"
+wf_crate.description = "The tutorial for this workflow can be found on Galaxy Training Network"
+wf_crate.CreativeWorkStatus = "Stable"
+```
+
+### Writing the RO-crate file
 
 In order to write the crate object contents to a zip file package or a decompressed directory, there are 2 write methods that can be used:
 
@@ -126,11 +152,13 @@ out_path = "/home/test_user/crate_base"
 crate.write_crate(out_path)
 ```
 
+
 ## License
 
  * © 2019-2020 The University of Manchester, UK 
  * © 2020 Vlaams Instituut voor Biotechnologie (VIB), BE 
  * © 2020 Barcelona Supercomputing Center (BSC), ES 
+ * © 2020 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 
 Licensed under the 
 Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>, 
