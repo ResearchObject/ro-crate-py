@@ -19,6 +19,7 @@
 
 import uuid
 
+from dateutil.parser import isoparse
 from .. import vocabs
 
 
@@ -123,3 +124,16 @@ class Entity(object):
 
     def filepath(self):
         return self.id
+
+    @property
+    def datePublished(self):
+        d = self['datePublished']
+        return d if not d else isoparse(d)
+
+    @datePublished.setter
+    def datePublished(self, value):
+        try:
+            value = value.isoformat()
+        except AttributeError:
+            pass
+        self['datePublished'] = value

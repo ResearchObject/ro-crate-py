@@ -243,14 +243,13 @@ class ROCrate():
     def name(self, value):
         self.root_dataset['name'] = value
 
-    # TODO: should change to dateCreated or that is only for workflowhub?
     @property
     def datePublished(self):
-        return self.root_dataset['datePublished']
+        return self.root_dataset.datePublished
 
     @datePublished.setter
     def datePublished(self, value):
-        self.root_dataset['datePublished'] = value
+        self.root_dataset.datePublished = value
 
     @property
     def creator(self):
