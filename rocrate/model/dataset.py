@@ -47,19 +47,6 @@ class Dataset(DataEntity):
     def format_id(self, identifier):
         return identifier.rstrip("/") + "/"
 
-    # name contentSize dateModified encodingFormat identifier sameAs
-    @property
-    def datePublished(self):
-        date = self["datePublished"]
-        return date and datetime.datetime.fromisoformat(date)
-
-    @datePublished.setter
-    def datePublished(self, date):
-        if hasattr(date, "isoformat"):  # datetime object
-            self["datePublished"] = date.isoformat()
-        else:
-            self["datePublished"] = str(date)
-
     def directory_entries(self, base_path=None):
         # iterate over the source dir contents to list all entries
         directory_entries = []

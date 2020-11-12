@@ -65,6 +65,7 @@ def test_contextual_entities():
     person_prop = person_dereference.properties()
     assert person_prop['@type'] == 'Person'
     assert person_prop['name'] == 'Joe Pesci'
+    assert not new_person.datePublished
 
 
 def test_properties():
@@ -78,6 +79,9 @@ def test_properties():
     crate.description = crate_description
     assert crate.description == crate_description
 
+    assert crate.datePublished == crate.root_dataset.datePublished
+    assert isinstance(crate.root_dataset.datePublished, datetime.datetime)
+    assert isinstance(crate.root_dataset["datePublished"], str)
     crate_datePublished = datetime.datetime.now()
     crate.datePublished = crate_datePublished
     assert crate.datePublished == crate_datePublished
