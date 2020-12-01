@@ -1,8 +1,8 @@
 {
-    "@context": "https://w3id.org/ro/crate/1.0/context",
+    "@context": "https://w3id.org/ro/crate/1.1/context",
     "@graph": [
 	{
-	    "@id": "ro-crate-metadata.jsonld",
+	    "@id": "ro-crate-metadata.json",
 	    "@type": "CreativeWork",
 	    "about": {
 		"@id": "./"
@@ -37,7 +37,7 @@
 	    "@type": [
 		"File",
 		"SoftwareSourceCode",
-		"Workflow"
+		"ComputationalWorkflow"
 	    ],
 	    "programmingLanguage": {
 		"@id": "#galaxy"
