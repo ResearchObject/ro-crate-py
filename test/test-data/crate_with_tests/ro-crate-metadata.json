@@ -1,12 +1,27 @@
 {
-    "@context": "https://w3id.org/ro/crate/1.1/context",
+    "@context": [
+        "https://w3id.org/ro/crate/1.1/context",
+        {
+            "TestSuite": "https://w3id.org/ro/terms/test#TestSuite",
+            "TestInstance": "https://w3id.org/ro/terms/test#TestInstance",
+            "TestService": "https://w3id.org/ro/terms/test#TestService",
+            "TestDefinition": "https://w3id.org/ro/terms/test#TestDefinition",
+            "instance": "https://w3id.org/ro/terms/test#instance",
+            "runsOn": "https://w3id.org/ro/terms/test#runsOn",
+            "resource": "https://w3id.org/ro/terms/test#resource",
+            "definition": "https://w3id.org/ro/terms/test#definition"
+        }
+    ],
     "@graph": [
 	{
 	    "@id": "ro-crate-metadata.json",
 	    "@type": "CreativeWork",
 	    "about": {
 		"@id": "./"
-	    }
+	    },
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate/1.1"
+            }
 	},
 	{
 	    "@id": "./",
@@ -46,7 +61,12 @@
 	},
 	{
 	    "@id": "test/",
-	    "@type": "Dataset"
+	    "@type": "Dataset",
+	    "hasPart": [
+		{
+		    "@id": "#test1"
+		}
+	    ]
 	},
 	{
 	    "@id": "LICENSE",
@@ -66,6 +86,40 @@
 	    "url": {
 		"@id": "https://galaxyproject.org/"
 	    }
-	}
+	},
+        {
+            "@id": "#test1",
+            "name": "test1",
+            "@type": "TestSuite",
+            "instance": [
+                {"@id": "#test1_1"}
+            ],
+            "definition": {
+                "@id": "test/test1/sort-and-change-case-test.yml",
+                "@type": "TestDefinition",
+                "conformsTo": {"@id": "#planemo"}
+            }
+        },
+        {
+            "@id": "#test1_1",
+            "name": "test1_1",
+            "@type": "TestInstance",
+            "runsOn": {"@id": "#jenkins"},
+            "url": "http://example.org/jenkins",
+            "resource": "job/tests/"
+        },
+	{
+            "@id": "#jenkins",
+            "@type": "TestService",
+            "name": "Jenkins",
+            "url": {"@id": "https://www.jenkins.io"}
+        },
+        {
+            "@id": "#planemo",
+            "@type": "SoftwareApplication",
+            "name": "Planemo",
+            "url": {"@id": "https://github.com/galaxyproject/planemo"},
+            "softwareVersion": ">=0.70"
+        }
     ]
 }
