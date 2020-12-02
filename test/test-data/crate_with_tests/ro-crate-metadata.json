@@ -13,80 +13,80 @@
         }
     ],
     "@graph": [
-	{
-	    "@id": "ro-crate-metadata.json",
-	    "@type": "CreativeWork",
-	    "about": {
-		"@id": "./"
-	    },
+        {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {
+                "@id": "./"
+            },
             "conformsTo": {
                 "@id": "https://w3id.org/ro/crate/1.1"
             }
-	},
-	{
-	    "@id": "./",
-	    "@type": "Dataset",
-	    "name": "sort-and-change-case",
-	    "description": "sort lines and change text to upper case",
-	    "license": "Apache-2.0",
-	    "mainEntity": {
-		"@id": "sort-and-change-case.ga"
-	    },
-	    "hasPart": [
-		{
-		    "@id": "sort-and-change-case.ga"
-		},
-		{
-		    "@id": "test/"
-		},
-		{
-		    "@id": "LICENSE"
-		},
-		{
-		    "@id": "README.md"
-		}
-	    ]
-	},
-	{
-	    "@id": "sort-and-change-case.ga",
-	    "@type": [
-		"File",
-		"SoftwareSourceCode",
-		"ComputationalWorkflow"
-	    ],
-	    "programmingLanguage": {
-		"@id": "#galaxy"
-	    },
-	    "name": "sort-and-change-case"
-	},
-	{
-	    "@id": "test/",
-	    "@type": "Dataset",
-	    "hasPart": [
-		{
-		    "@id": "#test1"
-		}
-	    ]
-	},
-	{
-	    "@id": "LICENSE",
-	    "@type": "File"
-	},
-	{
-	    "@id": "README.md",
-	    "@type": "File"
-	},
-	{
-	    "@id": "#galaxy",
-	    "@type": "ComputerLanguage",
-	    "name": "Galaxy",
-	    "identifier": {
-		"@id": "https://galaxyproject.org/"
-	    },
-	    "url": {
-		"@id": "https://galaxyproject.org/"
-	    }
-	},
+        },
+        {
+            "@id": "./",
+            "@type": "Dataset",
+            "name": "sort-and-change-case",
+            "description": "sort lines and change text to upper case",
+            "license": "Apache-2.0",
+            "mainEntity": {
+                "@id": "sort-and-change-case.ga"
+            },
+            "hasPart": [
+                {
+                    "@id": "sort-and-change-case.ga"
+                },
+                {
+                    "@id": "test/"
+                },
+                {
+                    "@id": "LICENSE"
+                },
+                {
+                    "@id": "README.md"
+                }
+            ]
+        },
+        {
+            "@id": "sort-and-change-case.ga",
+            "@type": [
+                "File",
+                "SoftwareSourceCode",
+                "ComputationalWorkflow"
+            ],
+            "programmingLanguage": {
+                "@id": "#galaxy"
+            },
+            "name": "sort-and-change-case"
+        },
+        {
+            "@id": "test/",
+            "@type": "Dataset",
+            "hasPart": [
+                {
+                    "@id": "#test1"
+                }
+            ]
+        },
+        {
+            "@id": "LICENSE",
+            "@type": "File"
+        },
+        {
+            "@id": "README.md",
+            "@type": "File"
+        },
+        {
+            "@id": "#galaxy",
+            "@type": "ComputerLanguage",
+            "name": "Galaxy",
+            "identifier": {
+                "@id": "https://galaxyproject.org/"
+            },
+            "url": {
+                "@id": "https://galaxyproject.org/"
+            }
+        },
         {
             "@id": "#test1",
             "name": "test1",
@@ -108,7 +108,7 @@
             "url": "http://example.org/jenkins",
             "resource": "job/tests/"
         },
-	{
+        {
             "@id": "#jenkins",
             "@type": "TestService",
             "name": "Jenkins",
