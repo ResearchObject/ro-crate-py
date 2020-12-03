@@ -38,6 +38,7 @@ from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
 
 # Imports for the __subclasses__ hack below
+from .model.testinstance import TestInstance  # noqa
 from .model.testservice import TestService  # noqa
 
 

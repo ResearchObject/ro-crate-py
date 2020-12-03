@@ -16,6 +16,12 @@
 # limitations under the License.
 
 from rocrate.rocrate import ROCrate
+from rocrate.model.testservice import TestService
+from rocrate.model.testinstance import TestInstance
+
+# Tell pytest these are not test classes (so it doesn't try to collect them)
+TestService.__test__ = False
+TestInstance.__test__ = False
 
 
 def test_read(test_data_dir, helpers):
@@ -40,7 +46,37 @@ def test_read(test_data_dir, helpers):
     assert test_service.type == "TestService"
     assert test_service.name == "Jenkins"
     assert test_service.url == "https://www.jenkins.io"
-    test_service.name = "foo"
-    test_service.url = {"@id": "https://foo.com"}
-    assert test_service.name == "foo"
-    assert test_service.url == "https://foo.com"
+
+    test_instance = crate.dereference("#test1_1")
+    assert test_instance.id == "#test1_1"
+    assert test_instance.type == "TestInstance"
+    assert test_instance.name == "test1_1"
+    assert test_instance.url == "http://example.org/jenkins"
+    assert test_instance.resource == "job/tests/"
+    assert test_instance.runsOn is test_service
+    assert test_instance.service is test_service
+
+
+def test_create():
+    crate = ROCrate()
+
+    test_service = TestService(crate, identifier="#jenkins")
+    crate._add_context_entity(test_service)
+    test_service.name = "Jenkins"
+    test_service.url = {"@id": "https://www.jenkins.io"}
+    assert test_service.name == "Jenkins"
+    assert test_service.url == "https://www.jenkins.io"
+
+    test_instance = TestInstance(crate, identifier="#foo_instance_1")
+    crate._add_context_entity(test_instance)
+    test_instance.name = "Foo Instance 1"
+    test_instance.url = {"@id": "http://example.org/foo"}
+    test_instance.resource = "job/foobar"
+    test_instance.runsOn = test_service
+    assert test_instance.name == "Foo Instance 1"
+    assert test_instance.url == "http://example.org/foo"
+    assert test_instance.resource == "job/foobar"
+    assert test_instance.runsOn is test_service
+    test_instance.runsOn = None
+    test_instance.service = test_service
+    assert test_instance.service is test_service
