@@ -37,6 +37,9 @@ from .model.dataset import Dataset
 from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
 
+# Imports for the __subclasses__ hack below
+from .model.testservice import TestService  # noqa
+
 
 from arcp import generate
 

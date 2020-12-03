@@ -87,7 +87,7 @@ class Entity(object):
             return return_list
         if isinstance(value, dict) and value['@id']:  # its a reference
             obj = self.crate.dereference(value['@id'])
-            return obj
+            return obj if obj else value['@id']
         return value
 
     def auto_reference(self, value):

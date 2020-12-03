@@ -34,3 +34,13 @@ def test_read(test_data_dir, helpers):
     assert test_dataset_prop['@id'] == 'test/'
     assert test_dataset_prop['@id'] == test_dataset.id
     assert crate.test_dir is test_dataset
+
+    test_service = crate.dereference("#jenkins")
+    assert test_service.id == "#jenkins"
+    assert test_service.type == "TestService"
+    assert test_service.name == "Jenkins"
+    assert test_service.url == "https://www.jenkins.io"
+    test_service.name = "foo"
+    test_service.url = {"@id": "https://foo.com"}
+    assert test_service.name == "foo"
+    assert test_service.url == "https://foo.com"
