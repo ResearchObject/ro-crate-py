@@ -19,7 +19,7 @@ import pytest
 import shutil
 from pathlib import Path
 
-from rocrate.rocrate import ROCrate, TEST_METADATA_BASENAME
+from rocrate.rocrate import ROCrate
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
@@ -108,7 +108,6 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
     assert test_dataset_prop['@id'] == 'test/'
     assert test_dataset_prop['@id'] == test_dataset.id
     assert crate.test_dir is test_dataset
-    assert crate.test_metadata_path == Path("test") / TEST_METADATA_BASENAME
 
     # write the crate in a different directory
     out_path = tmpdir / 'crate_read_out'
