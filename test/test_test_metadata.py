@@ -40,12 +40,6 @@ def test_read(test_data_dir, helpers):
     assert wf_prop['@id'] == main_wf.id
     assert set(wf_prop['@type']) == helpers.WORKFLOW_TYPES
 
-    test_dataset = crate.dereference('test/')
-    test_dataset_prop = test_dataset.properties()
-    assert test_dataset_prop['@id'] == 'test/'
-    assert test_dataset_prop['@id'] == test_dataset.id
-    assert crate.test_dir is test_dataset
-
     test_service = crate.dereference("#jenkins")
     assert test_service.id == "#jenkins"
     assert test_service.type == "TestService"
@@ -82,6 +76,13 @@ def test_read(test_data_dir, helpers):
     assert len(test_suite.instance) == 1
     assert test_suite.instance[0] is test_instance
     assert test_suite.definition is test_definition
+
+    test_dataset = crate.dereference('test/')
+    test_dataset_prop = test_dataset.properties()
+    assert test_dataset_prop['@id'] == 'test/'
+    assert test_dataset_prop['@id'] == test_dataset.id
+    assert crate.test_dir is test_dataset
+    assert set(crate.test_dir["hasPart"]) == {test_suite}
 
 
 def test_create():
