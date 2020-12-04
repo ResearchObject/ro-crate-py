@@ -64,6 +64,13 @@ def test_read(test_data_dir, helpers):
     assert test_engine.url == "https://github.com/galaxyproject/planemo"
     assert test_engine.version == ">=0.70"
 
+    def_id = "test/test1/sort-and-change-case-test.yml"
+    test_definition = crate.dereference(def_id)
+    assert test_definition.id == def_id
+    assert set(test_definition.type) == {"File", "TestDefinition"}
+    assert test_definition.conformsTo is test_engine
+    assert test_definition.engine is test_engine
+
 
 def test_create():
     crate = ROCrate()

@@ -44,6 +44,9 @@
                 },
                 {
                     "@id": "README.md"
+                },
+                {
+                    "@id": "test/test1/sort-and-change-case-test.yml"
                 }
             ]
         },
@@ -94,11 +97,7 @@
             "instance": [
                 {"@id": "#test1_1"}
             ],
-            "definition": {
-                "@id": "test/test1/sort-and-change-case-test.yml",
-                "@type": "TestDefinition",
-                "conformsTo": {"@id": "#planemo"}
-            }
+            "definition": {"@id": "test/test1/sort-and-change-case-test.yml"}
         },
         {
             "@id": "#test1_1",
@@ -107,6 +106,14 @@
             "runsOn": {"@id": "#jenkins"},
             "url": "http://example.org/jenkins",
             "resource": "job/tests/"
+        },
+        {
+            "@id": "test/test1/sort-and-change-case-test.yml",
+            "@type": [
+                "File",
+                "TestDefinition"
+            ],
+            "conformsTo": {"@id": "#planemo"}
         },
         {
             "@id": "#jenkins",
