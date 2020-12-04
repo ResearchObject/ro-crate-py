@@ -42,6 +42,7 @@ from .model.testdefinition import TestDefinition
 from .model.testinstance import TestInstance  # noqa
 from .model.testservice import TestService  # noqa
 from .model.softwareapplication import SoftwareApplication  # noqa
+from .model.testsuite import TestSuite  # noqa
 
 
 from arcp import generate

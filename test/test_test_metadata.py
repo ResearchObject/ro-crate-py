@@ -19,12 +19,14 @@ from rocrate.rocrate import ROCrate
 from rocrate.model.testservice import TestService
 from rocrate.model.testinstance import TestInstance
 from rocrate.model.testdefinition import TestDefinition
+from rocrate.model.testsuite import TestSuite
 from rocrate.model.softwareapplication import SoftwareApplication
 
 # Tell pytest these are not test classes (so it doesn't try to collect them)
 TestService.__test__ = False
 TestInstance.__test__ = False
 TestDefinition.__test__ = False
+TestSuite.__test__ = False
 
 
 def test_read(test_data_dir, helpers):
@@ -73,6 +75,14 @@ def test_read(test_data_dir, helpers):
     assert test_definition.conformsTo is test_engine
     assert test_definition.engine is test_engine
 
+    test_suite = crate.dereference("#test1")
+    assert test_suite.id == "#test1"
+    assert test_suite.type == "TestSuite"
+    assert test_suite.name == "test1"
+    assert len(test_suite.instance) == 1
+    assert test_suite.instance[0] is test_instance
+    assert test_suite.definition is test_definition
+
 
 def test_create():
     crate = ROCrate()
@@ -114,3 +124,15 @@ def test_create():
     test_definition.conformsTo = None
     test_definition.engine = test_engine
     assert test_definition.engine is test_engine
+
+    test_suite = TestSuite(crate, "#foosuite")
+    crate._add_context_entity(test_suite)
+    assert test_suite.id == "#foosuite"
+    assert test_suite.type == "TestSuite"
+    test_suite.name = "Foo Suite"
+    test_suite.instance = [test_instance]
+    test_suite.definition = test_definition
+    assert test_suite.name == "Foo Suite"
+    assert len(test_suite.instance) == 1
+    assert test_suite.instance[0] is test_instance
+    assert test_suite.definition is test_definition
