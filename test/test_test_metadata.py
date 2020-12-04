@@ -18,6 +18,7 @@
 from rocrate.rocrate import ROCrate
 from rocrate.model.testservice import TestService
 from rocrate.model.testinstance import TestInstance
+from rocrate.model.softwareapplication import SoftwareApplication
 
 # Tell pytest these are not test classes (so it doesn't try to collect them)
 TestService.__test__ = False
@@ -56,6 +57,13 @@ def test_read(test_data_dir, helpers):
     assert test_instance.runsOn is test_service
     assert test_instance.service is test_service
 
+    test_engine = crate.dereference("#planemo")
+    assert test_engine.id == "#planemo"
+    assert test_engine.type == "SoftwareApplication"
+    assert test_engine.name == "Planemo"
+    assert test_engine.url == "https://github.com/galaxyproject/planemo"
+    assert test_engine.version == ">=0.70"
+
 
 def test_create():
     crate = ROCrate()
@@ -80,3 +88,12 @@ def test_create():
     test_instance.runsOn = None
     test_instance.service = test_service
     assert test_instance.service is test_service
+
+    test_engine = SoftwareApplication(crate, identifier="#planemo")
+    crate._add_context_entity(test_engine)
+    test_engine.name = "Planemo"
+    test_engine.url = {"@id": "https://github.com/galaxyproject/planemo"}
+    test_engine.version = ">=0.70"
+    assert test_engine.name == "Planemo"
+    assert test_engine.url == "https://github.com/galaxyproject/planemo"
+    assert test_engine.version == ">=0.70"

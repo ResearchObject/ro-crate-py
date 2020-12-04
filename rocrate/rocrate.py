@@ -40,6 +40,7 @@ from .model.preview import Preview
 # Imports for the __subclasses__ hack below
 from .model.testinstance import TestInstance  # noqa
 from .model.testservice import TestService  # noqa
+from .model.softwareapplication import SoftwareApplication  # noqa
 
 
 from arcp import generate

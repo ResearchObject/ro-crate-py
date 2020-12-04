@@ -119,7 +119,7 @@
             "@type": "SoftwareApplication",
             "name": "Planemo",
             "url": {"@id": "https://github.com/galaxyproject/planemo"},
-            "softwareVersion": ">=0.70"
+            "version": ">=0.70"
         }
     ]
 }
