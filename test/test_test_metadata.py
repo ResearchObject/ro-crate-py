@@ -126,7 +126,7 @@ def test_create():
     assert test_definition.engine is test_engine
 
     test_suite = TestSuite(crate, "#foosuite")
-    crate._add_context_entity(test_suite)
+    crate._add_data_entity(test_suite)
     assert test_suite.id == "#foosuite"
     assert test_suite.type == "TestSuite"
     test_suite.name = "Foo Suite"
