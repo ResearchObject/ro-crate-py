@@ -30,7 +30,7 @@ TestSuite.__test__ = False
 
 
 def test_read(test_data_dir, helpers):
-    crate_dir = test_data_dir / 'crate_with_tests'
+    crate_dir = test_data_dir / 'ro-crate-galaxy-sortchangecase'
     crate = ROCrate(crate_dir)
 
     wf_id = 'sort-and-change-case.ga'
