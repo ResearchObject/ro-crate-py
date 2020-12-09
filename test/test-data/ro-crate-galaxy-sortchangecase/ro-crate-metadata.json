@@ -94,6 +94,9 @@
             "@id": "#test1",
             "name": "test1",
             "@type": "TestSuite",
+            "mainEntity": {
+                "@id": "sort-and-change-case.ga"
+            },
             "instance": [
                 {"@id": "#test1_1"}
             ],

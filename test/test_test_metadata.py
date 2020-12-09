@@ -76,6 +76,7 @@ def test_read(test_data_dir, helpers):
     assert len(test_suite.instance) == 1
     assert test_suite.instance[0] is test_instance
     assert test_suite.definition is test_definition
+    assert test_suite["mainEntity"] is main_wf
 
     test_dataset = crate.dereference('test/')
     test_dataset_prop = test_dataset.properties()

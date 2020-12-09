@@ -37,6 +37,7 @@ def print_suites(crate):
     print("test suites:")
     for suite in crate.test_dir["hasPart"]:
         print(" ", suite.id)
+        print("   workflow:", suite["mainEntity"])
         print("   instances:")
         for inst in suite.instance:
             print("     ", inst.id)
@@ -57,9 +58,8 @@ def main():
     crate = ROCrate(crate_dir)
     print_suites(crate)
 
-    workflow = crate.root_dataset["mainEntity"]
-    print("main workflow:", workflow.id)
-    workflow_path = crate_dir / workflow.id
+    main_workflow = crate.root_dataset["mainEntity"]
+    print("main workflow:", main_workflow.id)
 
     try:
         exe = subprocess.check_output(
@@ -74,8 +74,12 @@ def main():
     # run a test suite
     suite = crate.test_dir["hasPart"][0]
     def_path = crate_dir / suite.definition.id
+    workflow = suite["mainEntity"]
+    workflow_path = crate_dir / workflow.id
+
     print("running suite:", suite.id)
     print("definition path:", def_path)
+    print("workflow:", workflow.id)
     assert suite.definition.engine.id == "#planemo"
     new_workflow_path = def_path.parent / workflow_path.name
     # Planemo expects the test definition in the same dir as the workflow file
