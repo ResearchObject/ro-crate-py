@@ -65,7 +65,7 @@
         {
             "@id": "test/",
             "@type": "Dataset",
-            "hasPart": [
+            "about": [
                 {
                     "@id": "#test1"
                 }

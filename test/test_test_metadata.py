@@ -83,7 +83,7 @@ def test_read(test_data_dir, helpers):
     assert test_dataset_prop['@id'] == 'test/'
     assert test_dataset_prop['@id'] == test_dataset.id
     assert crate.test_dir is test_dataset
-    assert set(crate.test_dir["hasPart"]) == {test_suite}
+    assert set(crate.test_dir["about"]) == {test_suite}
 
 
 def test_create():

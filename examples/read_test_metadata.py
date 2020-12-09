@@ -35,10 +35,10 @@ RO_CRATE_DIR = REPO_DIR / "test/test-data/ro-crate-galaxy-sortchangecase"
 
 def print_suites(crate):
     print("test suites:")
-    for suite in crate.test_dir["hasPart"]:
+    for suite in crate.test_dir["about"]:
         print(" ", suite.id)
-        print("   workflow:", suite["mainEntity"])
-        print("   instances:")
+        print("    workflow:", suite["mainEntity"].id)
+        print("    instances:")
         for inst in suite.instance:
             print("     ", inst.id)
             print("       service:", inst.service.name)
@@ -72,7 +72,7 @@ def main():
         print("planemo executable:", exe)
 
     # run a test suite
-    suite = crate.test_dir["hasPart"][0]
+    suite = crate.test_dir["about"][0]
     def_path = crate_dir / suite.definition.id
     workflow = suite["mainEntity"]
     workflow_path = crate_dir / workflow.id
@@ -90,6 +90,8 @@ def main():
     p = subprocess.run(cmd)
     p.check_returncode()
     print("OK")
+
+    shutil.rmtree(wd)
 
 
 if __name__ == "__main__":
