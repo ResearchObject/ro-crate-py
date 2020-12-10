@@ -20,13 +20,14 @@ from rocrate.model.testservice import TestService
 from rocrate.model.testinstance import TestInstance
 from rocrate.model.testdefinition import TestDefinition
 from rocrate.model.testsuite import TestSuite
-from rocrate.model.softwareapplication import SoftwareApplication
+from rocrate.model.testengine import TestEngine
 
 # Tell pytest these are not test classes (so it doesn't try to collect them)
 TestService.__test__ = False
 TestInstance.__test__ = False
 TestDefinition.__test__ = False
 TestSuite.__test__ = False
+TestEngine.__test__ = False
 
 
 def test_read(test_data_dir, helpers):
@@ -45,6 +46,7 @@ def test_read(test_data_dir, helpers):
     assert test_service.type == "TestService"
     assert test_service.name == "Jenkins"
     assert test_service.url == "https://www.jenkins.io"
+    assert test_service.testServiceType == "jenkins"
 
     test_instance = crate.dereference("#test1_1")
     assert test_instance.id == "#test1_1"
@@ -57,10 +59,11 @@ def test_read(test_data_dir, helpers):
 
     test_engine = crate.dereference("#planemo")
     assert test_engine.id == "#planemo"
-    assert test_engine.type == "SoftwareApplication"
+    assert test_engine.type == "TestEngine"
     assert test_engine.name == "Planemo"
     assert test_engine.url == "https://github.com/galaxyproject/planemo"
     assert test_engine.version == ">=0.70"
+    assert test_engine.testEngineType == "planemo"
 
     def_id = "test/test1/sort-and-change-case-test.yml"
     test_definition = crate.dereference(def_id)
@@ -93,8 +96,10 @@ def test_create():
     crate._add_context_entity(test_service)
     test_service.name = "Jenkins"
     test_service.url = {"@id": "https://www.jenkins.io"}
+    test_service.testServiceType = "jenkins"
     assert test_service.name == "Jenkins"
     assert test_service.url == "https://www.jenkins.io"
+    assert test_service.testServiceType == "jenkins"
 
     test_instance = TestInstance(crate, identifier="#foo_instance_1")
     crate._add_context_entity(test_instance)
@@ -110,14 +115,16 @@ def test_create():
     test_instance.service = test_service
     assert test_instance.service is test_service
 
-    test_engine = SoftwareApplication(crate, identifier="#planemo")
+    test_engine = TestEngine(crate, identifier="#planemo")
     crate._add_context_entity(test_engine)
     test_engine.name = "Planemo"
     test_engine.url = {"@id": "https://github.com/galaxyproject/planemo"}
     test_engine.version = ">=0.70"
+    test_engine.testEngineType = "planemo"
     assert test_engine.name == "Planemo"
     assert test_engine.url == "https://github.com/galaxyproject/planemo"
     assert test_engine.version == ">=0.70"
+    assert test_engine.testEngineType == "planemo"
 
     test_definition = TestDefinition(crate, dest_path="test/foo/bar.yml")
     crate._add_context_entity(test_definition)

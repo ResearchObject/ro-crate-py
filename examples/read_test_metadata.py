@@ -42,12 +42,14 @@ def print_suites(crate):
         for inst in suite.instance:
             print("     ", inst.id)
             print("       service:", inst.service.name)
+            print("       service type:", inst.service.testServiceType)
             print("       url:", inst.url)
             print("       resource:", inst.resource)
         print("   definition:")
         print("     id:", suite.definition.id)
         engine = suite.definition.engine
         print("     engine:", engine.name, engine.version)
+        print("     engine type:", engine.testEngineType)
 
 
 def main():
@@ -80,7 +82,7 @@ def main():
     print("running suite:", suite.id)
     print("definition path:", def_path)
     print("workflow:", workflow.id)
-    assert suite.definition.engine.id == "#planemo"
+    assert suite.definition.engine.testEngineType == "planemo"
     new_workflow_path = def_path.parent / workflow_path.name
     # Planemo expects the test definition in the same dir as the workflow file
     shutil.copy2(workflow_path, new_workflow_path)

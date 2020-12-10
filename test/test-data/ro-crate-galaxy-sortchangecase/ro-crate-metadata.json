@@ -121,12 +121,14 @@
         {
             "@id": "#jenkins",
             "@type": "TestService",
+            "testServiceType": "jenkins",
             "name": "Jenkins",
             "url": {"@id": "https://www.jenkins.io"}
         },
         {
             "@id": "#planemo",
-            "@type": "SoftwareApplication",
+            "@type": "TestEngine",
+            "testEngineType": "planemo",
             "name": "Planemo",
             "url": {"@id": "https://github.com/galaxyproject/planemo"},
             "version": ">=0.70"

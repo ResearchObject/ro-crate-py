@@ -15,41 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .contextentity import ContextEntity
+from .softwareapplication import SoftwareApplication
 
 
-class TestService(ContextEntity):
+class TestEngine(SoftwareApplication):
 
     def _empty(self):
         return {
             "@id": self.id,
-            "@type": 'TestService'
+            "@type": 'TestEngine'
         }
 
     @property
-    def _default_type(self):
-        return "TestService"
+    def testEngineType(self):
+        return self["testEngineType"]
 
-    @property
-    def name(self):
-        return self["name"]
-
-    @name.setter
-    def name(self, name):
-        self["name"] = name
-
-    @property
-    def url(self):
-        return self["url"]
-
-    @url.setter
-    def url(self, url):
-        self["url"] = url
-
-    @property
-    def testServiceType(self):
-        return self["testServiceType"]
-
-    @testServiceType.setter
-    def testServiceType(self, testServiceType):
-        self["testServiceType"] = testServiceType
+    @testEngineType.setter
+    def testEngineType(self, testEngineType):
+        self["testEngineType"] = testEngineType
