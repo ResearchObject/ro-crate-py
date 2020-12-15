@@ -31,6 +31,7 @@ GALAXY_IMG = "bgruening/galaxy-stable:20.05"
 THIS_DIR = pathlib.Path(__file__).absolute().parent
 REPO_DIR = THIS_DIR.parent
 RO_CRATE_DIR = REPO_DIR / "test/test-data/ro-crate-galaxy-sortchangecase"
+PLANEMO = "https://w3id.org/ro/terms/test#PlanemoEngine"
 
 
 def print_suites(crate):
@@ -42,14 +43,13 @@ def print_suites(crate):
         for inst in suite.instance:
             print("     ", inst.id)
             print("       service:", inst.service.name)
-            print("       service type:", inst.service.testServiceType)
             print("       url:", inst.url)
             print("       resource:", inst.resource)
         print("   definition:")
         print("     id:", suite.definition.id)
         engine = suite.definition.engine
-        print("     engine:", engine.name, engine.version)
-        print("     engine type:", engine.testEngineType)
+        print("     engine:", engine.name)
+        print("     engine version:", suite.definition.engineVersion)
 
 
 def main():
@@ -82,7 +82,7 @@ def main():
     print("running suite:", suite.id)
     print("definition path:", def_path)
     print("workflow:", workflow.id)
-    assert suite.definition.engine.testEngineType == "planemo"
+    assert suite.definition.engine.id == PLANEMO
     new_workflow_path = def_path.parent / workflow_path.name
     # Planemo expects the test definition in the same dir as the workflow file
     shutil.copy2(workflow_path, new_workflow_path)

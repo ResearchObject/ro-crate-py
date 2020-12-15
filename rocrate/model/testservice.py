@@ -45,11 +45,3 @@ class TestService(ContextEntity):
     @url.setter
     def url(self, url):
         self["url"] = url
-
-    @property
-    def testServiceType(self):
-        return self["testServiceType"]
-
-    @testServiceType.setter
-    def testServiceType(self, testServiceType):
-        self["testServiceType"] = testServiceType

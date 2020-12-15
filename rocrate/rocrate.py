@@ -37,11 +37,11 @@ from .model.dataset import Dataset
 from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
 from .model.testdefinition import TestDefinition
-from .model.testengine import TestEngine
 
 # Imports for the __subclasses__ hack below
 from .model.testinstance import TestInstance  # noqa
 from .model.testservice import TestService  # noqa
+from .model.softwareapplication import SoftwareApplication  # noqa
 from .model.testsuite import TestSuite  # noqa
 
 
@@ -226,9 +226,6 @@ class ROCrate():
                         entity['@type']
                     )
                     instance = SubClass(self, identifier, entity)
-                elif entity['@type'] == "TestEngine":
-                    # FIXME: the above subclass list is not recursive
-                    instance = TestEngine(self, identifier, entity)
                 else:
                     instance = contextentity.ContextEntity(
                         self, identifier, entity

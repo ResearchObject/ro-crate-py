@@ -20,14 +20,17 @@ from rocrate.model.testservice import TestService
 from rocrate.model.testinstance import TestInstance
 from rocrate.model.testdefinition import TestDefinition
 from rocrate.model.testsuite import TestSuite
-from rocrate.model.testengine import TestEngine
+from rocrate.model.softwareapplication import SoftwareApplication
 
 # Tell pytest these are not test classes (so it doesn't try to collect them)
 TestService.__test__ = False
 TestInstance.__test__ = False
 TestDefinition.__test__ = False
 TestSuite.__test__ = False
-TestEngine.__test__ = False
+
+
+JENKINS = "https://w3id.org/ro/terms/test#JenkinsService"
+PLANEMO = "https://w3id.org/ro/terms/test#PlanemoEngine"
 
 
 def test_read(test_data_dir, helpers):
@@ -41,12 +44,11 @@ def test_read(test_data_dir, helpers):
     assert wf_prop['@id'] == main_wf.id
     assert set(wf_prop['@type']) == helpers.WORKFLOW_TYPES
 
-    test_service = crate.dereference("#jenkins")
-    assert test_service.id == "#jenkins"
+    test_service = crate.dereference(JENKINS)
+    assert test_service.id == JENKINS
     assert test_service.type == "TestService"
     assert test_service.name == "Jenkins"
     assert test_service.url == "https://www.jenkins.io"
-    assert test_service.testServiceType == "jenkins"
 
     test_instance = crate.dereference("#test1_1")
     assert test_instance.id == "#test1_1"
@@ -57,13 +59,11 @@ def test_read(test_data_dir, helpers):
     assert test_instance.runsOn is test_service
     assert test_instance.service is test_service
 
-    test_engine = crate.dereference("#planemo")
-    assert test_engine.id == "#planemo"
-    assert test_engine.type == "TestEngine"
+    test_engine = crate.dereference(PLANEMO)
+    assert test_engine.id == PLANEMO
+    assert test_engine.type == "SoftwareApplication"
     assert test_engine.name == "Planemo"
     assert test_engine.url == "https://github.com/galaxyproject/planemo"
-    assert test_engine.version == ">=0.70"
-    assert test_engine.testEngineType == "planemo"
 
     def_id = "test/test1/sort-and-change-case-test.yml"
     test_definition = crate.dereference(def_id)
@@ -71,6 +71,7 @@ def test_read(test_data_dir, helpers):
     assert set(test_definition.type) == {"File", "TestDefinition"}
     assert test_definition.conformsTo is test_engine
     assert test_definition.engine is test_engine
+    assert test_definition.engineVersion == ">=0.70"
 
     test_suite = crate.dereference("#test1")
     assert test_suite.id == "#test1"
@@ -92,14 +93,12 @@ def test_read(test_data_dir, helpers):
 def test_create():
     crate = ROCrate()
 
-    test_service = TestService(crate, identifier="#jenkins")
+    test_service = TestService(crate, identifier=JENKINS)
     crate._add_context_entity(test_service)
     test_service.name = "Jenkins"
     test_service.url = {"@id": "https://www.jenkins.io"}
-    test_service.testServiceType = "jenkins"
     assert test_service.name == "Jenkins"
     assert test_service.url == "https://www.jenkins.io"
-    assert test_service.testServiceType == "jenkins"
 
     test_instance = TestInstance(crate, identifier="#foo_instance_1")
     crate._add_context_entity(test_instance)
@@ -115,16 +114,12 @@ def test_create():
     test_instance.service = test_service
     assert test_instance.service is test_service
 
-    test_engine = TestEngine(crate, identifier="#planemo")
+    test_engine = SoftwareApplication(crate, identifier=PLANEMO)
     crate._add_context_entity(test_engine)
     test_engine.name = "Planemo"
     test_engine.url = {"@id": "https://github.com/galaxyproject/planemo"}
-    test_engine.version = ">=0.70"
-    test_engine.testEngineType = "planemo"
     assert test_engine.name == "Planemo"
     assert test_engine.url == "https://github.com/galaxyproject/planemo"
-    assert test_engine.version == ">=0.70"
-    assert test_engine.testEngineType == "planemo"
 
     test_definition = TestDefinition(crate, dest_path="test/foo/bar.yml")
     crate._add_context_entity(test_definition)
@@ -132,7 +127,9 @@ def test_create():
     assert test_definition.conformsTo is test_service
     test_definition.conformsTo = None
     test_definition.engine = test_engine
+    test_definition.engineVersion = ">=0.70"
     assert test_definition.engine is test_engine
+    assert test_definition.engineVersion == ">=0.70"
 
     test_suite = TestSuite(crate, "#foosuite")
     crate._add_data_entity(test_suite)
