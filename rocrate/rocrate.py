@@ -36,12 +36,16 @@ from .model.person import Person
 from .model.dataset import Dataset
 from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
+from .model.testdefinition import TestDefinition
+
+# Imports for the __subclasses__ hack below
+from .model.testinstance import TestInstance  # noqa
+from .model.testservice import TestService  # noqa
+from .model.softwareapplication import SoftwareApplication  # noqa
+from .model.testsuite import TestSuite  # noqa
 
 
 from arcp import generate
-
-
-TEST_METADATA_BASENAME = "test-metadata.json"
 
 
 class ROCrate():
@@ -178,16 +182,18 @@ class ROCrate():
                             if isinstance(entity['@type'], list)
                             else [entity['@type']])
             if 'File' in entity_types:
+                # temporary workaround, should be handled in the general case
+                cls = TestDefinition if "TestDefinition" in entity_types else File
                 file_path = os.path.join(source, entity['@id'])
                 identifier = entity.pop('@id', None)
                 if os.path.exists(file_path):
                     # referencing a file path relative to crate-root
-                    instance = File(self, file_path, identifier, properties=entity)
+                    instance = cls(self, file_path, identifier, properties=entity)
                 else:
                     # check if it is a valid absolute URI
                     try:
                         requests.get(identifier)
-                        instance = File(self, identifier, properties=entity)
+                        instance = cls(self, identifier, properties=entity)
                     except requests.ConnectionError:
                         print("Source is not a valid URI")
             if 'Dataset' in entity_types:
@@ -328,12 +334,6 @@ class ROCrate():
         if rval and "Dataset" in rval.type:
             return rval
         return None
-
-    @property
-    def test_metadata_path(self):
-        if self.test_dir is None:
-            return None
-        return Path(self.test_dir.filepath()) / TEST_METADATA_BASENAME
 
     def resolve_id(self, relative_id):
         return generate.arcp_random(relative_id.strip('./'), uuid=self.uuid)

@@ -1,0 +1,118 @@
+{
+    "uuid": "e2a8566c-c025-4181-9e90-7ed29d4e4df1",
+    "tags": [],
+    "format-version": "0.1",
+    "name": "sort-and-change-case",
+    "version": 0,
+    "steps": {
+        "0": {
+            "tool_id": null,
+            "tool_version": null,
+            "outputs": [],
+            "workflow_outputs": [],
+            "input_connections": {},
+            "tool_state": "{}",
+            "id": 0,
+            "uuid": "5a36fad2-66c7-4b9e-8759-0fbcae9b8541",
+            "errors": null,
+            "name": "Input dataset",
+            "label": "bed_input",
+            "inputs": [],
+            "position": {
+                "top": 200,
+                "left": 200
+            },
+            "annotation": "",
+            "content_id": null,
+            "type": "data_input"
+        },
+        "1": {
+            "tool_id": "sort1",
+            "tool_version": "1.1.0",
+            "outputs": [
+                {
+                    "type": "input",
+                    "name": "out_file1"
+                }
+            ],
+            "workflow_outputs": [
+                {
+                    "output_name": "out_file1",
+                    "uuid": "8237f71a-bc2a-494e-a63c-09c1e65ef7c8",
+                    "label": "sorted_bed"
+                }
+            ],
+            "input_connections": {
+                "input": {
+                    "output_name": "output",
+                    "id": 0
+                }
+            },
+            "tool_state": "{\"__page__\": null, \"style\": \"\\\"alpha\\\"\", \"column\": \"\\\"1\\\"\", \"__rerun_remap_job_id__\": null, \"column_set\": \"[]\", \"input\": \"{\\\"__class__\\\": \\\"RuntimeValue\\\"}\", \"header_lines\": \"\\\"0\\\"\", \"order\": \"\\\"ASC\\\"\"}",
+            "id": 1,
+            "uuid": "0b6b3cda-c75f-452b-85b1-8ae4f3302ba4",
+            "errors": null,
+            "name": "Sort",
+            "post_job_actions": {},
+            "label": "sort",
+            "inputs": [
+                {
+                    "name": "input",
+                    "description": "runtime parameter for tool Sort"
+                }
+            ],
+            "position": {
+                "top": 200,
+                "left": 420
+            },
+            "annotation": "",
+            "content_id": "sort1",
+            "type": "tool"
+        },
+        "2": {
+            "tool_id": "ChangeCase",
+            "tool_version": "1.0.0",
+            "outputs": [
+                {
+                    "type": "tabular",
+                    "name": "out_file1"
+                }
+            ],
+            "workflow_outputs": [
+                {
+                    "output_name": "out_file1",
+                    "uuid": "c31cd733-dab6-4d50-9fec-b644d162397b",
+                    "label": "uppercase_bed"
+                }
+            ],
+            "input_connections": {
+                "input": {
+                    "output_name": "out_file1",
+                    "id": 1
+                }
+            },
+            "tool_state": "{\"__page__\": null, \"casing\": \"\\\"up\\\"\", \"__rerun_remap_job_id__\": null, \"cols\": \"\\\"c1\\\"\", \"delimiter\": \"\\\"TAB\\\"\", \"input\": \"{\\\"__class__\\\": \\\"RuntimeValue\\\"}\"}",
+            "id": 2,
+            "uuid": "9698bcde-0729-48fe-b88d-ccfb6f6153b4",
+            "errors": null,
+            "name": "Change Case",
+            "post_job_actions": {},
+            "label": "change_case",
+            "inputs": [
+                {
+                    "name": "input",
+                    "description": "runtime parameter for tool Change Case"
+                }
+            ],
+            "position": {
+                "top": 200,
+                "left": 640
+            },
+            "annotation": "",
+            "content_id": "ChangeCase",
+            "type": "tool"
+        }
+    },
+    "annotation": "",
+    "a_galaxy_workflow": "true"
+}
