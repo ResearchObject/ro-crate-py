@@ -28,6 +28,7 @@ import shutil
 import tempfile
 
 from pathlib import Path
+from urllib.parse import urlsplit, urljoin
 
 from .model import contextentity
 from .model.root_dataset import RootDataset
@@ -45,9 +46,6 @@ from .model.softwareapplication import SoftwareApplication  # noqa
 from .model.testsuite import TestSuite  # noqa
 
 
-from arcp import generate
-
-
 class ROCrate():
 
     def __init__(self, source_path=None, load_preview=False):
@@ -57,6 +55,7 @@ class ROCrate():
         # TODO: add this as @base in the context? At least when loading
         # from zip
         self.uuid = uuid.uuid4()
+        self.arcp_base_uri = f"arcp://uuid,{self.uuid}/"
 
         # TODO: default_properties must include name, description,
         # datePublished, license
@@ -335,8 +334,10 @@ class ROCrate():
             return rval
         return None
 
-    def resolve_id(self, relative_id):
-        return generate.arcp_random(relative_id.strip('./'), uuid=self.uuid)
+    def resolve_id(self, id_):
+        if not urlsplit(id_).scheme:
+            id_ = urljoin(self.arcp_base_uri, id_)  # also does path normalization
+        return id_.rstrip("/")
 
     def get_entities(self):
         return (self.default_entities + self.data_entities +
