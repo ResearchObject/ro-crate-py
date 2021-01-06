@@ -20,6 +20,7 @@ import pytest
 import zipfile
 
 from rocrate.model.dataset import Dataset
+from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
 
@@ -30,7 +31,8 @@ def test_file_writing(test_data_dir, tmpdir, helpers, to_zip):
     crate.name = crate_name
     creator_id = '001'
     creator_name = 'Lee Ritenour'
-    new_person = crate.add_person(creator_id, {'name': creator_name})
+    new_person = Person(crate, creator_id, {'name': creator_name})
+    crate.add(new_person)
     crate.creator = new_person
 
     sample_file_id = 'sample_file.txt'

@@ -70,7 +70,8 @@ def test_dereferencing_equivalent_id(test_data_dir, name):
 
 def test_contextual_entities():
     crate = ROCrate()
-    new_person = crate.add_person('#joe', {'name': 'Joe Pesci'})
+    new_person = Person(crate, '#joe', {'name': 'Joe Pesci'})
+    crate.add(new_person)
     person_dereference = crate.dereference('#joe')
     assert person_dereference is new_person
     assert person_dereference.type == 'Person'
@@ -79,7 +80,8 @@ def test_contextual_entities():
     assert person_prop['name'] == 'Joe Pesci'
     assert not new_person.datePublished
     id_ = "https://orcid.org/0000-0002-1825-0097"
-    new_person = crate.add_person(id_, {'name': 'Josiah Carberry'})
+    new_person = Person(crate, id_, {'name': 'Josiah Carberry'})
+    crate.add(new_person)
     person_dereference = crate.dereference(id_)
     assert person_dereference is new_person
 
@@ -102,14 +104,16 @@ def test_properties():
     crate.datePublished = crate_datePublished
     assert crate.datePublished == crate_datePublished
 
-    new_person = crate.add_person('#001', {'name': 'Lee Ritenour'})
+    new_person = Person(crate, '#001', {'name': 'Lee Ritenour'})
+    crate.add(new_person)
     crate.creator = new_person
     assert crate.creator is new_person
     assert isinstance(crate.creator, Person)
     assert crate.creator['name'] == 'Lee Ritenour'
     assert crate.creator.type == 'Person'
 
-    new_person2 = crate.add_person('#002', {'name': 'Lee Ritenour'})
+    new_person2 = Person(crate, '#002', {'name': 'Lee Ritenour'})
+    crate.add(new_person2)
     crate.creator = [new_person, new_person2]
     assert isinstance(crate.creator, list)
     assert crate.creator[0] is new_person
@@ -118,7 +122,8 @@ def test_properties():
 
 def test_uuid():
     crate = ROCrate()
-    new_person = crate.add_person(name="No Identifier")
+    new_person = Person(crate, properties={"name": "No Identifier"})
+    crate.add(new_person)
     jsonld = new_person.as_jsonld()
     assert "Person" == jsonld["@type"]
     assert jsonld["@id"].startswith("#")

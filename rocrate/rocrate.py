@@ -361,17 +361,6 @@ class ROCrate():
         self.add(dataset_entity)
         return dataset_entity
 
-    ################################
-    #     Contextual entities      #
-    ################################
-
-    def add_person(self, identifier=None, properties={}, **kwargs):
-        props = dict(properties)
-        props.update(kwargs)
-        new_person = Person(self, identifier, props)
-        self.add(new_person)
-        return new_person
-
     def add(self, *entities):
         for e in entities:
             key = e.canonical_id()

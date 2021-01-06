@@ -111,12 +111,12 @@ dataset_entity = crate.add_directory(sample_dir, 'relative/rocrate/path')
 
 ```python
 # Add authors info
-crate.add_person('#joe', {'name': 'Joe Bloggs'})
+crate.add(Person(crate, '#joe', {'name': 'Joe Bloggs'}))
 
 # wf_crate example
-publisher = wf_crate.add_person('001', {'name': 'Bert Verlinden'})
-
-creator = wf_crate.add_person('002', {'name': 'Lee Ritenour'})
+publisher = Person(crate, '001', {'name': 'Bert Verlinden'})
+creator = Person(crate, '002', {'name': 'Lee Ritenour'})
+wf_crate.add(publisher, creator)
 
 # These contextual entities can be assigned to other metadata properties:
 
