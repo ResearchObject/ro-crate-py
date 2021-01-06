@@ -49,6 +49,7 @@ from .model.testsuite import TestSuite  # noqa
 class ROCrate():
 
     def __init__(self, source_path=None, load_preview=False):
+        self.__entity_map = {}
         self.default_entities = []
         self.data_entities = []
         self.contextual_entities = []
@@ -60,15 +61,10 @@ class ROCrate():
         # TODO: default_properties must include name, description,
         # datePublished, license
         if not source_path or not load_preview:
-            # create preview entity and add it to default_entities
-            self.preview = Preview(self)
-            self.default_entities.append(self.preview)
+            self.add(Preview(self))
         if not source_path:
             # create a new ro-crate
-            self.root_dataset = RootDataset(self)
-            self.default_entities.append(self.root_dataset)
-            self.metadata = Metadata(self)
-            self.default_entities.append(self.metadata)
+            self.add(RootDataset(self), Metadata(self))
         else:
             # load an existing ro-crate
             if zipfile.is_zipfile(source_path):
@@ -85,8 +81,7 @@ class ROCrate():
             if not os.path.isfile(metadata_path):
                 raise ValueError('The directory is not a valid RO-crate, '
                                  f'missing {Metadata.BASENAME}')
-            self.metadata = MetadataClass(self)
-            self.default_entities.append(self.metadata)
+            self.add(MetadataClass(self))
             entities = self.entities_from_metadata(metadata_path)
             self.build_crate(entities, source_path, load_preview)
             # TODO: load root dataset properties
@@ -152,14 +147,12 @@ class ROCrate():
         # properties to the build
         root_entity.pop('@id', None)
         root_entity.pop('hasPart', None)
-        self.root_dataset = RootDataset(self, root_entity)
-        self.default_entities.append(self.root_dataset)
+        self.add(RootDataset(self, root_entity))
 
         # check if a preview is present
         if Preview.BASENAME in entities.keys() and load_preview:
             preview_source = os.path.join(source, Preview.BASENAME)
-            self.preview = Preview(self, preview_source)
-            self.default_entities.append(self.preview)
+            self.add(Preview(self, preview_source))
 
         added_entities = []
         # iterate over data entities
@@ -202,7 +195,7 @@ class ROCrate():
                     instance = Dataset(self, dir_path, entity['@id'], props)
                 else:
                     raise Exception('Directory not found')
-            self._add_data_entity(instance)
+            self.add(instance)
             added_entities.append(data_entity_id)
 
         # the rest of the entities must be contextual entities
@@ -229,7 +222,7 @@ class ROCrate():
                     instance = contextentity.ContextEntity(
                         self, identifier, entity
                     )
-                self._add_context_entity(instance)
+                self.add(instance)
 
     # TODO: add contextual entities
     # def add_contact_point(id, properties = {})
@@ -340,8 +333,7 @@ class ROCrate():
         return id_.rstrip("/")
 
     def get_entities(self):
-        return (self.default_entities + self.data_entities +
-                self.contextual_entities)
+        return self.__entity_map.values()
 
     def set_main_entity(self, main_entity):
         self.root_dataset['mainEntity'] = main_entity
@@ -351,10 +343,7 @@ class ROCrate():
 
     def dereference(self, entity_id):
         canonical_id = self.resolve_id(entity_id)
-        for entity in self.get_entities():
-            if canonical_id == entity.canonical_id():
-                return entity
-        return None
+        return self.__entity_map.get(canonical_id, None)
 
     # source: file object or path (str)
     def add_file(self, source, crate_path=None, fetch_remote=False,
@@ -362,47 +351,46 @@ class ROCrate():
         props = dict(properties)
         props.update(kwargs)
         file_entity = File(self, source=source, dest_path=crate_path, fetch_remote=fetch_remote, properties=props)
-        self._add_data_entity(file_entity)
+        self.add(file_entity)
         return file_entity
-
-    def remove_file(self, file_id):
-        # if file in data_entities:
-        self._remove_data_entity(file_id)
 
     def add_directory(self, source, crate_path=None, properties={}, **kwargs):
         props = dict(properties)
         props.update(kwargs)
         dataset_entity = Dataset(self, source, crate_path, properties)
-        self._add_data_entity(dataset_entity)
+        self.add(dataset_entity)
         return dataset_entity
-
-    def remove_directory(self, dir_id):
-        # if file in data_entities:
-        self._remove_data_entity(dir_id)
-
-    def _add_data_entity(self, data_entity):
-        self._remove_data_entity(data_entity)
-        self.data_entities.append(data_entity)
-
-    def _remove_data_entity(self, data_entity):
-        if data_entity in self.data_entities:
-            self.data_entities.remove(data_entity)
 
     ################################
     #     Contextual entities      #
     ################################
 
-    def _add_context_entity(self, entity):
-        if entity in self.contextual_entities:
-            self.contextual_entities.remove(entity)
-        self.contextual_entities.append(entity)
-
     def add_person(self, identifier=None, properties={}, **kwargs):
         props = dict(properties)
         props.update(kwargs)
         new_person = Person(self, identifier, props)
-        self._add_context_entity(new_person)
+        self.add(new_person)
         return new_person
+
+    def add(self, *entities):
+        for e in entities:
+            key = e.canonical_id()
+            # crate MUST NOT list multiple entities with the same @id
+            if key in self.__entity_map:
+                raise ValueError(f'duplicate entity id: "{key}"')
+            self.__entity_map[key] = e
+            if isinstance(e, RootDataset):
+                self.root_dataset = e
+            if isinstance(e, (Metadata, LegacyMetadata)):
+                self.metadata = e
+            if isinstance(e, Preview):
+                self.preview = e
+            if isinstance(e, (RootDataset, Metadata, LegacyMetadata, Preview)):
+                self.default_entities.append(e)
+            elif hasattr(e, "write"):
+                self.data_entities.append(e)
+            else:
+                self.contextual_entities.append(e)
 
     # TODO
     # def fetch_all(self):

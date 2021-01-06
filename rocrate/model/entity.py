@@ -66,7 +66,7 @@ class Entity(object):
         return self.crate.resolve_id(self.id)
 
     def hash(self):
-        hash(self.canonical_id)
+        hash(self.canonical_id())
 
     def _empty(self):
         val = {
