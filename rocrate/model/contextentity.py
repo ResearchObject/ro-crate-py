@@ -17,13 +17,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from urllib.parse import urlparse
-
 from .. import vocabs
-from ..utils import as_list
+from ..utils import as_list, is_url
 
 from .entity import Entity
-from arcp import is_arcp_uri
+
 
 """
 A property class that can be used during class declaration
@@ -71,17 +69,12 @@ class ContextEntity(Entity):
         super(ContextEntity, self).__init__(crate, identifier, properties)
 
     def format_id(self, identifier):
-        if is_arcp_uri(identifier):
+        if is_url(identifier):
+            return identifier
+        elif identifier.startswith('#'):
             return identifier
         else:
-            # check if it's an absolute URL
-            url = urlparse(identifier)
-            if all([url.scheme, url.netloc, url.path]):
-                return identifier
-            elif identifier.startswith('#'):
-                return identifier
-            else:
-                return '#' + identifier
+            return '#' + identifier
 
     def getmany(self, instance):
         for json in as_list(instance.get(self.property)):

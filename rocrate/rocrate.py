@@ -28,7 +28,7 @@ import shutil
 import tempfile
 
 from pathlib import Path
-from urllib.parse import urlsplit, urljoin
+from urllib.parse import urljoin
 
 from .model import contextentity
 from .model.root_dataset import RootDataset
@@ -44,6 +44,8 @@ from .model.testinstance import TestInstance  # noqa
 from .model.testservice import TestService  # noqa
 from .model.softwareapplication import SoftwareApplication  # noqa
 from .model.testsuite import TestSuite  # noqa
+
+from .utils import is_url
 
 
 class ROCrate():
@@ -328,7 +330,7 @@ class ROCrate():
         return None
 
     def resolve_id(self, id_):
-        if not urlsplit(id_).scheme:
+        if not is_url(id_):
             id_ = urljoin(self.arcp_base_uri, id_)  # also does path normalization
         return id_.rstrip("/")
 
