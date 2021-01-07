@@ -39,13 +39,9 @@ class Entity(object):
             self._jsonld = self._empty()
 
     # Format the given ID with rules appropriate for this type.
-    # For example:
-    #  * contextual entities MUST be absolute URIs, or begin with: #
-    #  * files MUST NOT begin with ./
-    #  * directories MUST NOT begin with ./ (except for the crate itself),
-    #    and MUST end with /
+    # For example, Dataset (directory) data entities SHOULD end with /
     def format_id(self, identifier):
-        return str(identifier).strip('./')
+        return str(identifier)
 
     def __repr__(self):
         return "<%s %s>" % (self.id, self.type)
@@ -70,7 +66,7 @@ class Entity(object):
         return self.crate.resolve_id(self.id)
 
     def hash(self):
-        hash(self.canonical_id)
+        hash(self.canonical_id())
 
     def _empty(self):
         val = {

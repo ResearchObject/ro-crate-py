@@ -105,7 +105,7 @@ def add_boilerplate(fn):
 def main():
     join = os.path.join
     for root, dirs, files in os.walk(TOP_DIR):
-        dirs[:] = [_ for _ in dirs if not _.startswith(".") and not _ in EXCLUDE_DIRS]
+        dirs[:] = [_ for _ in dirs if not _.startswith(".") and _ not in EXCLUDE_DIRS]
         for name in files:
             if not name.endswith(".py"):
                 continue

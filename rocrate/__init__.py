@@ -43,6 +43,9 @@ Copyright 2020 Center for Advanced Studies, Research and Development in Sardinia
 __license__ = ("Apache License, version 2.0 "
                "<https://www.apache.org/licenses/LICENSE-2.0>")
 
+# for arcp scheme registration with urllib.parse
+import arcp  # noqa
+
 # Convenience export of public functions/types
 from .model.metadata import Metadata  # noqa
 from ._version import __version__  # noqa

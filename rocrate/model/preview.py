@@ -27,7 +27,7 @@ from .file import File
 class Preview(File):
     """
     RO-Crate preview file
-    
+
     This object holds a preview of an RO Crate in HTML format_
     """
     BASENAME = "ro-crate-preview.html"
@@ -46,13 +46,13 @@ class Preview(File):
 
     def generate_html(self):
         base_path = os.path.abspath(os.path.dirname(__file__))
-        template = open(os.path.join(base_path,'..' ,'templates', 'preview_template.html.j2'))
+        template = open(os.path.join(base_path, '..', 'templates', 'preview_template.html.j2'))
         src = Template(template.read())
 
         def template_function(func):
             src.globals[func.__name__] = func
             return func
-        
+
         @template_function
         def stringify(a):
             if type(a) is list:
@@ -61,7 +61,7 @@ class Preview(File):
                 return a
             else:
                 if a._jsonld and a._jsonld['name']:
-                    return  a._jsonld['name']
+                    return a._jsonld['name']
                 else:
                     return a
 

@@ -21,7 +21,9 @@ import os
 
 from .entity import Entity
 
+
 class DataEntity(Entity):
+
     def __init__(self, crate, identifier, properties=None):
         if not identifier or str(identifier).startswith("#"):
             raise ValueError("Identifier for data entity must be a relative path or absolute URI: %s" % identifier)

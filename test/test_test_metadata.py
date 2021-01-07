@@ -94,14 +94,14 @@ def test_create():
     crate = ROCrate()
 
     test_service = TestService(crate, identifier=JENKINS)
-    crate._add_context_entity(test_service)
+    crate.add(test_service)
     test_service.name = "Jenkins"
     test_service.url = {"@id": "https://www.jenkins.io"}
     assert test_service.name == "Jenkins"
     assert test_service.url == "https://www.jenkins.io"
 
     test_instance = TestInstance(crate, identifier="#foo_instance_1")
-    crate._add_context_entity(test_instance)
+    crate.add(test_instance)
     test_instance.name = "Foo Instance 1"
     test_instance.url = {"@id": "http://example.org/foo"}
     test_instance.resource = "job/foobar"
@@ -115,14 +115,14 @@ def test_create():
     assert test_instance.service is test_service
 
     test_engine = SoftwareApplication(crate, identifier=PLANEMO)
-    crate._add_context_entity(test_engine)
+    crate.add(test_engine)
     test_engine.name = "Planemo"
     test_engine.url = {"@id": "https://github.com/galaxyproject/planemo"}
     assert test_engine.name == "Planemo"
     assert test_engine.url == "https://github.com/galaxyproject/planemo"
 
     test_definition = TestDefinition(crate, dest_path="test/foo/bar.yml")
-    crate._add_context_entity(test_definition)
+    crate.add(test_definition)
     test_definition.conformsTo = test_service
     assert test_definition.conformsTo is test_service
     test_definition.conformsTo = None
@@ -132,7 +132,7 @@ def test_create():
     assert test_definition.engineVersion == ">=0.70"
 
     test_suite = TestSuite(crate, "#foosuite")
-    crate._add_data_entity(test_suite)
+    crate.add(test_suite)
     assert test_suite.id == "#foosuite"
     assert test_suite.type == "TestSuite"
     test_suite.name = "Foo Suite"

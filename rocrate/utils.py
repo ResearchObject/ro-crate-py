@@ -18,7 +18,7 @@
 # limitations under the License.
 
 import collections
-from datetime import date, datetime
+from urllib.parse import urlsplit
 
 
 def first(iterable):
@@ -40,3 +40,8 @@ def as_list(list_or_other):
         and not isinstance(list_or_other, str)):  # FIXME: bytes?
         return list_or_other
     return [list_or_other]
+
+
+def is_url(string):
+    parts = urlsplit(string)
+    return all((parts.scheme, parts.netloc, parts.path))

@@ -69,7 +69,7 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     wf_path = Path(workflow_path)
     # should this be added in a special path within the crate?
     wf_file = Workflow(wf_crate, str(wf_path), wf_path.name)
-    wf_crate._add_data_entity(wf_file)
+    wf_crate.add(wf_file)
     wf_crate.set_main_entity(wf_file)
     if wf_type == 'CWL':
         programming_language_entity = entity.Entity(
@@ -91,7 +91,7 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
             atexit.register(os.unlink, f.name)
             abstract_wf_id = wf_path.with_suffix(".cwl").name
             abstract_wf_file = Workflow(wf_crate, f.name, abstract_wf_id)
-            wf_crate._add_data_entity(abstract_wf_file)
+            wf_crate.add(abstract_wf_file)
             wf_file["subjectOf"] = abstract_wf_file
         programming_language_entity = entity.Entity(
             wf_crate, 'https://galaxyproject.org/'
