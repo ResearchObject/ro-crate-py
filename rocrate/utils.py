@@ -19,7 +19,6 @@
 
 import collections
 from urllib.parse import urlsplit
-from datetime import date, datetime
 
 
 def first(iterable):

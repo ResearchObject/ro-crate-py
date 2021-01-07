@@ -33,7 +33,6 @@ from urllib.parse import urljoin
 from .model import contextentity
 from .model.root_dataset import RootDataset
 from .model.file import File
-from .model.person import Person
 from .model.dataset import Dataset
 from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
@@ -137,7 +136,10 @@ class ROCrate():
         if root and "Dataset" in root.get("@type", []):
             return (None, "./")
         # Uh oh..
-        raise KeyError("Can't find Root Data Entity in RO-Crate, see https://www.researchobject.org/ro-crate/1.1/root-data-entity.html")
+        raise KeyError(
+            "Can't find Root Data Entity in RO-Crate, "
+            "see https://www.researchobject.org/ro-crate/1.1/root-data-entity.html"
+        )
 
     def build_crate(self, entities, source, load_preview):
         # add data and contextual entities to the crate
