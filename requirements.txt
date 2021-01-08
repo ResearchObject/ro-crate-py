@@ -1,5 +1,5 @@
 requests
 arcp==0.2.1
-galaxy2cwl
+gxformat2
 jinja2
 python-dateutil

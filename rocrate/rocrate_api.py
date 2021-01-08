@@ -20,14 +20,13 @@
 import atexit
 import os
 import tempfile
-from contextlib import redirect_stdout
 from pathlib import Path
 
 import rocrate.rocrate as roc
 from rocrate.model import entity
 from rocrate.model.workflow import Workflow
-from galaxy2cwl import get_cwl_interface
-
+from gxformat2.yaml import ordered_dump, ordered_load
+from gxformat2.abstract import from_dict
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
                           fetch_remote=False, cwl=None, diagram=None):
@@ -86,8 +85,10 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
         if not cwl:
             # create cwl_abstract
             with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".cwl") as f:
-                with redirect_stdout(f):
-                    get_cwl_interface.main(['1', workflow_path])
+                with open(workflow_path) as orig_f:
+                    wf_dict = ordered_load(orig_f)
+                abstract_dict = from_dict(wf_dict)
+                ordered_dump(abstract_dict, f)
             atexit.register(os.unlink, f.name)
             abstract_wf_id = wf_path.with_suffix(".cwl").name
             abstract_wf_file = Workflow(wf_crate, f.name, abstract_wf_id)
