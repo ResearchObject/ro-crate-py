@@ -74,16 +74,17 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     # diagram: an image/graphical workflow representation.
     # If a CWL/CWLAbstract file is provided, this is generated using cwltool
 
+    wf_type = wf_type.lower()
     wf_crate = roc.ROCrate()
     workflow_path = Path(workflow_path)
     # should this be added in a special path within the crate?
     wf_file = Workflow(wf_crate, str(workflow_path), workflow_path.name)
     wf_crate.add(wf_file)
-    wf_crate.set_main_entity(wf_file)
+    wf_crate.mainEntity = wf_file
     lang = get_lang(wf_crate, wf_type)
     wf_crate.add(lang)
     wf_file['programmingLanguage'] = lang
-    if wf_type == 'Galaxy' and not cwl:
+    if wf_type == 'galaxy' and not cwl:
         abstract_wf = galaxy_to_abstract_cwl(wf_crate, workflow_path)
         wf_crate.add(abstract_wf)
         wf_file["subjectOf"] = abstract_wf
