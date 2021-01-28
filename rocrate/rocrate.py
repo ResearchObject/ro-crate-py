@@ -318,6 +318,14 @@ class ROCrate():
         self.root_dataset['CreativeWorkStatus'] = value
 
     @property
+    def mainEntity(self):
+        return self.root_dataset['mainEntity']
+
+    @mainEntity.setter
+    def mainEntity(self, value):
+        self.root_dataset['mainEntity'] = value
+
+    @property
     def test_dir(self):
         rval = self.dereference("test")
         if rval and "Dataset" in rval.type:
@@ -338,9 +346,6 @@ class ROCrate():
 
     def get_entities(self):
         return self.__entity_map.values()
-
-    def set_main_entity(self, main_entity):
-        self.root_dataset['mainEntity'] = main_entity
 
     def _get_root_jsonld(self):
         self.root_dataset.properties()
