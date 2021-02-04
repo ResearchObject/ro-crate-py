@@ -78,8 +78,7 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     wf_crate = roc.ROCrate()
     workflow_path = Path(workflow_path)
     # should this be added in a special path within the crate?
-    wf_file = ComputationalWorkflow(wf_crate, str(workflow_path), workflow_path.name)
-    wf_crate.add(wf_file)
+    wf_file = wf_crate.add(ComputationalWorkflow(wf_crate, str(workflow_path), workflow_path.name))
     wf_crate.mainEntity = wf_file
     lang = get_lang(wf_crate, wf_type)
     wf_crate.add(lang)

@@ -354,21 +354,14 @@ class ROCrate():
         canonical_id = self.resolve_id(entity_id)
         return self.__entity_map.get(canonical_id, None)
 
-    # source: file object or path (str)
-    def add_file(self, source, crate_path=None, fetch_remote=False,
-                 properties={}, **kwargs):
-        props = dict(properties)
-        props.update(kwargs)
-        file_entity = File(self, source=source, dest_path=crate_path, fetch_remote=fetch_remote, properties=props)
-        self.add(file_entity)
-        return file_entity
+    def add_file(self, source, dest_path=None, fetch_remote=False,
+                 validate_url=True, properties=None):
+        return self.add(File(self, source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties))
 
-    def add_directory(self, source, crate_path=None, properties={}, **kwargs):
-        props = dict(properties)
-        props.update(kwargs)
-        dataset_entity = Dataset(self, source, crate_path, properties)
-        self.add(dataset_entity)
-        return dataset_entity
+    def add_dataset(self, source, dest_path=None, properties=None):
+        return self.add(Dataset(self, source, dest_path=dest_path, properties=properties))
+
+    add_directory = add_dataset
 
     def add(self, *entities):
         for e in entities:
@@ -389,6 +382,7 @@ class ROCrate():
                 self.data_entities.append(e)
             else:
                 self.contextual_entities.append(e)
+        return entities[0] if len(entities) == 1 else entities
 
     # TODO
     # def fetch_all(self):

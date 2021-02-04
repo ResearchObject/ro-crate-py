@@ -33,7 +33,9 @@ from .data_entity import DataEntity
 class File(DataEntity):
 
     def __init__(self, crate, source=None, dest_path=None, fetch_remote=False,
-                 validate_url=True, properties={}):
+                 validate_url=True, properties=None):
+        if properties is None:
+            properties = {}
         # process source
         self.fetch_remote = fetch_remote
         self.source = source
@@ -81,8 +83,6 @@ class File(DataEntity):
                     identifier = os.path.basename(source)
                 else:
                     identifier = source
-                if not properties:
-                    properties = {}
                 # set url to the source. When creating through workflowhub
                 # this is auto set to URL Workflow Hub page
                 properties.update({'url': source})
