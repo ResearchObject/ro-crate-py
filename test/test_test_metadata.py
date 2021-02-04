@@ -123,8 +123,8 @@ def test_create():
 
     test_definition = TestDefinition(crate, dest_path="test/foo/bar.yml")
     crate.add(test_definition)
-    test_definition.conformsTo = test_service
-    assert test_definition.conformsTo is test_service
+    test_definition.conformsTo = test_engine
+    assert test_definition.conformsTo is test_engine
     test_definition.conformsTo = None
     test_definition.engine = test_engine
     test_definition.engineVersion = ">=0.70"

@@ -24,7 +24,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 import rocrate.rocrate as roc
-from rocrate.model.workflow import Workflow
+from rocrate.model.computationalworkflow import ComputationalWorkflow
 from rocrate.model.computerlanguage import get_lang
 from galaxy2cwl import get_cwl_interface
 
@@ -35,7 +35,7 @@ def galaxy_to_abstract_cwl(crate, workflow_path):
             get_cwl_interface.main(['1', str(workflow_path)])
     atexit.register(os.unlink, f.name)
     abstract_wf_id = workflow_path.with_suffix(".cwl").name
-    return Workflow(crate, f.name, abstract_wf_id)
+    return ComputationalWorkflow(crate, f.name, abstract_wf_id)
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
@@ -78,8 +78,7 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     wf_crate = roc.ROCrate()
     workflow_path = Path(workflow_path)
     # should this be added in a special path within the crate?
-    wf_file = Workflow(wf_crate, str(workflow_path), workflow_path.name)
-    wf_crate.add(wf_file)
+    wf_file = wf_crate.add(ComputationalWorkflow(wf_crate, str(workflow_path), workflow_path.name))
     wf_crate.mainEntity = wf_file
     lang = get_lang(wf_crate, wf_type)
     wf_crate.add(lang)

@@ -22,7 +22,7 @@ import os
 from .file import File
 
 
-class Workflow(File):
+class ComputationalWorkflow(File):
     """\
     A scientific workflow that was used (or can be used) to analyze or
     generate files in the RO-Crate.
@@ -37,6 +37,6 @@ class Workflow(File):
         }
 
 
-class LegacyWorkflow(Workflow):
+class Workflow(ComputationalWorkflow):
 
     TYPES = ["File", "SoftwareSourceCode", "Workflow"]
