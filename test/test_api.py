@@ -26,6 +26,7 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     assert isinstance(wf_crate, ROCrate)
 
     wf = wf_crate.dereference(wf_id)
+    assert wf._default_type == "ComputationalWorkflow"
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference("#galaxy")
     assert hasattr(lang, "name")
