@@ -408,3 +408,18 @@ class ROCrate():
             writable_entity.write_zip(zf)
         zf.close()
         return zf.filename
+
+    def add_test_suite(self, identifier=None, name=None, main_entity=None):
+        if not main_entity:
+            main_entity = self.mainEntity
+            if not main_entity:
+                raise ValueError("crate does not have a main entity")
+        suite = self.add(TestSuite(self, identifier))
+        suite.name = name or suite.id.lstrip("#")
+        suite["mainEntity"] = main_entity
+        # note that a test dir is required (possibly empty) even if the suite
+        # is going to have only instances (no definitions)
+        test_dir = self.test_dir or self.add_directory(dest_path="test")
+        suite_set = set(test_dir["about"] or [])
+        suite_set.add(suite)
+        test_dir["about"] = list(suite_set)
