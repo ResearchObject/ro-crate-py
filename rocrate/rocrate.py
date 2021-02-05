@@ -354,12 +354,12 @@ class ROCrate():
         canonical_id = self.resolve_id(entity_id)
         return self.__entity_map.get(canonical_id, None)
 
-    def add_file(self, source, dest_path=None, fetch_remote=False,
+    def add_file(self, source=None, dest_path=None, fetch_remote=False,
                  validate_url=True, properties=None):
-        return self.add(File(self, source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties))
+        return self.add(File(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties))
 
-    def add_dataset(self, source, dest_path=None, properties=None):
-        return self.add(Dataset(self, source, dest_path=dest_path, properties=properties))
+    def add_dataset(self, source=None, dest_path=None, properties=None):
+        return self.add(Dataset(self, source=source, dest_path=dest_path, properties=properties))
 
     add_directory = add_dataset
 
