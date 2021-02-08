@@ -423,3 +423,4 @@ class ROCrate():
         suite_set = set(test_dir["about"] or [])
         suite_set.add(suite)
         test_dir["about"] = list(suite_set)
+        return suite
