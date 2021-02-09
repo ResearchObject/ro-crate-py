@@ -33,6 +33,7 @@ TestSuite.__test__ = False
 
 
 JENKINS = "https://w3id.org/ro/terms/test#JenkinsService"
+TRAVIS = "https://w3id.org/ro/terms/test#TravisService"
 PLANEMO = "https://w3id.org/ro/terms/test#PlanemoEngine"
 
 
@@ -181,3 +182,46 @@ def test_add_test_suite(test_data_dir, helpers):
     assert s4.name == "Foo"
     suites.add(s4)
     assert suites == set(crate.test_dir["about"])
+
+
+def test_add_test_instance(test_data_dir, helpers):
+    top_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    wf_path = top_dir / "sort-and-change-case.ga"
+    crate = ROCrate()
+    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    crate.mainEntity = wf
+    suite = crate.add_test_suite()
+    instances = set()
+    assert crate.dereference(JENKINS) is None
+    assert crate.dereference(TRAVIS) is None
+    i1 = crate.add_test_instance(suite, "http://example.com")
+    assert crate.dereference(JENKINS) is i1.service
+    assert crate.dereference(TRAVIS) is None
+    assert i1.url == "http://example.com"
+    instances.add(i1)
+    assert instances == set(suite.instance)
+    i2 = crate.add_test_instance(suite.id, "http://example.com")
+    assert i2.url == "http://example.com"
+    instances.add(i2)
+    assert instances == set(suite.instance)
+    i3 = crate.add_test_instance(suite, "http://example.com", resource="jobs")
+    assert i3.url == "http://example.com"
+    assert i3.resource == "jobs"
+    instances.add(i3)
+    assert instances == set(suite.instance)
+    i4 = crate.add_test_instance(suite, "http://example.com", service="travis")
+    assert i4.url == "http://example.com"
+    assert i4.service.id == TRAVIS
+    assert i4.service is crate.dereference(TRAVIS)
+    instances.add(i4)
+    assert instances == set(suite.instance)
+    i5 = crate.add_test_instance(suite, "http://example.com", identifier="test_1_1")
+    assert i5.url == "http://example.com"
+    assert i5.id == "#test_1_1"
+    instances.add(i5)
+    assert instances == set(suite.instance)
+    i6 = crate.add_test_instance(suite, "http://example.com", name="Test 1 Instance 1")
+    assert i6.url == "http://example.com"
+    assert i6.name == "Test 1 Instance 1"
+    instances.add(i6)
+    assert instances == set(suite.instance)

@@ -39,10 +39,10 @@ from .model.preview import Preview
 from .model.testdefinition import TestDefinition
 
 # Imports for the __subclasses__ hack below
-from .model.testinstance import TestInstance  # noqa
-from .model.testservice import TestService  # noqa
+from .model.testinstance import TestInstance
+from .model.testservice import TestService, get_service
 from .model.softwareapplication import SoftwareApplication  # noqa
-from .model.testsuite import TestSuite  # noqa
+from .model.testsuite import TestSuite
 
 from .utils import is_url
 
@@ -424,3 +424,26 @@ class ROCrate():
         suite_set.add(suite)
         test_dir["about"] = list(suite_set)
         return suite
+
+    def add_test_instance(self, suite, url, resource="", service="jenkins", identifier=None, name=None):
+        if isinstance(suite, TestSuite):
+            assert suite.crate is self
+        else:
+            suite = self.dereference(suite)
+            if suite is None:
+                raise ValueError("suite not found")
+        instance = self.add(TestInstance(self, identifier))
+        instance.url = url
+        instance.resource = resource
+        if isinstance(service, TestService):
+            assert service.crate is self
+        else:
+            service = get_service(self, service)
+            if not self.dereference(service.id):
+                self.add(service)
+        instance.service = service
+        instance.name = name or instance.id.lstrip("#")
+        instance_set = set(suite.instance or [])
+        instance_set.add(instance)
+        suite.instance = list(instance_set)
+        return instance
