@@ -15,12 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
+
 from rocrate.rocrate import ROCrate
 from rocrate.model.testservice import TestService
 from rocrate.model.testinstance import TestInstance
 from rocrate.model.testdefinition import TestDefinition
 from rocrate.model.testsuite import TestSuite
 from rocrate.model.softwareapplication import SoftwareApplication
+from rocrate.model.computationalworkflow import ComputationalWorkflow
 
 # Tell pytest these are not test classes (so it doesn't try to collect them)
 TestService.__test__ = False
@@ -30,6 +33,7 @@ TestSuite.__test__ = False
 
 
 JENKINS = "https://w3id.org/ro/terms/test#JenkinsService"
+TRAVIS = "https://w3id.org/ro/terms/test#TravisService"
 PLANEMO = "https://w3id.org/ro/terms/test#PlanemoEngine"
 
 
@@ -142,3 +146,103 @@ def test_create():
     assert len(test_suite.instance) == 1
     assert test_suite.instance[0] is test_instance
     assert test_suite.definition is test_definition
+
+
+def test_add_test_suite(test_data_dir, helpers):
+    top_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    wf_path = top_dir / "sort-and-change-case.ga"
+    crate = ROCrate()
+    with pytest.raises(ValueError):  # no main entity
+        crate.add_test_suite()
+    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    crate.mainEntity = wf
+    suites = set()
+    assert crate.test_dir is None
+    s1 = crate.add_test_suite()
+    assert crate.test_dir is not None
+    assert s1["mainEntity"] is wf
+    suites.add(s1)
+    assert suites == set(crate.test_dir["about"])
+    s2 = crate.add_test_suite(identifier="test1")
+    assert s2["mainEntity"] is wf
+    assert s2.id == "#test1"
+    suites.add(s2)
+    assert suites == set(crate.test_dir["about"])
+    s3 = crate.add_test_suite(identifier="test2", name="Test 2")
+    assert s3["mainEntity"] is wf
+    assert s3.id == "#test2"
+    assert s3.name == "Test 2"
+    suites.add(s3)
+    assert suites == set(crate.test_dir["about"])
+    wf2_path = top_dir / "README.md"
+    wf2 = crate.add(ComputationalWorkflow(crate, wf2_path, wf2_path.name))
+    s4 = crate.add_test_suite(identifier="test3", name="Foo", main_entity=wf2)
+    assert s4["mainEntity"] is wf2
+    assert s4.id == "#test3"
+    assert s4.name == "Foo"
+    suites.add(s4)
+    assert suites == set(crate.test_dir["about"])
+
+
+def test_add_test_instance(test_data_dir, helpers):
+    top_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    wf_path = top_dir / "sort-and-change-case.ga"
+    crate = ROCrate()
+    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    crate.mainEntity = wf
+    suite = crate.add_test_suite()
+    instances = set()
+    assert crate.dereference(JENKINS) is None
+    assert crate.dereference(TRAVIS) is None
+    i1 = crate.add_test_instance(suite, "http://example.com")
+    assert crate.dereference(JENKINS) is i1.service
+    assert crate.dereference(TRAVIS) is None
+    assert i1.url == "http://example.com"
+    instances.add(i1)
+    assert instances == set(suite.instance)
+    i2 = crate.add_test_instance(suite.id, "http://example.com")
+    assert i2.url == "http://example.com"
+    instances.add(i2)
+    assert instances == set(suite.instance)
+    i3 = crate.add_test_instance(suite, "http://example.com", resource="jobs")
+    assert i3.url == "http://example.com"
+    assert i3.resource == "jobs"
+    instances.add(i3)
+    assert instances == set(suite.instance)
+    i4 = crate.add_test_instance(suite, "http://example.com", service="travis")
+    assert i4.url == "http://example.com"
+    assert i4.service.id == TRAVIS
+    assert i4.service is crate.dereference(TRAVIS)
+    instances.add(i4)
+    assert instances == set(suite.instance)
+    i5 = crate.add_test_instance(suite, "http://example.com", identifier="test_1_1")
+    assert i5.url == "http://example.com"
+    assert i5.id == "#test_1_1"
+    instances.add(i5)
+    assert instances == set(suite.instance)
+    i6 = crate.add_test_instance(suite, "http://example.com", name="Test 1 Instance 1")
+    assert i6.url == "http://example.com"
+    assert i6.name == "Test 1 Instance 1"
+    instances.add(i6)
+    assert instances == set(suite.instance)
+
+
+@pytest.mark.parametrize("engine,engine_version", [(None, None), ("planemo", None), ("planemo", ">=0.70")])
+def test_add_test_definition(test_data_dir, helpers, engine, engine_version):
+    top_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    wf_path = top_dir / "sort-and-change-case.ga"
+    def_path = top_dir / "test" / "test1" / "sort-and-change-case-test.yml"
+    crate = ROCrate()
+    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    crate.mainEntity = wf
+    suite = crate.add_test_suite()
+    assert crate.dereference(PLANEMO) is None
+    kwargs = {"source": def_path}
+    if engine:
+        kwargs["engine"] = engine
+    if engine_version:
+        kwargs["engine_version"] = engine_version
+    d = crate.add_test_definition(suite, **kwargs)
+    assert crate.dereference(PLANEMO) is d.engine
+    if engine_version:
+        assert d.engineVersion == engine_version

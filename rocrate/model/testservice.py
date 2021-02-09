@@ -45,3 +45,39 @@ class TestService(ContextEntity):
     @url.setter
     def url(self, url):
         self["url"] = url
+
+
+JENKINS_ID = "https://w3id.org/ro/terms/test#JenkinsService"
+TRAVIS_ID = "https://w3id.org/ro/terms/test#TravisService"
+
+
+def jenkins(crate):
+    return TestService(crate, identifier=JENKINS_ID, properties={
+        "name": "Jenkins",
+        "url": {
+            "@id": "https://www.jenkins.io"
+        },
+    })
+
+
+def travis(crate):
+    return TestService(crate, identifier=TRAVIS_ID, properties={
+        "name": "Travis CI",
+        "url": {
+            "@id": "https://www.travis-ci.com"
+        },
+    })
+
+
+SERVICE_MAP = {
+    "jenkins": jenkins,
+    "travis": travis,
+}
+
+
+def get_service(crate, name):
+    try:
+        func = SERVICE_MAP[name.lower()]
+    except KeyError:
+        raise ValueError(f"Unknown service: {name}")
+    return func(crate)
