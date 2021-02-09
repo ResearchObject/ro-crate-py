@@ -18,6 +18,7 @@
 import io
 import pytest
 import zipfile
+from urllib.error import URLError
 
 from rocrate.model.dataset import Dataset
 from rocrate.model.person import Person
@@ -134,3 +135,24 @@ def test_remote_uri(tmpdir, helpers, fetch_remote):
     file1 = out_path / 'sample_file.txt'
     if fetch_remote:
         assert file1.exists()
+
+
+def test_remote_uri_exceptions(tmpdir, helpers):
+    crate = ROCrate()
+    url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
+           'master/test/test-data/_do_not_create_this_.foo')
+    crate.add_file(source=url, fetch_remote=True)
+    out_path = tmpdir / 'ro_crate_out_1'
+    out_path.mkdir()
+    with pytest.raises(URLError):
+        crate.write_crate(out_path)
+
+    crate = ROCrate()
+    url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
+           'master/test/test-data/sample_file.txt')
+    crate.add_file(source=url, dest_path="a/sample_file.txt", fetch_remote=True)
+    out_path = tmpdir / 'ro_crate_out_2'
+    out_path.mkdir()
+    (out_path / "a").mkdir(mode=0o444)
+    with pytest.raises(PermissionError):
+        crate.write_crate(out_path)

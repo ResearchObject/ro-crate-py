@@ -119,12 +119,8 @@ class File(DataEntity):
                     #   self._jsonld['contentSize']
                     # this would help check if the dataset to be retrieved is
                     # in fact what was registered in the first place.
-                    try:
-                        with urllib.request.urlopen(self.source) as response, \
-                             open(out_file_path, 'wb') as out_file:
-                            shutil.copyfileobj(response, out_file)
-                    except Exception:  # requests.ConnectionError as exception:
-                        print("URI does not exists or can't be accessed")
+                    with urllib.request.urlopen(self.source) as response, open(out_file_path, 'wb') as out_file:
+                        shutil.copyfileobj(response, out_file)
 
     def write_zip(self, zip_out):
         zip_out.write(self.source, self.id)
