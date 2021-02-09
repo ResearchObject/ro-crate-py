@@ -37,7 +37,7 @@ def test_file_writing(test_data_dir, tmpdir, helpers, to_zip):
     crate.creator = new_person
 
     sample_file_id = 'sample_file.txt'
-    sample_file2_id = 'subdir/sample_file2.csv'
+    sample_file2_id = 'a/b/sample_file2.csv'
     test_dir_id = 'test_add_dir/'
     data_entity_ids = [sample_file_id, sample_file2_id, test_dir_id]
     file_subdir_id = 'sample_file_subdir.txt'
@@ -97,7 +97,7 @@ def test_file_writing(test_data_dir, tmpdir, helpers, to_zip):
 def test_file_stringio(tmpdir, helpers):
     crate = ROCrate()
 
-    test_file_id = 'test_file.txt'
+    test_file_id = 'a/b/test_file.txt'
     file_content = 'This will be the content of the file'
     file_stringio = io.StringIO(file_content)
     file_returned = crate.add_file(file_stringio, test_file_id)
@@ -120,10 +120,11 @@ def test_remote_uri(tmpdir, helpers, fetch_remote):
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
            'master/test/test-data/sample_file.txt')
-    file_returned = crate.add_file(source=url, fetch_remote=fetch_remote)
     if fetch_remote:
-        assert file_returned.id == 'sample_file.txt'
+        file_returned = crate.add_file(source=url, dest_path="a/b/sample_file.txt", fetch_remote=fetch_remote)
+        assert file_returned.id == 'a/b/sample_file.txt'
     else:
+        file_returned = crate.add_file(source=url, fetch_remote=fetch_remote)
         assert file_returned.id == url
 
     out_path = tmpdir / 'ro_crate_out'
@@ -132,7 +133,7 @@ def test_remote_uri(tmpdir, helpers, fetch_remote):
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
-    file1 = out_path / 'sample_file.txt'
+    file1 = out_path / 'a/b/sample_file.txt'
     if fetch_remote:
         assert file1.exists()
 
