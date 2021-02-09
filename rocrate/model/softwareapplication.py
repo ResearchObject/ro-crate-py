@@ -50,3 +50,29 @@ class SoftwareApplication(ContextEntity, CreativeWork):
     @version.setter
     def version(self, version):
         self["version"] = version
+
+
+PLANEMO_ID = "https://w3id.org/ro/terms/test#PlanemoEngine"
+PLANEMO_DEFAULT_VERSION = "0.74"
+
+
+def planemo(crate):
+    return SoftwareApplication(crate, identifier=PLANEMO_ID, properties={
+        "name": "Planemo",
+        "url": {
+            "@id": "https://github.com/galaxyproject/planemo"
+        }
+    })
+
+
+APP_MAP = {
+    "planemo": planemo,
+}
+
+
+def get_app(crate, name):
+    try:
+        func = APP_MAP[name.lower()]
+    except KeyError:
+        raise ValueError(f"Unknown application: {name}")
+    return func(crate)

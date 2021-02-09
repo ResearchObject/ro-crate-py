@@ -225,3 +225,24 @@ def test_add_test_instance(test_data_dir, helpers):
     assert i6.name == "Test 1 Instance 1"
     instances.add(i6)
     assert instances == set(suite.instance)
+
+
+@pytest.mark.parametrize("engine,engine_version", [(None, None), ("planemo", None), ("planemo", ">=0.70")])
+def test_add_test_definition(test_data_dir, helpers, engine, engine_version):
+    top_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    wf_path = top_dir / "sort-and-change-case.ga"
+    def_path = top_dir / "test" / "test1" / "sort-and-change-case-test.yml"
+    crate = ROCrate()
+    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    crate.mainEntity = wf
+    suite = crate.add_test_suite()
+    assert crate.dereference(PLANEMO) is None
+    kwargs = {"source": def_path}
+    if engine:
+        kwargs["engine"] = engine
+    if engine_version:
+        kwargs["engine_version"] = engine_version
+    d = crate.add_test_definition(suite, **kwargs)
+    assert crate.dereference(PLANEMO) is d.engine
+    if engine_version:
+        assert d.engineVersion == engine_version

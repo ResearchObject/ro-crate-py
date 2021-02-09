@@ -41,7 +41,7 @@ from .model.testdefinition import TestDefinition
 # Imports for the __subclasses__ hack below
 from .model.testinstance import TestInstance
 from .model.testservice import TestService, get_service
-from .model.softwareapplication import SoftwareApplication  # noqa
+from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEFAULT_VERSION
 from .model.testsuite import TestSuite
 
 from .utils import is_url
@@ -426,12 +426,7 @@ class ROCrate():
         return suite
 
     def add_test_instance(self, suite, url, resource="", service="jenkins", identifier=None, name=None):
-        if isinstance(suite, TestSuite):
-            assert suite.crate is self
-        else:
-            suite = self.dereference(suite)
-            if suite is None:
-                raise ValueError("suite not found")
+        suite = self.__validate_suite(suite)
         instance = self.add(TestInstance(self, identifier))
         instance.url = url
         instance.resource = resource
@@ -447,3 +442,31 @@ class ROCrate():
         instance_set.add(instance)
         suite.instance = list(instance_set)
         return instance
+
+    def add_test_definition(
+            self, suite, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
+            engine="planemo", engine_version=PLANEMO_DEFAULT_VERSION
+    ):
+        suite = self.__validate_suite(suite)
+        definition = self.add(
+            TestDefinition(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties)
+        )
+        if isinstance(engine, SoftwareApplication):
+            assert engine.crate is self
+        else:
+            engine = get_app(self, engine)
+            if not self.dereference(engine.id):
+                self.add(engine)
+        definition.engine = engine
+        definition.engineVersion = engine_version
+        suite.definition = definition
+        return definition
+
+    def __validate_suite(self, suite):
+        if isinstance(suite, TestSuite):
+            assert suite.crate is self
+        else:
+            suite = self.dereference(suite)
+            if suite is None:
+                raise ValueError("suite not found")
+        return suite
