@@ -140,7 +140,7 @@ def test_remote_uri(tmpdir, helpers, fetch_remote):
 
 
 @pytest.mark.skipif(sys.platform.startswith("win"), reason="dir mode has no effect on Windows")
-def test_remote_uri_exceptions(tmpdir, helpers):
+def test_remote_uri_exceptions(tmpdir):
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
            'master/test/test-data/_do_not_create_this_.foo')
