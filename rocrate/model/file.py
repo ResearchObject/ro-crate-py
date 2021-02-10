@@ -96,18 +96,16 @@ class File(DataEntity):
         return val
 
     def write(self, base_path):
-        out_file_path = os.path.join(base_path, self.id)
-        out_dir = pathlib.Path(os.path.dirname(out_file_path))
+        base_path = pathlib.Path(base_path)
+        out_file_path = base_path / self.id
         # check if its local or remote URI
         if isinstance(self.source, IOBase):
-            if not out_dir.exists():
-                os.mkdir(out_dir)
+            out_file_path.parent.mkdir(parents=True, exist_ok=True)
             with open(out_file_path, 'w') as out_file:
                 out_file.write(self.source.getvalue())
         else:
             if os.path.isfile(self.source):
-                if not out_dir.exists():
-                    os.mkdir(out_dir)
+                out_file_path.parent.mkdir(parents=True, exist_ok=True)
                 copy(self.source, out_file_path)
             else:
                 if self.fetch_remote:
@@ -119,12 +117,9 @@ class File(DataEntity):
                     #   self._jsonld['contentSize']
                     # this would help check if the dataset to be retrieved is
                     # in fact what was registered in the first place.
-                    try:
-                        with urllib.request.urlopen(self.source) as response, \
-                             open(out_file_path, 'wb') as out_file:
-                            shutil.copyfileobj(response, out_file)
-                    except Exception:  # requests.ConnectionError as exception:
-                        print("URI does not exists or can't be accessed")
+                    out_file_path.parent.mkdir(parents=True, exist_ok=True)
+                    with urllib.request.urlopen(self.source) as response, open(out_file_path, 'wb') as out_file:
+                        shutil.copyfileobj(response, out_file)
 
     def write_zip(self, zip_out):
         zip_out.write(self.source, self.id)
