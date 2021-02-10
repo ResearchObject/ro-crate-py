@@ -18,6 +18,7 @@
 import io
 import pytest
 import sys
+import uuid
 import zipfile
 from urllib.error import URLError
 
@@ -143,7 +144,7 @@ def test_remote_uri(tmpdir, helpers, fetch_remote):
 def test_remote_uri_exceptions(tmpdir):
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
-           'master/test/test-data/_do_not_create_this_.foo')
+           f'master/test/test-data/{uuid.uuid4().hex}.foo')
     crate.add_file(source=url, fetch_remote=True)
     out_path = tmpdir / 'ro_crate_out_1'
     out_path.mkdir()
