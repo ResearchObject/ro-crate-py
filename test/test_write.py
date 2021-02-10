@@ -160,3 +160,28 @@ def test_remote_uri_exceptions(tmpdir):
     (out_path / "a").mkdir(mode=0o444)
     with pytest.raises(PermissionError):
         crate.write_crate(out_path)
+
+
+@pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
+def test_missing_source(test_data_dir, fetch_remote, validate_url):
+    crate = ROCrate()
+    path = test_data_dir / uuid.uuid4().hex
+    with pytest.raises(ValueError):
+        crate.add_file(str(path), fetch_remote=fetch_remote, validate_url=validate_url)
+
+    with pytest.raises(ValueError):
+        crate.add_file(str(path), path.name, fetch_remote=fetch_remote, validate_url=validate_url)
+
+
+@pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
+def test_stringio_no_dest(test_data_dir, fetch_remote, validate_url):
+    crate = ROCrate()
+    with pytest.raises(ValueError):
+        crate.add_file(io.StringIO("foo"))
+
+
+@pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
+def test_no_source_no_dest(test_data_dir, fetch_remote, validate_url):
+    crate = ROCrate()
+    with pytest.raises(ValueError):
+        crate.add_file()
