@@ -17,6 +17,7 @@
 
 import io
 import pytest
+import sys
 import zipfile
 from urllib.error import URLError
 
@@ -138,6 +139,7 @@ def test_remote_uri(tmpdir, helpers, fetch_remote):
         assert file1.exists()
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="dir mode has no effect on Windows")
 def test_remote_uri_exceptions(tmpdir, helpers):
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
