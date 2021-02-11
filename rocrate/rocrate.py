@@ -49,7 +49,7 @@ from .utils import is_url
 
 class ROCrate():
 
-    def __init__(self, source_path=None, load_preview=False):
+    def __init__(self, source_path=None, load_preview=False, init=False):
         self.__entity_map = {}
         self.default_entities = []
         self.data_entities = []
@@ -66,6 +66,9 @@ class ROCrate():
         if not source_path:
             # create a new ro-crate
             self.add(RootDataset(self), Metadata(self))
+        elif init:
+            # initialize an ro-crate from a directory tree
+            self.init(source_path)
         else:
             # load an existing ro-crate
             if zipfile.is_zipfile(source_path):
@@ -86,6 +89,19 @@ class ROCrate():
             entities = self.entities_from_metadata(metadata_path)
             self.build_crate(entities, source_path, load_preview)
             # TODO: load root dataset properties
+
+    def init(self, top_dir):
+        if not os.path.isdir(top_dir):
+            raise ValueError(f"{top_dir} is not a valid directory path")
+        self.add(RootDataset(self), Metadata(self))
+        for root, dirs, files in os.walk(top_dir):
+            root = Path(root)
+            for name in dirs:
+                source = root / name
+                self.add_dataset(source, source.relative_to(top_dir))
+            for name in files:
+                source = root / name
+                self.add_file(source, source.relative_to(top_dir))
 
     def entities_from_metadata(self, metadata_path):
         # Creates a dictionary {id: entity} from the metadata file
