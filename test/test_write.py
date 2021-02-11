@@ -18,6 +18,7 @@
 import io
 import pytest
 import sys
+import uuid
 import zipfile
 from urllib.error import URLError
 
@@ -140,10 +141,10 @@ def test_remote_uri(tmpdir, helpers, fetch_remote):
 
 
 @pytest.mark.skipif(sys.platform.startswith("win"), reason="dir mode has no effect on Windows")
-def test_remote_uri_exceptions(tmpdir, helpers):
+def test_remote_uri_exceptions(tmpdir):
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
-           'master/test/test-data/_do_not_create_this_.foo')
+           f'master/test/test-data/{uuid.uuid4().hex}.foo')
     crate.add_file(source=url, fetch_remote=True)
     out_path = tmpdir / 'ro_crate_out_1'
     out_path.mkdir()
@@ -159,3 +160,28 @@ def test_remote_uri_exceptions(tmpdir, helpers):
     (out_path / "a").mkdir(mode=0o444)
     with pytest.raises(PermissionError):
         crate.write_crate(out_path)
+
+
+@pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
+def test_missing_source(test_data_dir, fetch_remote, validate_url):
+    crate = ROCrate()
+    path = test_data_dir / uuid.uuid4().hex
+    with pytest.raises(ValueError):
+        crate.add_file(str(path), fetch_remote=fetch_remote, validate_url=validate_url)
+
+    with pytest.raises(ValueError):
+        crate.add_file(str(path), path.name, fetch_remote=fetch_remote, validate_url=validate_url)
+
+
+@pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
+def test_stringio_no_dest(test_data_dir, fetch_remote, validate_url):
+    crate = ROCrate()
+    with pytest.raises(ValueError):
+        crate.add_file(io.StringIO("foo"))
+
+
+@pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
+def test_no_source_no_dest(test_data_dir, fetch_remote, validate_url):
+    crate = ROCrate()
+    with pytest.raises(ValueError):
+        crate.add_file()

@@ -25,9 +25,9 @@ import urllib
 from io import IOBase
 from shutil import copy
 from urllib.error import HTTPError
-from urllib.parse import urlparse
 
 from .data_entity import DataEntity
+from ..utils import is_url
 
 
 class File(DataEntity):
@@ -36,25 +36,27 @@ class File(DataEntity):
                  validate_url=True, properties=None):
         if properties is None:
             properties = {}
-        # process source
         self.fetch_remote = fetch_remote
         self.source = source
+        is_local = is_remote = False
+        if isinstance(source, (str, pathlib.Path)):
+            is_local = os.path.isfile(str(source))
+            is_remote = is_url(str(source))
+            if not is_local and not is_remote:
+                raise ValueError(f"'{source}' is not a path to a local file or a valid remote URI")
+        elif dest_path is None:
+            raise ValueError("dest_path must be provided if source is not a path or URI")
         if dest_path:
             # the entity is refrencing a path relative to the ro-crate root
             identifier = dest_path  # relative path?
         else:
             # if there is no dest_path there must be a URI/local path as source
-            if os.path.isfile(source):
+            if is_local:
                 # local source -> becomes local reference = reference relative
                 # to ro-crate root
                 identifier = os.path.basename(source)
             else:
                 # entity is refering an external object (absolute URI)
-                # first chec that it is a valid remote URI
-                url = urlparse(source)
-                if not all([url.scheme, url.netloc, url.path]):
-                    raise RuntimeError("Source is not a path to a local file"
-                                       " or a valid remote URI")
                 if validate_url:
 
                     # specification says remote URI should always be
