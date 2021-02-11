@@ -23,7 +23,7 @@ class TestDefinition(File):
     def _empty(self):
         return {
             "@id": self.id,
-            "@type": 'TestDefinition'
+            "@type": ['File', 'TestDefinition']
         }
 
     @property
