@@ -3,3 +3,4 @@ arcp==0.2.1
 galaxy2cwl
 jinja2
 python-dateutil
+Click
