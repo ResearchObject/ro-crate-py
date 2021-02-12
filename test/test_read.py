@@ -17,9 +17,12 @@
 
 import pytest
 import shutil
+import uuid
 from pathlib import Path
 
 from rocrate.rocrate import ROCrate
+from rocrate.model.file import File
+from rocrate.model.dataset import Dataset
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
@@ -148,3 +151,82 @@ def test_legacy_crate(test_data_dir, tmpdir, helpers):
     main_wf = crate.dereference('test_galaxy_wf.ga')
     wf_prop = main_wf.properties()
     assert set(wf_prop['@type']) == helpers.LEGACY_WORKFLOW_TYPES
+
+
+def test_bad_crate(test_data_dir, tmpdir):
+    # nonexistent dir
+    crate_dir = test_data_dir / uuid.uuid4().hex
+    with pytest.raises(ValueError):
+        ROCrate(crate_dir)
+    with pytest.raises(ValueError):
+        ROCrate(crate_dir, init=True)
+    # no metadata file
+    crate_dir = tmpdir / uuid.uuid4().hex
+    crate_dir.mkdir()
+    with pytest.raises(ValueError):
+        ROCrate(crate_dir)
+
+
+@pytest.mark.parametrize("override", [False, True])
+def test_init(test_data_dir, tmpdir, helpers, override):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    if not override:
+        (crate_dir / helpers.METADATA_FILE_NAME).unlink()
+    crate = ROCrate(crate_dir, init=True)
+    assert crate.dereference("./") is not None
+    assert crate.dereference(helpers.METADATA_FILE_NAME) is not None
+    fpaths = [
+        "LICENSE",
+        "README.md",
+        "sort-and-change-case.ga",
+        "test/test1/input.bed",
+        "test/test1/output_exp.bed",
+        "test/test1/sort-and-change-case-test.yml"
+    ]
+    dpaths = [
+        "test/",
+        "test/test1/",
+    ]
+    for p in fpaths:
+        assert isinstance(crate.dereference(p), File)
+    for p in dpaths:
+        assert isinstance(crate.dereference(p), Dataset)
+
+    out_path = tmpdir / 'ro_crate_out'
+    out_path.mkdir()
+    crate.write_crate(out_path)
+
+    assert (out_path / helpers.METADATA_FILE_NAME).exists()
+    json_entities = helpers.read_json_entities(out_path)
+    data_entity_ids = fpaths + dpaths
+    helpers.check_crate(json_entities, data_entity_ids=data_entity_ids)
+    for p in fpaths:
+        with open(crate_dir / p) as f1, open(out_path / p) as f2:
+            assert f1.read() == f2.read()
+
+
+@pytest.mark.parametrize("load_preview,preview_exists", [(False, False), (False, True), (True, False), (True, True)])
+def test_init_preview(test_data_dir, tmpdir, helpers, load_preview, preview_exists):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    dummy_prev_content = "foo\nbar\n"
+    if preview_exists:
+        with open(crate_dir / helpers.PREVIEW_FILE_NAME, "wt") as f:
+            f.write(dummy_prev_content)
+    crate = ROCrate(crate_dir, load_preview=load_preview, init=True)
+    prev = crate.dereference(helpers.PREVIEW_FILE_NAME)
+    if load_preview and not preview_exists:
+        assert prev is None
+    else:
+        assert prev is not None
+
+    out_path = tmpdir / 'ro_crate_out'
+    out_path.mkdir()
+    crate.write_crate(out_path)
+
+    out_prev_path = out_path / helpers.PREVIEW_FILE_NAME
+    if load_preview and not preview_exists:
+        assert not out_prev_path.exists()
+    else:
+        assert out_prev_path.is_file()
+        if load_preview:
+            assert out_prev_path.open().read() == dummy_prev_content
