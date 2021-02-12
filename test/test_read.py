@@ -214,7 +214,6 @@ def test_init_preview(test_data_dir, tmpdir, helpers, load_preview, preview_exis
             f.write(dummy_prev_content)
     crate = ROCrate(crate_dir, load_preview=load_preview, init=True)
     prev = crate.dereference(helpers.PREVIEW_FILE_NAME)
-    print(prev)
     if load_preview and not preview_exists:
         assert prev is None
     else:

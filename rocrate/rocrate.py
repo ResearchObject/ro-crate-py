@@ -89,7 +89,8 @@ class ROCrate():
             # TODO: load root dataset properties
 
     def __init_from_tree(self, top_dir, load_preview=False):
-        if not os.path.isdir(top_dir):
+        top_dir = Path(top_dir)
+        if not top_dir.is_dir():
             raise ValueError(f"{top_dir} is not a valid directory path")
         self.add(RootDataset(self), Metadata(self))
         if not load_preview:
@@ -100,10 +101,10 @@ class ROCrate():
                 source = root / name
                 self.add_dataset(source, source.relative_to(top_dir))
             for name in files:
-                if name in {Metadata.BASENAME, LegacyMetadata.BASENAME}:
-                    continue
                 source = root / name
-                if name != Preview.BASENAME:
+                if source == top_dir / Metadata.BASENAME or source == top_dir / LegacyMetadata.BASENAME:
+                    continue
+                if source != top_dir / Preview.BASENAME:
                     self.add_file(source, source.relative_to(top_dir))
                 elif load_preview:
                     self.add(Preview(self, source))
