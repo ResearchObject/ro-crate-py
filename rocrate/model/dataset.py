@@ -18,7 +18,7 @@
 # limitations under the License.
 
 import os
-import pathlib
+from pathlib import Path
 import shutil
 
 from .data_entity import DataEntity
@@ -30,7 +30,7 @@ class Dataset(DataEntity):
         identifier = None
         self.source = source
         if not dest_path:
-            identifier = os.path.dirname(source)
+            identifier = Path(source).name
         else:
             identifier = str(dest_path)
         super().__init__(crate, identifier, properties)
@@ -64,7 +64,7 @@ class Dataset(DataEntity):
 
     def write(self, base_path):
         out_path = self.filepath(base_path)
-        pathlib.Path(out_path).mkdir(parents=True, exist_ok=True)
+        Path(out_path).mkdir(parents=True, exist_ok=True)
         for file_src, file_dest in self.directory_entries(out_path):
             file_dest_path = os.path.dirname(file_dest)
             if not os.path.exists(file_dest_path):
