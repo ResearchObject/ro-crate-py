@@ -18,7 +18,7 @@
 # limitations under the License.
 
 import os
-import pathlib
+from pathlib import Path
 import shutil
 import urllib
 
@@ -39,7 +39,7 @@ class File(DataEntity):
         self.fetch_remote = fetch_remote
         self.source = source
         is_local = is_remote = False
-        if isinstance(source, (str, pathlib.Path)):
+        if isinstance(source, (str, Path)):
             is_local = os.path.isfile(str(source))
             is_remote = is_url(str(source))
             if not is_local and not is_remote:
@@ -48,7 +48,7 @@ class File(DataEntity):
             raise ValueError("dest_path must be provided if source is not a path or URI")
         if dest_path:
             # the entity is refrencing a path relative to the ro-crate root
-            identifier = dest_path  # relative path?
+            identifier = Path(dest_path).as_posix()  # relative path?
         else:
             # if there is no dest_path there must be a URI/local path as source
             if is_local:
@@ -98,7 +98,7 @@ class File(DataEntity):
         return val
 
     def write(self, base_path):
-        base_path = pathlib.Path(base_path)
+        base_path = Path(base_path)
         out_file_path = base_path / self.id
         # check if its local or remote URI
         if isinstance(self.source, IOBase):

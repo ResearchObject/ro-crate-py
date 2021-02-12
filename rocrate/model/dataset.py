@@ -32,7 +32,7 @@ class Dataset(DataEntity):
         if not dest_path:
             identifier = Path(source).name
         else:
-            identifier = str(dest_path)
+            identifier = Path(dest_path).as_posix()
         super().__init__(crate, identifier, properties)
 
     def _empty(self):
