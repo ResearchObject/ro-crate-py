@@ -61,14 +61,12 @@ class ROCrate():
 
         # TODO: default_properties must include name, description,
         # datePublished, license
-        if not source_path or not load_preview:
-            self.add(Preview(self))
         if not source_path:
             # create a new ro-crate
-            self.add(RootDataset(self), Metadata(self))
+            self.add(RootDataset(self), Metadata(self), Preview(self))
         elif init:
             # initialize an ro-crate from a directory tree
-            self.init(source_path)
+            self.__init_from_tree(source_path, load_preview=load_preview)
         else:
             # load an existing ro-crate
             if zipfile.is_zipfile(source_path):
@@ -90,18 +88,25 @@ class ROCrate():
             self.build_crate(entities, source_path, load_preview)
             # TODO: load root dataset properties
 
-    def init(self, top_dir):
+    def __init_from_tree(self, top_dir, load_preview=False):
         if not os.path.isdir(top_dir):
             raise ValueError(f"{top_dir} is not a valid directory path")
         self.add(RootDataset(self), Metadata(self))
+        if not load_preview:
+            self.add(Preview(self))
         for root, dirs, files in os.walk(top_dir):
             root = Path(root)
             for name in dirs:
                 source = root / name
                 self.add_dataset(source, source.relative_to(top_dir))
             for name in files:
+                if name in {Metadata.BASENAME, LegacyMetadata.BASENAME}:
+                    continue
                 source = root / name
-                self.add_file(source, source.relative_to(top_dir))
+                if name != Preview.BASENAME:
+                    self.add_file(source, source.relative_to(top_dir))
+                elif load_preview:
+                    self.add(Preview(self, source))
 
     def entities_from_metadata(self, metadata_path):
         # Creates a dictionary {id: entity} from the metadata file
@@ -173,6 +178,8 @@ class ROCrate():
         if Preview.BASENAME in entities.keys() and load_preview:
             preview_source = os.path.join(source, Preview.BASENAME)
             self.add(Preview(self, preview_source))
+        else:
+            self.add(Preview(self))
 
         added_entities = []
         # iterate over data entities

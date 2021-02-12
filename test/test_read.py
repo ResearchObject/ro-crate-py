@@ -167,9 +167,11 @@ def test_bad_crate(test_data_dir, tmpdir):
         ROCrate(crate_dir)
 
 
-def test_init(test_data_dir, tmpdir, helpers):
+@pytest.mark.parametrize("override", [False, True])
+def test_init(test_data_dir, tmpdir, helpers, override):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
-    (crate_dir / helpers.METADATA_FILE_NAME).unlink()
+    if not override:
+        (crate_dir / helpers.METADATA_FILE_NAME).unlink()
     crate = ROCrate(crate_dir, init=True)
     assert crate.dereference("./") is not None
     assert crate.dereference(helpers.METADATA_FILE_NAME) is not None
@@ -201,3 +203,31 @@ def test_init(test_data_dir, tmpdir, helpers):
     for p in fpaths:
         with open(crate_dir / p) as f1, open(out_path / p) as f2:
             assert f1.read() == f2.read()
+
+
+@pytest.mark.parametrize("load_preview,preview_exists", [(False, False), (False, True), (True, False), (True, True)])
+def test_init_preview(test_data_dir, tmpdir, helpers, load_preview, preview_exists):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    dummy_prev_content = "foo\nbar\n"
+    if preview_exists:
+        with open(crate_dir / helpers.PREVIEW_FILE_NAME, "wt") as f:
+            f.write(dummy_prev_content)
+    crate = ROCrate(crate_dir, load_preview=load_preview, init=True)
+    prev = crate.dereference(helpers.PREVIEW_FILE_NAME)
+    print(prev)
+    if load_preview and not preview_exists:
+        assert prev is None
+    else:
+        assert prev is not None
+
+    out_path = tmpdir / 'ro_crate_out'
+    out_path.mkdir()
+    crate.write_crate(out_path)
+
+    out_prev_path = out_path / helpers.PREVIEW_FILE_NAME
+    if load_preview and not preview_exists:
+        assert not out_prev_path.exists()
+    else:
+        assert out_prev_path.is_file()
+        if load_preview:
+            assert out_prev_path.open().read() == dummy_prev_content
