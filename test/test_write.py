@@ -20,6 +20,7 @@ import pytest
 import sys
 import uuid
 import zipfile
+from pathlib import Path
 from urllib.error import URLError
 
 from rocrate.model.dataset import Dataset
@@ -185,3 +186,19 @@ def test_no_source_no_dest(test_data_dir, fetch_remote, validate_url):
     crate = ROCrate()
     with pytest.raises(ValueError):
         crate.add_file()
+
+
+def test_dataset(test_data_dir, tmpdir):
+    crate = ROCrate()
+    path = test_data_dir / "a" / "b"
+    d1 = crate.add_dataset(str(path))
+    assert crate.dereference("b") is d1
+    d2 = crate.add_dataset(str(path), "a/b")
+    assert crate.dereference("a/b") is d2
+
+    out_path = tmpdir / 'ro_crate_out'
+    out_path.mkdir()
+    crate.write_crate(out_path)
+
+    assert (out_path / "b").is_dir()
+    assert (out_path / "a" / "b").is_dir()
