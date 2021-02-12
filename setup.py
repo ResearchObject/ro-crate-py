@@ -81,4 +81,7 @@ setup(
         'Topic :: System :: Archiving',
         'Topic :: System :: Archiving :: Packaging',
     ],
+    entry_points={
+        "console_scripts": ["rocrate=rocrate.cli:cli"],
+    },
 )

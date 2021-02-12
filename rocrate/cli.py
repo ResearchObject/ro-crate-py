@@ -1,6 +1,6 @@
 import click
 
-from rocrate.rocrate import ROCrate
+from .rocrate import ROCrate
 
 
 @click.group()
