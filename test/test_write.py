@@ -20,7 +20,6 @@ import pytest
 import sys
 import uuid
 import zipfile
-from pathlib import Path
 from urllib.error import URLError
 
 from rocrate.model.dataset import Dataset

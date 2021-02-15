@@ -38,7 +38,7 @@ from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
 from .model.testdefinition import TestDefinition
 from .model.computationalworkflow import ComputationalWorkflow, galaxy_to_abstract_cwl
-from .model.computerlanguage import ComputerLanguage, get_lang, CWL_DEFAULT_VERSION
+from .model.computerlanguage import ComputerLanguage, get_lang
 from .model.testinstance import TestInstance
 from .model.testservice import TestService, get_service
 from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEFAULT_VERSION
