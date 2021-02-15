@@ -389,12 +389,20 @@ class ROCrate():
     add_directory = add_dataset
 
     def add(self, *entities):
+        """\
+        Add one or more entities to this RO-Crate.
+
+        If an entity with the same (canonical) id is already present in the
+        crate, it will be replaced (as in Python dictionaries).
+
+        Note that, according to the specs, "The RO-Crate Metadata JSON @graph
+        MUST NOT list multiple entities with the same @id; behaviour of
+        consumers of an RO-Crate encountering multiple entities with the same
+        @id is undefined". In practice, due to the replacement semantics, the
+        entity for a given id is the last one added to the crate with that id.
+        """
         for e in entities:
             key = e.canonical_id()
-            # crate MUST NOT list multiple entities with the same @id
-            if key in self.__entity_map:
-                raise ValueError(f'duplicate entity id: "{key}"')
-            self.__entity_map[key] = e
             if isinstance(e, RootDataset):
                 self.root_dataset = e
             if isinstance(e, (Metadata, LegacyMetadata)):
@@ -405,8 +413,11 @@ class ROCrate():
                 self.default_entities.append(e)
             elif hasattr(e, "write"):
                 self.data_entities.append(e)
+                if key not in self.__entity_map:
+                    self.root_dataset["hasPart"] += [e]
             else:
                 self.contextual_entities.append(e)
+            self.__entity_map[key] = e
         return entities[0] if len(entities) == 1 else entities
 
     # TODO
@@ -447,8 +458,7 @@ class ROCrate():
         else:
             kwargs = {"version": lang_version} if lang_version else {}
             lang = get_lang(self, lang, **kwargs)
-            if not self.dereference(lang.id):
-                self.add(lang)
+            self.add(lang)
         workflow.lang = lang
         if main:
             self.mainEntity = workflow
@@ -489,8 +499,7 @@ class ROCrate():
             assert service.crate is self
         else:
             service = get_service(self, service)
-            if not self.dereference(service.id):
-                self.add(service)
+            self.add(service)
         instance.service = service
         instance.name = name or instance.id.lstrip("#")
         instance_set = set(suite.instance or [])
@@ -511,8 +520,7 @@ class ROCrate():
             assert engine.crate is self
         else:
             engine = get_app(self, engine)
-            if not self.dereference(engine.id):
-                self.add(engine)
+            self.add(engine)
         definition.engine = engine
         definition.engineVersion = engine_version
         suite.definition = definition

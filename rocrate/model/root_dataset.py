@@ -41,16 +41,6 @@ class RootDataset(Dataset):
         val = {
             "@id": "./",
             "@type": "Dataset",
+            "hasPart": [],
         }
         return val
-
-    # def write(self, base_path):
-        # os.mkdir(base_path)
-
-    def properties(self):
-        parts = []
-        for entity in self.crate.data_entities:
-            parts.append(entity.reference())
-        properties = self._jsonld
-        properties.update({'hasPart': parts})
-        return properties

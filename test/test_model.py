@@ -21,6 +21,7 @@ import uuid
 import pytest
 from rocrate.rocrate import ROCrate
 from rocrate.model.file import File
+from rocrate.model.computationalworkflow import ComputationalWorkflow
 from rocrate.model.person import Person
 
 
@@ -125,3 +126,29 @@ def test_uuid():
     # Check it made a valid UUIDv4
     u = uuid.UUID(jsonld["@id"][1:])
     assert 4 == u.version
+
+
+def test_update(test_data_dir, tmpdir, helpers):
+    crate = ROCrate()
+    assert not crate.root_dataset["hasPart"]
+    wf_path = test_data_dir / "test_galaxy_wf.ga"
+    john = crate.add(Person(crate, '#john', {'name': 'John Doe'}))
+    file_ = crate.add_file(wf_path)
+    assert crate.root_dataset["hasPart"] == [file_]
+    file_["author"] = john
+    assert isinstance(file_, File)
+    assert crate.mainEntity is None
+    wf = crate.add_workflow(wf_path, main=True, lang="galaxy")
+    assert isinstance(wf, ComputationalWorkflow)
+    assert wf["author"] is None
+    assert crate.mainEntity is wf
+    assert crate.dereference(john.id) is john
+    assert crate.dereference(file_.id) is wf
+    assert crate.root_dataset["hasPart"] == [wf]
+    assert crate.root_dataset.properties()["hasPart"] == [{"@id": "test_galaxy_wf.ga"}]
+
+    out_path = tmpdir / "ro_crate_out"
+    out_path.mkdir()
+    crate.write_crate(out_path)
+    json_entities = helpers.read_json_entities(out_path)
+    helpers.check_wf_crate(json_entities, wf.id)
