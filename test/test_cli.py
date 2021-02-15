@@ -15,17 +15,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
 from click.testing import CliRunner
 
 from rocrate.cli import cli
 
 
-def test_cli_init(test_data_dir, tmpdir, helpers):
+@pytest.mark.parametrize("cwd", [False, True])
+def test_cli_init(test_data_dir, helpers, monkeypatch, cwd):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     metadata_path = crate_dir / helpers.METADATA_FILE_NAME
     metadata_path.unlink()
 
     runner = CliRunner()
-    result = runner.invoke(cli, ["init", str(crate_dir)])
+    args = ["init"]
+    if cwd:
+        monkeypatch.chdir(str(crate_dir))
+    else:
+        args.append(str(crate_dir))
+    result = runner.invoke(cli, args)
     assert result.exit_code == 0
     assert metadata_path.is_file()
+
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert "sort-and-change-case.ga" in json_entities
+    assert json_entities["sort-and-change-case.ga"]["@type"] == "File"
