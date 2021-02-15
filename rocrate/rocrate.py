@@ -380,7 +380,8 @@ class ROCrate():
 
     def add_file(self, source=None, dest_path=None, fetch_remote=False,
                  validate_url=True, properties=None):
-        return self.add(File(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties))
+        return self.add(File(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
+                             validate_url=validate_url, properties=properties))
 
     def add_dataset(self, source=None, dest_path=None, properties=None):
         return self.add(Dataset(self, source=source, dest_path=dest_path, properties=properties))
@@ -438,7 +439,8 @@ class ROCrate():
             main=False, lang="cwl", lang_version=None, gen_cwl=False
     ):
         workflow = self.add(ComputationalWorkflow(
-            self, source=source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties
+            self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
+            validate_url=validate_url, properties=properties
         ))
         if isinstance(lang, ComputerLanguage):
             assert lang.crate is self
@@ -502,7 +504,8 @@ class ROCrate():
     ):
         suite = self.__validate_suite(suite)
         definition = self.add(
-            TestDefinition(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties)
+            TestDefinition(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
+                           validate_url=validate_url, properties=properties)
         )
         if isinstance(engine, SoftwareApplication):
             assert engine.crate is self
