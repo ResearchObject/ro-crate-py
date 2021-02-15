@@ -17,6 +17,7 @@
 
 from rocrate import rocrate_api as roc_api
 from rocrate.rocrate import ROCrate
+from rocrate.model.computerlanguage import CWL_DEFAULT_VERSION, GALAXY_DEFAULT_VERSION
 
 
 def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
@@ -30,6 +31,7 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference("#galaxy")
     assert hasattr(lang, "name")
+    assert lang.version == GALAXY_DEFAULT_VERSION
     assert wf["programmingLanguage"] is lang
     assert wf["subjectOf"] is not None
     assert helpers.WORKFLOW_TYPES.issubset(wf["subjectOf"].type)
@@ -64,6 +66,7 @@ def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference("#cwl")
     assert hasattr(lang, "name")
+    assert lang.version == CWL_DEFAULT_VERSION
     assert wf["programmingLanguage"] is lang
     assert wf["subjectOf"] is None
 
@@ -94,6 +97,7 @@ def test_create_wf_include(test_data_dir, tmpdir, helpers):
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference("#galaxy")
     assert hasattr(lang, "name")
+    assert lang.version == GALAXY_DEFAULT_VERSION
     assert wf["programmingLanguage"] is lang
     assert wf["subjectOf"] is not None
     assert helpers.WORKFLOW_TYPES.issubset(wf["subjectOf"].type)

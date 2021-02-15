@@ -435,7 +435,7 @@ class ROCrate():
 
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
-            main=False, lang="cwl", lang_version=CWL_DEFAULT_VERSION, gen_cwl=False
+            main=False, lang="cwl", lang_version=None, gen_cwl=False
     ):
         workflow = self.add(ComputationalWorkflow(
             self, source=source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties
@@ -443,7 +443,8 @@ class ROCrate():
         if isinstance(lang, ComputerLanguage):
             assert lang.crate is self
         else:
-            lang = get_lang(self, lang, version=lang_version)
+            kwargs = {"version": lang_version} if lang_version else {}
+            lang = get_lang(self, lang, **kwargs)
             if not self.dereference(lang.id):
                 self.add(lang)
         workflow.lang = lang
