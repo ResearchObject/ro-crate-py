@@ -41,6 +41,5 @@ class RootDataset(Dataset):
         val = {
             "@id": "./",
             "@type": "Dataset",
-            "hasPart": [],
         }
         return val

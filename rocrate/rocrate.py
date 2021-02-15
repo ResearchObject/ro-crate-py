@@ -167,7 +167,7 @@ class ROCrate():
         # add data and contextual entities to the crate
         (metadata_id, root_id) = self.find_root_entity_id(entities)
         root_entity = entities[root_id]
-        root_entity_parts = root_entity['hasPart']
+        root_entity_parts = root_entity.get('hasPart', [])
 
         # remove hasPart and id from root_entity and add the rest of the
         # properties to the build
@@ -414,6 +414,7 @@ class ROCrate():
             elif hasattr(e, "write"):
                 self.data_entities.append(e)
                 if key not in self.__entity_map:
+                    self.root_dataset._jsonld.setdefault("hasPart", [])
                     self.root_dataset["hasPart"] += [e]
             else:
                 self.contextual_entities.append(e)

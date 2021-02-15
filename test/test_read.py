@@ -230,3 +230,14 @@ def test_init_preview(test_data_dir, tmpdir, helpers, load_preview, preview_exis
         assert out_prev_path.is_file()
         if load_preview:
             assert out_prev_path.open().read() == dummy_prev_content
+
+
+def test_no_parts(tmpdir):
+    crate = ROCrate()
+
+    out_path = tmpdir / 'ro_crate_out'
+    out_path.mkdir()
+    crate.write_crate(out_path)
+
+    crate = ROCrate(out_path)
+    assert not crate.root_dataset["hasPart"]
