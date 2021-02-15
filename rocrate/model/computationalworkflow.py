@@ -17,7 +17,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import atexit
 import os
+import tempfile
+from contextlib import redirect_stdout
+from galaxy2cwl import get_cwl_interface
 
 from .file import File
 
@@ -36,7 +40,34 @@ class ComputationalWorkflow(File):
             "name": os.path.splitext(self.id)[0],
         }
 
+    @property
+    def programmingLanguage(self):
+        return self["programmingLanguage"]
+
+    @programmingLanguage.setter
+    def programmingLanguage(self, programmingLanguage):
+        self["programmingLanguage"] = programmingLanguage
+
+    language = lang = programmingLanguage
+
+    @property
+    def subjectOf(self):
+        return self["subjectOf"]
+
+    @subjectOf.setter
+    def subjectOf(self, subjectOf):
+        self["subjectOf"] = subjectOf
+
 
 class Workflow(ComputationalWorkflow):
 
     TYPES = ["File", "SoftwareSourceCode", "Workflow"]
+
+
+def galaxy_to_abstract_cwl(workflow_path, delete=True):
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".cwl") as f:
+        with redirect_stdout(f):
+            get_cwl_interface.main(['1', str(workflow_path)])
+    if delete:
+        atexit.register(os.unlink, f.name)
+    return f.name

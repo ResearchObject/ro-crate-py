@@ -37,8 +37,8 @@ from .model.dataset import Dataset
 from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
 from .model.testdefinition import TestDefinition
-
-# Imports for the __subclasses__ hack below
+from .model.computationalworkflow import ComputationalWorkflow, galaxy_to_abstract_cwl
+from .model.computerlanguage import ComputerLanguage, get_lang, CWL_DEFAULT_VERSION
 from .model.testinstance import TestInstance
 from .model.testservice import TestService, get_service
 from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEFAULT_VERSION
@@ -432,6 +432,34 @@ class ROCrate():
             writable_entity.write_zip(zf)
         zf.close()
         return zf.filename
+
+    def add_workflow(
+            self, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
+            main=False, lang="cwl", lang_version=CWL_DEFAULT_VERSION, gen_cwl=False
+    ):
+        workflow = self.add(ComputationalWorkflow(
+            self, source=source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties
+        ))
+        if isinstance(lang, ComputerLanguage):
+            assert lang.crate is self
+        else:
+            lang = get_lang(self, lang, version=lang_version)
+            if not self.dereference(lang.id):
+                self.add(lang)
+        workflow.lang = lang
+        if main:
+            self.mainEntity = workflow
+        if gen_cwl and lang.id != "#cwl":
+            if lang.id != "#galaxy":
+                raise ValueError(f"conversion from {lang.name} to abstract CWL not supported")
+            cwl_source = galaxy_to_abstract_cwl(source)
+            cwl_dest_path = Path(source).with_suffix(".cwl").name
+            cwl_workflow = self.add_workflow(
+                source=cwl_source, dest_path=cwl_dest_path, fetch_remote=fetch_remote, properties=properties,
+                main=False, lang="cwl", gen_cwl=False
+            )
+            workflow.subjectOf = cwl_workflow
+        return workflow
 
     def add_test_suite(self, identifier=None, name=None, main_entity=None):
         if not main_entity:
