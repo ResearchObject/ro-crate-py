@@ -61,7 +61,7 @@ def workflow(state, path, language):
         state.crate.preview.write(crate_dir)
 
 
-@add.command()
+@add.command(name="test-suite")
 @click.option('-i', '--identifier')
 @click.option('-n', '--name')
 @click.option('-m', '--main-entity')
@@ -73,7 +73,7 @@ def suite(state, identifier, name, main_entity):
     print(suite_.id)
 
 
-@add.command()
+@add.command(name="test-instance")
 @click.argument('suite')
 @click.argument('url')
 @click.option('-r', '--resource', default="")
@@ -88,7 +88,7 @@ def instance(state, suite, url, resource, service, identifier, name):
     print(instance_.id)
 
 
-@add.command()
+@add.command(name="test-definition")
 @click.argument('suite')
 @click.argument('path', type=click.Path(exists=True))
 @click.option('-e', '--engine', type=click.Choice(ENGINE_CHOICES), default="planemo")

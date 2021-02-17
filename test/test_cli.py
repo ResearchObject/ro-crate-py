@@ -86,13 +86,13 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     wf_path = crate_dir / "sort-and-change-case.ga"
     runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
     # add test suite
-    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "suite"])
+    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "test-suite"])
     assert result.exit_code == 0
     suite_id = result.output.strip()
     json_entities = helpers.read_json_entities(crate_dir)
     assert suite_id in json_entities
     # add test instance
-    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "instance", suite_id, "http://example.com", "-r", "jobs"])
+    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "test-instance", suite_id, "http://example.com", "-r", "jobs"])
     assert result.exit_code == 0
     instance_id = result.output.strip()
     json_entities = helpers.read_json_entities(crate_dir)
@@ -105,7 +105,7 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
         def_path = def_path.relative_to(crate_dir)
     else:
         args.extend(["-c", str(crate_dir)])
-    extra_args = ["add", "definition", "-e", "planemo", "-v", ">=0.70", suite_id, str(def_path)]
+    extra_args = ["add", "test-definition", "-e", "planemo", "-v", ">=0.70", suite_id, str(def_path)]
     result = runner.invoke(cli, args + extra_args)
     assert result.exit_code == 0
     json_entities = helpers.read_json_entities(crate_dir)
