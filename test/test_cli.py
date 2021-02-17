@@ -41,3 +41,32 @@ def test_cli_init(test_data_dir, helpers, monkeypatch, cwd):
     json_entities = helpers.read_json_entities(crate_dir)
     assert "sort-and-change-case.ga" in json_entities
     assert json_entities["sort-and-change-case.ga"]["@type"] == "File"
+
+
+@pytest.mark.parametrize("cwd", [False, True])
+def test_cli_add_workflow(test_data_dir, helpers, monkeypatch, cwd):
+    # init
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    runner = CliRunner()
+    assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert "sort-and-change-case.ga" in json_entities
+    assert json_entities["sort-and-change-case.ga"]["@type"] == "File"
+    # add
+    wf_path = crate_dir / "sort-and-change-case.ga"
+    args = []
+    if cwd:
+        monkeypatch.chdir(str(crate_dir))
+        wf_path = wf_path.relative_to(crate_dir)
+    else:
+        args.extend(["-c", str(crate_dir)])
+    for lang in "cwl", "galaxy":
+        extra_args = ["add", "workflow", "-l", lang, str(wf_path)]
+        result = runner.invoke(cli, args + extra_args)
+        assert result.exit_code == 0
+        json_entities = helpers.read_json_entities(crate_dir)
+        helpers.check_wf_crate(json_entities, wf_path.name)
+        assert "sort-and-change-case.ga" in json_entities
+        lang_id = f"#{lang}"
+        assert lang_id in json_entities
+        assert json_entities["sort-and-change-case.ga"]["programmingLanguage"]["@id"] == lang_id
