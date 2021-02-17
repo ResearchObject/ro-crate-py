@@ -70,3 +70,44 @@ def test_cli_add_workflow(test_data_dir, helpers, monkeypatch, cwd):
         lang_id = f"#{lang}"
         assert lang_id in json_entities
         assert json_entities["sort-and-change-case.ga"]["programmingLanguage"]["@id"] == lang_id
+
+
+@pytest.mark.parametrize("cwd", [False, True])
+def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
+    # init
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    runner = CliRunner()
+    assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+    json_entities = helpers.read_json_entities(crate_dir)
+    def_id = "test/test1/sort-and-change-case-test.yml"
+    assert def_id in json_entities
+    assert json_entities[def_id]["@type"] == "File"
+    # add workflow
+    wf_path = crate_dir / "sort-and-change-case.ga"
+    runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
+    # add test suite
+    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "suite"])
+    assert result.exit_code == 0
+    suite_id = result.output.strip()
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert suite_id in json_entities
+    # add test instance
+    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "instance", suite_id, "http://example.com", "-r", "jobs"])
+    assert result.exit_code == 0
+    instance_id = result.output.strip()
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert instance_id in json_entities
+    # add test definition
+    def_path = crate_dir / def_id
+    args = []
+    if cwd:
+        monkeypatch.chdir(str(crate_dir))
+        def_path = def_path.relative_to(crate_dir)
+    else:
+        args.extend(["-c", str(crate_dir)])
+    extra_args = ["add", "definition", "-e", "planemo", "-v", ">=0.70", suite_id, str(def_path)]
+    result = runner.invoke(cli, args + extra_args)
+    assert result.exit_code == 0
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert def_id in json_entities
+    assert set(json_entities[def_id]["@type"]) == {"File", "TestDefinition"}
