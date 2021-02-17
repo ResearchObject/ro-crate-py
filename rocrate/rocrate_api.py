@@ -17,25 +17,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import atexit
-import os
-import tempfile
-from contextlib import redirect_stdout
 from pathlib import Path
 
 import rocrate.rocrate as roc
-from rocrate.model.computationalworkflow import ComputationalWorkflow
-from rocrate.model.computerlanguage import get_lang
-from galaxy2cwl import get_cwl_interface
-
-
-def galaxy_to_abstract_cwl(crate, workflow_path):
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".cwl") as f:
-        with redirect_stdout(f):
-            get_cwl_interface.main(['1', str(workflow_path)])
-    atexit.register(os.unlink, f.name)
-    abstract_wf_id = workflow_path.with_suffix(".cwl").name
-    return ComputationalWorkflow(crate, f.name, abstract_wf_id)
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
@@ -74,19 +58,12 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     # diagram: an image/graphical workflow representation.
     # If a CWL/CWLAbstract file is provided, this is generated using cwltool
 
-    wf_type = wf_type.lower()
     wf_crate = roc.ROCrate()
     workflow_path = Path(workflow_path)
-    # should this be added in a special path within the crate?
-    wf_file = wf_crate.add(ComputationalWorkflow(wf_crate, str(workflow_path), workflow_path.name))
-    wf_crate.mainEntity = wf_file
-    lang = get_lang(wf_crate, wf_type)
-    wf_crate.add(lang)
-    wf_file['programmingLanguage'] = lang
-    if wf_type == 'galaxy' and not cwl:
-        abstract_wf = galaxy_to_abstract_cwl(wf_crate, workflow_path)
-        wf_crate.add(abstract_wf)
-        wf_file["subjectOf"] = abstract_wf
+    wf_file = wf_crate.add_workflow(
+        str(workflow_path), workflow_path.name, fetch_remote=fetch_remote,
+        main=True, lang=wf_type, gen_cwl=(cwl is None)
+    )
 
     # if the source is a remote URL then add https://schema.org/codeRepository
     # property to it this can be checked by checking if the source is a URL

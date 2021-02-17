@@ -20,7 +20,6 @@ import pytest
 import sys
 import uuid
 import zipfile
-from pathlib import Path
 from urllib.error import URLError
 
 from rocrate.model.dataset import Dataset
@@ -202,3 +201,15 @@ def test_dataset(test_data_dir, tmpdir):
 
     assert (out_path / "b").is_dir()
     assert (out_path / "a" / "b").is_dir()
+
+
+def test_no_parts(tmpdir, helpers):
+    crate = ROCrate()
+
+    out_path = tmpdir / 'ro_crate_out'
+    out_path.mkdir()
+    crate.write_crate(out_path)
+
+    json_entities = helpers.read_json_entities(out_path)
+    helpers.check_crate(json_entities)
+    assert "hasPart" not in json_entities["./"]

@@ -37,8 +37,8 @@ from .model.dataset import Dataset
 from .model.metadata import Metadata, LegacyMetadata
 from .model.preview import Preview
 from .model.testdefinition import TestDefinition
-
-# Imports for the __subclasses__ hack below
+from .model.computationalworkflow import ComputationalWorkflow, galaxy_to_abstract_cwl
+from .model.computerlanguage import ComputerLanguage, get_lang
 from .model.testinstance import TestInstance
 from .model.testservice import TestService, get_service
 from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEFAULT_VERSION
@@ -167,7 +167,7 @@ class ROCrate():
         # add data and contextual entities to the crate
         (metadata_id, root_id) = self.find_root_entity_id(entities)
         root_entity = entities[root_id]
-        root_entity_parts = root_entity['hasPart']
+        root_entity_parts = root_entity.get('hasPart', [])
 
         # remove hasPart and id from root_entity and add the rest of the
         # properties to the build
@@ -380,7 +380,8 @@ class ROCrate():
 
     def add_file(self, source=None, dest_path=None, fetch_remote=False,
                  validate_url=True, properties=None):
-        return self.add(File(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties))
+        return self.add(File(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
+                             validate_url=validate_url, properties=properties))
 
     def add_dataset(self, source=None, dest_path=None, properties=None):
         return self.add(Dataset(self, source=source, dest_path=dest_path, properties=properties))
@@ -388,12 +389,20 @@ class ROCrate():
     add_directory = add_dataset
 
     def add(self, *entities):
+        """\
+        Add one or more entities to this RO-Crate.
+
+        If an entity with the same (canonical) id is already present in the
+        crate, it will be replaced (as in Python dictionaries).
+
+        Note that, according to the specs, "The RO-Crate Metadata JSON @graph
+        MUST NOT list multiple entities with the same @id; behaviour of
+        consumers of an RO-Crate encountering multiple entities with the same
+        @id is undefined". In practice, due to the replacement semantics, the
+        entity for a given id is the last one added to the crate with that id.
+        """
         for e in entities:
             key = e.canonical_id()
-            # crate MUST NOT list multiple entities with the same @id
-            if key in self.__entity_map:
-                raise ValueError(f'duplicate entity id: "{key}"')
-            self.__entity_map[key] = e
             if isinstance(e, RootDataset):
                 self.root_dataset = e
             if isinstance(e, (Metadata, LegacyMetadata)):
@@ -404,8 +413,12 @@ class ROCrate():
                 self.default_entities.append(e)
             elif hasattr(e, "write"):
                 self.data_entities.append(e)
+                if key not in self.__entity_map:
+                    self.root_dataset._jsonld.setdefault("hasPart", [])
+                    self.root_dataset["hasPart"] += [e]
             else:
                 self.contextual_entities.append(e)
+            self.__entity_map[key] = e
         return entities[0] if len(entities) == 1 else entities
 
     # TODO
@@ -433,6 +446,35 @@ class ROCrate():
         zf.close()
         return zf.filename
 
+    def add_workflow(
+            self, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
+            main=False, lang="cwl", lang_version=None, gen_cwl=False
+    ):
+        workflow = self.add(ComputationalWorkflow(
+            self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
+            validate_url=validate_url, properties=properties
+        ))
+        if isinstance(lang, ComputerLanguage):
+            assert lang.crate is self
+        else:
+            kwargs = {"version": lang_version} if lang_version else {}
+            lang = get_lang(self, lang, **kwargs)
+            self.add(lang)
+        workflow.lang = lang
+        if main:
+            self.mainEntity = workflow
+        if gen_cwl and lang.id != "#cwl":
+            if lang.id != "#galaxy":
+                raise ValueError(f"conversion from {lang.name} to abstract CWL not supported")
+            cwl_source = galaxy_to_abstract_cwl(source)
+            cwl_dest_path = Path(source).with_suffix(".cwl").name
+            cwl_workflow = self.add_workflow(
+                source=cwl_source, dest_path=cwl_dest_path, fetch_remote=fetch_remote, properties=properties,
+                main=False, lang="cwl", gen_cwl=False
+            )
+            workflow.subjectOf = cwl_workflow
+        return workflow
+
     def add_test_suite(self, identifier=None, name=None, main_entity=None):
         if not main_entity:
             main_entity = self.mainEntity
@@ -458,8 +500,7 @@ class ROCrate():
             assert service.crate is self
         else:
             service = get_service(self, service)
-            if not self.dereference(service.id):
-                self.add(service)
+            self.add(service)
         instance.service = service
         instance.name = name or instance.id.lstrip("#")
         instance_set = set(suite.instance or [])
@@ -473,14 +514,14 @@ class ROCrate():
     ):
         suite = self.__validate_suite(suite)
         definition = self.add(
-            TestDefinition(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote, properties=properties)
+            TestDefinition(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
+                           validate_url=validate_url, properties=properties)
         )
         if isinstance(engine, SoftwareApplication):
             assert engine.crate is self
         else:
             engine = get_app(self, engine)
-            if not self.dereference(engine.id):
-                self.add(engine)
+            self.add(engine)
         definition.engine = engine
         definition.engineVersion = engine_version
         suite.definition = definition
