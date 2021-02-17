@@ -510,8 +510,11 @@ class ROCrate():
 
     def add_test_definition(
             self, suite, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
-            engine="planemo", engine_version=PLANEMO_DEFAULT_VERSION
+            engine="planemo", engine_version=None
     ):
+        if engine_version is None:
+            # FIXME: this should be engine-specific
+            engine_version = PLANEMO_DEFAULT_VERSION
         suite = self.__validate_suite(suite)
         definition = self.add(
             TestDefinition(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
