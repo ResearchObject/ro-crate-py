@@ -28,11 +28,12 @@ def test_cli_init(test_data_dir, helpers, monkeypatch, cwd):
     metadata_path.unlink()
 
     runner = CliRunner()
-    args = ["init"]
+    args = []
     if cwd:
         monkeypatch.chdir(str(crate_dir))
     else:
-        args.append(str(crate_dir))
+        args.extend(["-c", str(crate_dir)])
+    args.append("init")
     result = runner.invoke(cli, args)
     assert result.exit_code == 0
     assert metadata_path.is_file()
