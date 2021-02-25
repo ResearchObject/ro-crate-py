@@ -160,10 +160,10 @@ crate.write_crate(out_path)
 
 ## License
 
- * © 2019-2020 The University of Manchester, UK 
- * © 2020 Vlaams Instituut voor Biotechnologie (VIB), BE 
- * © 2020 Barcelona Supercomputing Center (BSC), ES 
- * © 2020 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+ * Copyright 2019-2021 The University of Manchester, UK
+ * Copyright 2021 Vlaams Instituut voor Biotechnologie (VIB), BE
+ * Copyright 2021 Barcelona Supercomputing Center (BSC), ES
+ * Copyright 2021 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 
 Licensed under the 
 Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>, 
