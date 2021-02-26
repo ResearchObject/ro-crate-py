@@ -459,6 +459,16 @@ class ROCrate():
             out_file_path, 'w', compression=zipfile.ZIP_DEFLATED,
             allowZip64=True
         )
+        # copy unlisted files and directories
+        if self.source_path:
+            top = self.source_path
+            for root, dirs, files in os.walk(top):
+                root = Path(root)
+                for name in files:
+                    source = root / name
+                    dest = source.relative_to(top)
+                    if not self.dereference(str(dest)):
+                        zf.write(str(source), str(dest))
         for writable_entity in self.data_entities + self.default_entities:
             writable_entity.write_zip(zf)
         zf.close()

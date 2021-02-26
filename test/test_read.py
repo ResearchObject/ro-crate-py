@@ -18,6 +18,7 @@
 import pytest
 import shutil
 import uuid
+import zipfile
 from pathlib import Path
 
 from rocrate.rocrate import ROCrate
@@ -246,12 +247,19 @@ def test_no_parts(tmpdir):
     assert not crate.root_dataset["hasPart"]
 
 
-def test_extra_data(test_data_dir, tmpdir):
+@pytest.mark.parametrize("to_zip", [False, True])
+def test_extra_data(test_data_dir, tmpdir, to_zip):
     crate_dir = test_data_dir / 'read_extra'
     crate = ROCrate(crate_dir)
     out_path = tmpdir / 'read_extra_out'
-    out_path.mkdir()
-    crate.write_crate(out_path)
+    if to_zip:
+        zip_path = tmpdir / 'ro_crate_out.crate.zip'
+        crate.write_zip(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(out_path)
+    else:
+        out_path.mkdir()
+        crate.write_crate(out_path)
     for rel in {
             "listed.txt",
             "listed/listed.txt",
