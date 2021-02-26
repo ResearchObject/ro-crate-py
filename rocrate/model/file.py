@@ -124,4 +124,5 @@ class File(DataEntity):
                         shutil.copyfileobj(response, out_file)
 
     def write_zip(self, zip_out):
-        zip_out.write(self.source, self.id)
+        if self.id not in zip_out.namelist():
+            zip_out.write(self.source, self.id)

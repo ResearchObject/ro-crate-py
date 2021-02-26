@@ -79,4 +79,5 @@ class Dataset(DataEntity):
         # iterate over the entries
         for file_src, rel_path in self.directory_entries():
             dest_path = os.path.join(out_path, rel_path)
-            zip_out.write(file_src, dest_path)
+            if dest_path not in zip_out.namelist():
+                zip_out.write(file_src, dest_path)
