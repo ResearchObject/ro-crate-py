@@ -120,7 +120,10 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
     legacy_metadata_path = out_path / helpers.LEGACY_METADATA_FILE_NAME
-    assert not legacy_metadata_path.exists()
+    # legacy metadata file should just be copied over as a regular file
+    assert legacy_metadata_path.exists()
+    with open(crate_dir / helpers.LEGACY_METADATA_FILE_NAME) as f1, open(legacy_metadata_path) as f2:
+        assert f1.read() == f2.read()
     preview_path = out_path / helpers.PREVIEW_FILE_NAME
     assert preview_path.exists()
     if load_preview:
@@ -241,3 +244,21 @@ def test_no_parts(tmpdir):
 
     crate = ROCrate(out_path)
     assert not crate.root_dataset["hasPart"]
+
+
+def test_extra_data(test_data_dir, tmpdir):
+    crate_dir = test_data_dir / 'read_extra'
+    crate = ROCrate(crate_dir)
+    out_path = tmpdir / 'read_extra_out'
+    out_path.mkdir()
+    crate.write_crate(out_path)
+    for rel in {
+            "listed.txt",
+            "listed/listed.txt",
+            "listed/not_listed.txt",
+            "not_listed.txt",
+            "not_listed/not_listed.txt",
+    }:
+        assert (out_path / rel).is_file()
+        with open(crate_dir / rel) as f1, open(out_path / rel) as f2:
+            assert f1.read() == f2.read()

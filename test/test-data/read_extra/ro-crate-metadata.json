@@ -1,0 +1,43 @@
+{
+    "@context": "https://w3id.org/ro/crate/1.1/context",
+    "@graph": [
+        {
+            "@id": "./",
+            "@type": "Dataset",
+            "datePublished": "2021-02-26T09:46:41.236862",
+            "hasPart": [
+                {
+                    "@id": "listed/"
+                },
+                {
+                    "@id": "listed.txt"
+                },
+                {
+                    "@id": "listed/listed.txt"
+                }
+            ]
+        },
+        {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {
+                "@id": "./"
+            },
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate/1.1"
+            }
+        },
+        {
+            "@id": "listed/",
+            "@type": "Dataset"
+        },
+        {
+            "@id": "listed.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "listed/listed.txt",
+            "@type": "File"
+        }
+    ]
+}
