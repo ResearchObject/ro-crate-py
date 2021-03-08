@@ -158,6 +158,90 @@ crate.write_crate(out_path)
 ```
 
 
+## Command Line Interface
+
+`ro-crate-py` includes a hierarchical command line interface: the `rocrate` tool. `rocrate` is the top-level command, while specific functionalities are provided via sub-commands. Currently, the tool allows to initialize a directory tree as an RO-Crate (`rocrate init`) and to modify the metadata of an existing RO-Crate (`rocrate add`).
+
+```
+$ rocrate --help
+Usage: rocrate [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  -c, --crate-dir PATH
+  --help                Show this message and exit.
+
+Commands:
+  add
+  init
+```
+
+Commands act on the current directory, unless the `-c` option is specified.
+
+The `rocrate init` command explores a directory tree and generates an RO-Crate metadata file (`ro-crate-metadata.json`) listing all files and directories as `File` and `Dataset` entities, respectively. The metadata file is added (overwritten if present) to the directory at the top-level, turning it into an RO-Crate.
+
+The `rocrate add` command allows to add workflows and other entity types (currently [testing-related metadata](https://github.com/crs4/life_monitor/wiki/Workflow-Testing-RO-Crate)) to an RO-Crate. The entity type is specified via another sub-command level:
+
+```
+# rocrate add --help
+Usage: rocrate add [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  test-definition
+  test-instance
+  test-suite
+  workflow
+```
+
+Note that data entities (e.g., workflows) must already be present in the directory tree: the effect of the command is to register them in the metadata file.
+
+### Example
+
+```
+# From the ro-crate-py repository root
+cd test/test-data/ro-crate-galaxy-sortchangecase
+```
+
+This directory is already an ro-crate. Delete the metadata file to get a plain directory tree:
+
+```
+rm ro-crate-metadata.json
+```
+
+Now the directory tree contains several files and directories, including a Galaxy workflow and a Planemo test file, but it's not an RO-Crate since there is no metadata file. Initialize the crate:
+
+```
+rocrate init
+```
+
+This creates an `ro-crate-metadata.json` file that lists files and directories rooted at the current directory. Note that the Galaxy workflow is listed as a plain `File`:
+
+```json
+        {
+            "@id": "sort-and-change-case.ga",
+            "@type": "File"
+        }
+```
+
+To register the workflow as a `ComputationalWorkflow`:
+
+```
+rocrate add workflow -l galaxy sort-and-change-case.ga
+```
+
+Now the workflow has a type of `["File", "SoftwareSourceCode", "ComputationalWorkflow"]` and points to a `ComputerLanguage` entity that represents the Galaxy workflow language. Also, the workflow is listed as the crate's `mainEntity` (see https://about.workflowhub.eu/Workflow-RO-Crate).
+
+To add [workflow testing metadata](https://github.com/crs4/life_monitor/wiki/Workflow-Testing-RO-Crate) to the crate:
+
+```
+rocrate add test-suite -i \#test1
+rocrate add test-instance \#test1 http://example.com -r jobs -i \#test1_1
+rocrate add test-definition \#test1 test/test1/sort-and-change-case-test.yml  -e planemo -v '>=0.70'
+```
+
+
 ## License
 
  * Copyright 2019-2021 The University of Manchester, UK
