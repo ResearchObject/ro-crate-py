@@ -36,6 +36,8 @@ class Metadata(File):
 
     def __init__(self, crate):
         super().__init__(crate, None, self.BASENAME, False, None)
+        # https://www.researchobject.org/ro-crate/1.1/appendix/jsonld.html#extending-ro-crate
+        self.extra_terms = {}
 
     def _empty(self):
         # default properties of the metadata entry
@@ -51,7 +53,10 @@ class Metadata(File):
         graph = []
         for entity in self.crate.get_entities():
             graph.append(entity.properties())
-        return {'@context': f'{self.PROFILE}/context', '@graph': graph}
+        context = f'{self.PROFILE}/context'
+        if self.extra_terms:
+            context = [context, self.extra_terms]
+        return {'@context': context, '@graph': graph}
 
     def write(self, base_path):
         # writes itself in
@@ -81,3 +86,20 @@ class LegacyMetadata(Metadata):
 
     BASENAME = "ro-crate-metadata.jsonld"
     PROFILE = "https://w3id.org/ro/crate/1.0"
+
+
+# https://github.com/ResearchObject/ro-terms/tree/master/test
+TESTING_EXTRA_TERMS = {
+    "TestSuite": "https://w3id.org/ro/terms/test#TestSuite",
+    "TestInstance": "https://w3id.org/ro/terms/test#TestInstance",
+    "TestService": "https://w3id.org/ro/terms/test#TestService",
+    "TestDefinition": "https://w3id.org/ro/terms/test#TestDefinition",
+    "PlanemoEngine": "https://w3id.org/ro/terms/test#PlanemoEngine",
+    "JenkinsService": "https://w3id.org/ro/terms/test#JenkinsService",
+    "TravisService": "https://w3id.org/ro/terms/test#TravisService",
+    "instance": "https://w3id.org/ro/terms/test#instance",
+    "runsOn": "https://w3id.org/ro/terms/test#runsOn",
+    "resource": "https://w3id.org/ro/terms/test#resource",
+    "definition": "https://w3id.org/ro/terms/test#definition",
+    "engineVersion": "https://w3id.org/ro/terms/test#engineVersion"
+}
