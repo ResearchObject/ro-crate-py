@@ -15,10 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import pytest
 from click.testing import CliRunner
 
 from rocrate.cli import cli
+from rocrate.model.metadata import TESTING_EXTRA_TERMS
 
 
 @pytest.mark.parametrize("cwd", [False, True])
@@ -111,3 +113,13 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     json_entities = helpers.read_json_entities(crate_dir)
     assert def_id in json_entities
     assert set(json_entities[def_id]["@type"]) == {"File", "TestDefinition"}
+    # check extra terms
+    metadata_path = crate_dir / helpers.METADATA_FILE_NAME
+    with open(metadata_path, "rt") as f:
+        json_data = json.load(f)
+    assert "@context" in json_data
+    context = json_data["@context"]
+    assert isinstance(context, list)
+    assert len(context) > 1
+    extra_terms = context[1]
+    assert set(TESTING_EXTRA_TERMS.items()).issubset(extra_terms.items())
