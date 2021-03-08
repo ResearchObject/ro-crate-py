@@ -34,7 +34,7 @@ from .model import contextentity
 from .model.root_dataset import RootDataset
 from .model.file import File
 from .model.dataset import Dataset
-from .model.metadata import Metadata, LegacyMetadata
+from .model.metadata import Metadata, LegacyMetadata, TESTING_EXTRA_TERMS
 from .model.preview import Preview
 from .model.testdefinition import TestDefinition
 from .model.computationalworkflow import ComputationalWorkflow, galaxy_to_abstract_cwl
@@ -517,6 +517,7 @@ class ROCrate():
         suite_set = set(test_dir["about"] or [])
         suite_set.add(suite)
         test_dir["about"] = list(suite_set)
+        self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return suite
 
     def add_test_instance(self, suite, url, resource="", service="jenkins", identifier=None, name=None):
@@ -534,6 +535,7 @@ class ROCrate():
         instance_set = set(suite.instance or [])
         instance_set.add(instance)
         suite.instance = list(instance_set)
+        self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return instance
 
     def add_test_definition(
@@ -556,6 +558,7 @@ class ROCrate():
         definition.engine = engine
         definition.engineVersion = engine_version
         suite.definition = definition
+        self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return definition
 
     def __validate_suite(self, suite):
