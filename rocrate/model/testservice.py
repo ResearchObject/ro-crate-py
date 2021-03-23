@@ -49,6 +49,7 @@ class TestService(ContextEntity):
 
 JENKINS_ID = "https://w3id.org/ro/terms/test#JenkinsService"
 TRAVIS_ID = "https://w3id.org/ro/terms/test#TravisService"
+GITHUB_ID = "https://w3id.org/ro/terms/test#GithubService"
 
 
 def jenkins(crate):
@@ -69,9 +70,19 @@ def travis(crate):
     })
 
 
+def github(crate):
+    return TestService(crate, identifier=GITHUB_ID, properties={
+        "name": "Github Actions",
+        "url": {
+            "@id": "https://github.com"
+        },
+    })
+
+
 SERVICE_MAP = {
     "jenkins": jenkins,
     "travis": travis,
+    "github": github,
 }
 
 
