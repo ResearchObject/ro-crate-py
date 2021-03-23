@@ -97,6 +97,7 @@ TESTING_EXTRA_TERMS = {
     "PlanemoEngine": "https://w3id.org/ro/terms/test#PlanemoEngine",
     "JenkinsService": "https://w3id.org/ro/terms/test#JenkinsService",
     "TravisService": "https://w3id.org/ro/terms/test#TravisService",
+    "GithubService": "https://w3id.org/ro/terms/test#GithubService",
     "instance": "https://w3id.org/ro/terms/test#instance",
     "runsOn": "https://w3id.org/ro/terms/test#runsOn",
     "resource": "https://w3id.org/ro/terms/test#resource",
