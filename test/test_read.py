@@ -29,15 +29,15 @@ _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
 
 
-@pytest.mark.parametrize("load_preview,from_zip", [(False, False), (True, False), (True, True)])
-def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zip):
+@pytest.mark.parametrize("gen_preview,from_zip", [(False, False), (True, False), (True, True)])
+def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip):
     # load crate
     crate_dir = test_data_dir / 'read_crate'
     if from_zip:
         zip_source = shutil.make_archive(tmpdir / "read_crate.crate", "zip", crate_dir)
-        crate = ROCrate(zip_source, load_preview=load_preview)
+        crate = ROCrate(zip_source, gen_preview=gen_preview)
     else:
-        crate = ROCrate(crate_dir, load_preview=load_preview)
+        crate = ROCrate(crate_dir, gen_preview=gen_preview)
 
     # check loaded entities and properties
     root = crate.dereference('./')
@@ -65,7 +65,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
     assert preview_prop['@id'] == preview.id
     assert preview_prop['@type'] == 'CreativeWork'
     assert preview_prop['about'] == {'@id': './'}
-    if load_preview:
+    if not gen_preview:
         assert Path(preview.source).name == helpers.PREVIEW_FILE_NAME
     else:
         assert not preview.source
@@ -127,7 +127,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, load_preview, from_zi
         assert f1.read() == f2.read()
     preview_path = out_path / helpers.PREVIEW_FILE_NAME
     assert preview_path.exists()
-    if load_preview:
+    if not gen_preview:
         with open(preview.source) as f1, open(preview_path) as f2:
             assert f1.read() == f2.read()
 
@@ -209,18 +209,16 @@ def test_init(test_data_dir, tmpdir, helpers, override):
             assert f1.read() == f2.read()
 
 
-@pytest.mark.parametrize("load_preview,preview_exists", [(False, False), (False, True), (True, False), (True, True)])
-def test_init_preview(test_data_dir, tmpdir, helpers, load_preview, preview_exists):
+@pytest.mark.parametrize("gen_preview,preview_exists", [(False, False), (False, True), (True, False), (True, True)])
+def test_init_preview(test_data_dir, tmpdir, helpers, gen_preview, preview_exists):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     dummy_prev_content = "foo\nbar\n"
     if preview_exists:
         with open(crate_dir / helpers.PREVIEW_FILE_NAME, "wt") as f:
             f.write(dummy_prev_content)
-    crate = ROCrate(crate_dir, load_preview=load_preview, init=True)
+    crate = ROCrate(crate_dir, gen_preview=gen_preview, init=True)
     prev = crate.dereference(helpers.PREVIEW_FILE_NAME)
-    if load_preview and not preview_exists:
-        assert prev is None
-    else:
+    if gen_preview or preview_exists:
         assert prev is not None
 
     out_path = tmpdir / 'ro_crate_out'
@@ -228,12 +226,13 @@ def test_init_preview(test_data_dir, tmpdir, helpers, load_preview, preview_exis
     crate.write_crate(out_path)
 
     out_prev_path = out_path / helpers.PREVIEW_FILE_NAME
-    if load_preview and not preview_exists:
-        assert not out_prev_path.exists()
-    else:
+    if gen_preview or preview_exists:
         assert out_prev_path.is_file()
-        if load_preview:
-            assert out_prev_path.open().read() == dummy_prev_content
+    else:
+        assert not out_prev_path.exists()
+
+    if not gen_preview and preview_exists:
+        assert out_prev_path.open().read() == dummy_prev_content
 
 
 def test_no_parts(tmpdir):

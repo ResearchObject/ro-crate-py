@@ -47,7 +47,7 @@ def cli(ctx, crate_dir):
 @click.pass_obj
 def init(state):
     crate_dir = state.crate_dir or os.getcwd()
-    crate = ROCrate(crate_dir, init=True, load_preview=True)
+    crate = ROCrate(crate_dir, init=True)
     crate.metadata.write(crate_dir)
 
 
@@ -55,7 +55,7 @@ def init(state):
 @click.pass_obj
 def add(state):
     crate_dir = state.crate_dir or os.getcwd()
-    state.crate = ROCrate(crate_dir, init=False, load_preview=True)
+    state.crate = ROCrate(crate_dir, init=False, gen_preview=False)
 
 
 @add.command()
@@ -73,9 +73,6 @@ def workflow(state, path, language):
     # TODO: add command options for main and gen_cwl
     state.crate.add_workflow(source, dest_path, main=True, lang=language, gen_cwl=False)
     state.crate.metadata.write(crate_dir)
-    # FIXME: change preview generation to be optional when reading a crate
-    if not (Path(crate_dir) / Preview.BASENAME).is_file():
-        state.crate.preview.write(crate_dir)
 
 
 @add.command(name="test-suite")

@@ -27,9 +27,9 @@ from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
 
-@pytest.mark.parametrize("to_zip", [False, True])
-def test_file_writing(test_data_dir, tmpdir, helpers, to_zip):
-    crate = ROCrate()
+@pytest.mark.parametrize("gen_preview,to_zip", [(False, False), (False, True), (True, False), (True, True)])
+def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
+    crate = ROCrate(gen_preview=gen_preview)
     crate_name = 'Test crate'
     crate.name = crate_name
     creator_id = '001'
@@ -66,7 +66,10 @@ def test_file_writing(test_data_dir, tmpdir, helpers, to_zip):
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
     preview_path = out_path / helpers.PREVIEW_FILE_NAME
-    assert preview_path.exists()
+    if gen_preview:
+        assert preview_path.exists()
+    else:
+        assert not preview_path.exists()
     file1 = out_path / sample_file_id
     file2 = out_path / sample_file2_id
     file_subdir = out_path / test_dir_id / file_subdir_id
@@ -90,10 +93,8 @@ def test_file_writing(test_data_dir, tmpdir, helpers, to_zip):
     assert root["creator"] == {"@id": formatted_creator_id}
     assert formatted_creator_id in json_entities
     assert json_entities[formatted_creator_id]["name"] == creator_name
-    assert helpers.PREVIEW_FILE_NAME in json_entities
-    preview = json_entities[helpers.PREVIEW_FILE_NAME]
-    assert preview["@type"] == "CreativeWork"
-    assert preview["about"] == {"@id": "./"}
+    if gen_preview:
+        assert helpers.PREVIEW_FILE_NAME in json_entities
 
 
 def test_file_stringio(tmpdir, helpers):
