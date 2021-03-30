@@ -20,7 +20,6 @@ from pathlib import Path
 
 import click
 from .rocrate import ROCrate
-from .model.preview import Preview
 from .model.computerlanguage import LANG_MAP
 from .model.testservice import SERVICE_MAP
 from .model.softwareapplication import APP_MAP
@@ -44,11 +43,14 @@ def cli(ctx, crate_dir):
 
 
 @cli.command()
+@click.option('--gen-preview', is_flag=True)
 @click.pass_obj
-def init(state):
+def init(state, gen_preview):
     crate_dir = state.crate_dir or os.getcwd()
-    crate = ROCrate(crate_dir, init=True)
+    crate = ROCrate(crate_dir, init=True, gen_preview=gen_preview)
     crate.metadata.write(crate_dir)
+    if crate.preview:
+        crate.preview.write(crate_dir)
 
 
 @cli.group()

@@ -58,6 +58,7 @@ class ROCrate():
         # from zip
         self.uuid = uuid.uuid4()
         self.arcp_base_uri = f"arcp://uuid,{self.uuid}/"
+        self.preview = None
 
         if gen_preview:
             self.add(Preview(self))
