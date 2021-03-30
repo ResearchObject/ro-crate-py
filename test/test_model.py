@@ -29,7 +29,7 @@ RAW_REPO_URL = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py"
 
 
 def test_dereferencing(test_data_dir, helpers):
-    crate = ROCrate()
+    crate = ROCrate(gen_preview=True)
 
     # verify default entities
     root_dataset = crate.dereference('./')

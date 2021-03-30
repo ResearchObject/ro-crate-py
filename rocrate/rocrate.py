@@ -49,7 +49,7 @@ from .utils import is_url
 
 class ROCrate():
 
-    def __init__(self, source_path=None, load_preview=False, init=False):
+    def __init__(self, source_path=None, gen_preview=False, init=False):
         self.__entity_map = {}
         self.default_entities = []
         self.data_entities = []
@@ -58,15 +58,19 @@ class ROCrate():
         # from zip
         self.uuid = uuid.uuid4()
         self.arcp_base_uri = f"arcp://uuid,{self.uuid}/"
+        self.preview = None
+
+        if gen_preview:
+            self.add(Preview(self))
 
         # TODO: default_properties must include name, description,
         # datePublished, license
         if not source_path:
             # create a new ro-crate
-            self.add(RootDataset(self), Metadata(self), Preview(self))
+            self.add(RootDataset(self), Metadata(self))
         elif init:
             # initialize an ro-crate from a directory tree
-            self.__init_from_tree(source_path, load_preview=load_preview)
+            self.__init_from_tree(source_path, gen_preview=gen_preview)
         else:
             # load an existing ro-crate
             if zipfile.is_zipfile(source_path):
@@ -85,18 +89,16 @@ class ROCrate():
                                  f'missing {Metadata.BASENAME}')
             self.add(MetadataClass(self))
             entities = self.entities_from_metadata(metadata_path)
-            self.build_crate(entities, source_path, load_preview)
+            self.build_crate(entities, source_path, gen_preview)
             # TODO: load root dataset properties
         # in the zip case, self.source_path is the extracted dir
         self.source_path = source_path
 
-    def __init_from_tree(self, top_dir, load_preview=False):
+    def __init_from_tree(self, top_dir, gen_preview=False):
         top_dir = Path(top_dir)
         if not top_dir.is_dir():
             raise ValueError(f"{top_dir} is not a valid directory path")
         self.add(RootDataset(self), Metadata(self))
-        if not load_preview:
-            self.add(Preview(self))
         for root, dirs, files in os.walk(top_dir):
             root = Path(root)
             for name in dirs:
@@ -108,7 +110,7 @@ class ROCrate():
                     continue
                 if source != top_dir / Preview.BASENAME:
                     self.add_file(source, source.relative_to(top_dir))
-                elif load_preview:
+                elif not gen_preview:
                     self.add(Preview(self, source))
 
     def entities_from_metadata(self, metadata_path):
@@ -165,7 +167,7 @@ class ROCrate():
             "see https://www.researchobject.org/ro-crate/1.1/root-data-entity.html"
         )
 
-    def build_crate(self, entities, source, load_preview):
+    def build_crate(self, entities, source, gen_preview):
         # add data and contextual entities to the crate
         (metadata_id, root_id) = self.find_root_entity_id(entities)
         root_entity = entities[root_id]
@@ -177,12 +179,9 @@ class ROCrate():
         root_entity.pop('hasPart', None)
         self.add(RootDataset(self, root_entity))
 
-        # check if a preview is present
-        if Preview.BASENAME in entities.keys() and load_preview:
+        if not gen_preview and Preview.BASENAME in entities:
             preview_source = os.path.join(source, Preview.BASENAME)
             self.add(Preview(self, preview_source))
-        else:
-            self.add(Preview(self))
 
         added_entities = []
         # iterate over data entities
