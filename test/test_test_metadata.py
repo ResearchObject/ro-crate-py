@@ -86,12 +86,7 @@ def test_read(test_data_dir, helpers):
     assert test_suite.definition is test_definition
     assert test_suite["mainEntity"] is main_wf
 
-    test_dataset = crate.dereference('test/')
-    test_dataset_prop = test_dataset.properties()
-    assert test_dataset_prop['@id'] == 'test/'
-    assert test_dataset_prop['@id'] == test_dataset.id
-    assert crate.test_dir is test_dataset
-    assert set(crate.test_dir["about"]) == {test_suite}
+    assert set(crate.root_dataset["about"]) == {test_suite}
 
 
 def test_create():
@@ -157,23 +152,22 @@ def test_add_test_suite(test_data_dir, helpers):
     wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
     crate.mainEntity = wf
     suites = set()
-    assert crate.test_dir is None
+    assert crate.root_dataset["about"] is None
     s1 = crate.add_test_suite()
-    assert crate.test_dir is not None
     assert s1["mainEntity"] is wf
     suites.add(s1)
-    assert suites == set(crate.test_dir["about"])
+    assert suites == set(crate.root_dataset["about"])
     s2 = crate.add_test_suite(identifier="test1")
     assert s2["mainEntity"] is wf
     assert s2.id == "#test1"
     suites.add(s2)
-    assert suites == set(crate.test_dir["about"])
+    assert suites == set(crate.root_dataset["about"])
     s3 = crate.add_test_suite(identifier="test2", name="Test 2")
     assert s3["mainEntity"] is wf
     assert s3.id == "#test2"
     assert s3.name == "Test 2"
     suites.add(s3)
-    assert suites == set(crate.test_dir["about"])
+    assert suites == set(crate.root_dataset["about"])
     wf2_path = top_dir / "README.md"
     wf2 = crate.add(ComputationalWorkflow(crate, wf2_path, wf2_path.name))
     s4 = crate.add_test_suite(identifier="test3", name="Foo", main_entity=wf2)
@@ -181,7 +175,7 @@ def test_add_test_suite(test_data_dir, helpers):
     assert s4.id == "#test3"
     assert s4.name == "Foo"
     suites.add(s4)
-    assert suites == set(crate.test_dir["about"])
+    assert suites == set(crate.root_dataset["about"])
 
 
 def test_add_test_instance(test_data_dir, helpers):

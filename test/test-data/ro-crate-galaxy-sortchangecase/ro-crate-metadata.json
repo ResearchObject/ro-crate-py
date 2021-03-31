@@ -42,9 +42,6 @@
                     "@id": "sort-and-change-case.ga"
                 },
                 {
-                    "@id": "test/"
-                },
-                {
                     "@id": "LICENSE"
                 },
                 {
@@ -52,6 +49,11 @@
                 },
                 {
                     "@id": "test/test1/sort-and-change-case-test.yml"
+                }
+            ],
+            "about": [
+                {
+                    "@id": "#test1"
                 }
             ]
         },
@@ -66,15 +68,6 @@
                 "@id": "#galaxy"
             },
             "name": "sort-and-change-case"
-        },
-        {
-            "@id": "test/",
-            "@type": "Dataset",
-            "about": [
-                {
-                    "@id": "#test1"
-                }
-            ]
         },
         {
             "@id": "LICENSE",

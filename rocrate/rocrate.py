@@ -510,12 +510,9 @@ class ROCrate():
         suite = self.add(TestSuite(self, identifier))
         suite.name = name or suite.id.lstrip("#")
         suite["mainEntity"] = main_entity
-        # note that a test dir is required (possibly empty) even if the suite
-        # is going to have only instances (no definitions)
-        test_dir = self.test_dir or self.add_directory(dest_path="test")
-        suite_set = set(test_dir["about"] or [])
+        suite_set = set(self.root_dataset["about"] or [])
         suite_set.add(suite)
-        test_dir["about"] = list(suite_set)
+        self.root_dataset["about"] = list(suite_set)
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return suite
 
