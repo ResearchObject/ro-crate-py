@@ -74,7 +74,7 @@ def main():
         print("planemo executable:", exe)
 
     # run a test suite
-    suite = crate.root_dataset["about"][0]
+    suite = crate.test_suites[0]
     def_path = crate_dir / suite.definition.id
     workflow = suite["mainEntity"]
     workflow_path = crate_dir / workflow.id

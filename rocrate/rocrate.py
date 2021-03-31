@@ -364,6 +364,11 @@ class ROCrate():
             return rval
         return None
 
+    @property
+    def test_suites(self):
+        rval = self.root_dataset['about'] or []
+        return [_ for _ in rval if isinstance(_, TestSuite)]
+
     def resolve_id(self, id_):
         if not is_url(id_):
             id_ = urljoin(self.arcp_base_uri, id_)  # also does path normalization
