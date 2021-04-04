@@ -36,7 +36,7 @@ PLANEMO = "https://w3id.org/ro/terms/test#PlanemoEngine"
 
 def print_suites(crate):
     print("test suites:")
-    for suite in crate.root_dataset["about"]:
+    for suite in crate.test_suites:
         print(" ", suite.id)
         print("    workflow:", suite["mainEntity"].id)
         print("    instances:")

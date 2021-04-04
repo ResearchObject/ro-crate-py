@@ -51,7 +51,7 @@
                     "@id": "test/test1/sort-and-change-case-test.yml"
                 }
             ],
-            "about": [
+            "mentions": [
                 {
                     "@id": "#test1"
                 }

@@ -366,8 +366,9 @@ class ROCrate():
 
     @property
     def test_suites(self):
-        rval = self.root_dataset['about'] or []
-        return [_ for _ in rval if isinstance(_, TestSuite)]
+        mentions = [_ for _ in (self.root_dataset['mentions'] or []) if isinstance(_, TestSuite)]
+        about = [_ for _ in (self.root_dataset['about'] or []) if isinstance(_, TestSuite)]
+        return mentions + about
 
     def resolve_id(self, id_):
         if not is_url(id_):
@@ -508,16 +509,18 @@ class ROCrate():
         return workflow
 
     def add_test_suite(self, identifier=None, name=None, main_entity=None):
+        test_ref_prop = "mentions"
         if not main_entity:
             main_entity = self.mainEntity
             if not main_entity:
-                raise ValueError("crate does not have a main entity")
+                test_ref_prop = "about"
         suite = self.add(TestSuite(self, identifier))
         suite.name = name or suite.id.lstrip("#")
-        suite["mainEntity"] = main_entity
-        suite_set = set(self.root_dataset["about"] or [])
+        if main_entity:
+            suite["mainEntity"] = main_entity
+        suite_set = set(self.test_suites)
         suite_set.add(suite)
-        self.root_dataset["about"] = list(suite_set)
+        self.root_dataset[test_ref_prop] = list(suite_set)
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return suite
 
