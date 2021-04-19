@@ -364,6 +364,12 @@ class ROCrate():
             return rval
         return None
 
+    @property
+    def test_suites(self):
+        mentions = [_ for _ in (self.root_dataset['mentions'] or []) if isinstance(_, TestSuite)]
+        about = [_ for _ in (self.root_dataset['about'] or []) if isinstance(_, TestSuite)]
+        return mentions + about
+
     def resolve_id(self, id_):
         if not is_url(id_):
             id_ = urljoin(self.arcp_base_uri, id_)  # also does path normalization
@@ -503,19 +509,18 @@ class ROCrate():
         return workflow
 
     def add_test_suite(self, identifier=None, name=None, main_entity=None):
+        test_ref_prop = "mentions"
         if not main_entity:
             main_entity = self.mainEntity
             if not main_entity:
-                raise ValueError("crate does not have a main entity")
+                test_ref_prop = "about"
         suite = self.add(TestSuite(self, identifier))
         suite.name = name or suite.id.lstrip("#")
-        suite["mainEntity"] = main_entity
-        # note that a test dir is required (possibly empty) even if the suite
-        # is going to have only instances (no definitions)
-        test_dir = self.test_dir or self.add_directory(dest_path="test")
-        suite_set = set(test_dir["about"] or [])
+        if main_entity:
+            suite["mainEntity"] = main_entity
+        suite_set = set(self.test_suites)
         suite_set.add(suite)
-        test_dir["about"] = list(suite_set)
+        self.root_dataset[test_ref_prop] = list(suite_set)
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return suite
 

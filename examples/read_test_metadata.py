@@ -36,7 +36,7 @@ PLANEMO = "https://w3id.org/ro/terms/test#PlanemoEngine"
 
 def print_suites(crate):
     print("test suites:")
-    for suite in crate.test_dir["about"]:
+    for suite in crate.test_suites:
         print(" ", suite.id)
         print("    workflow:", suite["mainEntity"].id)
         print("    instances:")
@@ -74,7 +74,7 @@ def main():
         print("planemo executable:", exe)
 
     # run a test suite
-    suite = crate.test_dir["about"][0]
+    suite = crate.test_suites[0]
     def_path = crate_dir / suite.definition.id
     workflow = suite["mainEntity"]
     workflow_path = crate_dir / workflow.id
@@ -83,7 +83,7 @@ def main():
     print("definition path:", def_path)
     print("workflow:", workflow.id)
     assert suite.definition.engine.id == PLANEMO
-    new_workflow_path = def_path.parent / workflow_path.name
+    new_workflow_path = str(def_path.parent / workflow_path.name)
     # Planemo expects the test definition in the same dir as the workflow file
     shutil.copy2(workflow_path, new_workflow_path)
     cmd = ["planemo", "test", "--engine", "docker_galaxy",
