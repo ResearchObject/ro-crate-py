@@ -242,3 +242,31 @@ def test_add_test_definition(test_data_dir, engine, engine_version):
     assert crate.dereference(PLANEMO) is d.engine
     if engine_version:
         assert d.engineVersion == engine_version
+
+
+def test_test_suites_prop(test_data_dir):
+    top_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    wf_path = top_dir / "sort-and-change-case.ga"
+    crate = ROCrate()
+    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    crate.mainEntity = wf
+    suites = set()
+    assert not crate.test_suites
+    s1 = crate.add(TestSuite(crate, "s1"))
+    suites.add(s1)
+    crate.root_dataset["mentions"] = [s1]
+    assert suites == set(crate.test_suites)
+    s2 = crate.add(TestSuite(crate, "s2"))
+    crate.root_dataset["about"] = [s2]
+    suites.add(s2)
+    assert suites == set(crate.test_suites)
+    test_dir = crate.add_directory(dest_path="test")
+    assert crate.test_dir is test_dir
+    assert suites == set(crate.test_suites)  # no "about" yet
+    s3 = crate.add(TestSuite(crate, "s3"))
+    suites.add(s3)
+    test_dir["about"] = [s3]
+    assert suites == set(crate.test_suites)
+    # check for duplicates
+    crate.root_dataset["about"] = [s1, s2]
+    assert sum(_ is s1 for _ in crate.test_suites) == 1

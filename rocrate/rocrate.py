@@ -368,7 +368,10 @@ class ROCrate():
     def test_suites(self):
         mentions = [_ for _ in (self.root_dataset['mentions'] or []) if isinstance(_, TestSuite)]
         about = [_ for _ in (self.root_dataset['about'] or []) if isinstance(_, TestSuite)]
-        return mentions + about
+        if self.test_dir:
+            legacy_about = [_ for _ in (self.test_dir['about'] or []) if isinstance(_, TestSuite)]
+            about += legacy_about
+        return list(set(mentions + about))  # remove any duplicate refs
 
     def resolve_id(self, id_):
         if not is_url(id_):
