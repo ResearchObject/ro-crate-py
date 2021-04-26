@@ -5,7 +5,7 @@ ro-crate-py is open-source software distributed under the Apache License, Versio
 
 ## Before you begin
 
-[Set up git](https://docs.github.com/en/github/getting-started-with-github/set-up-git) on your local machine, then [fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo) this repository on GitHub and [create a local clone of your fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#step-2-create-a-local-clone-of-your-fork).
+[Set up Git](https://docs.github.com/en/github/getting-started-with-github/set-up-git) on your local machine, then [fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo) this repository on GitHub and [create a local clone of your fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#step-2-create-a-local-clone-of-your-fork).
 
 For instance, if your GitHub user name is `simleo`, you can get a local clone as follows:
 
@@ -38,19 +38,19 @@ $ git merge --ff-only upstream/master
 $ git push origin master
 ```
 
-If you need help with git and GitHub, head over to the [GitHub docs](https://docs.github.com/en/github). In particular, you should be familiar with [issues and pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests).
+If you need help with Git and GitHub, head over to the [GitHub docs](https://docs.github.com/en/github). In particular, you should be familiar with [issues and pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests).
 
 
 ## Making a contribution
 
 Contributions can range from fixing a broken link or a typo in the documentation to fixing a bug or adding a new feature to the software. Ideally, contributions (unless trivial) should be related to an [open issue](https://github.com/researchobject/ro-crate-py/issues). If there is no existing issue or [pull request](https://github.com/researchobject/ro-crate-py/pulls) related to the changes you wish to make, you can open a new one.
 
-Make your changes on a branch in your fork, then open a pull request (PR). Please take some time to summarize the proposed changes in the PR's description, especially if they're not obvious. If the PR addresses an open issue, you should [link them].
+Make your changes on a branch in your fork, then open a pull request (PR). Please take some time to summarize the proposed changes in the PR's description, especially if they're not obvious. If the PR addresses an open issue, you should [link them](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue).
 
 
 ## Contributing documentation
 
-Currently, documentation consists of a few [Markdown](http://daringfireball.net/projects/markdown) files such as this one. Read the [Mastering Markdown] guide for quick introduction to the format. Before opening the PR, you can check that the document renders as expected by looking at the corresponding page on the relevant branch in your fork.
+Currently, documentation consists of a few [Markdown](http://daringfireball.net/projects/markdown) files such as this one. Read the [Mastering Markdown](https://guides.github.com/features/mastering-markdown) guide for a quick introduction to the format. Before opening the PR, you can check that the document renders as expected by looking at the corresponding page on the relevant branch in your fork.
 
 
 ## Contributing software
@@ -64,7 +64,7 @@ $ pip install --upgrade pip
 $ pip install -r requirements.txt
 ```
 
-You can install ro-crate-py via `python setup.py install` or `pip install .` In this case, to see the effect of any changes you make to the code, you need to reinstall it. However, **at the moment**, ro-crate-py can be run directly from the source tree (e.g., it does not have any extension modules, nor does it generate any other files during the setup process), so you can speed this up by hacking the venv installation dir (replace "3.6" with the actual python version you are using):
+You can install ro-crate-py via `python setup.py install` or `pip install ./` In this case, to see the effect of any changes you make to the code, you need to reinstall it. However, **at the moment**, ro-crate-py can be run directly from the source tree (e.g., it does not have any extension modules, nor does it generate any other files during the setup process), so you can speed this up by hacking the venv installation dir (replace "3.6" with the actual Python version you are using):
 
 ```
 ln -sr . venv/lib/python3.6/site-packages/rocrate
@@ -74,15 +74,15 @@ In this way, any changes to the code will be picked up immediately.
 
 When you're done with your work, you can deactivate the virtual environment by typing `deactivate` on your shell.
 
-Before pushing any changes, make sure everything is ok by running the linting and testing commands as explained below.
+Before pushing any changes, make sure everything is fine by running the linting and testing commands as explained below.
 
 ### Linting
 
-ro-crate-py uses [flake8](https://github.com/PyCQA/flake8) for linting. The configuration is in `setup.cfg` and it's picked up automatically. If you have a `venv` directory or any other directory you don't want to be checked by flake8, use the `--exclude` option.
+ro-crate-py uses [Flake8](https://github.com/PyCQA/flake8) for linting. The configuration is in `setup.cfg` and it's picked up automatically. If you have a `venv` directory or any other directory you don't want to be checked by Flake8, use the `--exclude` option.
 
 ```
 pip install flake8
-flake8 --exclude venv .
+flake8 --exclude venv ./
 ```
 
 ### Testing
@@ -117,9 +117,9 @@ docker run --rm -it --name ro-crate-py ro-crate-py bash
 ```
 
 
-## Tidying up after your PR has been merged
+## Tidying up after PR merge
 
-After your PR has been merged, you can delete the branch you used for your changes. You can delete the remote branch from GitHub, by clicking on "Delete branch" in the PR's page. To resync everything, run:
+After your PR has been merged, you can delete the branch used for your changes. You can delete the remote branch from GitHub, by clicking on "Delete branch" in the PR's page. To resync everything, run:
 
 ```
 git checkout master
