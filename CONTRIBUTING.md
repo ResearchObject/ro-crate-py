@@ -76,7 +76,6 @@ When you're done with your work, you can deactivate the virtual environment by t
 
 Before pushing any changes, make sure everything is ok by running the linting and testing commands as explained below.
 
-
 ### Linting
 
 ro-crate-py uses [flake8](https://github.com/PyCQA/flake8) for linting. The configuration is in `setup.cfg` and it's picked up automatically. If you have a `venv` directory or any other directory you don't want to be checked by flake8, use the `--exclude` option.
@@ -103,7 +102,6 @@ pytest -sv test/test_write.py::test_remote_uri_exceptions
 
 Ideally, every code contribution should come with new unit tests that add coverage for the bug fix or new feature.
 
-
 ### Using the Docker image for development
 
 ro-crate-py is currently a fairly simple library that does not require any special infrastructure setup, so virtual environments should be enough for development. However, if you want a higher degree of isolation, you can build the [Docker](https://www.docker.com/) image with:
@@ -116,4 +114,17 @@ And then run it interactively with:
 
 ```
 docker run --rm -it --name ro-crate-py ro-crate-py bash
+```
+
+
+## Tidying up after your PR has been merged
+
+After your PR has been merged, you can delete the branch you used for your changes. You can delete the remote branch from GitHub, by clicking on "Delete branch" in the PR's page. To resync everything, run:
+
+```
+git checkout master
+git fetch -p upstream
+git merge --ff-only upstream/master
+git push origin master
+git branch -d <pr_branch_name>
 ```
