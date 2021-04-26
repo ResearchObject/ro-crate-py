@@ -9,27 +9,6 @@ Supports specification: [RO-Crate 1.1](https://w3id.org/ro/crate/1.1)
 
 Status: **Alpha**
 
-## Contribute
-
-Source code: <https://github.com/researchobject/ro-crate-py>
-
-Feel free to raise a pull request at <https://github.com/researchobject/ro-crate-py/pulls>
-or an issue at <https://github.com/researchobject/ro-crate-py/issues>.
-
-Submitted contributions are assumed to be covered by section 5 of the Apache License 2.0.
-
-For development, you can build a [Docker](https://www.docker.com/) image with:
-
-```
-docker build -t ro-crate-py .
-```
-
-And then run it interactively with:
-
-```
-docker run --rm -it --name ro-crate-py ro-crate-py bash
-```
-
 
 ## Installing
 
