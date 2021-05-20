@@ -431,6 +431,30 @@ class ROCrate():
             self.__entity_map[key] = e
         return entities[0] if len(entities) == 1 else entities
 
+    def delete(self, *entities):
+        """\
+        Delete one or more entities from this RO-Crate.
+        """
+        for e in entities:
+            if e is self.root_dataset:
+                raise ValueError("cannot delete the root data entity")
+            if e is self.metadata:
+                raise ValueError("cannot delete the metadata entity")
+            if e is self.preview:
+                self.default_entities.remove(e)
+                self.preview = None
+            elif hasattr(e, "write"):
+                try:
+                    self.data_entities.remove(e)
+                except ValueError:
+                    pass
+                self.root_dataset["hasPart"] = [_ for _ in self.root_dataset["hasPart"] or [] if _ != e]
+                if not self.root_dataset["hasPart"]:
+                    del self.root_dataset._jsonld["hasPart"]
+            else:
+                self.contextual_entities.remove(e)
+            self.__entity_map.pop(e.canonical_id(), None)
+
     # TODO
     # def fetch_all(self):
         # fetch all files defined in the crate
