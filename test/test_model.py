@@ -220,3 +220,14 @@ def test_delete_by_id(test_data_dir):
     crate.delete(path.name)
     assert f not in crate.data_entities
     assert crate.root_dataset["hasPart"] is None
+
+
+def test_self_delete(test_data_dir):
+    crate = ROCrate()
+    path = test_data_dir / "sample_file.txt"
+    f = crate.add_file(path)  # with this signature, the file's id will be its basename
+    assert f in crate.data_entities
+    assert f in crate.root_dataset["hasPart"]
+    f.delete()
+    assert f not in crate.data_entities
+    assert crate.root_dataset["hasPart"] is None
