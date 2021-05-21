@@ -31,6 +31,7 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 from .model import contextentity
+from .model.entity import Entity
 from .model.root_dataset import RootDataset
 from .model.file import File
 from .model.dataset import Dataset
@@ -436,6 +437,10 @@ class ROCrate():
         Delete one or more entities from this RO-Crate.
         """
         for e in entities:
+            if not isinstance(e, Entity):
+                e = self.dereference(e)
+            if not e:
+                continue
             if e is self.root_dataset:
                 raise ValueError("cannot delete the root data entity")
             if e is self.metadata:

@@ -208,3 +208,15 @@ def test_delete_refs(test_data_dir, tmpdir, helpers):
     # the test suite should not be in the crate at all
     # even better, the write should fail in such an inconsistent state
     # or perhaps such an inconsistent state should not be allowed at all
+
+
+def test_delete_by_id(test_data_dir):
+    crate = ROCrate()
+    path = test_data_dir / "sample_file.txt"
+    f = crate.add_file(path)  # with this signature, the file's id will be its basename
+    assert f in crate.data_entities
+    assert f in crate.root_dataset["hasPart"]
+    assert f.id == path.name
+    crate.delete(path.name)
+    assert f not in crate.data_entities
+    assert crate.root_dataset["hasPart"] is None
