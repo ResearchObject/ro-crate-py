@@ -130,3 +130,23 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     assert len(context) > 1
     extra_terms = context[1]
     assert set(TESTING_EXTRA_TERMS.items()).issubset(extra_terms.items())
+
+
+@pytest.mark.parametrize("cwd", [False, True])
+def test_cli_write_zip(test_data_dir, monkeypatch, cwd):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    runner = CliRunner()
+    assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+
+    output_zip_path = test_data_dir / "test-zip-archive.zip"
+    args = []
+    if cwd:
+        monkeypatch.chdir(str(crate_dir))
+    else:
+        args.extend(["-c", str(crate_dir)])
+    args.append("write-zip")
+    args.append(str(output_zip_path))
+
+    result = runner.invoke(cli, args)
+    assert result.exit_code == 0
+    assert output_zip_path.is_file()
