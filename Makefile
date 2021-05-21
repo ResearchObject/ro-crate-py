@@ -32,4 +32,4 @@ test: $(VENV_DIR)/bin/pytest install
 clean:
 	git clean -fdx -e $(VENV_DIR)
 
-.PHONY: init-venv install lint test clean
+.PHONY: init-venv install lint test clean $(VENV_DIR)
