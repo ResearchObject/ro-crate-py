@@ -122,5 +122,14 @@ def definition(state, suite, path, engine, engine_version):
     state.crate.metadata.write(crate_dir)
 
 
+@cli.command()
+@click.argument('dst', type=click.Path(writable=True))
+@click.pass_obj
+def write_zip(state, dst):
+    crate_dir = state.crate_dir or os.getcwd()
+    crate = ROCrate(crate_dir, init=True, gen_preview=False)
+    crate.write_zip(dst)
+
+
 if __name__ == '__main__':
     cli()
