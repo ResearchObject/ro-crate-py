@@ -186,6 +186,7 @@ def test_delete(test_data_dir):
     assert john in crate.contextual_entities
     crate.delete(john)
     assert john not in crate.contextual_entities
+    crate.delete(john)  # no-op
 
 
 # FIXME: what to do with refs is still WIP

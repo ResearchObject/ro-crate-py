@@ -457,7 +457,10 @@ class ROCrate():
                 if not self.root_dataset["hasPart"]:
                     del self.root_dataset._jsonld["hasPart"]
             else:
-                self.contextual_entities.remove(e)
+                try:
+                    self.contextual_entities.remove(e)
+                except ValueError:
+                    pass
             self.__entity_map.pop(e.canonical_id(), None)
 
     # TODO
