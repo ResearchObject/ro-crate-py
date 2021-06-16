@@ -192,7 +192,7 @@ def test_delete(test_data_dir):
 # FIXME: what to do with refs is still WIP
 def test_delete_refs(test_data_dir, tmpdir, helpers):
     def_path = "test/test1/sort-and-change-case-test.yml"
-    crate = ROCrate("test/test-data/ro-crate-galaxy-sortchangecase")
+    crate = ROCrate(test_data_dir / 'ro-crate-galaxy-sortchangecase')
     suite = crate.dereference("#test1")
     definition = crate.dereference(def_path)
     assert suite.definition is definition
