@@ -510,6 +510,8 @@ class ROCrate():
                 root = Path(root)
                 for name in files:
                     source = root / name
+                    if source.samefile(out_file_path):
+                        continue
                     dest = source.relative_to(top)
                     if not self.dereference(str(dest)):
                         zf.write(str(source), str(dest))
