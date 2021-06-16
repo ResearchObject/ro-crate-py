@@ -435,6 +435,10 @@ class ROCrate():
     def delete(self, *entities):
         """\
         Delete one or more entities from this RO-Crate.
+
+        Note that the crate could be left in an inconsistent state as a result
+        of calling this method, since neither entities pointing to the deleted
+        ones nor entities pointed to by the deleted ones are modified.
         """
         for e in entities:
             if not isinstance(e, Entity):
