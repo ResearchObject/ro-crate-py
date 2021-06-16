@@ -133,3 +133,6 @@ class Entity(object):
         except AttributeError:
             pass
         self['datePublished'] = value
+
+    def delete(self):
+        self.crate.delete(self)

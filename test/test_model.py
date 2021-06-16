@@ -23,6 +23,7 @@ from rocrate.rocrate import ROCrate
 from rocrate.model.file import File
 from rocrate.model.computationalworkflow import ComputationalWorkflow
 from rocrate.model.person import Person
+from rocrate.model.preview import Preview
 
 
 RAW_REPO_URL = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py"
@@ -152,3 +153,82 @@ def test_update(test_data_dir, tmpdir, helpers):
     crate.write_crate(out_path)
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_wf_crate(json_entities, wf.id)
+
+
+def test_delete(test_data_dir):
+    crate = ROCrate()
+    # fundamental entities
+    with pytest.raises(ValueError):
+        crate.delete(crate.root_dataset)
+    with pytest.raises(ValueError):
+        crate.delete(crate.metadata)
+    # preview
+    preview = crate.add(Preview(crate))
+    assert preview in crate.default_entities
+    crate.delete(preview)
+    assert preview not in crate.default_entities
+    assert crate.preview is None
+    # data entities
+    file1 = crate.add_file(test_data_dir / "sample_file.txt")
+    file2 = crate.add_file(test_data_dir / "sample_cwl_wf.cwl")
+    for f in file1, file2:
+        assert f in crate.root_dataset["hasPart"]
+        assert f in crate.data_entities
+    crate.delete(file1)
+    assert file1 not in crate.data_entities
+    assert file1 not in crate.root_dataset["hasPart"]
+    crate.delete(file2)
+    assert file2 not in crate.data_entities
+    assert crate.root_dataset["hasPart"] is None
+    crate.delete(file2)  # no-op
+    # contextual entities
+    john = crate.add(Person(crate, '#john', {'name': 'John Doe'}))
+    assert john in crate.contextual_entities
+    crate.delete(john)
+    assert john not in crate.contextual_entities
+    crate.delete(john)  # no-op
+
+
+# FIXME: what to do with refs is still WIP
+def test_delete_refs(test_data_dir, tmpdir, helpers):
+    def_path = "test/test1/sort-and-change-case-test.yml"
+    crate = ROCrate(test_data_dir / 'ro-crate-galaxy-sortchangecase')
+    suite = crate.dereference("#test1")
+    definition = crate.dereference(def_path)
+    assert suite.definition is definition
+    crate.delete(definition)
+    assert suite.definition is not definition  # so far, so good
+    assert suite.definition == str(def_path)  # should probably be set to None
+    crate.write_crate("/tmp/crate_out")
+    # check json output
+    out_path = tmpdir / "ro_crate_out"
+    crate.write_crate(out_path)
+    json_entities = helpers.read_json_entities(out_path)
+    assert def_path not in json_entities  # good
+    assert json_entities["#test1"]["definition"]["@id"] == def_path  # not good
+    # the test suite should not be in the crate at all
+    # even better, the write should fail in such an inconsistent state
+    # or perhaps such an inconsistent state should not be allowed at all
+
+
+def test_delete_by_id(test_data_dir):
+    crate = ROCrate()
+    path = test_data_dir / "sample_file.txt"
+    f = crate.add_file(path)  # with this signature, the file's id will be its basename
+    assert f in crate.data_entities
+    assert f in crate.root_dataset["hasPart"]
+    assert f.id == path.name
+    crate.delete(path.name)
+    assert f not in crate.data_entities
+    assert crate.root_dataset["hasPart"] is None
+
+
+def test_self_delete(test_data_dir):
+    crate = ROCrate()
+    path = test_data_dir / "sample_file.txt"
+    f = crate.add_file(path)  # with this signature, the file's id will be its basename
+    assert f in crate.data_entities
+    assert f in crate.root_dataset["hasPart"]
+    f.delete()
+    assert f not in crate.data_entities
+    assert crate.root_dataset["hasPart"] is None
