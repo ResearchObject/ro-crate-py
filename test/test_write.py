@@ -215,3 +215,17 @@ def test_no_parts(tmpdir, helpers):
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_crate(json_entities)
     assert "hasPart" not in json_entities["./"]
+
+
+def test_no_zip_in_zip(test_data_dir, tmpdir):
+    crate_dir = test_data_dir / 'ro-crate-galaxy-sortchangecase'
+    crate = ROCrate(crate_dir)
+
+    zip_name = 'ro_crate_out.crate.zip'
+    zip_path = crate_dir / zip_name  # within the crate dir
+    crate.write_zip(zip_path)
+    out_path = tmpdir / 'ro_crate_out'
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        zf.extractall(out_path)
+
+    assert not (out_path / zip_name).exists()
