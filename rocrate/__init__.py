@@ -30,7 +30,7 @@ __author__ = ", ".join((
     'Bert Droesbeke',
     'Ignacio Eguinoa',
     'Alban Gaignard',
-    'Simone Leo'
+    'Simone Leo',
     'Laura Rodríguez-Navas',
     'Stian Soiland-Reyes'
 ))
