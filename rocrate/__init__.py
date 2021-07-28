@@ -31,6 +31,7 @@ __author__ = ", ".join((
     'Ignacio Eguinoa',
     'Alban Gaignard',
     'Simone Leo',
+    'Luca Pireddu',
     'Laura Rodríguez-Navas',
     'Stian Soiland-Reyes'
 ))
