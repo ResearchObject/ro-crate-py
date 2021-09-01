@@ -1,0 +1,28 @@
+cff-version: 1.1.0
+message: "Cite as"
+authors:
+  - family-names: Droesbeke
+    given-names: Bert
+    orcid: https://orcid.org/0000-0003-0522-5674
+  - family-names: Eguinoa
+    given-names: Ignacio
+    orcid: https://orcid.org/0000-0002-6190-122X
+  - family-names: Gaignard
+    given-names: Alban
+    orcid: https://orcid.org/0000-0002-3597-8557
+  - family-names: Leo
+    given-names: Simone
+    orcid: https://orcid.org/0000-0001-8271-5429
+  - family-names: Pireddu
+    given-names: Luca
+    orcid: https://orcid.org/0000-0002-4663-5613
+  - family-names: Rodríguez-Navas
+    given-names: Laura
+    orcid: https://orcid.org/0000-0003-4929-1219
+  - family-names: Soiland-Reyes
+    given-names: Stian
+    orcid: https://orcid.org/0000-0001-9842-9718
+title: "ro-crate-py"
+version: 0.4.0
+doi: 10.5281/zenodo.3956493
+date-released: 2021-04-20
