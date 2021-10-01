@@ -20,10 +20,9 @@
 import os
 from pathlib import Path
 import shutil
-import urllib
+import urllib.request
 
 from io import IOBase
-from shutil import copy
 from urllib.error import HTTPError
 
 from .data_entity import DataEntity
@@ -38,20 +37,14 @@ class File(DataEntity):
             properties = {}
         self.fetch_remote = fetch_remote
         self.source = source
-        is_local = is_remote = False
-        if isinstance(source, (str, Path)):
-            is_local = os.path.isfile(str(source))
-            is_remote = is_url(str(source))
-            if not is_local and not is_remote:
-                raise ValueError(f"'{source}' is not a path to a local file or a valid remote URI")
-        elif dest_path is None:
+        if not isinstance(source, (str, Path)) and dest_path is None:
             raise ValueError("dest_path must be provided if source is not a path or URI")
         if dest_path:
             # the entity is refrencing a path relative to the ro-crate root
             identifier = Path(dest_path).as_posix()  # relative path?
         else:
             # if there is no dest_path there must be a URI/local path as source
-            if is_local:
+            if not(is_url(str(source))):
                 # local source -> becomes local reference = reference relative
                 # to ro-crate root
                 identifier = os.path.basename(source)
@@ -105,23 +98,16 @@ class File(DataEntity):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
             with open(out_file_path, 'w') as out_file:
                 out_file.write(self.source.getvalue())
-        else:
-            if os.path.isfile(self.source):
-                out_file_path.parent.mkdir(parents=True, exist_ok=True)
-                copy(self.source, out_file_path)
-            else:
-                if self.fetch_remote:
-                    # Legacy version
-                    # urllib.request.urlretrieve(self.source, out_file_path)
-                    # can check that the encodingFormat and contentSize matches
-                    # the request data? i.e.:
-                    # response.getheader('Content-Length') == \
-                    #   self._jsonld['contentSize']
-                    # this would help check if the dataset to be retrieved is
-                    # in fact what was registered in the first place.
-                    out_file_path.parent.mkdir(parents=True, exist_ok=True)
-                    with urllib.request.urlopen(self.source) as response, open(out_file_path, 'wb') as out_file:
-                        shutil.copyfileobj(response, out_file)
+        elif is_url(str(self.source)) and self.fetch_remote:
+            # Should we check that the resource hasn't changed? E.g., compare
+            # response.getheader('Content-Length') to self._jsonld['contentSize'] or
+            # response.getheader('Content-Type') to self._jsonld['encodingFormat']
+            out_file_path.parent.mkdir(parents=True, exist_ok=True)
+            with urllib.request.urlopen(self.source) as response, open(out_file_path, 'wb') as out_file:
+                shutil.copyfileobj(response, out_file)
+        elif os.path.isfile(self.source):
+            out_file_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(self.source, out_file_path)
 
     def write_zip(self, zip_out):
         if self.id not in zip_out.namelist():

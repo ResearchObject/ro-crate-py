@@ -269,3 +269,32 @@ def test_extra_data(test_data_dir, tmpdir, to_zip):
         assert (out_path / rel).is_file()
         with open(crate_dir / rel) as f1, open(out_path / rel) as f2:
             assert f1.read() == f2.read()
+
+
+def test_missing_dir(test_data_dir, tmpdir):
+    crate_dir = test_data_dir / 'read_crate'
+    name = 'examples'
+    shutil.rmtree(crate_dir / name)
+    crate = ROCrate(crate_dir)
+
+    examples_dataset = crate.dereference(name)
+    assert examples_dataset.id == f'{name}/'
+
+    out_path = tmpdir / 'crate_read_out'
+    crate.write_crate(out_path)
+    assert not (out_path / 'README.txt').exists()
+
+
+def test_missing_file(test_data_dir, tmpdir):
+    crate_dir = test_data_dir / 'read_crate'
+    name = 'test_file_galaxy.txt'
+    test_path = crate_dir / name
+    test_path.unlink()
+    crate = ROCrate(crate_dir)
+
+    test_file = crate.dereference(name)
+    assert test_file.id == name
+
+    out_path = tmpdir / 'crate_read_out'
+    crate.write_crate(out_path)
+    assert not (out_path / name).exists()
