@@ -165,14 +165,22 @@ def test_remote_uri_exceptions(tmpdir):
 
 
 @pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
-def test_missing_source(test_data_dir, fetch_remote, validate_url):
-    crate = ROCrate()
+def test_missing_source(test_data_dir, tmpdir, fetch_remote, validate_url):
     path = test_data_dir / uuid.uuid4().hex
-    with pytest.raises(ValueError):
-        crate.add_file(str(path), fetch_remote=fetch_remote, validate_url=validate_url)
+    args = {"fetch_remote": fetch_remote, "validate_url": validate_url}
 
-    with pytest.raises(ValueError):
-        crate.add_file(str(path), path.name, fetch_remote=fetch_remote, validate_url=validate_url)
+    crate = ROCrate()
+    file_ = crate.add_file(str(path), **args)
+    assert file_ is crate.dereference(path.name)
+    out_path = tmpdir / 'ro_crate_out_1'
+    crate.write_crate(out_path)
+    assert not (out_path / path.name).exists()
+
+    crate = ROCrate()
+    file_ = crate.add_file(str(path), path.name, **args)
+    assert file_ is crate.dereference(path.name)
+    out_path = tmpdir / 'ro_crate_out_2'
+    assert not (out_path / path.name).exists()
 
 
 @pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])

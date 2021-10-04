@@ -21,7 +21,6 @@ import importlib
 import json
 import os
 import uuid
-import requests
 import zipfile
 import atexit
 import shutil
@@ -206,25 +205,21 @@ class ROCrate():
             if 'File' in entity_types:
                 # temporary workaround, should be handled in the general case
                 cls = TestDefinition if "TestDefinition" in entity_types else File
-                file_path = os.path.join(source, entity['@id'])
-                identifier = entity.pop('@id', None)
-                if os.path.exists(file_path):
-                    # referencing a file path relative to crate-root
-                    instance = cls(self, file_path, identifier, properties=entity)
+                identifier = entity['@id']
+                props = {k: v for k, v in entity.items() if k != '@id'}
+                if is_url(identifier):
+                    instance = cls(self, source=identifier, properties=props)
                 else:
-                    # check if it is a valid absolute URI
-                    try:
-                        requests.get(identifier)
-                        instance = cls(self, identifier, properties=entity)
-                    except requests.ConnectionError:
-                        print("Source is not a valid URI")
+                    instance = cls(
+                        self,
+                        source=os.path.join(source, identifier),
+                        dest_path=identifier,
+                        properties=props
+                    )
             if 'Dataset' in entity_types:
                 dir_path = os.path.join(source, entity['@id'])
-                if os.path.exists(dir_path):
-                    props = {k: v for k, v in entity.items() if k != '@id'}
-                    instance = Dataset(self, dir_path, entity['@id'], props)
-                else:
-                    raise Exception('Directory not found')
+                props = {k: v for k, v in entity.items() if k != '@id'}
+                instance = Dataset(self, dir_path, entity['@id'], props)
             self.add(instance)
             added_entities.append(data_entity_id)
 
