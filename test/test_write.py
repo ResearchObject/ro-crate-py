@@ -174,13 +174,13 @@ def test_missing_source(test_data_dir, tmpdir, fetch_remote, validate_url):
     assert file_ is crate.dereference(path.name)
     out_path = tmpdir / 'ro_crate_out_1'
     crate.write_crate(out_path)
-    assert not(out_path / path.name).exists()
+    assert not (out_path / path.name).exists()
 
     crate = ROCrate()
     file_ = crate.add_file(str(path), path.name, **args)
     assert file_ is crate.dereference(path.name)
     out_path = tmpdir / 'ro_crate_out_2'
-    assert not(out_path / path.name).exists()
+    assert not (out_path / path.name).exists()
 
 
 @pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])

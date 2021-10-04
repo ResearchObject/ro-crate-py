@@ -44,7 +44,7 @@ class File(DataEntity):
             identifier = Path(dest_path).as_posix()  # relative path?
         else:
             # if there is no dest_path there must be a URI/local path as source
-            if not(is_url(str(source))):
+            if not is_url(str(source)):
                 # local source -> becomes local reference = reference relative
                 # to ro-crate root
                 identifier = os.path.basename(source)
