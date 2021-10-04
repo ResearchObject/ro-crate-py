@@ -20,7 +20,9 @@ import uuid
 
 import pytest
 from rocrate.rocrate import ROCrate
+from rocrate.model.data_entity import DataEntity
 from rocrate.model.file import File
+from rocrate.model.dataset import Dataset
 from rocrate.model.computationalworkflow import ComputationalWorkflow
 from rocrate.model.person import Person
 from rocrate.model.preview import Preview
@@ -68,6 +70,16 @@ def test_dereferencing_equivalent_id(test_data_dir, name):
             entity = crate.add_file(path, name)
         deref_entity = crate.dereference(id_)
         assert deref_entity is entity
+
+
+def test_data_entities(test_data_dir):
+    crate = ROCrate()
+    file_ = crate.add(File(crate, test_data_dir / 'sample_file.txt'))
+    dataset = crate.add(Dataset(crate, test_data_dir / 'test_add_dir'))
+    data_entity = crate.add(DataEntity(crate, '#mysterious'))
+    assert set(crate.data_entities) == {file_, dataset, data_entity}
+    part_ids = set(_["@id"] for _ in crate.root_dataset._jsonld["hasPart"])
+    assert set(_.id for _ in (file_, dataset, data_entity)) <= part_ids
 
 
 def test_contextual_entities():
