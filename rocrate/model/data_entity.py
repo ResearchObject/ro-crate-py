@@ -24,13 +24,14 @@ from .entity import Entity
 
 class DataEntity(Entity):
 
-    def __init__(self, crate, identifier, properties=None):
-        if not identifier or str(identifier).startswith("#"):
-            raise ValueError("Identifier for data entity must be a relative path or absolute URI: %s" % identifier)
-        super(DataEntity, self).__init__(crate, identifier, properties)
-
     def filepath(self, base_path=None):
         if base_path:
             return os.path.join(base_path, self.id)
         else:
             return self.id
+
+    def write(self, base_path):
+        pass
+
+    def write_zip(self, zip_out):
+        pass

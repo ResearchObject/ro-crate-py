@@ -32,6 +32,7 @@ from urllib.parse import urljoin
 from .model import contextentity
 from .model.entity import Entity
 from .model.root_dataset import RootDataset
+from .model.data_entity import DataEntity
 from .model.file import File
 from .model.dataset import Dataset
 from .model.metadata import Metadata, LegacyMetadata, TESTING_EXTRA_TERMS
@@ -186,42 +187,39 @@ class ROCrate():
         added_entities = []
         # iterate over data entities
         for data_entity_ref in root_entity_parts:
-            data_entity_id = data_entity_ref['@id']
-            # print(data_entity_id)
-            entity = entities[data_entity_id]
-            # basic checks should be moved to a separate function
-            if '@type' not in entity.keys():
-                raise Exception("Entity with @id:" + data_entity_id +
-                                " has no type defined")
-
-            # Data entities can have an array as @type. So far we just parse
-            # them as File class if File is in the list. For further
-            # extensions (e.g if a Workflow class is created) we can add extra
-            # cases or create a mapping table for specific combinations. See
+            id_ = data_entity_ref['@id']
+            entity = entities[id_]
+            try:
+                t = entity["@type"]
+            except KeyError:
+                raise ValueError(f'entity "{id_}" has no @type')
+            types = {_.strip() for _ in set(t if isinstance(t, list) else [t])}
+            # Deciding what to instantiate is not trivial, see
             # https://github.com/ResearchObject/ro-crate/issues/83
-            entity_types = (entity['@type']
-                            if isinstance(entity['@type'], list)
-                            else [entity['@type']])
-            if 'File' in entity_types:
+            if {'File', 'Dataset'} <= types:
+                raise ValueError("entity can't have both File and Dataset types")
+            if 'File' in types:
                 # temporary workaround, should be handled in the general case
-                cls = TestDefinition if "TestDefinition" in entity_types else File
-                identifier = entity['@id']
+                cls = TestDefinition if "TestDefinition" in types else File
                 props = {k: v for k, v in entity.items() if k != '@id'}
-                if is_url(identifier):
-                    instance = cls(self, source=identifier, properties=props)
+                if is_url(id_):
+                    instance = cls(self, source=id_, properties=props)
                 else:
                     instance = cls(
                         self,
-                        source=os.path.join(source, identifier),
-                        dest_path=identifier,
+                        source=os.path.join(source, id_),
+                        dest_path=id_,
                         properties=props
                     )
-            if 'Dataset' in entity_types:
-                dir_path = os.path.join(source, entity['@id'])
+            elif 'Dataset' in types:
+                dir_path = os.path.join(source, id_)
                 props = {k: v for k, v in entity.items() if k != '@id'}
-                instance = Dataset(self, dir_path, entity['@id'], props)
+                instance = Dataset(self, dir_path, id_, props)
+            else:
+                props = {k: v for k, v in entity.items() if k != '@id'}
+                instance = DataEntity(self, identifier=id_, properties=props)
             self.add(instance)
-            added_entities.append(data_entity_id)
+            added_entities.append(id_)
 
         # the rest of the entities must be contextual entities
         prebuilt_entities = [

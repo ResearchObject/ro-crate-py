@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import pytest
 import shutil
 import uuid
@@ -22,6 +23,7 @@ import zipfile
 from pathlib import Path
 
 from rocrate.rocrate import ROCrate
+from rocrate.model.data_entity import DataEntity
 from rocrate.model.file import File
 from rocrate.model.dataset import Dataset
 
@@ -298,3 +300,58 @@ def test_missing_file(test_data_dir, tmpdir):
     out_path = tmpdir / 'crate_read_out'
     crate.write_crate(out_path)
     assert not (out_path / name).exists()
+
+
+def test_generic_data_entity(tmpdir):
+    rc_id = "#collection"
+    metadata = {
+        "@context": [
+            "https://w3id.org/ro/crate/1.1/context",
+            {"@vocab": "http://schema.org/"},
+            {"@base": None}
+        ],
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {
+                    "@id": "./"
+                },
+                "identifier": "ro-crate-metadata.json"
+            },
+            {
+                "@id": "./",
+                "@type": "Dataset",
+                "hasPart": [{"@id": rc_id}],
+                "name": "Test RepositoryCollection"
+            },
+            {
+                "@id": rc_id,
+                "@type": "RepositoryCollection",
+                "name": "Test collection"
+            }
+        ]
+    }
+    crate_dir = tmpdir / "test_repository_collection"
+    crate_dir.mkdir()
+    with open(crate_dir / "ro-crate-metadata.json", "wt") as f:
+        json.dump(metadata, f, indent=4)
+    crate = ROCrate(crate_dir)
+
+    def check_rc():
+        rc = crate.dereference(rc_id)
+        assert rc is not None
+        assert isinstance(rc, DataEntity)
+        assert rc.id == rc_id
+        assert rc.type == "RepositoryCollection"
+        assert rc._jsonld["name"] == "Test collection"
+        assert crate.data_entities == [rc]
+        assert not crate.contextual_entities
+
+    check_rc()
+
+    out_crate_dir = tmpdir / "output_crate"
+    crate.write_crate(out_crate_dir)
+    crate = ROCrate(out_crate_dir)
+
+    check_rc()
