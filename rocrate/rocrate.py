@@ -17,6 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import errno
 import importlib
 import json
 import os
@@ -73,6 +74,8 @@ class ROCrate():
             # initialize an ro-crate from a directory tree
             self.__init_from_tree(source_path, gen_preview=gen_preview)
         else:
+            if not os.path.exists(source_path):
+                raise FileNotFoundError(errno.ENOENT, f"'{source_path}' not found")
             # load an existing ro-crate
             if zipfile.is_zipfile(source_path):
                 zip_path = tempfile.mkdtemp(prefix="ro", suffix="crate")
@@ -98,7 +101,7 @@ class ROCrate():
     def __init_from_tree(self, top_dir, gen_preview=False):
         top_dir = Path(top_dir)
         if not top_dir.is_dir():
-            raise ValueError(f"{top_dir} is not a valid directory path")
+            raise NotADirectoryError(errno.ENOTDIR, f"'{top_dir}': not a directory")
         self.add(RootDataset(self), Metadata(self))
         for root, dirs, files in os.walk(top_dir):
             root = Path(root)

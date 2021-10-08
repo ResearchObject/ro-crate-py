@@ -162,9 +162,9 @@ def test_legacy_crate(test_data_dir, tmpdir, helpers):
 def test_bad_crate(test_data_dir, tmpdir):
     # nonexistent dir
     crate_dir = test_data_dir / uuid.uuid4().hex
-    with pytest.raises(ValueError):
+    with pytest.raises(FileNotFoundError):
         ROCrate(crate_dir)
-    with pytest.raises(ValueError):
+    with pytest.raises(NotADirectoryError):
         ROCrate(crate_dir, init=True)
     # no metadata file
     crate_dir = tmpdir / uuid.uuid4().hex
