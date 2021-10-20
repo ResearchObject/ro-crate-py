@@ -18,7 +18,6 @@
 # limitations under the License.
 
 import os
-import tempfile
 
 from jinja2 import Template
 from .file import File
