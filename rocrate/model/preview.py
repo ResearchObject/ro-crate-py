@@ -18,7 +18,6 @@
 # limitations under the License.
 
 import os
-import tempfile
 
 from jinja2 import Template
 from .file import File
@@ -92,14 +91,3 @@ class Preview(File):
             out_html = self.generate_html()
             with open(write_path, 'w') as outfile:
                 outfile.write(out_html)
-
-    def write_zip(self, zip_out):
-        write_path = self.filepath()
-        out_html = self.generate_html()
-
-        tmpfile = tempfile.NamedTemporaryFile(mode='w', delete=False)
-        tmpfile_path = tmpfile.name
-        tmpfile.write(out_html)
-        tmpfile.close()
-        zip_out.write(tmpfile_path, write_path)
-        os.remove(tmpfile_path)

@@ -108,7 +108,3 @@ class File(DataEntity):
         elif os.path.isfile(self.source):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(self.source, out_file_path)
-
-    def write_zip(self, zip_out):
-        if self.id not in zip_out.namelist():
-            zip_out.write(self.source, self.id)

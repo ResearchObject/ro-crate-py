@@ -490,31 +490,17 @@ class ROCrate():
         for writable_entity in self.data_entities + self.default_entities:
             writable_entity.write(str(base_path))
 
-    def write_zip(self, out_zip):
-        if str(out_zip).endswith('.zip'):
-            out_file_path = out_zip
-        else:
-            out_file_path = out_zip + '.zip'
-        zf = zipfile.ZipFile(
-            out_file_path, 'w', compression=zipfile.ZIP_DEFLATED,
-            allowZip64=True
-        )
-        # copy unlisted files and directories
-        if self.source_path:
-            top = self.source_path
-            for root, dirs, files in os.walk(top):
-                root = Path(root)
-                for name in files:
-                    source = root / name
-                    if source.samefile(out_file_path):
-                        continue
-                    dest = source.relative_to(top)
-                    if not self.dereference(str(dest)):
-                        zf.write(str(source), str(dest))
-        for writable_entity in self.data_entities + self.default_entities:
-            writable_entity.write_zip(zf)
-        zf.close()
-        return zf.filename
+    def write_zip(self, out_path):
+        out_path = Path(out_path)
+        if out_path.suffix == ".zip":
+            out_path = out_path.parent / out_path.stem
+        tmp_dir = tempfile.mkdtemp(prefix="rocrate_")
+        try:
+            self.write_crate(tmp_dir)
+            archive = shutil.make_archive(out_path, "zip", tmp_dir)
+        finally:
+            shutil.rmtree(tmp_dir)
+        return archive
 
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,

@@ -32,6 +32,3 @@ class DataEntity(Entity):
 
     def write(self, base_path):
         pass
-
-    def write_zip(self, zip_out):
-        pass
