@@ -117,8 +117,8 @@ def test_file_stringio(tmpdir, helpers):
         assert f.read() == file_content
 
 
-@pytest.mark.parametrize("fetch_remote", [False, True])
-def test_remote_uri(tmpdir, helpers, fetch_remote):
+@pytest.mark.parametrize("fetch_remote,to_zip", [(False, False), (False, True), (True, False), (True, True)])
+def test_remote_uri(tmpdir, helpers, fetch_remote, to_zip):
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
            'master/test/test-data/sample_file.txt')
@@ -130,8 +130,13 @@ def test_remote_uri(tmpdir, helpers, fetch_remote):
         assert file_returned.id == url
 
     out_path = tmpdir / 'ro_crate_out'
-    out_path.mkdir()
-    crate.write_crate(out_path)
+    if to_zip:
+        zip_path = f"{out_path}.zip"
+        crate.write_zip(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(out_path)
+    else:
+        crate.write_crate(out_path)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()

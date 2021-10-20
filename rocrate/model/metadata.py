@@ -65,18 +65,6 @@ class Metadata(File):
         with open(write_path, 'w') as outfile:
             json.dump(as_jsonld, outfile, indent=4, sort_keys=True)
 
-    def write_zip(self, zip_out):
-        write_path = self.filepath()
-        as_jsonld = self.generate()
-        # with open(write_path, 'w') as outfile:
-        # TODO: fix this, there is no need to use a tmp file
-        tmpfile = tempfile.NamedTemporaryFile(mode='w', delete=False)
-        tmpfile_path = tmpfile.name
-        json.dump(as_jsonld, tmpfile, indent=4, sort_keys=True)
-        tmpfile.close()
-        zip_out.write(tmpfile_path, write_path)
-        os.remove(tmpfile_path)
-
     @property
     def root(self) -> Dataset:
         return self.crate.root_dataset

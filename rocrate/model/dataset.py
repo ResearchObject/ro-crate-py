@@ -70,14 +70,3 @@ class Dataset(DataEntity):
             if not os.path.exists(file_dest_path):
                 os.makedirs(file_dest_path)
             shutil.copyfile(file_src, file_dest)
-
-    def write_zip(self, zip_out):
-        out_path = self.filepath()
-        # create the dir in the zip
-        # zip_out.writestr(out_path, '')
-        # out_path = os.path.join(base_path, self.dest)
-        # iterate over the entries
-        for file_src, rel_path in self.directory_entries():
-            dest_path = os.path.join(out_path, rel_path)
-            if dest_path not in zip_out.namelist():
-                zip_out.write(file_src, dest_path)
