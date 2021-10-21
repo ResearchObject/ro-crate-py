@@ -467,26 +467,26 @@ class ROCrate():
     # def fetch_all(self):
         # fetch all files defined in the crate
 
+    def _copy_unlisted(self, top, base_path):
+        for root, dirs, files in os.walk(top):
+            root = Path(root)
+            for name in dirs:
+                source = root / name
+                dest = base_path / source.relative_to(top)
+                dest.mkdir(parents=True, exist_ok=True)
+            for name in files:
+                source = root / name
+                rel = source.relative_to(top)
+                if not self.dereference(str(rel)):
+                    dest = base_path / rel
+                    shutil.copyfile(source, dest)
+
     # write crate to local dir
     def write_crate(self, base_path):
         base_path = Path(base_path)
         base_path.mkdir(parents=True, exist_ok=True)
-        # copy unlisted files and directories
         if self.source_path:
-            top = self.source_path
-            for root, dirs, files in os.walk(top):
-                root = Path(root)
-                for name in dirs:
-                    source = root / name
-                    dest = base_path / source.relative_to(top)
-                    dest.mkdir(parents=True, exist_ok=True)
-                for name in files:
-                    source = root / name
-                    rel = source.relative_to(top)
-                    if not self.dereference(str(rel)):
-                        dest = base_path / rel
-                        shutil.copyfile(source, dest)
-        # write data entities
+            self._copy_unlisted(self.source_path, base_path)
         for writable_entity in self.data_entities + self.default_entities:
             writable_entity.write(str(base_path))
 
