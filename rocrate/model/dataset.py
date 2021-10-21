@@ -19,7 +19,6 @@
 
 import os
 from pathlib import Path
-import shutil
 
 from .data_entity import DataEntity
 
@@ -46,27 +45,8 @@ class Dataset(DataEntity):
     def format_id(self, identifier):
         return identifier.rstrip("/") + "/"
 
-    def directory_entries(self, base_path=None):
-        # iterate over the source dir contents to list all entries
-        directory_entries = []
-        if self.source and os.path.exists(self.source):
-            for base, subd, filenames in os.walk(self.source):
-                for filename in filenames:
-                    file_source = os.path.join(base, filename)
-                    rel_path = os.path.relpath(file_source, self.source)
-                    if base_path:
-                        dest_path = os.path.join(base_path, rel_path)
-                    else:
-                        dest_path = rel_path
-                    file_entry = (file_source, dest_path)
-                    directory_entries.append(file_entry)
-        return directory_entries
-
     def write(self, base_path):
         out_path = self.filepath(base_path)
         Path(out_path).mkdir(parents=True, exist_ok=True)
-        for file_src, file_dest in self.directory_entries(out_path):
-            file_dest_path = os.path.dirname(file_dest)
-            if not os.path.exists(file_dest_path):
-                os.makedirs(file_dest_path)
-            shutil.copyfile(file_src, file_dest)
+        if not self.crate.source_path and self.source and os.path.exists(self.source):
+            self.crate._copy_unlisted(self.source, out_path)
