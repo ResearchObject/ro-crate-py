@@ -46,7 +46,7 @@ class Dataset(DataEntity):
         return identifier.rstrip("/") + "/"
 
     def write(self, base_path):
-        out_path = self.filepath(base_path)
-        Path(out_path).mkdir(parents=True, exist_ok=True)
+        out_path = Path(base_path) / self.id
+        out_path.mkdir(parents=True, exist_ok=True)
         if not self.crate.source_path and self.source and os.path.exists(self.source):
             self.crate._copy_unlisted(self.source, out_path)

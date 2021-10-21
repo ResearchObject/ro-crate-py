@@ -118,9 +118,6 @@ class Entity(object):
     # def types(self)-> List[str]:
         # return tuple(as_list(self.get("@type", "Thing")))
 
-    def filepath(self):
-        return self.id
-
     @property
     def datePublished(self):
         d = self['datePublished']

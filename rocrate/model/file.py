@@ -91,8 +91,7 @@ class File(DataEntity):
         return val
 
     def write(self, base_path):
-        base_path = Path(base_path)
-        out_file_path = base_path / self.id
+        out_file_path = Path(base_path) / self.id
         # check if its local or remote URI
         if isinstance(self.source, IOBase):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)

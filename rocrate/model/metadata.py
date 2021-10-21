@@ -18,6 +18,7 @@
 # limitations under the License.
 
 import json
+from pathlib import Path
 
 from .file import File
 from .dataset import Dataset
@@ -57,8 +58,7 @@ class Metadata(File):
         return {'@context': context, '@graph': graph}
 
     def write(self, base_path):
-        # writes itself in
-        write_path = self.filepath(base_path)
+        write_path = Path(base_path) / self.id
         as_jsonld = self.generate()
         with open(write_path, 'w') as outfile:
             json.dump(as_jsonld, outfile, indent=4, sort_keys=True)
