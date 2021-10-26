@@ -61,40 +61,15 @@ class ROCrate():
         self.uuid = uuid.uuid4()
         self.arcp_base_uri = f"arcp://uuid,{self.uuid}/"
         self.preview = None
-
         if gen_preview:
             self.add(Preview(self))
-
-        # TODO: default_properties must include name, description,
-        # datePublished, license
         if not source_path:
             # create a new ro-crate
             self.add(RootDataset(self), Metadata(self))
         elif init:
-            # initialize an ro-crate from a directory tree
             self.__init_from_tree(source_path, gen_preview=gen_preview)
         else:
-            if not os.path.exists(source_path):
-                raise FileNotFoundError(errno.ENOENT, f"'{source_path}' not found")
-            # load an existing ro-crate
-            if zipfile.is_zipfile(source_path):
-                zip_path = tempfile.mkdtemp(prefix="ro", suffix="crate")
-                atexit.register(shutil.rmtree, zip_path)
-                with zipfile.ZipFile(source_path, "r") as zip_file:
-                    zip_file.extractall(zip_path)
-                source_path = zip_path
-            metadata_path = os.path.join(source_path, Metadata.BASENAME)
-            MetadataClass = Metadata
-            if not os.path.isfile(metadata_path):
-                metadata_path = os.path.join(source_path, LegacyMetadata.BASENAME)
-                MetadataClass = LegacyMetadata
-            if not os.path.isfile(metadata_path):
-                raise ValueError('The directory is not a valid RO-crate, '
-                                 f'missing {Metadata.BASENAME}')
-            self.add(MetadataClass(self))
-            entities = self.entities_from_metadata(metadata_path)
-            self.build_crate(entities, source_path, gen_preview)
-            # TODO: load root dataset properties
+            source_path = self.__read(source_path, gen_preview=gen_preview)
         # in the zip case, self.source_path is the extracted dir
         self.source_path = source_path
 
@@ -116,6 +91,28 @@ class ROCrate():
                     self.add_file(source, source.relative_to(top_dir))
                 elif not gen_preview:
                     self.add(Preview(self, source))
+
+    def __read(self, source_path, gen_preview=False):
+        source_path = Path(source_path)
+        if not source_path.exists():
+            raise FileNotFoundError(errno.ENOENT, f"'{source_path}' not found")
+        if zipfile.is_zipfile(source_path):
+            zip_path = tempfile.mkdtemp(prefix="rocrate_")
+            atexit.register(shutil.rmtree, zip_path)
+            with zipfile.ZipFile(source_path, "r") as zf:
+                zf.extractall(zip_path)
+            source_path = Path(zip_path)
+        metadata_path = source_path / Metadata.BASENAME
+        MetadataClass = Metadata
+        if not metadata_path.is_file():
+            metadata_path = source_path / LegacyMetadata.BASENAME
+            MetadataClass = LegacyMetadata
+        if not metadata_path.is_file():
+            raise ValueError(f"Not a valid RO-Crate: missing {Metadata.BASENAME}")
+        self.add(MetadataClass(self))
+        entities = self.entities_from_metadata(metadata_path)
+        self.build_crate(entities, source_path, gen_preview)
+        return source_path
 
     def entities_from_metadata(self, metadata_path):
         # Creates a dictionary {id: entity} from the metadata file
