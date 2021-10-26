@@ -17,7 +17,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from pathlib import Path
 
 from .data_entity import DataEntity
@@ -26,12 +25,10 @@ from .data_entity import DataEntity
 class Dataset(DataEntity):
 
     def __init__(self, crate, source=None, dest_path=None, properties=None):
-        identifier = None
-        self.source = source
-        if not dest_path:
-            identifier = Path(source).name
-        else:
-            identifier = Path(dest_path).as_posix()
+        if not source and not dest_path:
+            raise ValueError("dest_path must be provided if source is not")
+        self.source = source if not source else Path(source)
+        identifier = Path(dest_path).as_posix() if dest_path else self.source.name
         super().__init__(crate, identifier, properties)
 
     def _empty(self):
@@ -48,5 +45,5 @@ class Dataset(DataEntity):
     def write(self, base_path):
         out_path = Path(base_path) / self.id
         out_path.mkdir(parents=True, exist_ok=True)
-        if not self.crate.source_path and self.source and os.path.exists(self.source):
+        if not self.crate.source_path and self.source and self.source.exists():
             self.crate._copy_unlisted(self.source, out_path)

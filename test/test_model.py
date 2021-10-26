@@ -82,6 +82,15 @@ def test_data_entities(test_data_dir):
     assert set(_.id for _ in (file_, dataset, data_entity)) <= part_ids
 
 
+def test_bad_data_entities(test_data_dir):
+    # no source and no dest_path
+    crate = ROCrate()
+    with pytest.raises(ValueError):
+        crate.add(Dataset(crate))
+    with pytest.raises(ValueError):
+        crate.add(File(crate))
+
+
 def test_contextual_entities():
     crate = ROCrate()
     new_person = crate.add(Person(crate, '#joe', {'name': 'Joe Pesci'}))

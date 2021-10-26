@@ -485,7 +485,7 @@ class ROCrate():
         if self.source_path:
             self._copy_unlisted(self.source_path, base_path)
         for writable_entity in self.data_entities + self.default_entities:
-            writable_entity.write(str(base_path))
+            writable_entity.write(base_path)
 
     def write_zip(self, out_path):
         out_path = Path(out_path)

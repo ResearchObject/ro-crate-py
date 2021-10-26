@@ -175,14 +175,14 @@ def test_missing_source(test_data_dir, tmpdir, fetch_remote, validate_url):
     args = {"fetch_remote": fetch_remote, "validate_url": validate_url}
 
     crate = ROCrate()
-    file_ = crate.add_file(str(path), **args)
+    file_ = crate.add_file(path, **args)
     assert file_ is crate.dereference(path.name)
     out_path = tmpdir / 'ro_crate_out_1'
     crate.write_crate(out_path)
     assert not (out_path / path.name).exists()
 
     crate = ROCrate()
-    file_ = crate.add_file(str(path), path.name, **args)
+    file_ = crate.add_file(path, path.name, **args)
     assert file_ is crate.dereference(path.name)
     out_path = tmpdir / 'ro_crate_out_2'
     assert not (out_path / path.name).exists()
@@ -205,9 +205,9 @@ def test_no_source_no_dest(test_data_dir, fetch_remote, validate_url):
 def test_dataset(test_data_dir, tmpdir):
     crate = ROCrate()
     path = test_data_dir / "a" / "b"
-    d1 = crate.add_dataset(str(path))
+    d1 = crate.add_dataset(path)
     assert crate.dereference("b") is d1
-    d2 = crate.add_dataset(str(path), "a/b")
+    d2 = crate.add_dataset(path, "a/b")
     assert crate.dereference("a/b") is d2
 
     out_path = tmpdir / 'ro_crate_out'
