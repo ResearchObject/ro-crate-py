@@ -89,6 +89,11 @@ def test_bad_data_entities(test_data_dir):
         crate.add(Dataset(crate))
     with pytest.raises(ValueError):
         crate.add(File(crate))
+    # absolute dest_path
+    with pytest.raises(ValueError):
+        crate.add(Dataset(crate, test_data_dir, "/tmp/foo"))
+    with pytest.raises(ValueError):
+        crate.add(File(crate, test_data_dir / "sample_file.txt", "/tmp/x.txt"))
 
 
 def test_contextual_entities():

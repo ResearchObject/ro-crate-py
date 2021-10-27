@@ -28,7 +28,13 @@ class Dataset(DataEntity):
         if not source and not dest_path:
             raise ValueError("dest_path must be provided if source is not")
         self.source = source if not source else Path(source)
-        identifier = Path(dest_path).as_posix() if dest_path else self.source.name
+        if dest_path:
+            dest_path = Path(dest_path)
+            if dest_path.is_absolute():
+                raise ValueError("if provided, dest_path must be relative")
+            identifier = dest_path.as_posix()
+        else:
+            identifier = self.source.name
         super().__init__(crate, identifier, properties)
 
     def _empty(self):

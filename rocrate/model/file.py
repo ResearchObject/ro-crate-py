@@ -37,21 +37,18 @@ class File(DataEntity):
             properties = {}
         self.fetch_remote = fetch_remote
         self.source = source
-        if not isinstance(source, (str, Path)) and dest_path is None:
-            raise ValueError("dest_path must be provided if source is not a path or URI")
         if dest_path:
-            # the entity is refrencing a path relative to the ro-crate root
-            identifier = Path(dest_path).as_posix()  # relative path?
+            dest_path = Path(dest_path)
+            if dest_path.is_absolute():
+                raise ValueError("if provided, dest_path must be relative")
+            identifier = dest_path.as_posix()
         else:
-            # if there is no dest_path there must be a URI/local path as source
+            if not isinstance(source, (str, Path)):
+                raise ValueError("dest_path must be provided if source is not a path or URI")
             if not is_url(str(source)):
-                # local source -> becomes local reference = reference relative
-                # to ro-crate root
                 identifier = os.path.basename(source)
             else:
-                # entity is refering an external object (absolute URI)
                 if validate_url:
-
                     # specification says remote URI should always be
                     # accessible, but added this as optional to give the
                     # possibility of building off line (or behind a different
