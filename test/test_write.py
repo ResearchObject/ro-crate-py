@@ -97,13 +97,13 @@ def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
         assert helpers.PREVIEW_FILE_NAME in json_entities
 
 
-def test_file_stringio(tmpdir, helpers):
+@pytest.mark.parametrize("stream_cls", [io.BytesIO, io.StringIO])
+def test_in_mem_stream(stream_cls, tmpdir, helpers):
     crate = ROCrate()
 
     test_file_id = 'a/b/test_file.txt'
-    file_content = 'This will be the content of the file'
-    file_stringio = io.StringIO(file_content)
-    file_returned = crate.add_file(file_stringio, test_file_id)
+    file_content = b'\x00\x01' if stream_cls is io.BytesIO else 'foo\n'
+    file_returned = crate.add_file(stream_cls(file_content), test_file_id)
     assert file_returned.id == test_file_id
 
     out_path = tmpdir / 'ro_crate_out'
@@ -114,7 +114,8 @@ def test_file_stringio(tmpdir, helpers):
     assert metadata_path.exists()
     file1 = out_path / test_file_id
     assert file1.exists()
-    with open(file1) as f:
+    mode = 'r' + ('b' if stream_cls is io.BytesIO else 't')
+    with open(file1, mode) as f:
         assert f.read() == file_content
 
 

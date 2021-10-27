@@ -21,9 +21,7 @@ import os
 from pathlib import Path
 import shutil
 import urllib.request
-
-from io import IOBase
-from urllib.error import HTTPError
+from io import BytesIO, StringIO
 
 from .data_entity import DataEntity
 from ..utils import is_url
@@ -46,17 +44,11 @@ class File(DataEntity):
         else:
             if not isinstance(source, (str, Path)):
                 raise ValueError("dest_path must be provided if source is not a path or URI")
-            if not is_url(str(source)):
-                identifier = os.path.basename(source)
-            else:
-                if fetch_remote:
-                    # the entity will be referencing a local file (so it has a
-                    # local relative id), independently of the source being
-                    # external
-                    identifier = os.path.basename(source)
-                else:
-                    identifier = source
+            if is_url(str(source)):
+                identifier = os.path.basename(source) if fetch_remote else source
                 properties.update({'url': source})
+            else:
+                identifier = os.path.basename(source)
         super(File, self).__init__(crate, identifier, properties)
 
     def _empty(self):
@@ -68,9 +60,10 @@ class File(DataEntity):
 
     def write(self, base_path):
         out_file_path = Path(base_path) / self.id
-        if isinstance(self.source, IOBase):
+        if isinstance(self.source, (BytesIO, StringIO)):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(out_file_path, 'w') as out_file:
+            mode = 'w' + ('b' if isinstance(self.source, BytesIO) else 't')
+            with open(out_file_path, mode) as out_file:
                 out_file.write(self.source.getvalue())
         elif is_url(str(self.source)) and (self.fetch_remote or self.validate_url):
             with urllib.request.urlopen(self.source) as response:
