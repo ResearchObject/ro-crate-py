@@ -32,10 +32,11 @@ from ..utils import is_url
 class File(DataEntity):
 
     def __init__(self, crate, source=None, dest_path=None, fetch_remote=False,
-                 validate_url=True, properties=None):
+                 validate_url=False, properties=None):
         if properties is None:
             properties = {}
         self.fetch_remote = fetch_remote
+        self.validate_url = validate_url
         self.source = source
         if dest_path:
             dest_path = Path(dest_path)
@@ -48,26 +49,6 @@ class File(DataEntity):
             if not is_url(str(source)):
                 identifier = os.path.basename(source)
             else:
-                if validate_url:
-                    # specification says remote URI should always be
-                    # accessible, but added this as optional to give the
-                    # possibility of building off line (or behind a different
-                    # landing page?). The fetching of the remote file/dataset
-                    # itself (if enabled) is only done during ro-crate
-                    # writing, but here we can fetch some properties of the
-                    # remote file if possible
-                    try:
-                        response = urllib.request.urlopen(source)
-                    except HTTPError as e:
-                        # do something
-                        print('Remote URI not accessible', e.code)
-                    else:
-                        properties.update({
-                            'contentSize':
-                            response.getheader('Content-Length'),
-                            'encodingFormat':
-                            response.getheader('Content-Type')
-                        })
                 if fetch_remote:
                     # the entity will be referencing a local file (so it has a
                     # local relative id), independently of the source being
@@ -75,8 +56,6 @@ class File(DataEntity):
                     identifier = os.path.basename(source)
                 else:
                     identifier = source
-                # set url to the source. When creating through workflowhub
-                # this is auto set to URL Workflow Hub page
                 properties.update({'url': source})
         super(File, self).__init__(crate, identifier, properties)
 
@@ -89,18 +68,21 @@ class File(DataEntity):
 
     def write(self, base_path):
         out_file_path = Path(base_path) / self.id
-        # check if its local or remote URI
         if isinstance(self.source, IOBase):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
             with open(out_file_path, 'w') as out_file:
                 out_file.write(self.source.getvalue())
-        elif is_url(str(self.source)) and self.fetch_remote:
-            # Should we check that the resource hasn't changed? E.g., compare
-            # response.getheader('Content-Length') to self._jsonld['contentSize'] or
-            # response.getheader('Content-Type') to self._jsonld['encodingFormat']
-            out_file_path.parent.mkdir(parents=True, exist_ok=True)
-            with urllib.request.urlopen(self.source) as response, open(out_file_path, 'wb') as out_file:
-                shutil.copyfileobj(response, out_file)
+        elif is_url(str(self.source)) and (self.fetch_remote or self.validate_url):
+            with urllib.request.urlopen(self.source) as response:
+                if self.validate_url:
+                    self._jsonld.update({
+                        'contentSize': response.getheader('Content-Length'),
+                        'encodingFormat': response.getheader('Content-Type')
+                    })
+                if self.fetch_remote:
+                    out_file_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(out_file_path, 'wb') as out_file:
+                        shutil.copyfileobj(response, out_file)
         elif os.path.isfile(self.source):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(self.source, out_file_path)

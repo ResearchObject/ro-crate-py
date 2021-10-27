@@ -19,6 +19,7 @@ import io
 import pytest
 import uuid
 import zipfile
+from itertools import product
 from urllib.error import URLError
 
 from rocrate.model.dataset import Dataset
@@ -117,17 +118,22 @@ def test_file_stringio(tmpdir, helpers):
         assert f.read() == file_content
 
 
-@pytest.mark.parametrize("fetch_remote,to_zip", [(False, False), (False, True), (True, False), (True, True)])
-def test_remote_uri(tmpdir, helpers, fetch_remote, to_zip):
+@pytest.mark.parametrize(
+    "fetch_remote,validate_url,to_zip",
+    list(product((False, True), repeat=3))
+)
+def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
            'master/test/test-data/sample_file.txt')
+    relpath = "a/b/sample_file.txt"
+    kw = {"fetch_remote": fetch_remote, "validate_url": validate_url}
     if fetch_remote:
-        file_returned = crate.add_file(source=url, dest_path="a/b/sample_file.txt", fetch_remote=fetch_remote)
-        assert file_returned.id == 'a/b/sample_file.txt'
+        file_ = crate.add_file(url, relpath, **kw)
+        assert file_.id == relpath
     else:
-        file_returned = crate.add_file(source=url, fetch_remote=fetch_remote)
-        assert file_returned.id == url
+        file_ = crate.add_file(url, **kw)
+        assert file_.id == url
 
     out_path = tmpdir / 'ro_crate_out'
     if to_zip:
@@ -138,11 +144,12 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, to_zip):
     else:
         crate.write_crate(out_path)
 
-    metadata_path = out_path / helpers.METADATA_FILE_NAME
-    assert metadata_path.exists()
-    file1 = out_path / 'a/b/sample_file.txt'
+    out_crate = ROCrate(out_path)
     if fetch_remote:
-        assert file1.exists()
+        assert (out_path / relpath).is_file()
+        out_file = out_crate.dereference(file_.id)
+        if validate_url:
+            assert {"contentSize", "encodingFormat"}.issubset(out_file.properties())
 
 
 def test_remote_uri_exceptions(tmpdir):
