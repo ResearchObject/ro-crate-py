@@ -17,6 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import os
 from pathlib import Path
 import shutil
@@ -72,6 +73,8 @@ class File(DataEntity):
                         'contentSize': response.getheader('Content-Length'),
                         'encodingFormat': response.getheader('Content-Type')
                     })
+                    if not self.fetch_remote:
+                        self._jsonld['sdDatePublished'] = datetime.datetime.now().isoformat()
                 if self.fetch_remote:
                     out_file_path.parent.mkdir(parents=True, exist_ok=True)
                     with open(out_file_path, 'wb') as out_file:

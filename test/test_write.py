@@ -149,8 +149,13 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
     if fetch_remote:
         assert (out_path / relpath).is_file()
         out_file = out_crate.dereference(file_.id)
-        if validate_url:
-            assert {"contentSize", "encodingFormat"}.issubset(out_file.properties())
+    else:
+        out_file = out_crate.dereference(url)
+    if validate_url:
+        props = out_file.properties()
+        assert {"contentSize", "encodingFormat"}.issubset(props)
+        if not fetch_remote:
+            assert "sdDatePublished" in props
 
 
 def test_remote_uri_exceptions(tmpdir):
