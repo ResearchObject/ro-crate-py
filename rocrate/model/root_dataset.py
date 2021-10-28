@@ -24,7 +24,7 @@ from ..utils import iso_now
 class RootDataset(Dataset):
 
     def __init__(self, crate, properties=None):
-        super(RootDataset, self).__init__(crate, None, './', properties)
+        super().__init__(crate, dest_path='./', properties=properties)
 
     def format_id(self, identifier):
         return './'

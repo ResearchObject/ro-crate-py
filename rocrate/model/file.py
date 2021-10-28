@@ -23,33 +23,11 @@ import shutil
 import urllib.request
 from io import BytesIO, StringIO
 
-from .data_entity import DataEntity
+from .file_or_dir import FileOrDir
 from ..utils import is_url, iso_now
 
 
-class File(DataEntity):
-
-    def __init__(self, crate, source=None, dest_path=None, fetch_remote=False,
-                 validate_url=False, properties=None):
-        if properties is None:
-            properties = {}
-        self.fetch_remote = fetch_remote
-        self.validate_url = validate_url
-        self.source = source
-        if dest_path:
-            dest_path = Path(dest_path)
-            if dest_path.is_absolute():
-                raise ValueError("if provided, dest_path must be relative")
-            identifier = dest_path.as_posix()
-        else:
-            if not isinstance(source, (str, Path)):
-                raise ValueError("dest_path must be provided if source is not a path or URI")
-            if is_url(str(source)):
-                identifier = os.path.basename(source) if fetch_remote else source
-                properties.update({'url': source})
-            else:
-                identifier = os.path.basename(source)
-        super(File, self).__init__(crate, identifier, properties)
+class File(FileOrDir):
 
     def _empty(self):
         val = {

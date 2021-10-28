@@ -178,7 +178,7 @@ class ROCrate():
         # properties to the build
         root_entity.pop('@id', None)
         root_entity.pop('hasPart', None)
-        self.add(RootDataset(self, root_entity))
+        self.add(RootDataset(self, properties=root_entity))
 
         if not gen_preview and Preview.BASENAME in entities:
             preview_source = os.path.join(source, Preview.BASENAME)
@@ -214,7 +214,7 @@ class ROCrate():
             elif 'Dataset' in types:
                 dir_path = os.path.join(source, id_)
                 props = {k: v for k, v in entity.items() if k != '@id'}
-                instance = Dataset(self, dir_path, id_, props)
+                instance = Dataset(self, dir_path, id_, properties=props)
             else:
                 props = {k: v for k, v in entity.items() if k != '@id'}
                 instance = DataEntity(self, identifier=id_, properties=props)
@@ -382,13 +382,39 @@ class ROCrate():
         canonical_id = self.resolve_id(entity_id)
         return self.__entity_map.get(canonical_id, None)
 
-    def add_file(self, source=None, dest_path=None, fetch_remote=False,
-                 validate_url=True, properties=None):
-        return self.add(File(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
-                             validate_url=validate_url, properties=properties))
+    def add_file(
+            self,
+            source=None,
+            dest_path=None,
+            fetch_remote=False,
+            validate_url=True,
+            properties=None
+    ):
+        return self.add(File(
+            self,
+            source=source,
+            dest_path=dest_path,
+            fetch_remote=fetch_remote,
+            validate_url=validate_url,
+            properties=properties
+        ))
 
-    def add_dataset(self, source=None, dest_path=None, properties=None):
-        return self.add(Dataset(self, source=source, dest_path=dest_path, properties=properties))
+    def add_dataset(
+            self,
+            source=None,
+            dest_path=None,
+            fetch_remote=False,
+            validate_url=True,
+            properties=None
+    ):
+        return self.add(Dataset(
+            self,
+            source=source,
+            dest_path=dest_path,
+            fetch_remote=fetch_remote,
+            validate_url=validate_url,
+            properties=properties
+        ))
 
     add_directory = add_dataset
 

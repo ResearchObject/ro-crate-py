@@ -82,6 +82,16 @@ def test_data_entities(test_data_dir):
     assert set(_.id for _ in (file_, dataset, data_entity)) <= part_ids
 
 
+def test_remote_data_entities():
+    crate = ROCrate()
+    file_uri = "https://www.rfc-editor.org/rfc/rfc3986.txt"
+    dataset_uri = "https://ftp.mozilla.org/pub/misc/errorpages/"
+    file_ = crate.add(File(crate, file_uri))
+    dataset = crate.add(Dataset(crate, dataset_uri))
+    assert file_.id == file_uri
+    assert dataset.id == dataset_uri
+
+
 def test_bad_data_entities(test_data_dir):
     # no source and no dest_path
     crate = ROCrate()

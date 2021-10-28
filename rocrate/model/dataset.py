@@ -19,23 +19,10 @@
 
 from pathlib import Path
 
-from .data_entity import DataEntity
+from .file_or_dir import FileOrDir
 
 
-class Dataset(DataEntity):
-
-    def __init__(self, crate, source=None, dest_path=None, properties=None):
-        if not source and not dest_path:
-            raise ValueError("dest_path must be provided if source is not")
-        self.source = source if not source else Path(source)
-        if dest_path:
-            dest_path = Path(dest_path)
-            if dest_path.is_absolute():
-                raise ValueError("if provided, dest_path must be relative")
-            identifier = dest_path.as_posix()
-        else:
-            identifier = self.source.name
-        super().__init__(crate, identifier, properties)
+class Dataset(FileOrDir):
 
     def _empty(self):
         val = {
