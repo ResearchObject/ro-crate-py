@@ -38,7 +38,7 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-    wf_crate.write_crate(out_path)
+    wf_crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_wf_crate(json_entities, wf_id)
     wf_entity = json_entities[wf_id]
@@ -72,7 +72,7 @@ def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-    wf_crate.write_crate(out_path)
+    wf_crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_wf_crate(json_entities, wf_id)
 
@@ -106,7 +106,7 @@ def test_create_wf_include(test_data_dir, tmpdir, helpers):
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-    wf_crate.write_crate(out_path)
+    wf_crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_wf_crate(json_entities, wf_id)
 

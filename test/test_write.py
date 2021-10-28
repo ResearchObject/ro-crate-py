@@ -61,7 +61,7 @@ def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
             zf.extractall(out_path)
     else:
         out_path.mkdir()
-        crate.write_crate(out_path)
+        crate.write(out_path)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
@@ -108,7 +108,7 @@ def test_in_mem_stream(stream_cls, tmpdir, helpers):
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-    crate.write_crate(out_path)
+    crate.write(out_path)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
@@ -143,7 +143,7 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
         with zipfile.ZipFile(zip_path, "r") as zf:
             zf.extractall(out_path)
     else:
-        crate.write_crate(out_path)
+        crate.write(out_path)
 
     out_crate = ROCrate(out_path)
     if fetch_remote:
@@ -166,7 +166,7 @@ def test_remote_uri_exceptions(tmpdir):
     out_path = tmpdir / 'ro_crate_out_1'
     out_path.mkdir()
     with pytest.raises(URLError):
-        crate.write_crate(out_path)
+        crate.write(out_path)
 
     crate = ROCrate()
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
@@ -176,7 +176,7 @@ def test_remote_uri_exceptions(tmpdir):
     out_path.mkdir()
     (out_path / "a").mkdir(mode=0o444)
     try:
-        crate.write_crate(out_path)
+        crate.write(out_path)
     except PermissionError:
         pass
     # no error on Windows, or on Linux as root, so we don't use pytest.raises
@@ -191,7 +191,7 @@ def test_missing_source(test_data_dir, tmpdir, fetch_remote, validate_url):
     file_ = crate.add_file(path, **args)
     assert file_ is crate.dereference(path.name)
     out_path = tmpdir / 'ro_crate_out_1'
-    crate.write_crate(out_path)
+    crate.write(out_path)
     assert not (out_path / path.name).exists()
 
     crate = ROCrate()
@@ -225,7 +225,7 @@ def test_dataset(test_data_dir, tmpdir):
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-    crate.write_crate(out_path)
+    crate.write(out_path)
 
     assert (out_path / "b").is_dir()
     assert (out_path / "a" / "b").is_dir()
@@ -236,7 +236,7 @@ def test_no_parts(tmpdir, helpers):
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-    crate.write_crate(out_path)
+    crate.write(out_path)
 
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_crate(json_entities)

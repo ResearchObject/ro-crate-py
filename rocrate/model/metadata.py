@@ -25,10 +25,8 @@ from .dataset import Dataset
 
 
 class Metadata(File):
-    """
-    RO-Crate metadata file
-
-    This object holds the data of an RO Crate Metadata File rocrate_
+    """\
+    RO-Crate metadata file.
     """
     BASENAME = "ro-crate-metadata.json"
     PROFILE = "https://w3id.org/ro/crate/1.1"

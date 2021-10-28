@@ -118,7 +118,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     # write the crate in a different directory
     out_path = tmpdir / 'crate_read_out'
     out_path.mkdir()
-    crate.write_crate(out_path)
+    crate.write(out_path)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
@@ -200,7 +200,7 @@ def test_init(test_data_dir, tmpdir, helpers, override):
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-    crate.write_crate(out_path)
+    crate.write(out_path)
 
     assert (out_path / helpers.METADATA_FILE_NAME).exists()
     json_entities = helpers.read_json_entities(out_path)
@@ -225,7 +225,7 @@ def test_init_preview(test_data_dir, tmpdir, helpers, gen_preview, preview_exist
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-    crate.write_crate(out_path)
+    crate.write(out_path)
 
     out_prev_path = out_path / helpers.PREVIEW_FILE_NAME
     if gen_preview or preview_exists:
@@ -242,7 +242,7 @@ def test_no_parts(tmpdir):
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
-    crate.write_crate(out_path)
+    crate.write(out_path)
 
     crate = ROCrate(out_path)
     assert not crate.root_dataset["hasPart"]
@@ -260,7 +260,7 @@ def test_extra_data(test_data_dir, tmpdir, to_zip):
             zf.extractall(out_path)
     else:
         out_path.mkdir()
-        crate.write_crate(out_path)
+        crate.write(out_path)
     for rel in {
             "listed.txt",
             "listed/listed.txt",
@@ -283,7 +283,7 @@ def test_missing_dir(test_data_dir, tmpdir):
     assert examples_dataset.id == f'{name}/'
 
     out_path = tmpdir / 'crate_read_out'
-    crate.write_crate(out_path)
+    crate.write(out_path)
     assert not (out_path / 'README.txt').exists()
 
 
@@ -298,7 +298,7 @@ def test_missing_file(test_data_dir, tmpdir):
     assert test_file.id == name
 
     out_path = tmpdir / 'crate_read_out'
-    crate.write_crate(out_path)
+    crate.write(out_path)
     assert not (out_path / name).exists()
 
 
@@ -351,7 +351,7 @@ def test_generic_data_entity(tmpdir):
     check_rc()
 
     out_crate_dir = tmpdir / "output_crate"
-    crate.write_crate(out_crate_dir)
+    crate.write(out_crate_dir)
     crate = ROCrate(out_crate_dir)
 
     check_rc()

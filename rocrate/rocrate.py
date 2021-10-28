@@ -51,7 +51,7 @@ from .utils import is_url
 
 class ROCrate():
 
-    def __init__(self, source_path=None, gen_preview=False, init=False):
+    def __init__(self, source=None, gen_preview=False, init=False):
         self.__entity_map = {}
         self.default_entities = []
         self.data_entities = []
@@ -63,15 +63,15 @@ class ROCrate():
         self.preview = None
         if gen_preview:
             self.add(Preview(self))
-        if not source_path:
+        if not source:
             # create a new ro-crate
             self.add(RootDataset(self), Metadata(self))
         elif init:
-            self.__init_from_tree(source_path, gen_preview=gen_preview)
+            self.__init_from_tree(source, gen_preview=gen_preview)
         else:
-            source_path = self.__read(source_path, gen_preview=gen_preview)
-        # in the zip case, self.source_path is the extracted dir
-        self.source_path = source_path
+            source = self.__read(source, gen_preview=gen_preview)
+        # in the zip case, self.source is the extracted dir
+        self.source = source
 
     def __init_from_tree(self, top_dir, gen_preview=False):
         top_dir = Path(top_dir)
@@ -92,27 +92,27 @@ class ROCrate():
                 elif not gen_preview:
                     self.add(Preview(self, source))
 
-    def __read(self, source_path, gen_preview=False):
-        source_path = Path(source_path)
-        if not source_path.exists():
-            raise FileNotFoundError(errno.ENOENT, f"'{source_path}' not found")
-        if zipfile.is_zipfile(source_path):
+    def __read(self, source, gen_preview=False):
+        source = Path(source)
+        if not source.exists():
+            raise FileNotFoundError(errno.ENOENT, f"'{source}' not found")
+        if zipfile.is_zipfile(source):
             zip_path = tempfile.mkdtemp(prefix="rocrate_")
             atexit.register(shutil.rmtree, zip_path)
-            with zipfile.ZipFile(source_path, "r") as zf:
+            with zipfile.ZipFile(source, "r") as zf:
                 zf.extractall(zip_path)
-            source_path = Path(zip_path)
-        metadata_path = source_path / Metadata.BASENAME
+            source = Path(zip_path)
+        metadata_path = source / Metadata.BASENAME
         MetadataClass = Metadata
         if not metadata_path.is_file():
-            metadata_path = source_path / LegacyMetadata.BASENAME
+            metadata_path = source / LegacyMetadata.BASENAME
             MetadataClass = LegacyMetadata
         if not metadata_path.is_file():
             raise ValueError(f"Not a valid RO-Crate: missing {Metadata.BASENAME}")
         self.add(MetadataClass(self))
         entities = self.entities_from_metadata(metadata_path)
-        self.build_crate(entities, source_path, gen_preview)
-        return source_path
+        self.build_crate(entities, source, gen_preview)
+        return source
 
     def entities_from_metadata(self, metadata_path):
         # Creates a dictionary {id: entity} from the metadata file
@@ -478,14 +478,15 @@ class ROCrate():
                     dest = base_path / rel
                     shutil.copyfile(source, dest)
 
-    # write crate to local dir
-    def write_crate(self, base_path):
+    def write(self, base_path):
         base_path = Path(base_path)
         base_path.mkdir(parents=True, exist_ok=True)
-        if self.source_path:
-            self._copy_unlisted(self.source_path, base_path)
+        if self.source:
+            self._copy_unlisted(self.source, base_path)
         for writable_entity in self.data_entities + self.default_entities:
             writable_entity.write(base_path)
+
+    write_crate = write  # backwards compatibility
 
     def write_zip(self, out_path):
         out_path = Path(out_path)
@@ -493,7 +494,7 @@ class ROCrate():
             out_path = out_path.parent / out_path.stem
         tmp_dir = tempfile.mkdtemp(prefix="rocrate_")
         try:
-            self.write_crate(tmp_dir)
+            self.write(tmp_dir)
             archive = shutil.make_archive(out_path, "zip", tmp_dir)
         finally:
             shutil.rmtree(tmp_dir)

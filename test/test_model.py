@@ -176,7 +176,7 @@ def test_update(test_data_dir, tmpdir, helpers):
 
     out_path = tmpdir / "ro_crate_out"
     out_path.mkdir()
-    crate.write_crate(out_path)
+    crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_wf_crate(json_entities, wf.id)
 
@@ -225,10 +225,10 @@ def test_delete_refs(test_data_dir, tmpdir, helpers):
     crate.delete(definition)
     assert suite.definition is not definition  # so far, so good
     assert suite.definition == str(def_path)  # should probably be set to None
-    crate.write_crate("/tmp/crate_out")
+    crate.write("/tmp/crate_out")
     # check json output
     out_path = tmpdir / "ro_crate_out"
-    crate.write_crate(out_path)
+    crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
     assert def_path not in json_entities  # good
     assert json_entities["#test1"]["definition"]["@id"] == def_path  # not good
