@@ -18,6 +18,7 @@
 # limitations under the License.
 
 import collections
+from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
 
@@ -45,3 +46,7 @@ def as_list(list_or_other):
 def is_url(string):
     parts = urlsplit(string)
     return all((parts.scheme, parts.netloc, parts.path))
+
+
+def iso_now():
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()

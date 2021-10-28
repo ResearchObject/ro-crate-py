@@ -17,29 +17,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-
 from .dataset import Dataset
+from ..utils import iso_now
 
 
 class RootDataset(Dataset):
 
     def __init__(self, crate, properties=None):
-        default_properties = {
-            'datePublished': datetime.datetime.now().isoformat()
-        }
-        if properties:
-            default_properties.update(properties)
-        super(RootDataset, self).__init__(crate, None, './',
-                                          default_properties)
+        super(RootDataset, self).__init__(crate, None, './', properties)
 
     def format_id(self, identifier):
         return './'
 
     def _empty(self):
-        # Hard-coded bootstrap for now
         val = {
-            "@id": "./",
+            "@id": self.id,
             "@type": "Dataset",
+            "datePublished": iso_now(),
         }
         return val

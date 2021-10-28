@@ -17,7 +17,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
 import os
 from pathlib import Path
 import shutil
@@ -25,7 +24,7 @@ import urllib.request
 from io import BytesIO, StringIO
 
 from .data_entity import DataEntity
-from ..utils import is_url
+from ..utils import is_url, iso_now
 
 
 class File(DataEntity):
@@ -74,7 +73,7 @@ class File(DataEntity):
                         'encodingFormat': response.getheader('Content-Type')
                     })
                     if not self.fetch_remote:
-                        self._jsonld['sdDatePublished'] = datetime.datetime.now().isoformat()
+                        self._jsonld['sdDatePublished'] = iso_now()
                 if self.fetch_remote:
                     out_file_path.parent.mkdir(parents=True, exist_ok=True)
                     with open(out_file_path, 'wb') as out_file:
