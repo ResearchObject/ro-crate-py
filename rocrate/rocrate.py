@@ -26,6 +26,7 @@ import atexit
 import shutil
 import tempfile
 
+from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -33,6 +34,7 @@ from .model.contextentity import ContextEntity
 from .model.entity import Entity
 from .model.root_dataset import RootDataset
 from .model.data_entity import DataEntity
+from .model.file_or_dir import FileOrDir
 from .model.file import File
 from .model.dataset import Dataset
 from .model.metadata import Metadata, LegacyMetadata, TESTING_EXTRA_TERMS
@@ -180,6 +182,7 @@ class ROCrate():
         self.add(RootDataset(self, properties=root_entity))
         if not gen_preview and Preview.BASENAME in entities:
             self.add(Preview(self, source / Preview.BASENAME))
+        type_map = OrderedDict((_.__name__, _) for _ in subclasses(FileOrDir))
         for data_entity_ref in parts:
             id_ = data_entity_ref['@id']
             entity = entities.pop(id_)
@@ -189,24 +192,19 @@ class ROCrate():
             except KeyError:
                 raise ValueError(f'entity "{id_}" has no @type')
             types = {_.strip() for _ in set(t if isinstance(t, list) else [t])}
-            # Deciding what to instantiate is not trivial, see
-            # https://github.com/ResearchObject/ro-crate/issues/83
-            if {'File', 'Dataset'} <= types:
-                raise ValueError("entity can't have both File and Dataset types")
-            if 'File' in types:
-                # temporary workaround, should be handled in the general case
-                cls = TestDefinition if "TestDefinition" in types else File
+            # pick the most specific type (order guaranteed by subclasses)
+            cls = DataEntity
+            for name, c in type_map.items():
+                if name in types:
+                    cls = c
+                    break
+            if cls is DataEntity:
+                instance = DataEntity(self, identifier=id_, properties=entity)
+            else:
                 if is_url(id_):
                     instance = cls(self, id_, properties=entity)
                 else:
                     instance = cls(self, source / id_, id_, properties=entity)
-            elif 'Dataset' in types:
-                if is_url(id_):
-                    instance = Dataset(self, id_, properties=entity)
-                else:
-                    instance = Dataset(self, source / id_, id_, properties=entity)
-            else:
-                instance = DataEntity(self, identifier=id_, properties=entity)
             self.add(instance)
 
     def __read_contextual_entities(self, entities):

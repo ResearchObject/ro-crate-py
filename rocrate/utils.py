@@ -53,8 +53,15 @@ def iso_now():
 
 
 def subclasses(cls):
+    """\
+    Recursively iterate through all subclasses (direct and indirect) of cls.
+
+    Subclasses appear before their parent classes, but ordering is otherwise
+    undefined. For instance, if Cat and Dog are subclasses of Pet and Beagle
+    is a subclass of Dog, then Beagle will appear before Dog.
+    """
     direct = cls.__subclasses__()
     for d in direct:
-        yield d
         for c in subclasses(d):
             yield c
+        yield d
