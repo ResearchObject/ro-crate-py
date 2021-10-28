@@ -16,7 +16,9 @@
 # limitations under the License.
 
 import datetime
+import tempfile
 import uuid
+from pathlib import Path
 
 import pytest
 from rocrate.rocrate import ROCrate
@@ -101,9 +103,10 @@ def test_bad_data_entities(test_data_dir):
         crate.add(File(crate))
     # absolute dest_path
     with pytest.raises(ValueError):
-        crate.add(Dataset(crate, test_data_dir, "/tmp/foo"))
+        tmp = Path(tempfile.gettempdir())
+        crate.add(Dataset(crate, test_data_dir, tmp / "foo"))
     with pytest.raises(ValueError):
-        crate.add(File(crate, test_data_dir / "sample_file.txt", "/tmp/x.txt"))
+        crate.add(File(crate, test_data_dir / "sample_file.txt", tmp / "x.txt"))
 
 
 def test_contextual_entities():
