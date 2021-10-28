@@ -18,6 +18,7 @@
 # limitations under the License.
 
 import collections
+from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
 
@@ -45,3 +46,22 @@ def as_list(list_or_other):
 def is_url(string):
     parts = urlsplit(string)
     return all((parts.scheme, parts.netloc, parts.path))
+
+
+def iso_now():
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def subclasses(cls):
+    """\
+    Recursively iterate through all subclasses (direct and indirect) of cls.
+
+    Subclasses appear before their parent classes, but ordering is otherwise
+    undefined. For instance, if Cat and Dog are subclasses of Pet and Beagle
+    is a subclass of Dog, then Beagle will appear before Dog.
+    """
+    direct = cls.__subclasses__()
+    for d in direct:
+        for c in subclasses(d):
+            yield c
+        yield d

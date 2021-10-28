@@ -133,7 +133,7 @@ crate.write_zip(out_path)
 
 # write crate to disk
 out_path = "/home/test_user/crate_base"
-crate.write_crate(out_path)
+crate.write(out_path)
 ```
 
 

@@ -17,22 +17,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+import shutil
 from pathlib import Path
+from urllib.request import urlopen
 
-from .data_entity import DataEntity
+from .file_or_dir import FileOrDir
+from ..utils import is_url, iso_now
 
 
-class Dataset(DataEntity):
-
-    def __init__(self, crate, source=None, dest_path=None, properties=None):
-        identifier = None
-        self.source = source
-        if not dest_path:
-            identifier = Path(source).name
-        else:
-            identifier = Path(dest_path).as_posix()
-        super().__init__(crate, identifier, properties)
+class Dataset(FileOrDir):
 
     def _empty(self):
         val = {
@@ -46,7 +39,29 @@ class Dataset(DataEntity):
         return identifier.rstrip("/") + "/"
 
     def write(self, base_path):
-        out_path = self.filepath(base_path)
-        Path(out_path).mkdir(parents=True, exist_ok=True)
-        if not self.crate.source_path and self.source and os.path.exists(self.source):
-            self.crate._copy_unlisted(self.source, out_path)
+        out_path = Path(base_path) / self.id
+        if is_url(str(self.source)):
+            if self.validate_url and not self.fetch_remote:
+                with urlopen(self.source) as _:
+                    self._jsonld['sdDatePublished'] = iso_now()
+            if self.fetch_remote:
+                self.__get_parts(out_path)
+        else:
+            out_path.mkdir(parents=True, exist_ok=True)
+            if not self.crate.source and self.source and self.source.exists():
+                self.crate._copy_unlisted(self.source, out_path)
+
+    def __get_parts(self, out_path):
+        out_path.mkdir(parents=True, exist_ok=True)
+        base = self.source.rstrip("/")
+        for entry in self._jsonld.get("hasPart", []):
+            try:
+                part = entry["@id"]
+            except KeyError:
+                continue
+            if is_url(part) or part.startswith("/"):
+                raise RuntimeError(f"'{self.source}': part '{part}' is not a relative path")
+            part_uri = f"{base}/{part}"
+            part_out_path = out_path / part
+            with urlopen(part_uri) as r, open(part_out_path, 'wb') as f:
+                shutil.copyfileobj(r, f)

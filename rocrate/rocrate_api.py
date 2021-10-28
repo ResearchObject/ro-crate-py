@@ -61,7 +61,7 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     wf_crate = roc.ROCrate()
     workflow_path = Path(workflow_path)
     wf_file = wf_crate.add_workflow(
-        str(workflow_path), workflow_path.name, fetch_remote=fetch_remote,
+        workflow_path, workflow_path.name, fetch_remote=fetch_remote,
         main=True, lang=wf_type, gen_cwl=(cwl is None)
     )
 

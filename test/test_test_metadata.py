@@ -147,7 +147,7 @@ def test_add_test_suite(test_data_dir):
     top_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     wf_path = top_dir / "sort-and-change-case.ga"
     crate = ROCrate()
-    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    wf = crate.add(ComputationalWorkflow(crate, wf_path, wf_path.name))
     crate.mainEntity = wf
     suites = set()
     assert not crate.test_suites
@@ -184,7 +184,7 @@ def test_add_test_instance(test_data_dir):
     top_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     wf_path = top_dir / "sort-and-change-case.ga"
     crate = ROCrate()
-    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    wf = crate.add(ComputationalWorkflow(crate, wf_path, wf_path.name))
     crate.mainEntity = wf
     suite = crate.add_test_suite()
     instances = set()
@@ -229,7 +229,7 @@ def test_add_test_definition(test_data_dir, engine, engine_version):
     wf_path = top_dir / "sort-and-change-case.ga"
     def_path = top_dir / "test" / "test1" / "sort-and-change-case-test.yml"
     crate = ROCrate()
-    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    wf = crate.add(ComputationalWorkflow(crate, wf_path, wf_path.name))
     crate.mainEntity = wf
     suite = crate.add_test_suite()
     assert crate.dereference(PLANEMO) is None
@@ -248,7 +248,7 @@ def test_test_suites_prop(test_data_dir):
     top_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     wf_path = top_dir / "sort-and-change-case.ga"
     crate = ROCrate()
-    wf = crate.add(ComputationalWorkflow(crate, str(wf_path), wf_path.name))
+    wf = crate.add(ComputationalWorkflow(crate, wf_path, wf_path.name))
     crate.mainEntity = wf
     suites = set()
     assert not crate.test_suites

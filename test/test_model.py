@@ -16,7 +16,9 @@
 # limitations under the License.
 
 import datetime
+import tempfile
 import uuid
+from pathlib import Path
 
 import pytest
 from rocrate.rocrate import ROCrate
@@ -80,6 +82,31 @@ def test_data_entities(test_data_dir):
     assert set(crate.data_entities) == {file_, dataset, data_entity}
     part_ids = set(_["@id"] for _ in crate.root_dataset._jsonld["hasPart"])
     assert set(_.id for _ in (file_, dataset, data_entity)) <= part_ids
+
+
+def test_remote_data_entities():
+    crate = ROCrate()
+    file_uri = "https://www.rfc-editor.org/rfc/rfc3986.txt"
+    dataset_uri = "https://ftp.mozilla.org/pub/misc/errorpages/"
+    file_ = crate.add(File(crate, file_uri))
+    dataset = crate.add(Dataset(crate, dataset_uri))
+    assert file_.id == file_uri
+    assert dataset.id == dataset_uri
+
+
+def test_bad_data_entities(test_data_dir):
+    # no source and no dest_path
+    crate = ROCrate()
+    with pytest.raises(ValueError):
+        crate.add(Dataset(crate))
+    with pytest.raises(ValueError):
+        crate.add(File(crate))
+    # absolute dest_path
+    with pytest.raises(ValueError):
+        tmp = Path(tempfile.gettempdir())
+        crate.add(Dataset(crate, test_data_dir, tmp / "foo"))
+    with pytest.raises(ValueError):
+        crate.add(File(crate, test_data_dir / "sample_file.txt", tmp / "x.txt"))
 
 
 def test_contextual_entities():
@@ -162,7 +189,7 @@ def test_update(test_data_dir, tmpdir, helpers):
 
     out_path = tmpdir / "ro_crate_out"
     out_path.mkdir()
-    crate.write_crate(out_path)
+    crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
     helpers.check_wf_crate(json_entities, wf.id)
 
@@ -211,10 +238,10 @@ def test_delete_refs(test_data_dir, tmpdir, helpers):
     crate.delete(definition)
     assert suite.definition is not definition  # so far, so good
     assert suite.definition == str(def_path)  # should probably be set to None
-    crate.write_crate("/tmp/crate_out")
+    crate.write("/tmp/crate_out")
     # check json output
     out_path = tmpdir / "ro_crate_out"
-    crate.write_crate(out_path)
+    crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
     assert def_path not in json_entities  # good
     assert json_entities["#test1"]["definition"]["@id"] == def_path  # not good

@@ -18,6 +18,7 @@
 # limitations under the License.
 
 import os
+from pathlib import Path
 
 from jinja2 import Template
 from .file import File
@@ -87,7 +88,7 @@ class Preview(File):
         if self.source:
             super().write(dest_base)
         else:
-            write_path = self.filepath(dest_base)
+            write_path = Path(dest_base) / self.id
             out_html = self.generate_html()
             with open(write_path, 'w') as outfile:
                 outfile.write(out_html)

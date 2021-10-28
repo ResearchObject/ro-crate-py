@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2019-2021 The University of Manchester, UK
 # Copyright 2020-2021 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2021 Barcelona Supercomputing Center (BSC), ES
@@ -9,7 +7,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,22 +15,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .dataset import Dataset
-from ..utils import iso_now
+from rocrate.utils import subclasses
 
 
-class RootDataset(Dataset):
+class Pet:
+    pass
 
-    def __init__(self, crate, properties=None):
-        super().__init__(crate, dest_path='./', properties=properties)
 
-    def format_id(self, identifier):
-        return './'
+class Cat(Pet):
+    pass
 
-    def _empty(self):
-        val = {
-            "@id": self.id,
-            "@type": "Dataset",
-            "datePublished": iso_now(),
-        }
-        return val
+
+class Dog(Pet):
+    pass
+
+
+class Beagle(Dog):
+    pass
+
+
+def test_subclasses():
+    pet_subclasses = list(subclasses(Pet))
+    assert set(pet_subclasses) == {Cat, Dog, Beagle}
+    assert pet_subclasses.index(Beagle) < pet_subclasses.index(Dog)
