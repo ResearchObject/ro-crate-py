@@ -212,9 +212,12 @@ class ROCrate():
                         properties=props
                     )
             elif 'Dataset' in types:
-                dir_path = os.path.join(source, id_)
                 props = {k: v for k, v in entity.items() if k != '@id'}
-                instance = Dataset(self, dir_path, id_, properties=props)
+                if is_url(id_):
+                    instance = Dataset(self, source=id_, properties=props)
+                else:
+                    instance = Dataset(self, os.path.join(source, id_), id_,
+                                       properties=props)
             else:
                 props = {k: v for k, v in entity.items() if k != '@id'}
                 instance = DataEntity(self, identifier=id_, properties=props)

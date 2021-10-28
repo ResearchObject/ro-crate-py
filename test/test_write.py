@@ -147,15 +147,58 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
 
     out_crate = ROCrate(out_path)
     if fetch_remote:
-        assert (out_path / relpath).is_file()
         out_file = out_crate.dereference(file_.id)
+        assert (out_path / relpath).is_file()
     else:
         out_file = out_crate.dereference(url)
+        assert not (out_path / relpath).exists()
     if validate_url:
         props = out_file.properties()
         assert {"contentSize", "encodingFormat"}.issubset(props)
         if not fetch_remote:
             assert "sdDatePublished" in props
+
+
+@pytest.mark.parametrize(
+    "fetch_remote,validate_url",
+    list(product((False, True), repeat=2))
+)
+def test_remote_dir(tmpdir, helpers, fetch_remote, validate_url):
+    crate = ROCrate()
+    url = "https://ftp.mozilla.org/pub/misc/errorpages/"
+    relpath = "pub/misc/errorpages/"
+    properties = {
+        "hasPart": [
+            {"@id": "404.html"},
+            {"@id": "500.html"},
+        ],
+    }
+    kw = {
+        "fetch_remote": fetch_remote,
+        "validate_url": validate_url,
+        "properties": properties,
+    }
+    if fetch_remote:
+        dataset = crate.add_dataset(url, relpath, **kw)
+        assert dataset.id == relpath
+    else:
+        dataset = crate.add_dataset(url, **kw)
+        assert dataset.id == url
+
+    out_path = tmpdir / 'ro_crate_out'
+    crate.write(out_path)
+
+    out_crate = ROCrate(out_path)
+    if fetch_remote:
+        out_dataset = out_crate.dereference(relpath)
+        assert (out_path / relpath).is_dir()
+        for entry in properties["hasPart"]:
+            assert (out_path / relpath / entry["@id"]).is_file()
+    else:
+        out_dataset = out_crate.dereference(url)
+        assert not (out_path / relpath).exists()
+    if validate_url and not fetch_remote:
+        assert "sdDatePublished" in out_dataset.properties()
 
 
 def test_remote_uri_exceptions(tmpdir):
