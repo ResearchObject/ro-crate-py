@@ -50,3 +50,11 @@ def is_url(string):
 
 def iso_now():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def subclasses(cls):
+    direct = cls.__subclasses__()
+    for d in direct:
+        yield d
+        for c in subclasses(d):
+            yield c

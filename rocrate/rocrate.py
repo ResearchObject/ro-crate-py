@@ -18,7 +18,6 @@
 # limitations under the License.
 
 import errno
-import importlib
 import json
 import os
 import uuid
@@ -30,7 +29,7 @@ import tempfile
 from pathlib import Path
 from urllib.parse import urljoin
 
-from .model import contextentity
+from .model.contextentity import ContextEntity
 from .model.entity import Entity
 from .model.root_dataset import RootDataset
 from .model.data_entity import DataEntity
@@ -46,7 +45,7 @@ from .model.testservice import TestService, get_service
 from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEFAULT_VERSION
 from .model.testsuite import TestSuite
 
-from .utils import is_url
+from .utils import is_url, subclasses
 
 
 def read_metadata(metadata_path):
@@ -128,7 +127,8 @@ class ROCrate():
             raise ValueError(f"Not a valid RO-Crate: missing {Metadata.BASENAME}")
         self.add(MetadataClass(self))
         _, entities = read_metadata(metadata_path)
-        self.build_crate(entities, source, gen_preview)
+        self.__read_data_entities(entities, source, gen_preview)
+        self.__read_contextual_entities(entities)
         return source
 
     def find_root_entity_id(self, entities):
@@ -171,27 +171,19 @@ class ROCrate():
             "see https://www.researchobject.org/ro-crate/1.1/root-data-entity.html"
         )
 
-    def build_crate(self, entities, source, gen_preview):
-        # add data and contextual entities to the crate
-        (metadata_id, root_id) = self.find_root_entity_id(entities)
-        root_entity = entities[root_id]
-        root_entity_parts = root_entity.get('hasPart', [])
-
-        # remove hasPart and id from root_entity and add the rest of the
-        # properties to the build
-        root_entity.pop('@id', None)
-        root_entity.pop('hasPart', None)
+    def __read_data_entities(self, entities, source, gen_preview):
+        metadata_id, root_id = self.find_root_entity_id(entities)
+        entities.pop(metadata_id)  # added previously
+        root_entity = entities.pop(root_id)
+        assert root_id == root_entity.pop('@id')
+        parts = root_entity.pop('hasPart', [])
         self.add(RootDataset(self, properties=root_entity))
-
         if not gen_preview and Preview.BASENAME in entities:
-            preview_source = os.path.join(source, Preview.BASENAME)
-            self.add(Preview(self, preview_source))
-
-        added_entities = []
-        # iterate over data entities
-        for data_entity_ref in root_entity_parts:
+            self.add(Preview(self, source / Preview.BASENAME))
+        for data_entity_ref in parts:
             id_ = data_entity_ref['@id']
-            entity = entities[id_]
+            entity = entities.pop(id_)
+            assert id_ == entity.pop('@id')
             try:
                 t = entity["@type"]
             except KeyError:
@@ -204,63 +196,28 @@ class ROCrate():
             if 'File' in types:
                 # temporary workaround, should be handled in the general case
                 cls = TestDefinition if "TestDefinition" in types else File
-                props = {k: v for k, v in entity.items() if k != '@id'}
                 if is_url(id_):
-                    instance = cls(self, source=id_, properties=props)
+                    instance = cls(self, id_, properties=entity)
                 else:
-                    instance = cls(
-                        self,
-                        source=os.path.join(source, id_),
-                        dest_path=id_,
-                        properties=props
-                    )
+                    instance = cls(self, source / id_, id_, properties=entity)
             elif 'Dataset' in types:
-                props = {k: v for k, v in entity.items() if k != '@id'}
                 if is_url(id_):
-                    instance = Dataset(self, source=id_, properties=props)
+                    instance = Dataset(self, id_, properties=entity)
                 else:
-                    instance = Dataset(self, os.path.join(source, id_), id_,
-                                       properties=props)
+                    instance = Dataset(self, source / id_, id_, properties=entity)
             else:
-                props = {k: v for k, v in entity.items() if k != '@id'}
-                instance = DataEntity(self, identifier=id_, properties=props)
+                instance = DataEntity(self, identifier=id_, properties=entity)
             self.add(instance)
-            added_entities.append(id_)
 
-        # the rest of the entities must be contextual entities
-        prebuilt_entities = [
-            root_id, metadata_id, Preview.BASENAME
-        ]
+    def __read_contextual_entities(self, entities):
+        type_map = {_.__name__: _ for _ in subclasses(ContextEntity)}
         for identifier, entity in entities.items():
-            if identifier not in added_entities + prebuilt_entities:
-                # should this be done in the extract entities?
-                entity.pop('@id', None)
-                # contextual entities should not have @type array
-                # (see https://github.com/ResearchObject/ro-crate/issues/83)
-                if entity['@type'] in [
-                        cls.__name__
-                        for cls in contextentity.ContextEntity.__subclasses__()
-                ]:
-                    module_name = 'rocrate.model.' + entity['@type'].lower()
-                    SubClass = getattr(
-                        importlib.import_module(module_name, package=None),
-                        entity['@type']
-                    )
-                    instance = SubClass(self, identifier, entity)
-                else:
-                    instance = contextentity.ContextEntity(
-                        self, identifier, entity
-                    )
-                self.add(instance)
-
-    # TODO: add contextual entities
-    # def add_contact_point(id, properties = {})
-    # def add_organization(id, properties = {})
-
-    # add properties: name datePublished author license identifier
-    # distribution contactPoint publisher funder description url hasPart.
-    # publisher should be an Organization though it MAY be a Person. funder
-    # should reference an Organization
+            assert identifier == entity.pop('@id')
+            # https://github.com/ResearchObject/ro-crate/issues/83
+            if isinstance(entity['@type'], list):
+                raise RuntimeError(f"multiple types for '{identifier}'")
+            cls = type_map.get(entity['@type'], ContextEntity)
+            self.add(cls(self, identifier, entity))
 
     @property
     def name(self):
