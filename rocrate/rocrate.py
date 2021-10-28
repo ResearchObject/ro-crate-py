@@ -49,6 +49,23 @@ from .model.testsuite import TestSuite
 from .utils import is_url
 
 
+def read_metadata(metadata_path):
+    """\
+    Read an RO-Crate metadata file.
+
+    Return a tuple of two elements: the context; a dictionary that maps entity
+    ids to the entities themselves.
+    """
+    with open(metadata_path) as f:
+        metadata = json.load(f)
+    try:
+        context = metadata['@context']
+        graph = metadata['@graph']
+    except KeyError:
+        raise ValueError(f"{metadata_path} must have a @context and a @graph")
+    return context, {_["@id"]: _ for _ in graph}
+
+
 class ROCrate():
 
     def __init__(self, source=None, gen_preview=False, init=False):
@@ -110,23 +127,9 @@ class ROCrate():
         if not metadata_path.is_file():
             raise ValueError(f"Not a valid RO-Crate: missing {Metadata.BASENAME}")
         self.add(MetadataClass(self))
-        entities = self.entities_from_metadata(metadata_path)
+        _, entities = read_metadata(metadata_path)
         self.build_crate(entities, source, gen_preview)
         return source
-
-    def entities_from_metadata(self, metadata_path):
-        # Creates a dictionary {id: entity} from the metadata file
-        with open(metadata_path) as metadata_file:
-            metadata_jsonld = json.load(metadata_file)
-        # TODO: should validate the json-ld
-        if '@graph' in metadata_jsonld.keys():
-            entities_dict = {}
-            for entity in metadata_jsonld['@graph']:
-                entities_dict[entity['@id']] = entity
-                # print(entity)
-            return entities_dict
-        else:
-            raise ValueError('The metadata file has no @graph')
 
     def find_root_entity_id(self, entities):
         """Find Metadata file and Root Data Entity in RO-Crate.
