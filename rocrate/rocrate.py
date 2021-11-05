@@ -339,9 +339,11 @@ class ROCrate():
     def _get_root_jsonld(self):
         self.root_dataset.properties()
 
-    def dereference(self, entity_id):
+    def dereference(self, entity_id, default=None):
         canonical_id = self.resolve_id(entity_id)
-        return self.__entity_map.get(canonical_id, None)
+        return self.__entity_map.get(canonical_id, default)
+
+    get = dereference
 
     def add_file(
             self,

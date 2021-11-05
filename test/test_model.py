@@ -54,6 +54,13 @@ def test_dereferencing(test_data_dir, helpers):
     readme_entity = crate.add_file(readme_url)
     assert crate.dereference(readme_url) is readme_entity
 
+    # dereference nonexistent entity
+    assert crate.dereference(f"#{uuid.uuid4()}") is None
+    assert crate.dereference(f"#{uuid.uuid4()}", file_returned) is file_returned
+
+    # alias
+    assert crate.get(readme_url) is readme_entity
+
 
 @pytest.mark.parametrize("name", [".foo", "foo.", ".foo/", "foo./"])
 def test_dereferencing_equivalent_id(test_data_dir, name):
