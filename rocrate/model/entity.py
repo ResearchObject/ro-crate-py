@@ -59,9 +59,6 @@ class Entity(object):
             return clsName
         return "Thing"
 
-    def reference(self):
-        return {'@id': self.id}
-
     def canonical_id(self):
         return self.crate.resolve_id(self.id)
 
@@ -75,37 +72,18 @@ class Entity(object):
         }
         return val
 
-    def auto_dereference(self, value):
-        if isinstance(value, list):
-            return_list = []
-            for entry in value:
-                return_list.append(self.auto_dereference(entry))
-            return return_list
-        if isinstance(value, dict) and value['@id']:  # its a reference
-            obj = self.crate.dereference(value['@id'])
-            return obj if obj else value['@id']
-        return value
-
-    def auto_reference(self, value):
-        if isinstance(value, list):  # TODO: make it in a more pythonic way
-            return_list = []
-            for entry in value:
-                return_list.append(self.auto_reference(entry))
-            return return_list
-        if isinstance(value, Entity):
-            # add reference to an Entity
-            return value.reference()  # I assume it is already in the crate...
-        else:
-            return value
-
     def __getitem__(self, key: str):
-        if key in self._jsonld.keys():
-            return self.auto_dereference(self._jsonld[key])
-        else:
-            return None
+        v = self._jsonld.get(key)
+        if not v or isinstance(v, str) or key.startswith("@"):
+            return v
+        values = v if isinstance(v, list) else [v]
+        deref_values = [self.crate.dereference(_["@id"], _["@id"]) for _ in values]
+        return deref_values if isinstance(v, list) else deref_values[0]
 
     def __setitem__(self, key: str, value):
-        self._jsonld[key] = self.auto_reference(value)
+        values = value if isinstance(value, list) else [value]
+        ref_values = [{"@id": _.id} if isinstance(_, Entity) else _ for _ in values]
+        self._jsonld[key] = ref_values if isinstance(value, list) else ref_values[0]
 
     def __delitem__(self, key: str):
         del self._jsonld[key]
