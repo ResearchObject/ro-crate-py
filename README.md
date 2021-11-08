@@ -238,3 +238,5 @@ see the file `LICENSE.txt` for details.
 
 The above DOI corresponds to the latest versioned release as [published to Zenodo](https://zenodo.org/record/3956493), where you will find all earlier releases. 
 To cite `ro-crate-py` independent of version, use <https://doi.org/10.5281/zenodo.3956493>, which will always redirect to the latest release.
+
+You may also be interested in the paper [Packaging research artefacts with RO-Crate](https://arxiv.org/abs/2108.06503) to appear in _Data Science_.
