@@ -20,6 +20,7 @@
 import os
 from pathlib import Path
 import shutil
+import filecmp
 import urllib.request
 from io import BytesIO, StringIO
 
@@ -58,4 +59,6 @@ class File(FileOrDir):
                         shutil.copyfileobj(response, out_file)
         elif os.path.isfile(self.source):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy(self.source, out_file_path)
+            if not os.path.exists(out_file_path) or not filecmp.cmp(self.source, out_file_path):
+                # shutil.copyfile(src, dst)
+                shutil.copy(self.source, out_file_path)
