@@ -32,7 +32,7 @@ class TestDefinition(File):
 
     @property
     def engineVersion(self):
-        return self["engineVersion"]
+        return self.get("engineVersion")
 
     @engineVersion.setter
     def engineVersion(self, engineVersion):
@@ -40,7 +40,7 @@ class TestDefinition(File):
 
     @property
     def conformsTo(self):
-        return self["conformsTo"]
+        return self.get("conformsTo")
 
     @conformsTo.setter
     def conformsTo(self, conformsTo):

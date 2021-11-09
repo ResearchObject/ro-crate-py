@@ -18,12 +18,13 @@
 # limitations under the License.
 
 import uuid
+from collections.abc import MutableMapping
 
 from dateutil.parser import isoparse
 from .. import vocabs
 
 
-class Entity(object):
+class Entity(MutableMapping):
 
     def __init__(self, crate, identifier=None, properties=None):
         self.crate = crate
@@ -59,14 +60,11 @@ class Entity(object):
             return clsName
         return "Thing"
 
-    def reference(self):
-        return {'@id': self.id}
-
     def canonical_id(self):
         return self.crate.resolve_id(self.id)
 
-    def hash(self):
-        hash(self.canonical_id())
+    def __hash__(self):
+        return hash(self.canonical_id())
 
     def _empty(self):
         val = {
@@ -75,44 +73,52 @@ class Entity(object):
         }
         return val
 
-    def auto_dereference(self, value):
-        if isinstance(value, list):
-            return_list = []
-            for entry in value:
-                return_list.append(self.auto_dereference(entry))
-            return return_list
-        if isinstance(value, dict) and value['@id']:  # its a reference
-            obj = self.crate.dereference(value['@id'])
-            return obj if obj else value['@id']
-        return value
-
-    def auto_reference(self, value):
-        if isinstance(value, list):  # TODO: make it in a more pythonic way
-            return_list = []
-            for entry in value:
-                return_list.append(self.auto_reference(entry))
-            return return_list
-        if isinstance(value, Entity):
-            # add reference to an Entity
-            return value.reference()  # I assume it is already in the crate...
-        else:
-            return value
-
-    def __getitem__(self, key: str):
-        if key in self._jsonld.keys():
-            return self.auto_dereference(self._jsonld[key])
-        else:
-            return None
+    def __getitem__(self, key):
+        v = self._jsonld[key]
+        if isinstance(v, str) or key.startswith("@"):
+            return v
+        values = v if isinstance(v, list) else [v]
+        deref_values = [self.crate.dereference(_["@id"], _["@id"]) for _ in values]
+        return deref_values if isinstance(v, list) else deref_values[0]
 
     def __setitem__(self, key: str, value):
-        self._jsonld[key] = self.auto_reference(value)
+        if key.startswith("@"):
+            raise KeyError(f"cannot set '{key}'")
+        values = value if isinstance(value, list) else [value]
+        ref_values = [{"@id": _.id} if isinstance(_, Entity) else _ for _ in values]
+        self._jsonld[key] = ref_values if isinstance(value, list) else ref_values[0]
 
     def __delitem__(self, key: str):
+        if key.startswith("@"):
+            raise KeyError(f"cannot delete '{key}'")
         del self._jsonld[key]
 
+    def popitem(self):
+        raise NotImplementedError
+
+    def clear(self):
+        raise NotImplementedError
+
+    def update(self):
+        raise NotImplementedError
+
+    def __iter__(self):
+        return iter(self._jsonld)
+
+    def __len__(self):
+        return len(self._jsonld)
+
+    def __contains__(self, key):
+        return key in self._jsonld
+
+    def __eq__(self, other):
+        if not isinstance(other, Entity):
+            return NotImplemented
+        return self.id == other.id and self._jsonld == other._jsonld
+
     @property
-    def type(self) -> str:
-        return self['@type']
+    def type(self):
+        return self._jsonld['@type']
 
     # @property
     # def types(self)-> List[str]:
@@ -120,7 +126,7 @@ class Entity(object):
 
     @property
     def datePublished(self):
-        d = self['datePublished']
+        d = self.get('datePublished')
         return d if not d else isoparse(d)
 
     @datePublished.setter

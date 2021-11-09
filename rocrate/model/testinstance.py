@@ -32,7 +32,7 @@ class TestInstance(ContextEntity):
 
     @property
     def name(self):
-        return self["name"]
+        return self.get("name")
 
     @name.setter
     def name(self, name):
@@ -40,7 +40,7 @@ class TestInstance(ContextEntity):
 
     @property
     def resource(self):
-        return self["resource"]
+        return self.get("resource")
 
     @resource.setter
     def resource(self, resource):
@@ -48,7 +48,7 @@ class TestInstance(ContextEntity):
 
     @property
     def runsOn(self):
-        return self["runsOn"]
+        return self.get("runsOn")
 
     @runsOn.setter
     def runsOn(self, runsOn):
@@ -56,7 +56,7 @@ class TestInstance(ContextEntity):
 
     @property
     def url(self):
-        return self["url"]
+        return self.get("url")
 
     @url.setter
     def url(self, url):

@@ -32,7 +32,7 @@ class TestSuite(ContextEntity):
 
     @property
     def name(self):
-        return self["name"]
+        return self.get("name")
 
     @name.setter
     def name(self, name):
@@ -40,7 +40,7 @@ class TestSuite(ContextEntity):
 
     @property
     def instance(self):
-        return self["instance"]
+        return self.get("instance")
 
     @instance.setter
     def instance(self, instance):
@@ -48,7 +48,7 @@ class TestSuite(ContextEntity):
 
     @property
     def definition(self):
-        return self["definition"]
+        return self.get("definition")
 
     @definition.setter
     def definition(self, definition):

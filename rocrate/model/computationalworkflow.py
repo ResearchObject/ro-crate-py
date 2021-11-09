@@ -42,7 +42,7 @@ class ComputationalWorkflow(File):
 
     @property
     def programmingLanguage(self):
-        return self["programmingLanguage"]
+        return self.get("programmingLanguage")
 
     @programmingLanguage.setter
     def programmingLanguage(self, programmingLanguage):
@@ -52,7 +52,7 @@ class ComputationalWorkflow(File):
 
     @property
     def subjectOf(self):
-        return self["subjectOf"]
+        return self.get("subjectOf")
 
     @subjectOf.setter
     def subjectOf(self, subjectOf):
