@@ -32,7 +32,7 @@ class TestService(ContextEntity):
 
     @property
     def name(self):
-        return self["name"]
+        return self.get("name")
 
     @name.setter
     def name(self, name):
@@ -40,7 +40,7 @@ class TestService(ContextEntity):
 
     @property
     def url(self):
-        return self["url"]
+        return self.get("url")
 
     @url.setter
     def url(self, url):

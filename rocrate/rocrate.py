@@ -219,7 +219,7 @@ class ROCrate():
 
     @property
     def name(self):
-        return self.root_dataset['name']
+        return self.root_dataset.get('name')
 
     @name.setter
     def name(self, value):
@@ -235,7 +235,7 @@ class ROCrate():
 
     @property
     def creator(self):
-        return self.root_dataset['creator']
+        return self.root_dataset.get('creator')
 
     @creator.setter
     def creator(self, value):
@@ -243,7 +243,7 @@ class ROCrate():
 
     @property
     def license(self):
-        return self.root_dataset['license']
+        return self.root_dataset.get('license')
 
     @license.setter
     def license(self, value):
@@ -251,7 +251,7 @@ class ROCrate():
 
     @property
     def description(self):
-        return self.root_dataset['description']
+        return self.root_dataset.get('description')
 
     @description.setter
     def description(self, value):
@@ -259,7 +259,7 @@ class ROCrate():
 
     @property
     def keywords(self):
-        return self.root_dataset['keywords']
+        return self.root_dataset.get('keywords')
 
     @keywords.setter
     def keywords(self, value):
@@ -267,7 +267,7 @@ class ROCrate():
 
     @property
     def publisher(self):
-        return self.root_dataset['publisher']
+        return self.root_dataset.get('publisher')
 
     @publisher.setter
     def publisher(self, value):
@@ -275,7 +275,7 @@ class ROCrate():
 
     @property
     def isBasedOn(self):
-        return self.root_dataset['isBasedOn']
+        return self.root_dataset.get('isBasedOn')
 
     @isBasedOn.setter
     def isBasedOn(self, value):
@@ -283,7 +283,7 @@ class ROCrate():
 
     @property
     def image(self):
-        return self.root_dataset['image']
+        return self.root_dataset.get('image')
 
     @image.setter
     def image(self, value):
@@ -291,7 +291,7 @@ class ROCrate():
 
     @property
     def CreativeWorkStatus(self):
-        return self.root_dataset['CreativeWorkStatus']
+        return self.root_dataset.get('CreativeWorkStatus')
 
     @CreativeWorkStatus.setter
     def CreativeWorkStatus(self, value):
@@ -299,7 +299,7 @@ class ROCrate():
 
     @property
     def mainEntity(self):
-        return self.root_dataset['mainEntity']
+        return self.root_dataset.get('mainEntity')
 
     @mainEntity.setter
     def mainEntity(self, value):
@@ -321,10 +321,10 @@ class ROCrate():
 
     @property
     def test_suites(self):
-        mentions = [_ for _ in (self.root_dataset['mentions'] or []) if isinstance(_, TestSuite)]
-        about = [_ for _ in (self.root_dataset['about'] or []) if isinstance(_, TestSuite)]
+        mentions = [_ for _ in self.root_dataset.get('mentions', []) if isinstance(_, TestSuite)]
+        about = [_ for _ in self.root_dataset.get('about', []) if isinstance(_, TestSuite)]
         if self.test_dir:
-            legacy_about = [_ for _ in (self.test_dir['about'] or []) if isinstance(_, TestSuite)]
+            legacy_about = [_ for _ in self.test_dir.get('about', []) if isinstance(_, TestSuite)]
             about += legacy_about
         return list(set(mentions + about))  # remove any duplicate refs
 
@@ -439,7 +439,7 @@ class ROCrate():
                     self.data_entities.remove(e)
                 except ValueError:
                     pass
-                self.root_dataset["hasPart"] = [_ for _ in self.root_dataset["hasPart"] or [] if _ != e]
+                self.root_dataset["hasPart"] = [_ for _ in self.root_dataset.get("hasPart", []) if _ != e]
                 if not self.root_dataset["hasPart"]:
                     del self.root_dataset._jsonld["hasPart"]
             else:

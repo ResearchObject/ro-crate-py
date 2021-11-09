@@ -32,8 +32,8 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     lang = wf_crate.dereference("#galaxy")
     assert hasattr(lang, "name")
     assert lang.version == GALAXY_DEFAULT_VERSION
-    assert wf["programmingLanguage"] is lang
-    assert wf["subjectOf"] is not None
+    assert wf.get("programmingLanguage") is lang
+    assert wf.get("subjectOf") is not None
     assert helpers.WORKFLOW_TYPES.issubset(wf["subjectOf"].type)
 
     out_path = tmpdir / 'ro_crate_out'
@@ -67,8 +67,8 @@ def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
     lang = wf_crate.dereference("#cwl")
     assert hasattr(lang, "name")
     assert lang.version == CWL_DEFAULT_VERSION
-    assert wf["programmingLanguage"] is lang
-    assert wf["subjectOf"] is None
+    assert wf.get("programmingLanguage") is lang
+    assert "subjectOf" not in wf
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
@@ -98,8 +98,8 @@ def test_create_wf_include(test_data_dir, tmpdir, helpers):
     lang = wf_crate.dereference("#galaxy")
     assert hasattr(lang, "name")
     assert lang.version == GALAXY_DEFAULT_VERSION
-    assert wf["programmingLanguage"] is lang
-    assert wf["subjectOf"] is not None
+    assert wf.get("programmingLanguage") is lang
+    assert wf.get("subjectOf") is not None
     assert helpers.WORKFLOW_TYPES.issubset(wf["subjectOf"].type)
     assert wf_crate.dereference(extra_file1.name) is not None
     assert wf_crate.dereference(extra_file2.name) is not None

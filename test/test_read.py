@@ -245,7 +245,7 @@ def test_no_parts(tmpdir):
     crate.write(out_path)
 
     crate = ROCrate(out_path)
-    assert not crate.root_dataset["hasPart"]
+    assert "hasPart" not in crate.root_dataset
 
 
 @pytest.mark.parametrize("to_zip", [False, True])

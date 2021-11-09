@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import datetime
+import json
 import tempfile
 import uuid
 from pathlib import Path
@@ -177,7 +178,7 @@ def test_uuid():
 
 def test_update(test_data_dir, tmpdir, helpers):
     crate = ROCrate()
-    assert not crate.root_dataset["hasPart"]
+    assert "hasPart" not in crate.root_dataset
     wf_path = test_data_dir / "test_galaxy_wf.ga"
     john = crate.add(Person(crate, '#john', {'name': 'John Doe'}))
     file_ = crate.add_file(wf_path)
@@ -187,7 +188,7 @@ def test_update(test_data_dir, tmpdir, helpers):
     assert crate.mainEntity is None
     wf = crate.add_workflow(wf_path, main=True, lang="galaxy")
     assert isinstance(wf, ComputationalWorkflow)
-    assert wf["author"] is None
+    assert "author" not in wf
     assert crate.mainEntity is wf
     assert crate.dereference(john.id) is john
     assert crate.dereference(file_.id) is wf
@@ -225,7 +226,7 @@ def test_delete(test_data_dir):
     assert file1 not in crate.root_dataset["hasPart"]
     crate.delete(file2)
     assert file2 not in crate.data_entities
-    assert crate.root_dataset["hasPart"] is None
+    assert "hasPart" not in crate.root_dataset
     crate.delete(file2)  # no-op
     # contextual entities
     john = crate.add(Person(crate, '#john', {'name': 'John Doe'}))
@@ -266,7 +267,7 @@ def test_delete_by_id(test_data_dir):
     assert f.id == path.name
     crate.delete(path.name)
     assert f not in crate.data_entities
-    assert crate.root_dataset["hasPart"] is None
+    assert "hasPart" not in crate.root_dataset
 
 
 def test_self_delete(test_data_dir):
@@ -277,4 +278,56 @@ def test_self_delete(test_data_dir):
     assert f in crate.root_dataset["hasPart"]
     f.delete()
     assert f not in crate.data_entities
-    assert crate.root_dataset["hasPart"] is None
+    assert "hasPart" not in crate.root_dataset
+
+
+def test_entity_as_mapping(tmpdir, helpers):
+    orcid = "https://orcid.org/0000-0002-1825-0097"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@graph": [
+            {"@id": "ro-crate-metadata.json",
+             "@type": "CreativeWork",
+             "about": {"@id": "./"},
+             "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}},
+            {"@id": "./",
+             "@type": "Dataset",
+             "author": {"@id": orcid}},
+            {"@id": orcid,
+             "@type": "Person",
+             "givenName": "Josiah",
+             "familyName": "Carberry"}
+        ]
+    }
+    crate_dir = tmpdir / "in_crate"
+    crate_dir.mkdir()
+    with open(crate_dir / helpers.METADATA_FILE_NAME, "wt") as f:
+        json.dump(metadata, f, indent=4)
+    crate = ROCrate(crate_dir)
+    person = crate.dereference(orcid)
+    assert len(person) == 4
+    assert len(list(person)) == 4
+    assert set(person) == set(person.keys()) == {"@id", "@type", "givenName", "familyName"}
+    assert set(person.values()) == {orcid, "Person", "Josiah", "Carberry"}
+    assert set(person.items()) == set(zip(person.keys(), person.values()))
+    assert person.setdefault("givenName", "foo") == "Josiah"
+    assert len(person) == 4
+    assert person.setdefault("award", "Oscar") == "Oscar"
+    assert len(person) == 5
+    assert "award" in person
+    assert person.pop("award") == "Oscar"
+    assert len(person) == 4
+    assert "award" not in person
+    for key in "@id", "@type":
+        with pytest.raises(KeyError):
+            person[key] = "foo"
+        with pytest.raises(KeyError):
+            del person[key]
+        with pytest.raises(KeyError):
+            person.pop(key)
+    twin = Person(crate, orcid, properties={
+        "givenName": "Josiah",
+        "familyName": "Carberry"
+    })
+    assert twin == person
+    assert Person(crate, orcid) != person
