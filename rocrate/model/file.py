@@ -59,6 +59,5 @@ class File(FileOrDir):
                         shutil.copyfileobj(response, out_file)
         elif os.path.isfile(self.source):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
-            if not os.path.exists(out_file_path) or not filecmp.cmp(self.source, out_file_path):
-                # shutil.copyfile(src, dst)
+            if not out_file_path.exists():
                 shutil.copy(self.source, out_file_path)

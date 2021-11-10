@@ -463,7 +463,8 @@ class ROCrate():
                 rel = source.relative_to(top)
                 if not self.dereference(str(rel)):
                     dest = base_path / rel
-                    shutil.copyfile(source, dest)
+                    if not dest.exists():
+                        shutil.copyfile(source, dest)
 
     def write(self, base_path):
         base_path = Path(base_path)
