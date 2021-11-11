@@ -28,22 +28,19 @@ from rocrate.model.file import File
 from rocrate.model.dataset import Dataset
 from rocrate.model.computationalworkflow import ComputationalWorkflow
 from rocrate.model.person import Person
-from rocrate.model.preview import Preview
 
 
 RAW_REPO_URL = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py"
 
 
 def test_dereferencing(test_data_dir, helpers):
-    crate = ROCrate(gen_preview=True)
+    crate = ROCrate()
 
     # verify default entities
     root_dataset = crate.dereference('./')
     assert crate.root_dataset is root_dataset
     metadata_entity = crate.dereference(helpers.METADATA_FILE_NAME)
     assert crate.metadata is metadata_entity
-    preview_entity = crate.dereference(helpers.PREVIEW_FILE_NAME)
-    assert preview_entity is crate.preview
 
     # dereference added files
     sample_file = test_data_dir / 'sample_file.txt'
@@ -209,12 +206,6 @@ def test_delete(test_data_dir):
         crate.delete(crate.root_dataset)
     with pytest.raises(ValueError):
         crate.delete(crate.metadata)
-    # preview
-    preview = crate.add(Preview(crate))
-    assert preview in crate.default_entities
-    crate.delete(preview)
-    assert preview not in crate.default_entities
-    assert crate.preview is None
     # data entities
     file1 = crate.add_file(test_data_dir / "sample_file.txt")
     file2 = crate.add_file(test_data_dir / "sample_cwl_wf.cwl")

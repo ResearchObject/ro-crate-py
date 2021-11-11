@@ -30,6 +30,8 @@ from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urljoin
 
+from . import preview
+
 from .model.contextentity import ContextEntity
 from .model.entity import Entity
 from .model.root_dataset import RootDataset
@@ -38,7 +40,6 @@ from .model.file_or_dir import FileOrDir
 from .model.file import File
 from .model.dataset import Dataset
 from .model.metadata import Metadata, LegacyMetadata, TESTING_EXTRA_TERMS
-from .model.preview import Preview
 from .model.testdefinition import TestDefinition
 from .model.computationalworkflow import ComputationalWorkflow, galaxy_to_abstract_cwl
 from .model.computerlanguage import ComputerLanguage, get_lang
@@ -69,7 +70,7 @@ def read_metadata(metadata_path):
 
 class ROCrate():
 
-    def __init__(self, source=None, gen_preview=False, init=False):
+    def __init__(self, source=None, init=False):
         self.__entity_map = {}
         self.default_entities = []
         self.data_entities = []
@@ -78,20 +79,17 @@ class ROCrate():
         # from zip
         self.uuid = uuid.uuid4()
         self.arcp_base_uri = f"arcp://uuid,{self.uuid}/"
-        self.preview = None
-        if gen_preview:
-            self.add(Preview(self))
         if not source:
             # create a new ro-crate
             self.add(RootDataset(self), Metadata(self))
         elif init:
-            self.__init_from_tree(source, gen_preview=gen_preview)
+            self.__init_from_tree(source)
         else:
-            source = self.__read(source, gen_preview=gen_preview)
+            source = self.__read(source)
         # in the zip case, self.source is the extracted dir
         self.source = source
 
-    def __init_from_tree(self, top_dir, gen_preview=False):
+    def __init_from_tree(self, top_dir):
         top_dir = Path(top_dir)
         if not top_dir.is_dir():
             raise NotADirectoryError(errno.ENOTDIR, f"'{top_dir}': not a directory")
@@ -105,12 +103,9 @@ class ROCrate():
                 source = root / name
                 if source == top_dir / Metadata.BASENAME or source == top_dir / LegacyMetadata.BASENAME:
                     continue
-                if source != top_dir / Preview.BASENAME:
-                    self.add_file(source, source.relative_to(top_dir))
-                elif not gen_preview:
-                    self.add(Preview(self, source))
+                self.add_file(source, source.relative_to(top_dir))
 
-    def __read(self, source, gen_preview=False):
+    def __read(self, source):
         source = Path(source)
         if not source.exists():
             raise FileNotFoundError(errno.ENOENT, f"'{source}' not found")
@@ -129,7 +124,7 @@ class ROCrate():
             raise ValueError(f"Not a valid RO-Crate: missing {Metadata.BASENAME}")
         self.add(MetadataClass(self))
         _, entities = read_metadata(metadata_path)
-        self.__read_data_entities(entities, source, gen_preview)
+        self.__read_data_entities(entities, source)
         self.__read_contextual_entities(entities)
         return source
 
@@ -173,15 +168,13 @@ class ROCrate():
             "see https://www.researchobject.org/ro-crate/1.1/root-data-entity.html"
         )
 
-    def __read_data_entities(self, entities, source, gen_preview):
+    def __read_data_entities(self, entities, source):
         metadata_id, root_id = self.find_root_entity_id(entities)
         entities.pop(metadata_id)  # added previously
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
         parts = root_entity.pop('hasPart', [])
         self.add(RootDataset(self, properties=root_entity))
-        if not gen_preview and Preview.BASENAME in entities:
-            self.add(Preview(self, source / Preview.BASENAME))
         type_map = OrderedDict((_.__name__, _) for _ in subclasses(FileOrDir))
         for data_entity_ref in parts:
             id_ = data_entity_ref['@id']
@@ -400,9 +393,7 @@ class ROCrate():
                 self.root_dataset = e
             if isinstance(e, (Metadata, LegacyMetadata)):
                 self.metadata = e
-            if isinstance(e, Preview):
-                self.preview = e
-            if isinstance(e, (RootDataset, Metadata, LegacyMetadata, Preview)):
+            if isinstance(e, (RootDataset, Metadata, LegacyMetadata)):
                 self.default_entities.append(e)
             elif hasattr(e, "write"):
                 self.data_entities.append(e)
@@ -431,9 +422,6 @@ class ROCrate():
                 raise ValueError("cannot delete the root data entity")
             if e is self.metadata:
                 raise ValueError("cannot delete the metadata entity")
-            if e is self.preview:
-                self.default_entities.remove(e)
-                self.preview = None
             elif hasattr(e, "write"):
                 try:
                     self.data_entities.remove(e)
@@ -467,23 +455,26 @@ class ROCrate():
                     dest = base_path / rel
                     shutil.copyfile(source, dest)
 
-    def write(self, base_path):
+    def write(self, base_path, gen_preview=False):
         base_path = Path(base_path)
         base_path.mkdir(parents=True, exist_ok=True)
         if self.source:
             self._copy_unlisted(self.source, base_path)
         for writable_entity in self.data_entities + self.default_entities:
             writable_entity.write(base_path)
+        if gen_preview:
+            with open(base_path / preview.BASENAME, "wt") as f:
+                f.write(preview.generate(self))
 
     write_crate = write  # backwards compatibility
 
-    def write_zip(self, out_path):
+    def write_zip(self, out_path, gen_preview=False):
         out_path = Path(out_path)
         if out_path.suffix == ".zip":
             out_path = out_path.parent / out_path.stem
         tmp_dir = tempfile.mkdtemp(prefix="rocrate_")
         try:
-            self.write(tmp_dir)
+            self.write(tmp_dir, gen_preview=gen_preview)
             archive = shutil.make_archive(out_path, "zip", tmp_dir)
         finally:
             shutil.rmtree(tmp_dir)

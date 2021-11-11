@@ -19,6 +19,8 @@ import os
 from pathlib import Path
 
 import click
+
+from . import preview
 from .rocrate import ROCrate
 from .model.computerlanguage import LANG_MAP
 from .model.testservice import SERVICE_MAP
@@ -46,16 +48,17 @@ def cli(ctx, crate_dir):
 @click.option('--gen-preview', is_flag=True)
 @click.pass_obj
 def init(state, gen_preview):
-    crate = ROCrate(state.crate_dir, init=True, gen_preview=gen_preview)
+    crate = ROCrate(state.crate_dir, init=True)
     crate.metadata.write(state.crate_dir)
-    if crate.preview:
-        crate.preview.write(state.crate_dir)
+    if gen_preview:
+        with open(Path(state.crate_dir) / preview.BASENAME, "wt") as f:
+            f.write(preview.generate(crate))
 
 
 @cli.group()
 @click.pass_obj
 def add(state):
-    state.crate = ROCrate(state.crate_dir, init=False, gen_preview=False)
+    state.crate = ROCrate(state.crate_dir, init=False)
 
 
 @add.command()
@@ -120,8 +123,8 @@ def definition(state, suite, path, engine, engine_version):
 @click.argument('dst', type=click.Path(writable=True))
 @click.pass_obj
 def write_zip(state, dst):
-    crate = ROCrate(state.crate_dir, init=True, gen_preview=False)
-    crate.write_zip(dst)
+    crate = ROCrate(state.crate_dir, init=True)
+    crate.write_zip(dst, gen_preview=False)
 
 
 if __name__ == '__main__':

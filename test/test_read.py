@@ -20,7 +20,6 @@ import pytest
 import shutil
 import uuid
 import zipfile
-from pathlib import Path
 
 from rocrate.rocrate import ROCrate
 from rocrate.model.data_entity import DataEntity
@@ -33,13 +32,12 @@ _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
 
 @pytest.mark.parametrize("gen_preview,from_zip", [(False, False), (True, False), (True, True)])
 def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip):
-    # load crate
     crate_dir = test_data_dir / 'read_crate'
     if from_zip:
         zip_source = shutil.make_archive(tmpdir / "read_crate.crate", "zip", crate_dir)
-        crate = ROCrate(zip_source, gen_preview=gen_preview)
+        crate = ROCrate(zip_source)
     else:
-        crate = ROCrate(crate_dir, gen_preview=gen_preview)
+        crate = ROCrate(crate_dir)
 
     # check loaded entities and properties
     root = crate.dereference('./')
@@ -59,18 +57,6 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     # conformsTo is currently hardcoded in the Metadata class, not read from the crate
     assert md_prop['conformsTo'] == {'@id': helpers.PROFILE}
     assert metadata.root is root
-
-    preview = crate.dereference(helpers.PREVIEW_FILE_NAME)
-    assert preview == crate.preview
-    preview_prop = preview.properties()
-    assert preview_prop['@id'] == helpers.PREVIEW_FILE_NAME
-    assert preview_prop['@id'] == preview.id
-    assert preview_prop['@type'] == 'CreativeWork'
-    assert preview_prop['about'] == {'@id': './'}
-    if not gen_preview:
-        assert Path(preview.source).name == helpers.PREVIEW_FILE_NAME
-    else:
-        assert not preview.source
 
     main_wf = crate.dereference('test_galaxy_wf.ga')
     wf_prop = main_wf.properties()
@@ -118,7 +104,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     # write the crate in a different directory
     out_path = tmpdir / 'crate_read_out'
     out_path.mkdir()
-    crate.write(out_path)
+    crate.write(out_path, gen_preview=gen_preview)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
@@ -129,8 +115,10 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
         assert f1.read() == f2.read()
     preview_path = out_path / helpers.PREVIEW_FILE_NAME
     assert preview_path.exists()
-    if not gen_preview:
-        with open(preview.source) as f1, open(preview_path) as f2:
+    with open(crate_dir / helpers.PREVIEW_FILE_NAME) as f1, open(preview_path) as f2:
+        if gen_preview:
+            assert f1.read() != f2.read()
+        else:
             assert f1.read() == f2.read()
 
     json_entities = helpers.read_json_entities(out_path)
@@ -209,32 +197,6 @@ def test_init(test_data_dir, tmpdir, helpers, override):
     for p in fpaths:
         with open(crate_dir / p) as f1, open(out_path / p) as f2:
             assert f1.read() == f2.read()
-
-
-@pytest.mark.parametrize("gen_preview,preview_exists", [(False, False), (False, True), (True, False), (True, True)])
-def test_init_preview(test_data_dir, tmpdir, helpers, gen_preview, preview_exists):
-    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
-    dummy_prev_content = "foo\nbar\n"
-    if preview_exists:
-        with open(crate_dir / helpers.PREVIEW_FILE_NAME, "wt") as f:
-            f.write(dummy_prev_content)
-    crate = ROCrate(crate_dir, gen_preview=gen_preview, init=True)
-    prev = crate.dereference(helpers.PREVIEW_FILE_NAME)
-    if gen_preview or preview_exists:
-        assert prev is not None
-
-    out_path = tmpdir / 'ro_crate_out'
-    out_path.mkdir()
-    crate.write(out_path)
-
-    out_prev_path = out_path / helpers.PREVIEW_FILE_NAME
-    if gen_preview or preview_exists:
-        assert out_prev_path.is_file()
-    else:
-        assert not out_prev_path.exists()
-
-    if not gen_preview and preview_exists:
-        assert out_prev_path.open().read() == dummy_prev_content
 
 
 def test_no_parts(tmpdir):

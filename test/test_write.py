@@ -29,7 +29,7 @@ from rocrate.rocrate import ROCrate
 
 @pytest.mark.parametrize("gen_preview,to_zip", [(False, False), (False, True), (True, False), (True, True)])
 def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
-    crate = ROCrate(gen_preview=gen_preview)
+    crate = ROCrate()
     crate_name = 'Test crate'
     crate.name = crate_name
     creator_id = '001'
@@ -56,12 +56,12 @@ def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
     out_path = tmpdir / 'ro_crate_out'
     if to_zip:
         zip_path = tmpdir / 'ro_crate_out.crate.zip'
-        crate.write_zip(zip_path)
+        crate.write_zip(zip_path, gen_preview=gen_preview)
         with zipfile.ZipFile(zip_path, "r") as zf:
             zf.extractall(out_path)
     else:
         out_path.mkdir()
-        crate.write(out_path)
+        crate.write(out_path, gen_preview=gen_preview)
 
     metadata_path = out_path / helpers.METADATA_FILE_NAME
     assert metadata_path.exists()
@@ -93,8 +93,6 @@ def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
     assert root["creator"] == {"@id": formatted_creator_id}
     assert formatted_creator_id in json_entities
     assert json_entities[formatted_creator_id]["name"] == creator_name
-    if gen_preview:
-        assert helpers.PREVIEW_FILE_NAME in json_entities
 
 
 @pytest.mark.parametrize("stream_cls", [io.BytesIO, io.StringIO])
