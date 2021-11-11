@@ -59,5 +59,5 @@ class File(FileOrDir):
                         shutil.copyfileobj(response, out_file)
         elif os.path.isfile(self.source):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
-            if not out_file_path.exists():
+            if not out_file_path.exists() or not out_file_path.samefile(self.source):
                 shutil.copy(self.source, out_file_path)
