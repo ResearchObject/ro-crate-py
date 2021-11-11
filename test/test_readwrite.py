@@ -35,4 +35,3 @@ def test_file_rewriting(test_data_dir, helpers):
     file2 = crate_dir / sample_file2_id
     assert file1.exists()
     assert file2.exists()
-    
