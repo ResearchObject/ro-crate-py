@@ -33,7 +33,6 @@ _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
 
 @pytest.mark.parametrize("gen_preview,from_zip", [(False, False), (True, False), (True, True)])
 def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip):
-    # load crate
     crate_dir = test_data_dir / 'read_crate'
     if from_zip:
         zip_source = shutil.make_archive(tmpdir / "read_crate.crate", "zip", crate_dir)
@@ -41,7 +40,21 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     else:
         crate = ROCrate(crate_dir, gen_preview=gen_preview)
 
-    # check loaded entities and properties
+    assert set(_["@id"] for _ in crate.default_entities) == {
+        "./",
+        "ro-crate-metadata.json",
+        "ro-crate-preview.html"
+    }
+    assert set(_["@id"] for _ in crate.data_entities) == {
+        "test_galaxy_wf.ga",
+        "abstract_wf.cwl",
+        "test_file_galaxy.txt",
+        "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/sample_file.txt",
+        "examples/",
+        "test/",
+    }
+    assert set(_["@id"] for _ in crate.contextual_entities) == {"#joe"}
+
     root = crate.dereference('./')
     assert crate.root_dataset is root
     root_prop = root.properties()

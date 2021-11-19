@@ -32,8 +32,8 @@ class Preview(File):
     """
     BASENAME = "ro-crate-preview.html"
 
-    def __init__(self, crate, source=None):
-        super().__init__(crate, source, self.BASENAME, None)
+    def __init__(self, crate, source=None, properties=None):
+        super().__init__(crate, source, self.BASENAME, properties=properties)
 
     def _empty(self):
         # default properties of the metadata entry

@@ -180,8 +180,9 @@ class ROCrate():
         assert root_id == root_entity.pop('@id')
         parts = root_entity.pop('hasPart', [])
         self.add(RootDataset(self, properties=root_entity))
-        if not gen_preview and Preview.BASENAME in entities:
-            self.add(Preview(self, source / Preview.BASENAME))
+        preview_entity = entities.pop(Preview.BASENAME, None)
+        if preview_entity and not gen_preview:
+            self.add(Preview(self, source / Preview.BASENAME, properties=preview_entity))
         type_map = OrderedDict((_.__name__, _) for _ in subclasses(FileOrDir))
         for data_entity_ref in parts:
             id_ = data_entity_ref['@id']
