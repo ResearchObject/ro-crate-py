@@ -45,6 +45,15 @@ def test_crate_update(test_data_dir, tmpdir, helpers):
         f.write(upd_content)
     crate.delete(upd_file)
     crate.add_file(upd_source, upd_file_id)
+
+    # add a new file
+    new_file_id = "spam.txt"
+    new_content = b"enlarge your crate\n"
+    new_source = tmpdir / "new_source.txt"
+    with open(new_source, "wb") as f:
+        f.write(new_content)
+    crate.add_file(new_source, new_file_id)
+
     crate.write(crate_dir)
 
     for root, dirs, files in os.walk(crate_dir):
@@ -56,5 +65,7 @@ def test_crate_update(test_data_dir, tmpdir, helpers):
                     content = f.read()
                 if path == crate_dir / upd_file_id:
                     assert content == upd_content
+                elif path == crate_dir / new_file_id:
+                    assert content == new_content
                 else:
                     assert content == content_map[path]
