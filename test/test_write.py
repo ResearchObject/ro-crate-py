@@ -265,6 +265,8 @@ def test_dataset(test_data_dir, tmpdir):
     assert crate.dereference("b") is d1
     d2 = crate.add_dataset(path, "a/b")
     assert crate.dereference("a/b") is d2
+    d_from_str = crate.add_dataset(str(test_data_dir / "c"))
+    assert crate.dereference("c") is d_from_str
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
@@ -272,6 +274,7 @@ def test_dataset(test_data_dir, tmpdir):
 
     assert (out_path / "b").is_dir()
     assert (out_path / "a" / "b").is_dir()
+    assert (out_path / "c").is_dir()
 
 
 def test_no_parts(tmpdir, helpers):

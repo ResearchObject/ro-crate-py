@@ -48,7 +48,7 @@ class Dataset(FileOrDir):
                 self.__get_parts(out_path)
         else:
             out_path.mkdir(parents=True, exist_ok=True)
-            if not self.crate.source and self.source and self.source.exists():
+            if not self.crate.source and self.source and Path(self.source).exists():
                 self.crate._copy_unlisted(self.source, out_path)
 
     def __get_parts(self, out_path):
