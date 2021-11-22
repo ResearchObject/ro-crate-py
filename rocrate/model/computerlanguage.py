@@ -104,6 +104,7 @@ def galaxy(crate, version=GALAXY_DEFAULT_VERSION):
         "version": version
     })
 
+
 def compss(crate, version=COMPSS_DEFAULT_VERSION):
     return ComputerLanguage(crate, identifier="#compss", properties={
         "name": "COMPSs Programming Model",
@@ -112,6 +113,7 @@ def compss(crate, version=COMPSS_DEFAULT_VERSION):
         "citation": "https://doi.org/10.1007/s10723-013-9272-5",
         "version": version
     })
+
 
 LANG_MAP = {
     "cwl": cwl,
