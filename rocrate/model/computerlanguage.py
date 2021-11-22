@@ -75,6 +75,7 @@ CWL_DEFAULT_VERSION = "1.2"
 # https://github.com/galaxyproject/gxformat2 has some info on gxformat2 versions
 # version can probably be simply ignored for "native" *.ga workflows
 GALAXY_DEFAULT_VERSION = "v19_09"
+COMPSS_DEFAULT_VERSION = "2.10"
 
 
 def cwl(crate, version=CWL_DEFAULT_VERSION):
@@ -104,9 +105,20 @@ def galaxy(crate, version=GALAXY_DEFAULT_VERSION):
     })
 
 
+def compss(crate, version=COMPSS_DEFAULT_VERSION):
+    return ComputerLanguage(crate, identifier="#compss", properties={
+        "name": "COMPSs Programming Model",
+        "alternateName": "COMPSs",
+        "url": "http://compss.bsc.es/",
+        "citation": "https://doi.org/10.1007/s10723-013-9272-5",
+        "version": version
+    })
+
+
 LANG_MAP = {
     "cwl": cwl,
     "galaxy": galaxy,
+    "compss": compss,
 }
 
 
