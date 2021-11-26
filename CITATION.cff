@@ -1,6 +1,8 @@
 cff-version: 1.1.0
 message: "Cite as"
 authors:
+  - family-names: De Geest
+    given-names: Paul
   - family-names: Droesbeke
     given-names: Bert
     orcid: https://orcid.org/0000-0003-0522-5674
@@ -19,10 +21,13 @@ authors:
   - family-names: Rodríguez-Navas
     given-names: Laura
     orcid: https://orcid.org/0000-0003-4929-1219
+  - family-names: Sirvent
+    given-names: Raül
+    orcid: https://orcid.org/0000-0003-0606-2512
   - family-names: Soiland-Reyes
     given-names: Stian
     orcid: https://orcid.org/0000-0001-9842-9718
 title: "ro-crate-py"
-version: 0.5.0
+version: 0.5.1
 doi: 10.5281/zenodo.3956493
-date-released: 2021-11-08
+date-released: 2021-11-26
