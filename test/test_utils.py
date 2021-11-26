@@ -15,7 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rocrate.utils import subclasses
+import pytest
+
+from rocrate.utils import subclasses, get_norm_value
 
 
 class Pet:
@@ -38,3 +40,15 @@ def test_subclasses():
     pet_subclasses = list(subclasses(Pet))
     assert set(pet_subclasses) == {Cat, Dog, Beagle}
     assert pet_subclasses.index(Beagle) < pet_subclasses.index(Dog)
+
+
+def test_get_norm_value():
+    for value in {"@id": "foo"}, "foo", ["foo"], [{"@id": "foo"}]:
+        entity = {"@id": "#xyz", "name": value}
+        assert get_norm_value(entity, "name") == ["foo"]
+    for value in [{"@id": "foo"}, "bar"], ["foo", {"@id": "bar"}]:
+        entity = {"@id": "#xyz", "name": value}
+        assert get_norm_value(entity, "name") == ["foo", "bar"]
+    assert get_norm_value({"@id": "#xyz"}, "name") == []
+    with pytest.raises(ValueError):
+        get_norm_value({"@id": "#xyz", "name": [["foo"]]}, "name")

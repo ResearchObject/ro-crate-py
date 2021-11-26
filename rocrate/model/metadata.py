@@ -31,8 +31,15 @@ class Metadata(File):
     BASENAME = "ro-crate-metadata.json"
     PROFILE = "https://w3id.org/ro/crate/1.1"
 
-    def __init__(self, crate):
-        super().__init__(crate, None, self.BASENAME, False, None)
+    def __init__(self, crate, properties=None):
+        super().__init__(
+            crate,
+            source=None,
+            dest_path=self.BASENAME,
+            fetch_remote=False,
+            validate_url=False,
+            properties=properties
+        )
         # https://www.researchobject.org/ro-crate/1.1/appendix/jsonld.html#extending-ro-crate
         self.extra_terms = {}
 
@@ -88,3 +95,12 @@ TESTING_EXTRA_TERMS = {
     "definition": "https://w3id.org/ro/terms/test#definition",
     "engineVersion": "https://w3id.org/ro/terms/test#engineVersion"
 }
+
+
+def metadata_class(descriptor_id):
+    if descriptor_id == Metadata.BASENAME:
+        return Metadata
+    elif descriptor_id == LegacyMetadata.BASENAME:
+        return LegacyMetadata
+    else:
+        return ValueError("Invalid metadata descriptor ID: {descriptor_id!r}")
