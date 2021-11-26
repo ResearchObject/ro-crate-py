@@ -67,6 +67,18 @@ def read_metadata(metadata_path):
     return context, {_["@id"]: _ for _ in graph}
 
 
+def pick_type(json_entity, type_map, fallback=None):
+    try:
+        t = json_entity["@type"]
+    except KeyError:
+        raise ValueError(f'entity {json_entity["@id"]!r} has no @type')
+    types = {_.strip() for _ in set(t if isinstance(t, list) else [t])}
+    for name, c in type_map.items():
+        if name in types:
+            return c
+    return fallback
+
+
 class ROCrate():
 
     def __init__(self, source=None, gen_preview=False, init=False):
@@ -187,17 +199,7 @@ class ROCrate():
             id_ = data_entity_ref['@id']
             entity = entities.pop(id_)
             assert id_ == entity.pop('@id')
-            try:
-                t = entity["@type"]
-            except KeyError:
-                raise ValueError(f'entity "{id_}" has no @type')
-            types = {_.strip() for _ in set(t if isinstance(t, list) else [t])}
-            # pick the most specific type (order guaranteed by subclasses)
-            cls = DataEntity
-            for name, c in type_map.items():
-                if name in types:
-                    cls = c
-                    break
+            cls = pick_type(entity, type_map, fallback=DataEntity)
             if cls is DataEntity:
                 instance = DataEntity(self, identifier=id_, properties=entity)
             else:
@@ -211,10 +213,7 @@ class ROCrate():
         type_map = {_.__name__: _ for _ in subclasses(ContextEntity)}
         for identifier, entity in entities.items():
             assert identifier == entity.pop('@id')
-            # https://github.com/ResearchObject/ro-crate/issues/83
-            if isinstance(entity['@type'], list):
-                raise RuntimeError(f"multiple types for '{identifier}'")
-            cls = type_map.get(entity['@type'], ContextEntity)
+            cls = pick_type(entity, type_map, fallback=ContextEntity)
             self.add(cls(self, identifier, entity))
 
     @property
