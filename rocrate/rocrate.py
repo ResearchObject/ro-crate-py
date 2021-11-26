@@ -37,7 +37,7 @@ from .model.data_entity import DataEntity
 from .model.file_or_dir import FileOrDir
 from .model.file import File
 from .model.dataset import Dataset
-from .model.metadata import Metadata, LegacyMetadata, TESTING_EXTRA_TERMS
+from .model.metadata import Metadata, LegacyMetadata, TESTING_EXTRA_TERMS, metadata_class
 from .model.preview import Preview
 from .model.testdefinition import TestDefinition
 from .model.computationalworkflow import ComputationalWorkflow, galaxy_to_abstract_cwl
@@ -47,7 +47,7 @@ from .model.testservice import TestService, get_service
 from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEFAULT_VERSION
 from .model.testsuite import TestSuite
 
-from .utils import is_url, subclasses
+from .utils import is_url, subclasses, get_norm_value
 
 
 def read_metadata(metadata_path):
@@ -121,13 +121,10 @@ class ROCrate():
                 zf.extractall(zip_path)
             source = Path(zip_path)
         metadata_path = source / Metadata.BASENAME
-        MetadataClass = Metadata
         if not metadata_path.is_file():
             metadata_path = source / LegacyMetadata.BASENAME
-            MetadataClass = LegacyMetadata
         if not metadata_path.is_file():
             raise ValueError(f"Not a valid RO-Crate: missing {Metadata.BASENAME}")
-        self.add(MetadataClass(self))
         _, entities = read_metadata(metadata_path)
         self.__read_data_entities(entities, source, gen_preview)
         self.__read_contextual_entities(entities)
@@ -144,12 +141,11 @@ class ROCrate():
         # First let's try conformsTo algorithm in
         # <https://www.researchobject.org/ro-crate/1.1/root-data-entity.html#finding-the-root-data-entity>
         for entity in entities.values():
-            conformsTo = entity.get("conformsTo")
-            if conformsTo and "@id" in conformsTo:
-                conformsTo = conformsTo["@id"]
-            if conformsTo and conformsTo.startswith("https://w3id.org/ro/crate/"):
-                if "about" in entity:
-                    return (entity["@id"], entity["about"]["@id"])
+            about = get_norm_value(entity, "about")
+            if about:
+                for id_ in get_norm_value(entity, "conformsTo"):
+                    if id_.startswith("https://w3id.org/ro/crate/"):
+                        return(entity["@id"], about[0])
         # ..fall back to a generous look up by filename,
         for candidate in (
                 Metadata.BASENAME, LegacyMetadata.BASENAME,
@@ -175,7 +171,10 @@ class ROCrate():
 
     def __read_data_entities(self, entities, source, gen_preview):
         metadata_id, root_id = self.find_root_entity_id(entities)
-        entities.pop(metadata_id)  # added previously
+        MetadataClass = metadata_class(metadata_id)
+        metadata_properties = entities.pop(metadata_id)
+        self.add(MetadataClass(self, properties=metadata_properties))
+
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
         parts = root_entity.pop('hasPart', [])

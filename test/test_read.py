@@ -368,3 +368,34 @@ def test_generic_data_entity(tmpdir):
     crate = ROCrate(out_crate_dir)
 
     check_rc()
+
+
+def test_root_conformsto(tmpdir):
+    # actually not a valid workflow ro-crate, but here it does not matter
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": "./"},
+                "conformsTo": [
+                    {"@id": "https://w3id.org/ro/crate/1.1"},
+                    {"@id": "https://about.workflowhub.eu/Workflow-RO-Crate/"}
+                ]
+            },
+            {
+                "@id": "./",
+                "@type": "Dataset",
+            },
+        ]
+    }
+    crate_dir = tmpdir / "test_root_conformsto_crate"
+    crate_dir.mkdir()
+    with open(crate_dir / "ro-crate-metadata.json", "wt") as f:
+        json.dump(metadata, f, indent=4)
+    crate = ROCrate(crate_dir)
+    assert crate.metadata["conformsTo"] == [
+        "https://w3id.org/ro/crate/1.1",
+        "https://about.workflowhub.eu/Workflow-RO-Crate/"
+    ]

@@ -65,3 +65,16 @@ def subclasses(cls):
         for c in subclasses(d):
             yield c
         yield d
+
+
+def get_norm_value(json_entity, prop):
+    """\
+    Get a normalized value for a property (always as a list of strings).
+    """
+    value = json_entity.get(prop, [])
+    if not isinstance(value, list):
+        value = [value]
+    try:
+        return [_ if isinstance(_, str) else _["@id"] for _ in value]
+    except (TypeError, KeyError):
+        raise ValueError(f"Malformed value for {prop!r}: {json_entity.get(prop)!r}")
