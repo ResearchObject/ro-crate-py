@@ -295,6 +295,7 @@ def test_entity_as_mapping(tmpdir, helpers):
              "author": {"@id": orcid}},
             {"@id": orcid,
              "@type": "Person",
+             "name": None,
              "givenName": "Josiah",
              "familyName": "Carberry"}
         ]
@@ -305,18 +306,24 @@ def test_entity_as_mapping(tmpdir, helpers):
         json.dump(metadata, f, indent=4)
     crate = ROCrate(crate_dir)
     person = crate.dereference(orcid)
-    assert len(person) == 4
-    assert len(list(person)) == 4
-    assert set(person) == set(person.keys()) == {"@id", "@type", "givenName", "familyName"}
-    assert set(person.values()) == {orcid, "Person", "Josiah", "Carberry"}
+    exp_len = len(metadata["@graph"][2])
+    assert len(person) == exp_len
+    assert len(list(person)) == exp_len
+    assert set(person) == set(person.keys()) == {"@id", "@type", "name", "givenName", "familyName"}
+    assert set(person.values()) == {orcid, "Person", None, "Josiah", "Carberry"}
     assert set(person.items()) == set(zip(person.keys(), person.values()))
+    assert person.id == orcid
+    assert person.type == "Person"
+    assert person["name"] is None
+    assert person["givenName"] == "Josiah"
+    assert person["familyName"] == "Carberry"
     assert person.setdefault("givenName", "foo") == "Josiah"
-    assert len(person) == 4
+    assert len(person) == exp_len
     assert person.setdefault("award", "Oscar") == "Oscar"
-    assert len(person) == 5
+    assert len(person) == exp_len + 1
     assert "award" in person
     assert person.pop("award") == "Oscar"
-    assert len(person) == 4
+    assert len(person) == exp_len
     assert "award" not in person
     for key in "@id", "@type":
         with pytest.raises(KeyError):
@@ -326,8 +333,10 @@ def test_entity_as_mapping(tmpdir, helpers):
         with pytest.raises(KeyError):
             person.pop(key)
     twin = Person(crate, orcid, properties={
+        "name": None,
         "givenName": "Josiah",
         "familyName": "Carberry"
     })
     assert twin == person
     assert Person(crate, orcid) != person
+    assert crate.root_dataset["author"] is person
