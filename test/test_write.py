@@ -159,6 +159,27 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
             assert "sdDatePublished" in props
 
 
+@pytest.mark.slow
+@pytest.mark.parametrize("fetch_remote", [False, True])
+def test_ftp_uri(tmpdir, fetch_remote):
+    crate = ROCrate()
+    url = 'ftp://ftp-trace.ncbi.nih.gov/pub/gdp/README'
+    relpath = "a/b/README"
+    if fetch_remote:
+        file_ = crate.add_file(url, relpath, fetch_remote=True)
+        assert file_.id == relpath
+    else:
+        file_ = crate.add_file(url, fetch_remote=False)
+        assert file_.id == url
+
+    out_path = tmpdir / 'ro_crate_out'
+    crate.write(out_path)
+    if fetch_remote:
+        assert (out_path / relpath).is_file()
+    else:
+        assert not (out_path / relpath).exists()
+
+
 @pytest.mark.parametrize(
     "fetch_remote,validate_url",
     list(product((False, True), repeat=2))
