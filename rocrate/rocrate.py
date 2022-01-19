@@ -503,11 +503,12 @@ class ROCrate():
             kwargs = {"version": lang_version} if lang_version else {}
             lang = get_lang(self, lang, **kwargs)
             self.add(lang)
+        lang_str = lang.id.rsplit("#", 1)[1]
         workflow.lang = lang
         if main:
             self.mainEntity = workflow
-        if gen_cwl and lang.id != "#cwl":
-            if lang.id != "#galaxy":
+        if gen_cwl and lang_str != "cwl":
+            if lang_str != "galaxy":
                 raise ValueError(f"conversion from {lang.name} to abstract CWL not supported")
             cwl_source = galaxy_to_abstract_cwl(source)
             cwl_dest_path = Path(source).with_suffix(".cwl").name
