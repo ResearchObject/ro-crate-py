@@ -27,12 +27,14 @@ RO-Crate metadata, see rocrate_
 """
 
 __author__ = ", ".join((
+    'Paul De Geest',
     'Bert Droesbeke',
     'Ignacio Eguinoa',
     'Alban Gaignard',
     'Simone Leo',
     'Luca Pireddu',
     'Laura Rodríguez-Navas',
+    'Raül Sirvent',
     'Stian Soiland-Reyes'
 ))
 __copyright__ = """\

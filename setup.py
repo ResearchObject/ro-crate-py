@@ -55,12 +55,14 @@ setup(
     long_description_content_type='text/markdown',
     long_description=long_description,
     author=", ".join((
+        'Paul De Geest',
         'Bert Droesbeke',
         'Ignacio Eguinoa',
         'Alban Gaignard',
         'Simone Leo',
         'Luca Pireddu',
         'Laura Rodríguez-Navas',
+        'Raül Sirvent',
         'Stian Soiland-Reyes'
     )),
     python_requires='>=3.6',
