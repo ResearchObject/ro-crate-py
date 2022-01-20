@@ -40,7 +40,7 @@ from .model.dataset import Dataset
 from .model.metadata import WORKFLOW_PROFILE, Metadata, LegacyMetadata, TESTING_EXTRA_TERMS, metadata_class
 from .model.preview import Preview
 from .model.testdefinition import TestDefinition
-from .model.computationalworkflow import ComputationalWorkflow, galaxy_to_abstract_cwl
+from .model.computationalworkflow import ComputationalWorkflow, WorkflowDescription, galaxy_to_abstract_cwl
 from .model.computerlanguage import ComputerLanguage, get_lang
 from .model.testinstance import TestInstance
 from .model.testservice import TestService, get_service
@@ -491,9 +491,9 @@ class ROCrate():
 
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
-            main=False, lang="cwl", lang_version=None, gen_cwl=False
+            main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow
     ):
-        workflow = self.add(ComputationalWorkflow(
+        workflow = self.add(cls(
             self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
             validate_url=validate_url, properties=properties
         ))
@@ -517,7 +517,7 @@ class ROCrate():
             cwl_dest_path = Path(source).with_suffix(".cwl").name
             cwl_workflow = self.add_workflow(
                 source=cwl_source, dest_path=cwl_dest_path, fetch_remote=fetch_remote, properties=properties,
-                main=False, lang="cwl", gen_cwl=False
+                main=False, lang="cwl", gen_cwl=False, cls=WorkflowDescription
             )
             workflow.subjectOf = cwl_workflow
         return workflow

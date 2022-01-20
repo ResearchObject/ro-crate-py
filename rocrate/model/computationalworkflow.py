@@ -59,6 +59,14 @@ class ComputationalWorkflow(File):
         self["subjectOf"] = subjectOf
 
 
+class WorkflowDescription(ComputationalWorkflow):
+    """\
+    Abstract CWL description of the main workflow.
+    """
+    TYPES = ["File", "SoftwareSourceCode", "HowTo"]
+
+
+# Legacy
 class Workflow(ComputationalWorkflow):
 
     TYPES = ["File", "SoftwareSourceCode", "Workflow"]

@@ -38,6 +38,7 @@ class Helpers:
     METADATA_FILE_NAME = 'ro-crate-metadata.json'
     LEGACY_METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
     WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "ComputationalWorkflow"}
+    WORKFLOW_DESC_TYPES = {"File", "SoftwareSourceCode", "HowTo"}
     LEGACY_WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "Workflow"}
     PREVIEW_FILE_NAME = "ro-crate-preview.html"
 
