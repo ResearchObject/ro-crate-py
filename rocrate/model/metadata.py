@@ -24,6 +24,9 @@ from .file import File
 from .dataset import Dataset
 
 
+WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
+
+
 class Metadata(File):
     """\
     RO-Crate metadata file.

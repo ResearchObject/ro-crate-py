@@ -76,7 +76,7 @@ def test_cli_add_workflow(test_data_dir, helpers, monkeypatch, cwd):
         json_entities = helpers.read_json_entities(crate_dir)
         helpers.check_wf_crate(json_entities, wf_path.name)
         assert "sort-and-change-case.ga" in json_entities
-        lang_id = f"#{lang}"
+        lang_id = f"https://w3id.org/workflowhub/workflow-ro-crate#{lang}"
         assert lang_id in json_entities
         assert json_entities["sort-and-change-case.ga"]["programmingLanguage"]["@id"] == lang_id
 

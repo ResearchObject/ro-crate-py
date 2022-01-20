@@ -20,6 +20,7 @@ import pathlib
 import shutil
 
 import pytest
+from rocrate.utils import get_norm_value
 
 
 THIS_DIR = pathlib.Path(__file__).absolute().parent
@@ -33,9 +34,11 @@ class Helpers:
 
     PROFILE = f"{BASE_URL}/{VERSION}"
     LEGACY_PROFILE = f"{BASE_URL}/{LEGACY_VERSION}"
+    WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
     METADATA_FILE_NAME = 'ro-crate-metadata.json'
     LEGACY_METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
     WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "ComputationalWorkflow"}
+    WORKFLOW_DESC_TYPES = {"File", "SoftwareSourceCode", "HowTo"}
     LEGACY_WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "Workflow"}
     PREVIEW_FILE_NAME = "ro-crate-preview.html"
 
@@ -54,7 +57,7 @@ class Helpers:
         assert cls.METADATA_FILE_NAME in json_entities
         metadata = json_entities[cls.METADATA_FILE_NAME]
         assert metadata["@type"] == "CreativeWork"
-        assert metadata["conformsTo"] == {"@id": cls.PROFILE}
+        assert cls.PROFILE in get_norm_value(metadata, "conformsTo")
         assert metadata["about"] == {"@id": root_id}
         if data_entity_ids:
             data_entity_ids = set(data_entity_ids)
@@ -71,6 +74,8 @@ class Helpers:
         assert isinstance(wf_entity["@type"], list)
         assert cls.WORKFLOW_TYPES.issubset(wf_entity["@type"])
         assert "programmingLanguage" in wf_entity
+        metadata = json_entities[cls.METADATA_FILE_NAME]
+        assert cls.WORKFLOW_PROFILE in get_norm_value(metadata, "conformsTo")
 
 
 @pytest.fixture

@@ -37,10 +37,10 @@ from .model.data_entity import DataEntity
 from .model.file_or_dir import FileOrDir
 from .model.file import File
 from .model.dataset import Dataset
-from .model.metadata import Metadata, LegacyMetadata, TESTING_EXTRA_TERMS, metadata_class
+from .model.metadata import WORKFLOW_PROFILE, Metadata, LegacyMetadata, TESTING_EXTRA_TERMS, metadata_class
 from .model.preview import Preview
 from .model.testdefinition import TestDefinition
-from .model.computationalworkflow import ComputationalWorkflow, galaxy_to_abstract_cwl
+from .model.computationalworkflow import ComputationalWorkflow, WorkflowDescription, galaxy_to_abstract_cwl
 from .model.computerlanguage import ComputerLanguage, get_lang
 from .model.testinstance import TestInstance
 from .model.testservice import TestService, get_service
@@ -491,9 +491,9 @@ class ROCrate():
 
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
-            main=False, lang="cwl", lang_version=None, gen_cwl=False
+            main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow
     ):
-        workflow = self.add(ComputationalWorkflow(
+        workflow = self.add(cls(
             self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
             validate_url=validate_url, properties=properties
         ))
@@ -503,17 +503,21 @@ class ROCrate():
             kwargs = {"version": lang_version} if lang_version else {}
             lang = get_lang(self, lang, **kwargs)
             self.add(lang)
+        lang_str = lang.id.rsplit("#", 1)[1]
         workflow.lang = lang
         if main:
             self.mainEntity = workflow
-        if gen_cwl and lang.id != "#cwl":
-            if lang.id != "#galaxy":
+            profiles = set(_.rstrip("/") for _ in get_norm_value(self.metadata, "conformsTo"))
+            profiles.add(WORKFLOW_PROFILE)
+            self.metadata["conformsTo"] = [{"@id": _} for _ in sorted(profiles)]
+        if gen_cwl and lang_str != "cwl":
+            if lang_str != "galaxy":
                 raise ValueError(f"conversion from {lang.name} to abstract CWL not supported")
             cwl_source = galaxy_to_abstract_cwl(source)
             cwl_dest_path = Path(source).with_suffix(".cwl").name
             cwl_workflow = self.add_workflow(
                 source=cwl_source, dest_path=cwl_dest_path, fetch_remote=fetch_remote, properties=properties,
-                main=False, lang="cwl", gen_cwl=False
+                main=False, lang="cwl", gen_cwl=False, cls=WorkflowDescription
             )
             workflow.subjectOf = cwl_workflow
         return workflow

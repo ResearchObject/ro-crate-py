@@ -19,6 +19,8 @@ from rocrate import rocrate_api as roc_api
 from rocrate.rocrate import ROCrate
 from rocrate.model.computerlanguage import CWL_DEFAULT_VERSION, GALAXY_DEFAULT_VERSION
 
+WF_CRATE = "https://w3id.org/workflowhub/workflow-ro-crate"
+
 
 def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     wf_id = 'test_galaxy_wf.ga'
@@ -29,12 +31,12 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     wf = wf_crate.dereference(wf_id)
     assert wf._default_type == "ComputationalWorkflow"
     assert wf_crate.mainEntity is wf
-    lang = wf_crate.dereference("#galaxy")
+    lang = wf_crate.dereference(f"{WF_CRATE}#galaxy")
     assert hasattr(lang, "name")
     assert lang.version == GALAXY_DEFAULT_VERSION
     assert wf.get("programmingLanguage") is lang
     assert wf.get("subjectOf") is not None
-    assert helpers.WORKFLOW_TYPES.issubset(wf["subjectOf"].type)
+    assert helpers.WORKFLOW_DESC_TYPES.issubset(wf["subjectOf"].type)
 
     out_path = tmpdir / 'ro_crate_out'
     out_path.mkdir()
@@ -45,7 +47,7 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     assert "subjectOf" in wf_entity
     abstract_wf_id = wf_entity["subjectOf"]["@id"]
     abstract_wf_entity = json_entities[abstract_wf_id]
-    assert helpers.WORKFLOW_TYPES.issubset(abstract_wf_entity["@type"])
+    assert helpers.WORKFLOW_DESC_TYPES.issubset(abstract_wf_entity["@type"])
 
     wf_out_path = out_path / wf_id
     assert wf_out_path.exists()
@@ -64,7 +66,7 @@ def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
 
     wf = wf_crate.dereference(wf_id)
     assert wf_crate.mainEntity is wf
-    lang = wf_crate.dereference("#cwl")
+    lang = wf_crate.dereference(f"{WF_CRATE}#cwl")
     assert hasattr(lang, "name")
     assert lang.version == CWL_DEFAULT_VERSION
     assert wf.get("programmingLanguage") is lang
@@ -95,12 +97,12 @@ def test_create_wf_include(test_data_dir, tmpdir, helpers):
 
     wf = wf_crate.dereference(wf_id)
     assert wf_crate.mainEntity is wf
-    lang = wf_crate.dereference("#galaxy")
+    lang = wf_crate.dereference(f"{WF_CRATE}#galaxy")
     assert hasattr(lang, "name")
     assert lang.version == GALAXY_DEFAULT_VERSION
     assert wf.get("programmingLanguage") is lang
     assert wf.get("subjectOf") is not None
-    assert helpers.WORKFLOW_TYPES.issubset(wf["subjectOf"].type)
+    assert helpers.WORKFLOW_DESC_TYPES.issubset(wf["subjectOf"].type)
     assert wf_crate.dereference(extra_file1.name) is not None
     assert wf_crate.dereference(extra_file2.name) is not None
 

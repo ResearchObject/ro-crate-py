@@ -74,12 +74,16 @@ class ComputerLanguage(ContextEntity):
 CWL_DEFAULT_VERSION = "1.2"
 # https://github.com/galaxyproject/gxformat2 has some info on gxformat2 versions
 # version can probably be simply ignored for "native" *.ga workflows
-GALAXY_DEFAULT_VERSION = "v19_09"
+GALAXY_DEFAULT_VERSION = "21.09"
+KNIME_DEFAULT_VERSION = "4.5.0"
+NEXTFLOW_DEFAULT_VERSION = "21.10"
+SNAKEMAKE_DEFAULT_VERSION = "6.13"
 COMPSS_DEFAULT_VERSION = "2.10"
 
 
 def cwl(crate, version=CWL_DEFAULT_VERSION):
-    return ComputerLanguage(crate, identifier="#cwl", properties={
+    id_ = "https://w3id.org/workflowhub/workflow-ro-crate#cwl"
+    return ComputerLanguage(crate, identifier=id_, properties={
         "name": "Common Workflow Language",
         "alternateName": "CWL",
         "identifier": {
@@ -93,13 +97,56 @@ def cwl(crate, version=CWL_DEFAULT_VERSION):
 
 
 def galaxy(crate, version=GALAXY_DEFAULT_VERSION):
-    return ComputerLanguage(crate, identifier="#galaxy", properties={
+    id_ = "https://w3id.org/workflowhub/workflow-ro-crate#galaxy"
+    return ComputerLanguage(crate, identifier=id_, properties={
         "name": "Galaxy",
         "identifier": {
             "@id": "https://galaxyproject.org/"
         },
         "url": {
             "@id": "https://galaxyproject.org/"
+        },
+        "version": version
+    })
+
+
+def knime(crate, version=KNIME_DEFAULT_VERSION):
+    id_ = "https://w3id.org/workflowhub/workflow-ro-crate#knime"
+    return ComputerLanguage(crate, identifier=id_, properties={
+        "name": "KNIME",
+        "identifier": {
+            "@id": "https://www.knime.com/"
+        },
+        "url": {
+            "@id": "https://www.knime.com/"
+        },
+        "version": version
+    })
+
+
+def nextflow(crate, version=NEXTFLOW_DEFAULT_VERSION):
+    id_ = "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
+    return ComputerLanguage(crate, identifier=id_, properties={
+        "name": "Nextflow",
+        "identifier": {
+            "@id": "https://www.nextflow.io/"
+        },
+        "url": {
+            "@id": "https://www.nextflow.io/"
+        },
+        "version": version
+    })
+
+
+def snakemake(crate, version=SNAKEMAKE_DEFAULT_VERSION):
+    id_ = "https://w3id.org/workflowhub/workflow-ro-crate#snakemake"
+    return ComputerLanguage(crate, identifier=id_, properties={
+        "name": "Snakemake",
+        "identifier": {
+            "@id": "https://doi.org/10.1093/bioinformatics/bts480"
+        },
+        "url": {
+            "@id": "https://snakemake.readthedocs.io"
         },
         "version": version
     })
@@ -118,6 +165,9 @@ def compss(crate, version=COMPSS_DEFAULT_VERSION):
 LANG_MAP = {
     "cwl": cwl,
     "galaxy": galaxy,
+    "knime": knime,
+    "nextflow": nextflow,
+    "snakemake": snakemake,
     "compss": compss,
 }
 
