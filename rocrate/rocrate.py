@@ -37,7 +37,7 @@ from .model.data_entity import DataEntity
 from .model.file_or_dir import FileOrDir
 from .model.file import File
 from .model.dataset import Dataset
-from .model.metadata import Metadata, LegacyMetadata, TESTING_EXTRA_TERMS, metadata_class
+from .model.metadata import WORKFLOW_PROFILE, Metadata, LegacyMetadata, TESTING_EXTRA_TERMS, metadata_class
 from .model.preview import Preview
 from .model.testdefinition import TestDefinition
 from .model.computationalworkflow import ComputationalWorkflow, galaxy_to_abstract_cwl
@@ -507,6 +507,9 @@ class ROCrate():
         workflow.lang = lang
         if main:
             self.mainEntity = workflow
+            profiles = set(_.rstrip("/") for _ in get_norm_value(self.metadata, "conformsTo"))
+            profiles.add(WORKFLOW_PROFILE)
+            self.metadata["conformsTo"] = [{"@id": _} for _ in sorted(profiles)]
         if gen_cwl and lang_str != "cwl":
             if lang_str != "galaxy":
                 raise ValueError(f"conversion from {lang.name} to abstract CWL not supported")
