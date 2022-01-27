@@ -522,6 +522,39 @@ class ROCrate():
             workflow.subjectOf = cwl_workflow
         return workflow
 
+    def add_workflow_run(
+            self, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
+            main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow
+    ):
+        workflow_run = self.add(cls(
+            self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
+            validate_url=validate_url, properties=properties
+        ))
+        if isinstance(lang, ComputerLanguage):
+            assert lang.crate is self
+        else:
+            kwargs = {"version": lang_version} if lang_version else {}
+            lang = get_lang(self, lang, **kwargs)
+            self.add(lang)
+        lang_str = lang.id.rsplit("#", 1)[1]
+        workflow_run.lang = lang
+        if main:
+            self.mainEntity = workflow_run
+            profiles = set(_.rstrip("/") for _ in get_norm_value(self.metadata, "conformsTo"))
+            profiles.add(WORKFLOW_PROFILE)
+            self.metadata["conformsTo"] = [{"@id": _} for _ in sorted(profiles)]
+        if gen_cwl and lang_str != "cwl":
+            if lang_str != "galaxy":
+                raise ValueError(f"conversion from {lang.name} to abstract CWL not supported")
+            cwl_source = galaxy_to_abstract_cwl(source)
+            cwl_dest_path = Path(source).with_suffix(".cwl").name
+            cwl_workflow = self.add_workflow_run(
+                source=cwl_source, dest_path=cwl_dest_path, fetch_remote=fetch_remote, properties=properties,
+                main=False, lang="cwl", gen_cwl=False, cls=WorkflowDescription
+            )
+            workflow_run.subjectOf = cwl_workflow
+        return workflow_run
+
     def add_test_suite(self, identifier=None, name=None, main_entity=None):
         test_ref_prop = "mentions"
         if not main_entity:

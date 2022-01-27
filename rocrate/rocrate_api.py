@@ -76,3 +76,25 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
         wf_crate.add_file(file_entry)
 
     return wf_crate
+
+def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata, author=None, include_files=[],
+                          fetch_remote=False, cwl=None, diagram=None):
+
+    wfr_crate = roc.ROCrate()
+    workflow_path = Path(workflow_path)
+    wf_file = wfr_crate.add_workflow(
+        workflow_path, workflow_path.name, fetch_remote=fetch_remote,
+        main=True, lang=wf_type, gen_cwl=(cwl is None)
+    )
+
+    # if the source is a remote URL then add https://schema.org/codeRepository
+    # property to it this can be checked by checking if the source is a URL
+    # instead of a local path
+    if 'url' in wf_file.properties():
+        wf_file['codeRepository'] = wf_file['url']
+
+    # add extra files
+    for file_entry in include_files:
+        wfr_crate.add_file(file_entry)
+
+    return wfr_crate
