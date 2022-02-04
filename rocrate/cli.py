@@ -120,7 +120,7 @@ def definition(state, suite, path, engine, engine_version):
 @click.argument('dst', type=click.Path(writable=True))
 @click.pass_obj
 def write_zip(state, dst):
-    crate = ROCrate(state.crate_dir, init=True, gen_preview=False)
+    crate = ROCrate(state.crate_dir, init=False, gen_preview=False)
     crate.write_zip(dst)
 
 

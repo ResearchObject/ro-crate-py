@@ -21,6 +21,7 @@ from click.testing import CliRunner
 
 from rocrate.cli import cli
 from rocrate.model.metadata import TESTING_EXTRA_TERMS
+from rocrate.rocrate import ROCrate
 
 
 @pytest.mark.parametrize("gen_preview,cwd", [(False, False), (False, True), (True, False), (True, True)])
@@ -137,6 +138,9 @@ def test_cli_write_zip(test_data_dir, monkeypatch, cwd):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     runner = CliRunner()
     assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+    wf_path = crate_dir / "sort-and-change-case.ga"
+    args = ["-c", str(crate_dir), "add", "workflow", str(wf_path)]
+    assert runner.invoke(cli, args).exit_code == 0
 
     output_zip_path = test_data_dir / "test-zip-archive.zip"
     args = []
@@ -150,3 +154,6 @@ def test_cli_write_zip(test_data_dir, monkeypatch, cwd):
     result = runner.invoke(cli, args)
     assert result.exit_code == 0
     assert output_zip_path.is_file()
+
+    crate = ROCrate(output_zip_path)
+    assert crate.mainEntity is not None
