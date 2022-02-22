@@ -222,19 +222,26 @@ class ProvenanceProfile:
 
     def declare_process(
         self,
-        process_name: str,
-        ga_export_jobs_attrs: list,
+        # process_name: str,
+        ga_export_jobs_attrs: dict,
         when: datetime.datetime,
         process_run_id: Optional[str] = None,
     ) -> str:
         """Record the start of each Process."""
         if process_run_id is None:
             process_run_id = uuid.uuid4().urn
+        
+        cmd = ga_export_jobs_attrs["command_line"]
+        process_name = ga_export_jobs_attrs["tool_id"]
+        tool_version = ga_export_jobs_attrs["tool_version"]
         prov_label = "Run of ga_export/jobs_attrs.txt#" + process_name
+        start_time = ga_export_jobs_attrs["create_time"]
+        end_time = ga_export_jobs_attrs["update_time"]
+
         self.document.activity(
             process_run_id,
-            None,
-            None,
+            start_time,
+            end_time,
             {PROV_TYPE: WFPROV["ProcessRun"], PROV_LABEL: prov_label},
         )
         self.document.wasAssociatedWith(
