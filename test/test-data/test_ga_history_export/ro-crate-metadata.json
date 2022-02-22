@@ -1,0 +1,92 @@
+{
+    "@context": "https://w3id.org/ro/crate/1.1/context",
+    "@graph": [
+        {
+            "@id": "./",
+            "@type": "Dataset",
+            "datePublished": "2021-11-29T18:48:54+00:00",
+            "hasPart": [
+                {
+                    "@id": "datasets/"
+                },
+                {
+                    "@id": "implicit_collection_jobs_attrs.txt"
+                },
+                {
+                    "@id": "jobs_attrs.txt"
+                },
+                {
+                    "@id": "libraries_attrs.txt"
+                },
+                {
+                    "@id": "history_attrs.txt"
+                },
+                {
+                    "@id": "datasets_attrs.txt"
+                },
+                {
+                    "@id": "collections_attrs.txt"
+                },
+                {
+                    "@id": "datasets_attrs.txt.provenance"
+                },
+                {
+                    "@id": "export_attrs.txt"
+                },
+                {
+                    "@id": "datasets/a.tab_1.tabular"
+                }
+            ]
+        },
+        {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {
+                "@id": "./"
+            },
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate/1.1"
+            }
+        },
+        {
+            "@id": "datasets/",
+            "@type": "Dataset"
+        },
+        {
+            "@id": "implicit_collection_jobs_attrs.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "jobs_attrs.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "libraries_attrs.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "history_attrs.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "datasets_attrs.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "collections_attrs.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "datasets_attrs.txt.provenance",
+            "@type": "File"
+        },
+        {
+            "@id": "export_attrs.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "datasets/a.tab_1.tabular",
+            "@type": "File"
+        }
+    ]
+}

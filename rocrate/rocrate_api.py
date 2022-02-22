@@ -78,7 +78,7 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     return wf_crate
 
 def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata, author=None, include_files=[],
-                          fetch_remote=False, cwl=None, diagram=None):
+                              fetch_remote=False, cwl=None, diagram=None):
 
     wfr_crate = roc.ROCrate()
     workflow_path = Path(workflow_path)
