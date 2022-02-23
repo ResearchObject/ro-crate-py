@@ -55,6 +55,9 @@ from rocrate.utils_cwl import CWLObjectType, JobsType, get_listing, posix_path, 
 from pathlib import Path
 import rocrate.rocrate as roc
 
+def posix_path(local_path: str) -> str:
+    return str(PurePosixPath(Path(local_path)))
+
 
 class ProvenanceProfile:
     """
@@ -96,6 +99,8 @@ class ProvenanceProfile:
         self.workflow_run_uuid = run_uuid or uuid.uuid4()
         self.workflow_run_uri = self.workflow_run_uuid.urn  # type: str
         self.generate_prov_doc()
+        for job in ga_export["jobs_attrs"]:
+            self.declare_process(job)
 
     def __str__(self) -> str:
         """Represent this Provenvance profile as a string."""
@@ -224,7 +229,7 @@ class ProvenanceProfile:
         self,
         # process_name: str,
         ga_export_jobs_attrs: dict,
-        when: datetime.datetime,
+        # when: datetime.datetime,
         process_run_id: Optional[str] = None,
     ) -> str:
         """Record the start of each Process."""
@@ -238,17 +243,27 @@ class ProvenanceProfile:
         start_time = ga_export_jobs_attrs["create_time"]
         end_time = ga_export_jobs_attrs["update_time"]
 
+        # cmd = self.document.entity(
+        #     uuid.uuid4().urn,
+        #     {PROV_TYPE: WFPROV["Artifact"], PROV_LABEL: ga_export_jobs_attrs["command_line"]}
+        #     )
+
         self.document.activity(
             process_run_id,
             start_time,
             end_time,
-            {PROV_TYPE: WFPROV["ProcessRun"], PROV_LABEL: prov_label},
+            {
+                PROV_TYPE: WFPROV["ProcessRun"], 
+                PROV_LABEL: prov_label, 
+                # Find out how to include commandline as a string
+                # PROV_LABEL: cmd
+            },
         )
         self.document.wasAssociatedWith(
             process_run_id, self.engine_uuid, str("wf:main/" + process_name)
         )
         self.document.wasStartedBy(
-            process_run_id, None, self.workflow_run_uri, when, None, None
+            process_run_id, None, self.workflow_run_uri, start_time, None, None
         )
         return process_run_id
 
@@ -256,13 +271,13 @@ class ProvenanceProfile:
         self,
         process_name: str,
         process_run_id: str,
-        outputs: Union[CWLObjectType, MutableSequence[CWLObjectType], None],
+        # outputs: Union[CWLObjectType, MutableSequence[CWLObjectType], None],
         when: datetime.datetime,
     ) -> None:
         self.generate_output_prov(outputs, process_run_id, process_name)
         self.document.wasEndedBy(process_run_id, None, self.workflow_run_uri, when)
 
-    def declare_file(self, value: CWLObjectType) -> Tuple[ProvEntity, ProvEntity, str]:
+    def declare_file(self) -> Tuple[ProvEntity, ProvEntity, str]:
         if value["class"] != "File":
             raise ValueError("Must have class:File: %s" % value)
         # Need to determine file hash aka RO filename
@@ -318,7 +333,8 @@ class ProvenanceProfile:
 
         # Check for secondaries
         for sec in cast(
-            MutableSequence[CWLObjectType], value.get("secondaryFiles", [])
+            # MutableSequence[CWLObjectType], 
+            value.get("secondaryFiles", [])
         ):
             # TODO: Record these in a specializationOf entity with UUID?
             if sec["class"] == "File":
@@ -339,7 +355,9 @@ class ProvenanceProfile:
 
         return file_entity, entity, checksum
 
-    def declare_directory(self, value: CWLObjectType) -> ProvEntity:
+    def declare_directory(self
+    # , value: CWLObjectType
+    ) -> ProvEntity:
         """Register any nested files/directories."""
         # FIXME: Calculate a hash-like identifier for directory
         # so we get same value if it's the same filenames/hashes
@@ -444,15 +462,15 @@ class ProvenanceProfile:
 
     def declare_string(self, value: str) -> Tuple[ProvEntity, str]:
         """Save as string in UTF-8."""
-        byte_s = BytesIO(str(value).encode(ENCODING))
-        data_file = self.research_object.add_data_file(byte_s, content_type=TEXT_PLAIN)
-        checksum = PurePosixPath(data_file).name
+        # byte_s = BytesIO(str(value).encode(ENCODING))
+        # data_file = self.research_object.add_data_file(byte_s, content_type=TEXT_PLAIN)
+        # checksum = PurePosixPath(data_file).name
         # FIXME: Don't naively assume add_data_file uses hash in filename!
         data_id = "data:%s" % PurePosixPath(data_file).stem
         entity = self.document.entity(
             data_id, {PROV_TYPE: WFPROV["Artifact"], PROV_VALUE: str(value)}
         )  # type: ProvEntity
-        return entity, checksum
+        return entity #, checksum
 
     def declare_artefact(self, value: Any) -> ProvEntity:
         """Create data artefact entities for all file objects."""
@@ -689,11 +707,11 @@ class ProvenanceProfile:
 
     def finalize_prov_profile(self, name):
         # type: (Optional[str]) -> List[Identifier]
-        """Transfer the provenance related files to the RO."""
+        """Transfer the provenance related files to the RO-crate"""
         # NOTE: Relative posix path
         if name is None:
             # main workflow, fixed filenames
-            filename = "primary.cwlprov"
+            filename = "ga_export.cwlprov"
         else:
             # ASCII-friendly filename, avoiding % as we don't want %2520 in manifest.json
             wf_name = urllib.parse.quote(str(name), safe="").replace("%", "_")

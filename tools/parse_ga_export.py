@@ -2,7 +2,7 @@ import json
 import os
 import re
 
-def ga_history_export(export_dir):
+def load_ga_history_export(export_dir):
     fn_list = os.listdir(export_dir)
 
     export_metadata = {}
@@ -13,6 +13,5 @@ def ga_history_export(export_dir):
                 # create keys for metadata files, removes '.' and 'txt' from fn
                 key = '_'.join(list(filter(None, re.split('\.|txt',f))))
                 export_metadata[key] = json.loads(fh.read())
-
 
     return export_metadata
