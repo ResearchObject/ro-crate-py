@@ -9,6 +9,7 @@ from socket import getfqdn
 from typing import (
     Any,
     Dict,
+    Iterable,
     List,
     MutableMapping,
     MutableSequence,
@@ -22,6 +23,7 @@ from prov.identifier import Identifier
 from prov.model import PROV, PROV_LABEL, PROV_TYPE, PROV_VALUE, ProvDocument, ProvEntity
 from schema_salad.sourceline import SourceLine
 from typing_extensions import TYPE_CHECKING
+from tools.load_ga_export import load_ga_history_export, GalaxyJob, GalaxyDataset
 
 # from .errors import WorkflowException
 # from .job import CommandLineJob, JobBase
@@ -58,6 +60,11 @@ import rocrate.rocrate as roc
 def posix_path(local_path: str) -> str:
     return str(PurePosixPath(Path(local_path)))
 
+def remove_escapes(s):
+    escapes = ''.join([chr(char) for char in range(1, 32)])
+    translator = str.maketrans('', '', escapes)
+    t = s.translate(translator)
+
 
 class ProvenanceProfile:
     """
@@ -68,7 +75,7 @@ class ProvenanceProfile:
 
     def __init__(
         self,
-        ga_export: Dict, #"ResearchObject", #should be changed to ro_crate?
+        ga_export: Dict, 
         full_name: str,
         orcid: str,
         # fsaccess: StdFsAccess,
@@ -77,30 +84,35 @@ class ProvenanceProfile:
         """
         Initialize the provenance profile.
         Keyword arguments:
-            research_object -- the research object or ro-crate
+            ga_export -- the galaxy metadata export (Dict)
             full_name -- author name
             orcid -- orcid (optional)
-            fsaccess -- file system access to create RO
             run_uuid -- uuid for the workflow run
         """
         # self.fsaccess = fsaccess
         self.orcid = orcid
         self.ga_export = ga_export
-        # self.research_object = research_object
-        # self.folder = self.research_object.folder
         self.ro_uuid = uuid.uuid4()
         # TODO: should be connected to a ro_crate?
         self.base_uri = "arcp://uuid,%s/" % self.ro_uuid
         self.document = ProvDocument()
         # TODO extract engine_uuid from galaxy, type: str
         self.engine_uuid = "urn:uuid:%s" % uuid.uuid4()  #type: str
-        # self.add_to_manifest = self.research_object.add_to_manifest
         self.full_name = full_name
         self.workflow_run_uuid = run_uuid or uuid.uuid4()
         self.workflow_run_uri = self.workflow_run_uuid.urn  # type: str
+        
+        metadata_export = load_ga_history_export(ga_export)
         self.generate_prov_doc()
-        for job in ga_export["jobs_attrs"]:
-            self.declare_process(job)
+        self.jobs = []
+        # print(metadata_export["jobs_attrs"][0]["params"])
+        for job in metadata_export["jobs_attrs"]:
+            job_attrs = GalaxyJob()
+            job_attrs.parse_ga_jobs_attrs(job)
+            self.jobs.append(job_attrs.attributes)
+            self.declare_process(job_attrs.attributes)
+
+        # print(self.document.serialize(format="rdf", rdf_format="turtle"))
 
     def __str__(self) -> str:
         """Represent this Provenvance profile as a string."""
@@ -115,10 +127,8 @@ class ProvenanceProfile:
         # can we identify a host where the workflow was executed?
         # should OnlineAccount be used to describe a galaxy user?
         # PROV_TYPE: FOAF["OnlineAccount"],
-
-        # TODO:
-        # need to check how to get the exact galaxy version
-        self.galaxy_version = "galaxy" #%s" % versionstring().split()[-1]
+        # TODO: change how we register galaxy version, probably a declare_version func
+        # self.galaxy_version = self.ga_export["jobs_attrs"][0]["galaxy_version"]
         # TODO: change notation to already imported namespaces? 
         self.document.add_namespace("wfprov", "http://purl.org/wf4ever/wfprov#")
         # document.add_namespace('prov', 'http://www.w3.org/ns/prov#')
@@ -137,12 +147,6 @@ class ProvenanceProfile:
         # Also needed for docker images
         # self.document.add_namespace(SHA256, "nih:sha-256;")
 
-        # info only, won't really be used by prov as sub-resources use
-        # annotations
-        # self.document.add_namespace("researchobject", self.research_object.base_uri)
-        # self.metadata_ns = self.document.add_namespace(
-        #     "metadata", self.research_object.base_uri + METADATA + "/"
-        # )
         # Pre-register provenance directory so we can refer to its files
         self.provenance_ns = self.document.add_namespace(
             "provenance", self.base_uri + posix_path(PROVENANCE) + "/"
@@ -167,7 +171,7 @@ class ProvenanceProfile:
             else:
                 # TODO: Look up name from ORCID API?
                 pass
-            # print(self.orcid or uuid.uuid4().urn)
+
             agent = self.document.agent(self.orcid or uuid.uuid4().urn, person)
             self.document.actedOnBehalfOf(account, agent)
 
@@ -181,8 +185,6 @@ class ProvenanceProfile:
                 "prov:label": "galaxy_version_placeholder",
             },
         )
-        # FIXME: This datetime will be a bit too delayed, we should
-        # capture when cwltool.py earliest started?
         self.document.wasStartedBy(wfengine, None, account, datetime.datetime.now())
         # define workflow run level activity
         self.document.activity(
@@ -196,7 +198,6 @@ class ProvenanceProfile:
         )
         # association between SoftwareAgent and WorkflowRun
         main_workflow = "wf:main"
-        # print(self.workflow_run_uri, self.engine_uuid, main_workflow)
         self.document.wasAssociatedWith(
             self.workflow_run_uri, self.engine_uuid, main_workflow
         )
@@ -204,26 +205,6 @@ class ProvenanceProfile:
             self.workflow_run_uri, None, self.engine_uuid, datetime.datetime.now()
         )
         return (self.workflow_run_uri, self.document)
-
-    # def evaluate(
-    #     self,
-    #     process: Process,
-    #     job: JobsType,
-    #     job_order_object: CWLObjectType,
-    #     research_obj: "ResearchObject",
-    # ) -> None:
-    #     """Evaluate the nature of job."""
-    #     if not hasattr(process, "steps"):
-    #         # record provenance of independent commandline tool executions
-    #         self.prospective_prov(job)
-    #         customised_job = copy_job_order(job, job_order_object)
-    #         self.used_artefacts(customised_job, self.workflow_run_uri)
-    #         research_obj.create_job(customised_job)
-    #     elif hasattr(job, "workflow"):
-    #         # record provenance of workflow executions
-    #         self.prospective_prov(job)
-    #         customised_job = copy_job_order(job, job_order_object)
-    #         self.used_artefacts(customised_job, self.workflow_run_uri)
 
     def declare_process(
         self,
@@ -243,6 +224,7 @@ class ProvenanceProfile:
         start_time = ga_export_jobs_attrs["create_time"]
         end_time = ga_export_jobs_attrs["update_time"]
 
+        #TODO: Find out how to include commandline as a string
         # cmd = self.document.entity(
         #     uuid.uuid4().urn,
         #     {PROV_TYPE: WFPROV["Artifact"], PROV_LABEL: ga_export_jobs_attrs["command_line"]}
@@ -255,7 +237,7 @@ class ProvenanceProfile:
             {
                 PROV_TYPE: WFPROV["ProcessRun"], 
                 PROV_LABEL: prov_label, 
-                # Find out how to include commandline as a string
+                #TODO: Find out how to include commandline as a string
                 # PROV_LABEL: cmd
             },
         )
@@ -265,19 +247,178 @@ class ProvenanceProfile:
         self.document.wasStartedBy(
             process_run_id, None, self.workflow_run_uri, start_time, None, None
         )
+        self.used_artefacts(process_run_id, ga_export_jobs_attrs)
+        # self.generate_output_prov(outputs, process_run_id, process_name)
+        # self.document.wasEndedBy(process_run_id, None, self.workflow_run_uri, when)
         return process_run_id
 
-    def record_process_end(
+    def used_artefacts(
         self,
-        process_name: str,
         process_run_id: str,
-        # outputs: Union[CWLObjectType, MutableSequence[CWLObjectType], None],
-        when: datetime.datetime,
+        process_metadata: dict,
+        process_name: Optional[str] = None,
     ) -> None:
-        self.generate_output_prov(outputs, process_run_id, process_name)
-        self.document.wasEndedBy(process_run_id, None, self.workflow_run_uri, when)
+        """Add used() for each data artefact."""
+        # FIXME: Use workflow name if available, "main" is wrong for nested workflows
+        base = "main"
+        if process_name is not None:
+            base += "/" + process_name
+        tool_id = process_metadata["tool_id"]
+        base += "/" + tool_id
+        items = ["inputs","outputs","parameters"]
+        # print(process_metadata["params"])
+        for item in items:
+            # print(item)
+            # print("-----------")
+            # print(process_metadata[item])
 
-    def declare_file(self) -> Tuple[ProvEntity, ProvEntity, str]:
+            for key, value in process_metadata[item].items():
+                prov_role = self.wf_ns[f"{base}/{key}"]
+                
+                print("key  : ",key)
+                print("-----------")
+                print("value: ",value)
+                print("-----------")
+                print("type : ",type(value))
+                if not value:
+                    value = ""
+                # if value and isinstance(value, str):
+                #     value = remove_escapes(value)
+
+                for artefact in value:
+                    try:
+                        # print(artefact)
+                        entity = self.declare_artefact(artefact)
+                        self.document.used(
+                            process_run_id,
+                            entity,
+                            datetime.datetime.now(),
+                            None,
+                            {"prov:role": prov_role},
+                        )
+                    except OSError:
+                        pass
+
+    def declare_artefact(self, value: Any) -> ProvEntity:
+        """Create data artefact entities for all file objects."""
+        if value is None:
+            # FIXME: If this can happen we'll need a better way to represent this in PROV
+            return self.document.entity(CWLPROV["None"], {PROV_LABEL: "None"})
+
+        if isinstance(value, (bool, int, float)):
+            # Typically used in job documents for flags
+
+            # FIXME: Make consistent hash URIs for these
+            # that somehow include the type
+            # (so "1" != 1 != "1.0" != true)
+            entity = self.document.entity(uuid.uuid4().urn, {PROV_VALUE: value})
+            # self.research_object.add_uri(entity.identifier.uri)
+            return entity
+
+        if isinstance(value, (str)):
+            entity = self.declare_string(value)
+            return entity
+
+        if isinstance(value, bytes):
+            # If we got here then we must be in Python 3
+            byte_s = BytesIO(value)
+            # data_file = self.research_object.add_data_file(byte_s)
+            # FIXME: Don't naively assume add_data_file uses hash in filename!
+            data_id = "data:%s" % str(value) #PurePosixPath(data_file).stem
+            return self.document.entity(
+                data_id,
+                {PROV_TYPE: WFPROV["Artifact"], PROV_VALUE: str(value)},
+            )
+
+        if isinstance(value, Dict):
+            if "@id" in value:
+                # Already processed this value, but it might not be in this PROV
+                entities = self.document.get_record(value["@id"])
+                if entities:
+                    return entities[0]
+                # else, unknown in PROV, re-add below as if it's fresh
+
+            # Base case - we found a File we need to update
+            if value.get("class") == "File":
+                (entity, _, _) = self.declare_file(value)
+                value["@id"] = entity.identifier.uri
+                return entity
+
+            if value.get("class") == "Directory":
+                entity = self.declare_directory(value)
+                value["@id"] = entity.identifier.uri
+                return entity
+            coll_id = value.setdefault("@id", uuid.uuid4().urn)
+            # some other kind of dictionary?
+            # TODO: also Save as JSON
+            coll = self.document.entity(
+                coll_id,
+                [
+                    (PROV_TYPE, WFPROV["Artifact"]),
+                    (PROV_TYPE, PROV["Collection"]),
+                    (PROV_TYPE, PROV["Dictionary"]),
+                ],
+            )
+
+            if value.get("class"):
+                #_logger.warning("Unknown data class %s.", value["class"])
+                # FIXME: The class might be "http://example.com/somethingelse"
+                coll.add_asserted_type(CWLPROV[value["class"]])
+
+            # Let's iterate and recurse
+            coll_attribs = []  # type: List[Tuple[Identifier, ProvEntity]]
+            for (key, val) in value.items():
+                v_ent = self.declare_artefact(val)
+                self.document.membership(coll, v_ent)
+                m_entity = self.document.entity(uuid.uuid4().urn)
+                # Note: only support PROV-O style dictionary
+                # https://www.w3.org/TR/prov-dictionary/#dictionary-ontological-definition
+                # as prov.py do not easily allow PROV-N extensions
+                m_entity.add_asserted_type(PROV["KeyEntityPair"])
+                m_entity.add_attributes(
+                    {PROV["pairKey"]: str(key), PROV["pairEntity"]: v_ent}
+                )
+                coll_attribs.append((PROV["hadDictionaryMember"], m_entity))
+            coll.add_attributes(coll_attribs)
+            # self.research_object.add_uri(coll.identifier.uri)
+            return coll
+
+        # some other kind of Collection?
+        # TODO: also save as JSON
+        try:
+            members = []
+            for each_input_obj in iter(value):
+                # Recurse and register any nested objects
+                e = self.declare_artefact(each_input_obj)
+                members.append(e)
+
+            # If we reached this, then we were allowed to iterate
+            coll = self.document.entity(
+                uuid.uuid4().urn,
+                [
+                    (PROV_TYPE, WFPROV["Artifact"]),
+                    (PROV_TYPE, PROV["Collection"]),
+                ],
+            )
+            if not members:
+                coll.add_asserted_type(PROV["EmptyCollection"])
+            else:
+                for member in members:
+                    # FIXME: This won't preserve order, for that
+                    # we would need to use PROV.Dictionary
+                    # with numeric keys
+                    self.document.membership(coll, member)
+            # self.research_object.add_uri(coll.identifier.uri)
+            # FIXME: list value does not support adding "@id"
+            return coll
+        except TypeError:
+            #_logger.warning("Unrecognized type %s of %r", type(value), value)
+            # Let's just fall back to Python repr()
+            entity = self.document.entity(uuid.uuid4().urn, {PROV_LABEL: repr(value)})
+            # self.research_object.add_uri(entity.identifier.uri)
+            return entity
+
+    def declare_file(self, value: Dict) -> Tuple[ProvEntity, ProvEntity, str]:
         if value["class"] != "File":
             raise ValueError("Must have class:File: %s" % value)
         # Need to determine file hash aka RO filename
@@ -457,7 +598,7 @@ class ProvenanceProfile:
             # Empty directory
             coll.add_asserted_type(PROV["EmptyCollection"])
             coll.add_asserted_type(PROV["EmptyDictionary"])
-        self.research_object.add_uri(coll.identifier.uri)
+        # self.research_object.add_uri(coll.identifier.uri)
         return coll
 
     def declare_string(self, value: str) -> Tuple[ProvEntity, str]:
@@ -466,160 +607,12 @@ class ProvenanceProfile:
         # data_file = self.research_object.add_data_file(byte_s, content_type=TEXT_PLAIN)
         # checksum = PurePosixPath(data_file).name
         # FIXME: Don't naively assume add_data_file uses hash in filename!
-        data_id = "data:%s" % PurePosixPath(data_file).stem
+        data_id = "data:%s" % str(value) #PurePosixPath(data_file).stem
         entity = self.document.entity(
             data_id, {PROV_TYPE: WFPROV["Artifact"], PROV_VALUE: str(value)}
         )  # type: ProvEntity
         return entity #, checksum
 
-    def declare_artefact(self, value: Any) -> ProvEntity:
-        """Create data artefact entities for all file objects."""
-        if value is None:
-            # FIXME: If this can happen in CWL, we'll
-            # need a better way to represent this in PROV
-            return self.document.entity(CWLPROV["None"], {PROV_LABEL: "None"})
-
-        if isinstance(value, (bool, int, float)):
-            # Typically used in job documents for flags
-
-            # FIXME: Make consistent hash URIs for these
-            # that somehow include the type
-            # (so "1" != 1 != "1.0" != true)
-            entity = self.document.entity(uuid.uuid4().urn, {PROV_VALUE: value})
-            self.research_object.add_uri(entity.identifier.uri)
-            return entity
-
-        if isinstance(value, (str, str)):
-            (entity, _) = self.declare_string(value)
-            return entity
-
-        if isinstance(value, bytes):
-            # If we got here then we must be in Python 3
-            byte_s = BytesIO(value)
-            data_file = self.research_object.add_data_file(byte_s)
-            # FIXME: Don't naively assume add_data_file uses hash in filename!
-            data_id = "data:%s" % PurePosixPath(data_file).stem
-            return self.document.entity(
-                data_id,
-                {PROV_TYPE: WFPROV["Artifact"], PROV_VALUE: str(value)},
-            )
-
-        if isinstance(value, MutableMapping):
-            if "@id" in value:
-                # Already processed this value, but it might not be in this PROV
-                entities = self.document.get_record(value["@id"])
-                if entities:
-                    return entities[0]
-                # else, unknown in PROV, re-add below as if it's fresh
-
-            # Base case - we found a File we need to update
-            if value.get("class") == "File":
-                (entity, _, _) = self.declare_file(value)
-                value["@id"] = entity.identifier.uri
-                return entity
-
-            if value.get("class") == "Directory":
-                entity = self.declare_directory(value)
-                value["@id"] = entity.identifier.uri
-                return entity
-            coll_id = value.setdefault("@id", uuid.uuid4().urn)
-            # some other kind of dictionary?
-            # TODO: also Save as JSON
-            coll = self.document.entity(
-                coll_id,
-                [
-                    (PROV_TYPE, WFPROV["Artifact"]),
-                    (PROV_TYPE, PROV["Collection"]),
-                    (PROV_TYPE, PROV["Dictionary"]),
-                ],
-            )
-
-            if value.get("class"):
-                #_logger.warning("Unknown data class %s.", value["class"])
-                # FIXME: The class might be "http://example.com/somethingelse"
-                coll.add_asserted_type(CWLPROV[value["class"]])
-
-            # Let's iterate and recurse
-            coll_attribs = []  # type: List[Tuple[Identifier, ProvEntity]]
-            for (key, val) in value.items():
-                v_ent = self.declare_artefact(val)
-                self.document.membership(coll, v_ent)
-                m_entity = self.document.entity(uuid.uuid4().urn)
-                # Note: only support PROV-O style dictionary
-                # https://www.w3.org/TR/prov-dictionary/#dictionary-ontological-definition
-                # as prov.py do not easily allow PROV-N extensions
-                m_entity.add_asserted_type(PROV["KeyEntityPair"])
-                m_entity.add_attributes(
-                    {PROV["pairKey"]: str(key), PROV["pairEntity"]: v_ent}
-                )
-                coll_attribs.append((PROV["hadDictionaryMember"], m_entity))
-            coll.add_attributes(coll_attribs)
-            self.research_object.add_uri(coll.identifier.uri)
-            return coll
-
-        # some other kind of Collection?
-        # TODO: also save as JSON
-        try:
-            members = []
-            for each_input_obj in iter(value):
-                # Recurse and register any nested objects
-                e = self.declare_artefact(each_input_obj)
-                members.append(e)
-
-            # If we reached this, then we were allowed to iterate
-            coll = self.document.entity(
-                uuid.uuid4().urn,
-                [
-                    (PROV_TYPE, WFPROV["Artifact"]),
-                    (PROV_TYPE, PROV["Collection"]),
-                ],
-            )
-            if not members:
-                coll.add_asserted_type(PROV["EmptyCollection"])
-            else:
-                for member in members:
-                    # FIXME: This won't preserve order, for that
-                    # we would need to use PROV.Dictionary
-                    # with numeric keys
-                    self.document.membership(coll, member)
-            self.research_object.add_uri(coll.identifier.uri)
-            # FIXME: list value does not support adding "@id"
-            return coll
-        except TypeError:
-            #_logger.warning("Unrecognized type %s of %r", type(value), value)
-            # Let's just fall back to Python repr()
-            entity = self.document.entity(uuid.uuid4().urn, {PROV_LABEL: repr(value)})
-            self.research_object.add_uri(entity.identifier.uri)
-            return entity
-
-    def used_artefacts(
-        self,
-        job_order: Union[CWLObjectType, List[CWLObjectType]],
-        process_run_id: str,
-        name: Optional[str] = None,
-    ) -> None:
-        """Add used() for each data artefact."""
-        if isinstance(job_order, list):
-            for entry in job_order:
-                self.used_artefacts(entry, process_run_id, name)
-        else:
-            # FIXME: Use workflow name in packed.cwl, "main" is wrong for nested workflows
-            base = "main"
-            if name is not None:
-                base += "/" + name
-            for key, value in job_order.items():
-                prov_role = self.wf_ns[f"{base}/{key}"]
-                try:
-                    entity = self.declare_artefact(value)
-                    self.document.used(
-                        process_run_id,
-                        entity,
-                        datetime.datetime.now(),
-                        None,
-                        {"prov:role": prov_role},
-                    )
-                except OSError:
-                    pass
 
     def generate_output_prov(
         self,
@@ -703,7 +696,7 @@ class ProvenanceProfile:
         # Tip: we can't use https://www.w3.org/TR/prov-links/#term-mention
         # as prov:mentionOf() is only for entities, not activities
         uris = [i.uri for i in prov_ids]
-        self.research_object.add_annotation(activity, uris, PROV["has_provenance"].uri)
+        # self.research_object.add_annotation(activity, uris, PROV["has_provenance"].uri)
 
     def finalize_prov_profile(self, name):
         # type: (Optional[str]) -> List[Identifier]

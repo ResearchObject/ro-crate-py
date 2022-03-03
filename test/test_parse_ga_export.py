@@ -11,15 +11,29 @@ from rocrate.model.computerlanguage import CWL_DEFAULT_VERSION, GALAXY_DEFAULT_V
 from rocrate.provenance_profile import ProvenanceProfile
 
 WF_CRATE = "https://w3id.org/workflowhub/workflow-ro-crate"
-from tools import parse_ga_export
+from tools.load_ga_export import load_ga_history_export, GalaxyJob, GalaxyDataset
 
+def test_ga_history_loading(test_data_dir, tmpdir, helpers):
+    export_dir = "test_ga_history_export"
+    export_path = test_data_dir / export_dir / "history_export"
+    
+    metadata_export = load_ga_history_export(export_path)
+    jobs = []
+    for job in metadata_export["jobs_attrs"]:
+        job_attrs = GalaxyJob()
+        job_attrs.parse_ga_jobs_attrs(job)
+        jobs.append(job_attrs.attributes)
+        
+        assert isinstance(job_attrs, GalaxyJob)
+    print(jobs[0])
+    assert len(jobs) == 4
 
 def test_ga_history_parsing(test_data_dir, tmpdir, helpers):
     export_dir = "test_ga_history_export"
     export_path = test_data_dir / export_dir / "history_export"
     
-    metadata_export = parse_ga_export.load_ga_history_export(export_path)
-    prov = ProvenanceProfile(metadata_export, "PDG", "https://orcid.org/0000-0002-8940-4946")
+    # metadata_export = load_ga_history_export(export_path)
+    prov = ProvenanceProfile(export_path, "PDG", "https://orcid.org/0000-0002-8940-4946")
     # print(len(metadata_export['jobs_attrs']))
     # print(prov.document.serialize(format="rdf", rdf_format="turtle"))
     assert isinstance(prov, ProvenanceProfile)
