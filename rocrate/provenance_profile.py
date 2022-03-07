@@ -1,8 +1,10 @@
 import copy
+import pdb
 import datetime
 import logging
 import urllib
 import uuid
+import json
 from io import BytesIO
 from pathlib import PurePath, PurePosixPath
 from socket import getfqdn
@@ -24,6 +26,7 @@ from prov.model import PROV, PROV_LABEL, PROV_TYPE, PROV_VALUE, ProvDocument, Pr
 from schema_salad.sourceline import SourceLine
 from typing_extensions import TYPE_CHECKING
 from tools.load_ga_export import load_ga_history_export, GalaxyJob, GalaxyDataset
+from ast import literal_eval
 
 # from .errors import WorkflowException
 # from .job import CommandLineJob, JobBase
@@ -48,7 +51,7 @@ from rocrate.provenance_constants import (
     WFPROV,
 )
 # from .stdfsaccess import StdFsAccess
-from rocrate.utils_cwl import CWLObjectType, JobsType, get_listing, posix_path, versionstring
+# from rocrate.utils_cwl import CWLObjectType, JobsType, get_listing, posix_path, versionstring
 # from .workflow_job import WorkflowJob
 
 # if TYPE_CHECKING:
@@ -65,6 +68,14 @@ def remove_escapes(s):
     translator = str.maketrans('', '', escapes)
     t = s.translate(translator)
 
+def reassign(d):
+    for k, v in d.items():
+        try:
+            evald = literal_eval(v)
+            if isinstance(evald, dict):
+                d[k] = evald
+        except ValueError:
+            pass
 
 class ProvenanceProfile:
     """
@@ -274,30 +285,32 @@ class ProvenanceProfile:
 
             for key, value in process_metadata[item].items():
                 prov_role = self.wf_ns[f"{base}/{key}"]
-                
-                print("key  : ",key)
-                print("-----------")
-                print("value: ",value)
-                print("-----------")
-                print("type : ",type(value))
+
                 if not value:
                     value = ""
-                # if value and isinstance(value, str):
-                #     value = remove_escapes(value)
+                if "json" in key:
+                    value = json.loads(value)
 
-                for artefact in value:
-                    try:
-                        # print(artefact)
-                        entity = self.declare_artefact(artefact)
-                        self.document.used(
-                            process_run_id,
-                            entity,
-                            datetime.datetime.now(),
-                            None,
-                            {"prov:role": prov_role},
-                        )
-                    except OSError:
-                        pass
+                # print("key  : ",key)
+                # print("-----------")
+                # print("value: ",value)
+                # print("-----------")
+                # print("type : ",type(value))
+                # print("-----------")
+
+                # for artefact in value:
+                try:
+                    pdb.set_trace()  
+                    entity = self.declare_artefact(value)
+                    self.document.used(
+                        process_run_id,
+                        entity,
+                        datetime.datetime.now(),
+                        None,
+                        {"prov:role": prov_role},
+                    )
+                except OSError:
+                    pass
 
     def declare_artefact(self, value: Any) -> ProvEntity:
         """Create data artefact entities for all file objects."""
@@ -316,6 +329,8 @@ class ProvenanceProfile:
             return entity
 
         if isinstance(value, (str)):
+            # clean up unwanted characters
+            value = value.replace("|", "_")
             entity = self.declare_string(value)
             return entity
 
@@ -368,6 +383,12 @@ class ProvenanceProfile:
             # Let's iterate and recurse
             coll_attribs = []  # type: List[Tuple[Identifier, ProvEntity]]
             for (key, val) in value.items():
+                # clean up unwanted characters
+                if isinstance(key, str):
+                    key = key.replace("|", "_")
+                if isinstance(val, str):    
+                    val = val.replace("|", "_")
+
                 v_ent = self.declare_artefact(val)
                 self.document.membership(coll, v_ent)
                 m_entity = self.document.entity(uuid.uuid4().urn)
@@ -538,9 +559,9 @@ class ProvenanceProfile:
         # a later call to this method will sort that
         is_empty = True
 
-        if "listing" not in value:
-            get_listing(self.fsaccess, value)
-        for entry in cast(MutableSequence[CWLObjectType], value.get("listing", [])):
+        # if "listing" not in value:
+        #     get_listing(self.fsaccess, value)
+        for entry in cast(Dict, value.get("listing", [])):
             is_empty = False
             # Declare child-artifacts
             entity = self.declare_artefact(entry)
@@ -616,7 +637,7 @@ class ProvenanceProfile:
 
     def generate_output_prov(
         self,
-        final_output: Union[CWLObjectType, MutableSequence[CWLObjectType], None],
+        final_output: Union[Dict, None],
         process_run_id: Optional[str],
         name: Optional[str],
     ) -> None:
@@ -647,9 +668,9 @@ class ProvenanceProfile:
                     entity, process_run_id, timestamp, None, {"prov:role": role}
                 )
 
-    def prospective_prov(self, job: JobsType) -> None:
+    def prospective_prov(self, job: GalaxyJob) -> None:
         """Create prospective prov recording as wfdesc prov:Plan."""
-        if not isinstance(job, WorkflowJob):
+        if not isinstance(job, GalaxyJob):
             # direct command line tool execution
             self.document.entity(
                 "wf:main",

@@ -35,7 +35,7 @@ def test_ga_history_parsing(test_data_dir, tmpdir, helpers):
     # metadata_export = load_ga_history_export(export_path)
     prov = ProvenanceProfile(export_path, "PDG", "https://orcid.org/0000-0002-8940-4946")
     # print(len(metadata_export['jobs_attrs']))
-    # print(prov.document.serialize(format="rdf", rdf_format="turtle"))
+    print(prov.document.serialize(format="rdf", rdf_format="turtle"))
     assert isinstance(prov, ProvenanceProfile)
 
 
