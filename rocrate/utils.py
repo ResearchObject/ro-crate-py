@@ -18,6 +18,7 @@
 # limitations under the License.
 
 import collections
+import os
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
@@ -78,3 +79,12 @@ def get_norm_value(json_entity, prop):
         return [_ if isinstance(_, str) else _["@id"] for _ in value]
     except (TypeError, KeyError):
         raise ValueError(f"Malformed value for {prop!r}: {json_entity.get(prop)!r}")
+
+
+def walk(top, topdown=True, onerror=None, followlinks=False, exclude=None):
+    exclude = frozenset(exclude or [])
+    for root, dirs, files in os.walk(top):
+        if exclude:
+            dirs[:] = [_ for _ in dirs if _ not in exclude]
+            files[:] = [_ for _ in files if _ not in exclude]
+        yield root, dirs, files

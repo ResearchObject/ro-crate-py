@@ -41,6 +41,21 @@ class State:
     pass
 
 
+class CSVParamType(click.ParamType):
+    name = "csv"
+
+    def convert(self, value, param, ctx):
+        if isinstance(value, (list, tuple, set, frozenset)):
+            return value
+        try:
+            return value.split(",") if value else []
+        except AttributeError:
+            self.fail(f"{value!r} is not splittable", param, ctx)
+
+
+CSV = CSVParamType()
+
+
 @click.group()
 @click.option('-c', '--crate-dir', type=click.Path())
 @click.pass_context
@@ -51,9 +66,10 @@ def cli(ctx, crate_dir):
 
 @cli.command()
 @click.option('--gen-preview', is_flag=True)
+@click.option('-e', '--exclude', type=CSV)
 @click.pass_obj
-def init(state, gen_preview):
-    crate = ROCrate(state.crate_dir, init=True, gen_preview=gen_preview)
+def init(state, gen_preview, exclude):
+    crate = ROCrate(state.crate_dir, init=True, gen_preview=gen_preview, exclude=exclude)
     crate.metadata.write(state.crate_dir)
     if crate.preview:
         crate.preview.write(state.crate_dir)
