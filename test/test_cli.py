@@ -94,7 +94,7 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     assert json_entities[def_id]["@type"] == "File"
     # add workflow
     wf_path = crate_dir / "sort-and-change-case.ga"
-    runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
+    assert runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
     # add test suite
     result = runner.invoke(cli, ["-c", str(crate_dir), "add", "test-suite"])
     assert result.exit_code == 0
@@ -131,6 +131,32 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     assert len(context) > 1
     extra_terms = context[1]
     assert set(TESTING_EXTRA_TERMS.items()).issubset(extra_terms.items())
+
+
+@pytest.mark.parametrize("hash_", [False, True])
+def test_cli_add_test_metadata_explicit_ids(test_data_dir, helpers, monkeypatch, hash_):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    runner = CliRunner()
+    assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+    wf_path = crate_dir / "sort-and-change-case.ga"
+    assert runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
+    suite_id = "#foo"
+    cli_suite_id = suite_id if hash_ else suite_id[1:]
+    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "test-suite", "-i", cli_suite_id])
+    assert result.exit_code == 0
+    assert result.output.strip() == suite_id
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert suite_id in json_entities
+    instance_id = "#bar"
+    cli_instance_id = instance_id if hash_ else instance_id[1:]
+    result = runner.invoke(
+        cli, ["-c", str(crate_dir), "add", "test-instance", cli_suite_id,
+              "http://example.com", "-r", "jobs", "-i", cli_instance_id]
+    )
+    assert result.exit_code == 0
+    assert result.output.strip() == instance_id
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert instance_id in json_entities
 
 
 @pytest.mark.parametrize("cwd", [False, True])

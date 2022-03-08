@@ -23,11 +23,18 @@ from .rocrate import ROCrate
 from .model.computerlanguage import LANG_MAP
 from .model.testservice import SERVICE_MAP
 from .model.softwareapplication import APP_MAP
+from .utils import is_url
 
 
 LANG_CHOICES = list(LANG_MAP)
 SERVICE_CHOICES = list(SERVICE_MAP)
 ENGINE_CHOICES = list(APP_MAP)
+
+
+def add_hash(id_):
+    if id_ is None or id_.startswith("#") or is_url(id_):
+        return id_
+    return "#" + id_
 
 
 class State:
@@ -80,7 +87,7 @@ def workflow(state, path, language):
 @click.option('-m', '--main-entity')
 @click.pass_obj
 def suite(state, identifier, name, main_entity):
-    suite_ = state.crate.add_test_suite(identifier=identifier, name=name, main_entity=main_entity)
+    suite_ = state.crate.add_test_suite(identifier=add_hash(identifier), name=name, main_entity=main_entity)
     state.crate.metadata.write(state.crate_dir)
     print(suite_.id)
 
@@ -94,7 +101,10 @@ def suite(state, identifier, name, main_entity):
 @click.option('-n', '--name')
 @click.pass_obj
 def instance(state, suite, url, resource, service, identifier, name):
-    instance_ = state.crate.add_test_instance(suite, url, resource=resource, service=service, identifier=identifier, name=name)
+    instance_ = state.crate.add_test_instance(
+        add_hash(suite), url, resource=resource, service=service,
+        identifier=add_hash(identifier), name=name
+    )
     state.crate.metadata.write(state.crate_dir)
     print(instance_.id)
 
