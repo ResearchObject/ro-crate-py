@@ -349,7 +349,7 @@ class ROCrate():
             source=None,
             dest_path=None,
             fetch_remote=False,
-            validate_url=True,
+            validate_url=False,
             properties=None
     ):
         return self.add(File(
@@ -366,7 +366,7 @@ class ROCrate():
             source=None,
             dest_path=None,
             fetch_remote=False,
-            validate_url=True,
+            validate_url=False,
             properties=None
     ):
         return self.add(Dataset(
@@ -490,7 +490,7 @@ class ROCrate():
         return archive
 
     def add_workflow(
-            self, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
+            self, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
             main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow
     ):
         workflow = self.add(cls(
@@ -557,7 +557,7 @@ class ROCrate():
         return instance
 
     def add_test_definition(
-            self, suite, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
+            self, suite, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
             engine="planemo", engine_version=None
     ):
         if engine_version is None:
