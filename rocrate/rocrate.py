@@ -19,7 +19,6 @@
 
 import errno
 import json
-import os
 import uuid
 import zipfile
 import atexit
