@@ -43,7 +43,6 @@ class FileOrDir(DataEntity):
                 raise ValueError("dest_path must be provided if source is not a path or URI")
             if is_url(str(source)):
                 identifier = os.path.basename(source) if fetch_remote else source
-                properties.update({'url': source})
             else:
                 identifier = os.path.basename(source)
         super().__init__(crate, identifier, properties)
