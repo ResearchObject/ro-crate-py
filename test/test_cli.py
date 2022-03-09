@@ -20,6 +20,7 @@ import pytest
 from click.testing import CliRunner
 
 from rocrate.cli import cli
+from rocrate.model.file import File
 from rocrate.model.metadata import TESTING_EXTRA_TERMS
 from rocrate.rocrate import ROCrate
 
@@ -51,6 +52,22 @@ def test_cli_init(test_data_dir, helpers, monkeypatch, cwd, gen_preview):
     json_entities = helpers.read_json_entities(crate_dir)
     assert "sort-and-change-case.ga" in json_entities
     assert json_entities["sort-and-change-case.ga"]["@type"] == "File"
+
+
+def test_cli_init_exclude(test_data_dir, helpers):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    (crate_dir / helpers.METADATA_FILE_NAME).unlink()
+    exclude = "test,README.md"
+    runner = CliRunner()
+    args = ["-c", str(crate_dir), "init", "-e", exclude]
+    assert runner.invoke(cli, args).exit_code == 0
+    crate = ROCrate(crate_dir)
+    for p in "LICENSE", "sort-and-change-case.ga":
+        assert isinstance(crate.dereference(p), File)
+    for p in exclude.split(",") + ["test/"]:
+        assert not crate.dereference(p)
+    for e in crate.data_entities:
+        assert not(e.id.startswith("test"))
 
 
 @pytest.mark.parametrize("cwd", [False, True])

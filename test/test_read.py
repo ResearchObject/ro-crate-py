@@ -224,6 +224,29 @@ def test_init(test_data_dir, tmpdir, helpers, override):
             assert f1.read() == f2.read()
 
 
+def test_exclude(test_data_dir, tmpdir, helpers):
+    def check(out=False):
+        for p in "LICENSE", "sort-and-change-case.ga":
+            assert isinstance(crate.dereference(p), File)
+        for p in exclude + ["test/"]:
+            assert not crate.dereference(p)
+            if out:
+                assert not(crate.source / p).exists()
+        for e in crate.data_entities:
+            assert not(e.id.startswith("test"))
+        if out:
+            assert not(crate.source / "test").exists()
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    (crate_dir / helpers.METADATA_FILE_NAME).unlink()
+    exclude = ["test", "README.md"]
+    crate = ROCrate(crate_dir, init=True, exclude=exclude)
+    check()
+    out_path = tmpdir / 'ro_crate_out'
+    crate.write(out_path)
+    crate = ROCrate(out_path)
+    check(out=True)
+
+
 @pytest.mark.parametrize("gen_preview,preview_exists", [(False, False), (False, True), (True, False), (True, True)])
 def test_init_preview(test_data_dir, tmpdir, helpers, gen_preview, preview_exists):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
