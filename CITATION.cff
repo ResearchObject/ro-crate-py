@@ -29,6 +29,6 @@ authors:
     given-names: Stian
     orcid: https://orcid.org/0000-0001-9842-9718
 title: "ro-crate-py"
-version: 0.5.5
+version: 0.6.0
 doi: 10.5281/zenodo.3956493
-date-released: 2022-02-07
+date-released: 2022-03-09
