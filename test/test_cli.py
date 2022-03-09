@@ -20,6 +20,7 @@ import pytest
 from click.testing import CliRunner
 
 from rocrate.cli import cli
+from rocrate.model.file import File
 from rocrate.model.metadata import TESTING_EXTRA_TERMS
 from rocrate.rocrate import ROCrate
 
@@ -51,6 +52,22 @@ def test_cli_init(test_data_dir, helpers, monkeypatch, cwd, gen_preview):
     json_entities = helpers.read_json_entities(crate_dir)
     assert "sort-and-change-case.ga" in json_entities
     assert json_entities["sort-and-change-case.ga"]["@type"] == "File"
+
+
+def test_cli_init_exclude(test_data_dir, helpers):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    (crate_dir / helpers.METADATA_FILE_NAME).unlink()
+    exclude = "test,README.md"
+    runner = CliRunner()
+    args = ["-c", str(crate_dir), "init", "-e", exclude]
+    assert runner.invoke(cli, args).exit_code == 0
+    crate = ROCrate(crate_dir)
+    for p in "LICENSE", "sort-and-change-case.ga":
+        assert isinstance(crate.dereference(p), File)
+    for p in exclude.split(",") + ["test/"]:
+        assert not crate.dereference(p)
+    for e in crate.data_entities:
+        assert not(e.id.startswith("test"))
 
 
 @pytest.mark.parametrize("cwd", [False, True])
@@ -94,7 +111,7 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     assert json_entities[def_id]["@type"] == "File"
     # add workflow
     wf_path = crate_dir / "sort-and-change-case.ga"
-    runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
+    assert runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
     # add test suite
     result = runner.invoke(cli, ["-c", str(crate_dir), "add", "test-suite"])
     assert result.exit_code == 0
@@ -131,6 +148,32 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     assert len(context) > 1
     extra_terms = context[1]
     assert set(TESTING_EXTRA_TERMS.items()).issubset(extra_terms.items())
+
+
+@pytest.mark.parametrize("hash_", [False, True])
+def test_cli_add_test_metadata_explicit_ids(test_data_dir, helpers, monkeypatch, hash_):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    runner = CliRunner()
+    assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+    wf_path = crate_dir / "sort-and-change-case.ga"
+    assert runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
+    suite_id = "#foo"
+    cli_suite_id = suite_id if hash_ else suite_id[1:]
+    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "test-suite", "-i", cli_suite_id])
+    assert result.exit_code == 0
+    assert result.output.strip() == suite_id
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert suite_id in json_entities
+    instance_id = "#bar"
+    cli_instance_id = instance_id if hash_ else instance_id[1:]
+    result = runner.invoke(
+        cli, ["-c", str(crate_dir), "add", "test-instance", cli_suite_id,
+              "http://example.com", "-r", "jobs", "-i", cli_instance_id]
+    )
+    assert result.exit_code == 0
+    assert result.output.strip() == instance_id
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert instance_id in json_entities
 
 
 @pytest.mark.parametrize("cwd", [False, True])

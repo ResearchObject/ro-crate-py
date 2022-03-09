@@ -19,7 +19,6 @@
 
 import errno
 import json
-import os
 import uuid
 import zipfile
 import atexit
@@ -47,7 +46,7 @@ from .model.testservice import TestService, get_service
 from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEFAULT_VERSION
 from .model.testsuite import TestSuite
 
-from .utils import is_url, subclasses, get_norm_value
+from .utils import is_url, subclasses, get_norm_value, walk
 
 
 def read_metadata(metadata_path):
@@ -81,7 +80,8 @@ def pick_type(json_entity, type_map, fallback=None):
 
 class ROCrate():
 
-    def __init__(self, source=None, gen_preview=False, init=False):
+    def __init__(self, source=None, gen_preview=False, init=False, exclude=None):
+        self.exclude = exclude
         self.__entity_map = {}
         self.default_entities = []
         self.data_entities = []
@@ -108,7 +108,7 @@ class ROCrate():
         if not top_dir.is_dir():
             raise NotADirectoryError(errno.ENOTDIR, f"'{top_dir}': not a directory")
         self.add(RootDataset(self), Metadata(self))
-        for root, dirs, files in os.walk(top_dir):
+        for root, dirs, files in walk(top_dir, exclude=self.exclude):
             root = Path(root)
             for name in dirs:
                 source = root / name
@@ -453,7 +453,7 @@ class ROCrate():
         # fetch all files defined in the crate
 
     def _copy_unlisted(self, top, base_path):
-        for root, dirs, files in os.walk(top):
+        for root, dirs, files in walk(top, exclude=self.exclude):
             root = Path(root)
             for name in dirs:
                 source = root / name

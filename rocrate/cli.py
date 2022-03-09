@@ -23,6 +23,7 @@ from .rocrate import ROCrate
 from .model.computerlanguage import LANG_MAP
 from .model.testservice import SERVICE_MAP
 from .model.softwareapplication import APP_MAP
+from .utils import is_url
 
 
 LANG_CHOICES = list(LANG_MAP)
@@ -30,8 +31,29 @@ SERVICE_CHOICES = list(SERVICE_MAP)
 ENGINE_CHOICES = list(APP_MAP)
 
 
+def add_hash(id_):
+    if id_ is None or id_.startswith("#") or is_url(id_):
+        return id_
+    return "#" + id_
+
+
 class State:
     pass
+
+
+class CSVParamType(click.ParamType):
+    name = "csv"
+
+    def convert(self, value, param, ctx):
+        if isinstance(value, (list, tuple, set, frozenset)):
+            return value
+        try:
+            return value.split(",") if value else []
+        except AttributeError:
+            self.fail(f"{value!r} is not splittable", param, ctx)
+
+
+CSV = CSVParamType()
 
 
 @click.group()
@@ -44,9 +66,10 @@ def cli(ctx, crate_dir):
 
 @cli.command()
 @click.option('--gen-preview', is_flag=True)
+@click.option('-e', '--exclude', type=CSV)
 @click.pass_obj
-def init(state, gen_preview):
-    crate = ROCrate(state.crate_dir, init=True, gen_preview=gen_preview)
+def init(state, gen_preview, exclude):
+    crate = ROCrate(state.crate_dir, init=True, gen_preview=gen_preview, exclude=exclude)
     crate.metadata.write(state.crate_dir)
     if crate.preview:
         crate.preview.write(state.crate_dir)
@@ -80,7 +103,7 @@ def workflow(state, path, language):
 @click.option('-m', '--main-entity')
 @click.pass_obj
 def suite(state, identifier, name, main_entity):
-    suite_ = state.crate.add_test_suite(identifier=identifier, name=name, main_entity=main_entity)
+    suite_ = state.crate.add_test_suite(identifier=add_hash(identifier), name=name, main_entity=main_entity)
     state.crate.metadata.write(state.crate_dir)
     print(suite_.id)
 
@@ -94,7 +117,10 @@ def suite(state, identifier, name, main_entity):
 @click.option('-n', '--name')
 @click.pass_obj
 def instance(state, suite, url, resource, service, identifier, name):
-    instance_ = state.crate.add_test_instance(suite, url, resource=resource, service=service, identifier=identifier, name=name)
+    instance_ = state.crate.add_test_instance(
+        add_hash(suite), url, resource=resource, service=service,
+        identifier=add_hash(identifier), name=name
+    )
     state.crate.metadata.write(state.crate_dir)
     print(instance_.id)
 
