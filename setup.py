@@ -59,6 +59,7 @@ setup(
         'Bert Droesbeke',
         'Ignacio Eguinoa',
         'Alban Gaignard',
+        'Sebastiaan Huber',
         'Simone Leo',
         'Luca Pireddu',
         'Laura Rodríguez-Navas',
