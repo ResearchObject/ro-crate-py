@@ -12,7 +12,7 @@ Status: **Alpha**
 
 ## Installing
 
-You will need Python 3.6 or later (Recommended: 3.7).
+You will need Python 3.7 or later (Recommended: 3.7).
 
 This library is easiest to install using [pip](https://docs.python.org/3/installing/):
 
