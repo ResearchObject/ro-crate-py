@@ -14,15 +14,65 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import json
-import pytest
+
+import click
 from click.testing import CliRunner
+import pytest
 
 from rocrate.cli import cli
 from rocrate.model.file import File
 from rocrate.model.metadata import TESTING_EXTRA_TERMS
 from rocrate.rocrate import ROCrate
+
+
+def get_command_paths(command):
+    """Return a list of full command paths for all leaf commands that are part of the given root command.
+
+    For example, for a root command that has two subcommands ``command_a`` and ``command_b`` where ``command_b`` in turn
+    has two subcommands, the returned list will have the form::
+
+        [
+            ['command_a'],
+            ['command_b', 'subcommand_a'],
+            ['command_b', 'subcommand_b'],
+        ]
+
+    :param command: The root command.
+    :return: A list of lists, where each element is the full command path to a leaf command.
+    """
+
+    def resolve_commands(command, command_path, commands):
+        if isinstance(command, click.MultiCommand):
+            for subcommand in command.commands.values():
+                command_subpath = command_path + [subcommand.name]
+                resolve_commands(subcommand, command_subpath, commands)
+        else:
+            commands.append(command_path)
+
+    commands = []
+    resolve_commands(command, [], commands)
+
+    return commands
+
+
+@pytest.mark.parametrize('command_path', get_command_paths(cli))
+def test_cli_help(command_path):
+    """Test that invoking any CLI command with ``--help`` prints the help string and exits normally.
+
+    This is a regression test for: https://github.com/ResearchObject/ro-crate-py/issues/97
+
+    Note that we cannot simply invoke the actual leaf :class:`click.Command` that we are testing, because the test
+    runner follows a different path then when actually invoking the command from the command line. This means that any
+    code that is in the groups that the command is part of, won't be executed. This in turn means that a command could
+    actually be broken when invoked from the command line but would not be detected by the test. The workaround is to
+    invoke the full command path. For example when testing ``add workflow --help``, we cannot simply invoke ``workflow``
+    with ``['--help']`` as argument but we need to invoke the base command with ``['add', 'workflow', '--help']``.
+    """
+    runner = CliRunner()
+    result = runner.invoke(cli, command_path + ['--help'])
+    assert result.exit_code == 0, result.output
+    assert 'Usage:' in result.output
 
 
 @pytest.mark.parametrize("gen_preview,cwd", [(False, False), (False, True), (True, False), (True, True)])
@@ -33,12 +83,11 @@ def test_cli_init(test_data_dir, helpers, monkeypatch, cwd, gen_preview):
     metadata_path.unlink()
 
     runner = CliRunner()
-    args = []
+    args = ["init"]
     if cwd:
         monkeypatch.chdir(str(crate_dir))
     else:
         args.extend(["-c", str(crate_dir)])
-    args.append("init")
     if gen_preview:
         args.append("--gen-preview")
     result = runner.invoke(cli, args)
@@ -59,8 +108,9 @@ def test_cli_init_exclude(test_data_dir, helpers):
     (crate_dir / helpers.METADATA_FILE_NAME).unlink()
     exclude = "test,README.md"
     runner = CliRunner()
-    args = ["-c", str(crate_dir), "init", "-e", exclude]
-    assert runner.invoke(cli, args).exit_code == 0
+    args = ["init", "-c", str(crate_dir), "-e", exclude]
+    result = runner.invoke(cli, args)
+    assert result.exit_code == 0
     crate = ROCrate(crate_dir)
     for p in "LICENSE", "sort-and-change-case.ga":
         assert isinstance(crate.dereference(p), File)
@@ -75,20 +125,20 @@ def test_cli_add_workflow(test_data_dir, helpers, monkeypatch, cwd):
     # init
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     runner = CliRunner()
-    assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+    assert runner.invoke(cli, ["init", "-c", str(crate_dir)]).exit_code == 0
     json_entities = helpers.read_json_entities(crate_dir)
     assert "sort-and-change-case.ga" in json_entities
     assert json_entities["sort-and-change-case.ga"]["@type"] == "File"
     # add
     wf_path = crate_dir / "sort-and-change-case.ga"
-    args = []
+    args = ["add", "workflow"]
     if cwd:
         monkeypatch.chdir(str(crate_dir))
         wf_path = wf_path.relative_to(crate_dir)
     else:
         args.extend(["-c", str(crate_dir)])
     for lang in "cwl", "galaxy":
-        extra_args = ["add", "workflow", "-l", lang, str(wf_path)]
+        extra_args = ["-l", lang, str(wf_path)]
         result = runner.invoke(cli, args + extra_args)
         assert result.exit_code == 0
         json_entities = helpers.read_json_entities(crate_dir)
@@ -104,35 +154,35 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     # init
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     runner = CliRunner()
-    assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+    assert runner.invoke(cli, ["init", "-c", str(crate_dir)]).exit_code == 0
     json_entities = helpers.read_json_entities(crate_dir)
     def_id = "test/test1/sort-and-change-case-test.yml"
     assert def_id in json_entities
     assert json_entities[def_id]["@type"] == "File"
     # add workflow
     wf_path = crate_dir / "sort-and-change-case.ga"
-    assert runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
+    assert runner.invoke(cli, ["add", "workflow", "-c", str(crate_dir), "-l", "galaxy", str(wf_path)]).exit_code == 0
     # add test suite
-    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "test-suite"])
+    result = runner.invoke(cli, ["add", "test-suite", "-c", str(crate_dir)])
     assert result.exit_code == 0
     suite_id = result.output.strip()
     json_entities = helpers.read_json_entities(crate_dir)
     assert suite_id in json_entities
     # add test instance
-    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "test-instance", suite_id, "http://example.com", "-r", "jobs"])
+    result = runner.invoke(cli, ["add", "test-instance", "-c", str(crate_dir), suite_id, "http://example.com", "-r", "jobs"])
     assert result.exit_code == 0
     instance_id = result.output.strip()
     json_entities = helpers.read_json_entities(crate_dir)
     assert instance_id in json_entities
     # add test definition
     def_path = crate_dir / def_id
-    args = []
+    args = ["add", "test-definition"]
     if cwd:
         monkeypatch.chdir(str(crate_dir))
         def_path = def_path.relative_to(crate_dir)
     else:
         args.extend(["-c", str(crate_dir)])
-    extra_args = ["add", "test-definition", "-e", "planemo", "-v", ">=0.70", suite_id, str(def_path)]
+    extra_args = ["-e", "planemo", "-v", ">=0.70", suite_id, str(def_path)]
     result = runner.invoke(cli, args + extra_args)
     assert result.exit_code == 0
     json_entities = helpers.read_json_entities(crate_dir)
@@ -154,22 +204,22 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
 def test_cli_add_test_metadata_explicit_ids(test_data_dir, helpers, monkeypatch, hash_):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     runner = CliRunner()
-    assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+    assert runner.invoke(cli, ["init", "-c", str(crate_dir)]).exit_code == 0
     wf_path = crate_dir / "sort-and-change-case.ga"
-    assert runner.invoke(cli, ["-c", str(crate_dir), "add", "workflow", "-l", "galaxy", str(wf_path)]).exit_code == 0
+    assert runner.invoke(cli, ["add", "workflow", "-c", str(crate_dir), "-l", "galaxy", str(wf_path)]).exit_code == 0
     suite_id = "#foo"
     cli_suite_id = suite_id if hash_ else suite_id[1:]
-    result = runner.invoke(cli, ["-c", str(crate_dir), "add", "test-suite", "-i", cli_suite_id])
+    result = runner.invoke(cli, ["add", "test-suite", "-c", str(crate_dir), "-i", cli_suite_id])
     assert result.exit_code == 0
     assert result.output.strip() == suite_id
     json_entities = helpers.read_json_entities(crate_dir)
     assert suite_id in json_entities
     instance_id = "#bar"
     cli_instance_id = instance_id if hash_ else instance_id[1:]
-    result = runner.invoke(
-        cli, ["-c", str(crate_dir), "add", "test-instance", cli_suite_id,
-              "http://example.com", "-r", "jobs", "-i", cli_instance_id]
-    )
+    args = [
+        "add", "test-instance", cli_suite_id, "http://example.com", "-c", str(crate_dir), "-r", "jobs", "-i", cli_instance_id
+    ]
+    result = runner.invoke(cli, args)
     assert result.exit_code == 0
     assert result.output.strip() == instance_id
     json_entities = helpers.read_json_entities(crate_dir)
@@ -180,18 +230,17 @@ def test_cli_add_test_metadata_explicit_ids(test_data_dir, helpers, monkeypatch,
 def test_cli_write_zip(test_data_dir, monkeypatch, cwd):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     runner = CliRunner()
-    assert runner.invoke(cli, ["-c", str(crate_dir), "init"]).exit_code == 0
+    assert runner.invoke(cli, ["init", "-c", str(crate_dir)]).exit_code == 0
     wf_path = crate_dir / "sort-and-change-case.ga"
-    args = ["-c", str(crate_dir), "add", "workflow", str(wf_path)]
+    args = ["add", "workflow", str(wf_path), "-c", str(crate_dir)]
     assert runner.invoke(cli, args).exit_code == 0
 
     output_zip_path = test_data_dir / "test-zip-archive.zip"
-    args = []
+    args = ["write-zip"]
     if cwd:
         monkeypatch.chdir(str(crate_dir))
     else:
         args.extend(["-c", str(crate_dir)])
-    args.append("write-zip")
     args.append(str(output_zip_path))
 
     result = runner.invoke(cli, args)
