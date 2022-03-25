@@ -54,58 +54,57 @@ class CSVParamType(click.ParamType):
 
 
 CSV = CSVParamType()
+OPTION_CRATE_PATH = click.option('-c', '--crate-dir', type=click.Path(), default=os.getcwd)
 
 
 @click.group()
-@click.option('-c', '--crate-dir', type=click.Path())
-@click.pass_context
-def cli(ctx, crate_dir):
-    ctx.obj = state = State()
-    state.crate_dir = os.getcwd() if not crate_dir else os.path.abspath(crate_dir)
+def cli():
+    pass
 
 
 @cli.command()
 @click.option('--gen-preview', is_flag=True)
 @click.option('-e', '--exclude', type=CSV)
-@click.pass_obj
-def init(state, gen_preview, exclude):
-    crate = ROCrate(state.crate_dir, init=True, gen_preview=gen_preview, exclude=exclude)
-    crate.metadata.write(state.crate_dir)
+@OPTION_CRATE_PATH
+def init(crate_dir, gen_preview, exclude):
+    crate = ROCrate(crate_dir, init=True, gen_preview=gen_preview, exclude=exclude)
+    crate.metadata.write(crate_dir)
     if crate.preview:
-        crate.preview.write(state.crate_dir)
+        crate.preview.write(crate_dir)
 
 
 @cli.group()
-@click.pass_obj
-def add(state):
-    state.crate = ROCrate(state.crate_dir, init=False, gen_preview=False)
+def add():
+    pass
 
 
 @add.command()
 @click.argument('path', type=click.Path(exists=True))
 @click.option('-l', '--language', type=click.Choice(LANG_CHOICES), default="cwl")
-@click.pass_obj
-def workflow(state, path, language):
+@OPTION_CRATE_PATH
+def workflow(crate_dir, path, language):
+    crate = ROCrate(crate_dir, init=False, gen_preview=False)
     source = Path(path).resolve(strict=True)
     try:
-        dest_path = source.relative_to(state.crate_dir)
+        dest_path = source.relative_to(crate_dir)
     except ValueError:
         # For now, only support marking an existing file as a workflow
-        raise ValueError(f"{source} is not in the crate dir {state.crate_dir}")
+        raise ValueError(f"{source} is not in the crate dir {crate_dir}")
     # TODO: add command options for main and gen_cwl
-    state.crate.add_workflow(source, dest_path, main=True, lang=language, gen_cwl=False)
-    state.crate.metadata.write(state.crate_dir)
+    crate.add_workflow(source, dest_path, main=True, lang=language, gen_cwl=False)
+    crate.metadata.write(crate_dir)
 
 
 @add.command(name="test-suite")
 @click.option('-i', '--identifier')
 @click.option('-n', '--name')
 @click.option('-m', '--main-entity')
-@click.pass_obj
-def suite(state, identifier, name, main_entity):
-    suite_ = state.crate.add_test_suite(identifier=add_hash(identifier), name=name, main_entity=main_entity)
-    state.crate.metadata.write(state.crate_dir)
-    print(suite_.id)
+@OPTION_CRATE_PATH
+def suite(crate_dir, identifier, name, main_entity):
+    crate = ROCrate(crate_dir, init=False, gen_preview=False)
+    suite = crate.add_test_suite(identifier=add_hash(identifier), name=name, main_entity=main_entity)
+    crate.metadata.write(crate_dir)
+    print(suite.id)
 
 
 @add.command(name="test-instance")
@@ -115,13 +114,14 @@ def suite(state, identifier, name, main_entity):
 @click.option('-s', '--service', type=click.Choice(SERVICE_CHOICES), default="jenkins")
 @click.option('-i', '--identifier')
 @click.option('-n', '--name')
-@click.pass_obj
-def instance(state, suite, url, resource, service, identifier, name):
-    instance_ = state.crate.add_test_instance(
+@OPTION_CRATE_PATH
+def instance(crate_dir, suite, url, resource, service, identifier, name):
+    crate = ROCrate(crate_dir, init=False, gen_preview=False)
+    instance_ = crate.add_test_instance(
         add_hash(suite), url, resource=resource, service=service,
         identifier=add_hash(identifier), name=name
     )
-    state.crate.metadata.write(state.crate_dir)
+    crate.metadata.write(crate_dir)
     print(instance_.id)
 
 
@@ -130,23 +130,24 @@ def instance(state, suite, url, resource, service, identifier, name):
 @click.argument('path', type=click.Path(exists=True))
 @click.option('-e', '--engine', type=click.Choice(ENGINE_CHOICES), default="planemo")
 @click.option('-v', '--engine-version')
-@click.pass_obj
-def definition(state, suite, path, engine, engine_version):
+@OPTION_CRATE_PATH
+def definition(crate_dir, suite, path, engine, engine_version):
+    crate = ROCrate(crate_dir, init=False, gen_preview=False)
     source = Path(path).resolve(strict=True)
     try:
-        dest_path = source.relative_to(state.crate_dir)
+        dest_path = source.relative_to(crate_dir)
     except ValueError:
         # For now, only support marking an existing file as a test definition
-        raise ValueError(f"{source} is not in the crate dir {state.crate_dir}")
-    state.crate.add_test_definition(suite, source=source, dest_path=dest_path, engine=engine, engine_version=engine_version)
-    state.crate.metadata.write(state.crate_dir)
+        raise ValueError(f"{source} is not in the crate dir {crate_dir}")
+    crate.add_test_definition(suite, source=source, dest_path=dest_path, engine=engine, engine_version=engine_version)
+    crate.metadata.write(crate_dir)
 
 
 @cli.command()
 @click.argument('dst', type=click.Path(writable=True))
-@click.pass_obj
-def write_zip(state, dst):
-    crate = ROCrate(state.crate_dir, init=False, gen_preview=False)
+@OPTION_CRATE_PATH
+def write_zip(crate_dir, dst):
+    crate = ROCrate(crate_dir, init=False, gen_preview=False)
     crate.write_zip(dst)
 
 
