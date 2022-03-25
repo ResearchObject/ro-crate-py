@@ -27,10 +27,13 @@ from rocrate.rocrate import ROCrate
 
 
 def get_command_paths(command):
-    """Return a list of full command paths for all leaf commands that are part of the given root command.
+    """\
+    Return a list of full command paths for all leaf commands that are part of
+    the given root command.
 
-    For example, for a root command that has two subcommands ``command_a`` and ``command_b`` where ``command_b`` in turn
-    has two subcommands, the returned list will have the form::
+    For example, for a root command that has two subcommands ``command_a`` and
+    ``command_b`` where ``command_b`` in turn has two subcommands, the
+    returned list will have the form::
 
         [
             ['command_a'],
@@ -39,7 +42,8 @@ def get_command_paths(command):
         ]
 
     :param command: The root command.
-    :return: A list of lists, where each element is the full command path to a leaf command.
+    :return: A list of lists, where each element is the full command path to a
+      leaf command.
     """
 
     def resolve_commands(command, command_path, commands):
@@ -58,16 +62,23 @@ def get_command_paths(command):
 
 @pytest.mark.parametrize('command_path', get_command_paths(cli))
 def test_cli_help(command_path):
-    """Test that invoking any CLI command with ``--help`` prints the help string and exits normally.
+    """\
+    Test that invoking any CLI command with ``--help`` prints the help string
+    and exits normally.
 
-    This is a regression test for: https://github.com/ResearchObject/ro-crate-py/issues/97
+    This is a regression test for:
+    https://github.com/ResearchObject/ro-crate-py/issues/97
 
-    Note that we cannot simply invoke the actual leaf :class:`click.Command` that we are testing, because the test
-    runner follows a different path then when actually invoking the command from the command line. This means that any
-    code that is in the groups that the command is part of, won't be executed. This in turn means that a command could
-    actually be broken when invoked from the command line but would not be detected by the test. The workaround is to
-    invoke the full command path. For example when testing ``add workflow --help``, we cannot simply invoke ``workflow``
-    with ``['--help']`` as argument but we need to invoke the base command with ``['add', 'workflow', '--help']``.
+    Note that we cannot simply invoke the actual leaf :class:`click.Command`
+    that we are testing, because the test runner follows a different path then
+    when actually invoking the command from the command line. This means that
+    any code that is in the groups that the command is part of, won't be
+    executed. This in turn means that a command could actually be broken when
+    invoked from the command line but would not be detected by the test. The
+    workaround is to invoke the full command path. For example when testing
+    ``add workflow --help``, we cannot simply invoke ``workflow`` with
+    ``['--help']`` as argument but we need to invoke the base command with
+    ``['add', 'workflow', '--help']``.
     """
     runner = CliRunner()
     result = runner.invoke(cli, command_path + ['--help'])
