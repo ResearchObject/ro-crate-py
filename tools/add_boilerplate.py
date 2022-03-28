@@ -2,6 +2,7 @@
 # Copyright 2020-2022 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2022 Barcelona Supercomputing Center (BSC), ES
 # Copyright 2020-2022 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+# Copyright 2022 École Polytechnique Fédérale de Lausanne, CH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +34,7 @@ START_YEAR_MAP = {
     "Vlaams Instituut voor Biotechnologie (VIB), BE": "2020",
     "Barcelona Supercomputing Center (BSC), ES": "2020",
     "Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT": "2020",
+    "École Polytechnique Fédérale de Lausanne, CH": "2022",
 }
 THIS_YEAR = str(datetime.date.today().year)
 BOILERPLATE_START = "Copyright [yyyy] [name of copyright owner]"
