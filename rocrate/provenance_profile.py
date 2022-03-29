@@ -163,7 +163,7 @@ class ProvenanceProfile:
             "provenance", self.base_uri + posix_path(PROVENANCE) + "/"
         )
         # TODO: use appropriate refs for ga_export and related inputs
-        ro_identifier_workflow = self.base_uri + "ga_export"
+        ro_identifier_workflow = self.base_uri + "ga_export"  + "/"
         self.wf_ns = self.document.add_namespace("wf", ro_identifier_workflow)
         ro_identifier_input = (
             self.base_uri + "ga_export/datasets#"
@@ -284,12 +284,16 @@ class ProvenanceProfile:
             # print(process_metadata[item])
 
             for key, value in process_metadata[item].items():
-                prov_role = self.wf_ns[f"{base}/{key}"]
-
                 if not value:
                     value = ""
                 if "json" in key:
                     value = json.loads(value)
+                if isinstance(key, str):
+                    key = key.replace("|", "_")
+                if isinstance(value, str):    
+                    val = value.replace("|", "_")
+
+                prov_role = self.wf_ns[f"{base}/{key}"]
 
                 # print("key  : ",key)
                 # print("-----------")
@@ -300,7 +304,7 @@ class ProvenanceProfile:
 
                 # for artefact in value:
                 try:
-                    pdb.set_trace()  
+                    # pdb.set_trace()  
                     entity = self.declare_artefact(value)
                     self.document.used(
                         process_run_id,
@@ -336,7 +340,7 @@ class ProvenanceProfile:
 
         if isinstance(value, bytes):
             # If we got here then we must be in Python 3
-            byte_s = BytesIO(value)
+            # byte_s = BytesIO(value)
             # data_file = self.research_object.add_data_file(byte_s)
             # FIXME: Don't naively assume add_data_file uses hash in filename!
             data_id = "data:%s" % str(value) #PurePosixPath(data_file).stem
@@ -628,6 +632,7 @@ class ProvenanceProfile:
         # data_file = self.research_object.add_data_file(byte_s, content_type=TEXT_PLAIN)
         # checksum = PurePosixPath(data_file).name
         # FIXME: Don't naively assume add_data_file uses hash in filename!
+        value = str(value).replace("|", "_")
         data_id = "data:%s" % str(value) #PurePosixPath(data_file).stem
         entity = self.document.entity(
             data_id, {PROV_TYPE: WFPROV["Artifact"], PROV_VALUE: str(value)}
