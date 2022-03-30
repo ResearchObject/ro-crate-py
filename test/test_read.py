@@ -452,3 +452,45 @@ def test_multi_type_context_entity(tmpdir):
     entity = crate.dereference(id_)
     assert entity in crate.contextual_entities
     assert set(entity.type) == set(type_)
+
+
+@pytest.mark.parametrize("root,basename", [
+    ("", "ro-crate-metadata.json"),
+    ("", "ro-crate-metadata.jsonld"),
+    ("https://example.org/crate/", "ro-crate-metadata.json"),
+    ("https://example.org/crate/", "ro-crate-metadata.jsonld"),
+    ("", "bad-name.json"),
+])
+def test_find_root(tmpdir, root, basename):
+    metadata_id = root + basename
+    root_id = root or "./"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@graph": [
+            {
+                "@id": metadata_id,
+                "@type": "CreativeWork",
+                "about": {"@id": root_id},
+                "conformsTo": [
+                    {"@id": "https://w3id.org/ro/crate/1.1"},
+                    {"@id": "https://example.org/fancy-ro-crate/1.0"},
+                ]
+            },
+            {
+                "@id": root_id,
+                "@type": "Dataset",
+            },
+        ]
+    }
+    crate_dir = tmpdir / "test_find_root"
+    crate_dir.mkdir()
+    # fixed filename, we only want the metadata entry to change
+    with open(crate_dir / "ro-crate-metadata.json", "wt") as f:
+        json.dump(metadata, f, indent=4)
+    if basename not in {"ro-crate-metadata.json", "ro-crate-metadata.jsonld"}:
+        with pytest.raises(KeyError):
+            ROCrate(crate_dir)
+    else:
+        ROCrate(crate_dir)
+        # assert crate.metadata.id == metadata_id
+        # assert crate.root_dataset.id == root_id

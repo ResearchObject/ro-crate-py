@@ -144,43 +144,22 @@ class ROCrate():
         return source
 
     def find_root_entity_id(self, entities):
-        """Find Metadata file and Root Data Entity in RO-Crate.
+        """\
+        Find metadata file descriptor and root data entity.
 
-        Returns a tuple of the @id identifiers (metadata, root)
+        Return a tuple of the corresponding identifiers (metadata, root).
+        If the entities are not found, raise a KeyError.
         """
-        # Note that for all cases below we will deliberately
-        # throw KeyError if "about" exists but it has no "@id"
-
-        # First let's try conformsTo algorithm in
-        # <https://www.researchobject.org/ro-crate/1.1/root-data-entity.html#finding-the-root-data-entity>
-        for entity in entities.values():
-            about = get_norm_value(entity, "about")
-            if about:
-                for id_ in get_norm_value(entity, "conformsTo"):
-                    if id_.startswith("https://w3id.org/ro/crate/"):
-                        return(entity["@id"], about[0])
-        # ..fall back to a generous look up by filename,
-        for candidate in (
-                Metadata.BASENAME, LegacyMetadata.BASENAME,
-                f"./{Metadata.BASENAME}", f"./{LegacyMetadata.BASENAME}"
-        ):
-            metadata_file = entities.get(candidate)
-            if metadata_file and "about" in metadata_file:
-                return (metadata_file["@id"], metadata_file["about"]["@id"])
-        # No luck! Is there perhaps a root dataset directly in here?
-        root = entities.get("./", {})
-        # FIXME: below will work both for
-        # "@type": "Dataset"
-        # "@type": ["Dataset"]
-        # ..but also the unlikely
-        # "@type": "DatasetSomething"
-        if root and "Dataset" in root.get("@type", []):
-            return (None, "./")
-        # Uh oh..
-        raise KeyError(
-            "Can't find Root Data Entity in RO-Crate, "
-            "see https://www.researchobject.org/ro-crate/1.1/root-data-entity.html"
-        )
+        metadata = entities.get(Metadata.BASENAME,
+                                entities.get(LegacyMetadata.BASENAME))
+        if not metadata:
+            bn_map = {k.rsplit("/", 1)[-1]: v for k, v in entities.items()}
+            metadata = bn_map.get(Metadata.BASENAME,
+                                  bn_map.get(LegacyMetadata.BASENAME))
+        if not metadata:
+            raise KeyError("Metadata file descriptor not found")
+        root = entities[metadata["about"]["@id"]]
+        return metadata["@id"], root["@id"]
 
     def __read_data_entities(self, entities, source, gen_preview):
         metadata_id, root_id = self.find_root_entity_id(entities)

@@ -102,9 +102,10 @@ TESTING_EXTRA_TERMS = {
 
 
 def metadata_class(descriptor_id):
-    if descriptor_id == Metadata.BASENAME:
+    basename = descriptor_id.rsplit("/", 1)[-1]
+    if basename == Metadata.BASENAME:
         return Metadata
-    elif descriptor_id == LegacyMetadata.BASENAME:
+    elif basename == LegacyMetadata.BASENAME:
         return LegacyMetadata
     else:
-        return ValueError("Invalid metadata descriptor ID: {descriptor_id!r}")
+        raise ValueError(f"Invalid metadata descriptor ID: {descriptor_id!r}")
