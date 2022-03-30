@@ -25,19 +25,22 @@ def test_ga_history_loading(test_data_dir, tmpdir, helpers):
         jobs.append(job_attrs.attributes)
         
         assert isinstance(job_attrs, GalaxyJob)
-    print(jobs[0])
+    # print(jobs[0])
     assert len(jobs) == 4
 
 def test_ga_history_parsing(test_data_dir, tmpdir, helpers):
     export_dir = "test_ga_history_export"
     export_path = test_data_dir / export_dir / "history_export"
+    # prov_name = "ga_export.cwlprov"
+    # crate_path = test_data_dir / export_dir / "history_export_crate"
     
     # metadata_export = load_ga_history_export(export_path)
     prov = ProvenanceProfile(export_path, "PDG", "https://orcid.org/0000-0002-8940-4946")
+
     # print(len(metadata_export['jobs_attrs']))
-    print(prov.document.serialize(format="rdf", rdf_format="turtle"))
-    with open("test_prov.ttl","w") as provenance_file:
-            prov.document.serialize(provenance_file,format="rdf", rdf_format="turtle")
+    # print(prov.document.serialize(format="rdf", rdf_format="turtle"))
+    # with open("test_prov.ttl","w") as provenance_file:
+    #         prov.document.serialize(provenance_file,format="rdf", rdf_format="turtle")
     assert isinstance(prov, ProvenanceProfile)
 
 

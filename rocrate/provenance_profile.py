@@ -88,7 +88,8 @@ class ProvenanceProfile:
         self,
         ga_export: Dict, 
         full_name: str,
-        orcid: str,
+        orcid: str, 
+        prov_name: str = None,
         # fsaccess: StdFsAccess,
         run_uuid: Optional[uuid.UUID] = None,
     ) -> None:
@@ -98,6 +99,7 @@ class ProvenanceProfile:
             ga_export -- the galaxy metadata export (Dict)
             full_name -- author name
             orcid -- orcid (optional)
+            prov_name -- provenance file name
             run_uuid -- uuid for the workflow run
         """
         # self.fsaccess = fsaccess
@@ -123,6 +125,7 @@ class ProvenanceProfile:
             self.jobs.append(job_attrs.attributes)
             self.declare_process(job_attrs.attributes)
 
+        self.finalize_prov_profile(prov_name)
         # print(self.document.serialize(format="rdf", rdf_format="turtle"))
 
     def __str__(self) -> str:
@@ -724,7 +727,7 @@ class ProvenanceProfile:
         uris = [i.uri for i in prov_ids]
         # self.research_object.add_annotation(activity, uris, PROV["has_provenance"].uri)
 
-    def finalize_prov_profile(self, name):
+    def finalize_prov_profile(self, name=None):
         # type: (Optional[str]) -> List[Identifier]
         """Transfer the provenance related files to the RO-crate"""
         # NOTE: Relative posix path
@@ -740,7 +743,9 @@ class ProvenanceProfile:
             # multiple places or iterations
             filename = f"{wf_name}.{self.workflow_run_uuid}.cwlprov"
 
-        basename = str(PurePosixPath(PROVENANCE) / filename)
+        # basename = str(PurePosixPath(crate_path) / filename)
+        basename = filename
+        print(basename)
 
         # TODO: Also support other profiles than CWLProv, e.g. ProvOne
 
@@ -748,19 +753,17 @@ class ProvenanceProfile:
         prov_ids = []
 
         # https://www.w3.org/TR/prov-xml/
-        with self.research_object.write_bag_file(basename + ".xml") as provenance_file:
+        with open(basename + ".xml", "w") as provenance_file:
             self.document.serialize(provenance_file, format="xml", indent=4)
             prov_ids.append(self.provenance_ns[filename + ".xml"])
 
         # https://www.w3.org/TR/prov-n/
-        with self.research_object.write_bag_file(
-            basename + ".provn"
-        ) as provenance_file:
+        with open(basename + ".provn", "w") as provenance_file:
             self.document.serialize(provenance_file, format="provn", indent=2)
             prov_ids.append(self.provenance_ns[filename + ".provn"])
 
         # https://www.w3.org/Submission/prov-json/
-        with self.research_object.write_bag_file(basename + ".json") as provenance_file:
+        with open(basename + ".json", "w") as provenance_file:
             self.document.serialize(provenance_file, format="json", indent=2)
             prov_ids.append(self.provenance_ns[filename + ".json"])
 
@@ -768,24 +771,20 @@ class ProvenanceProfile:
         # which can be serialized to ttl/nt/jsonld (and more!)
 
         # https://www.w3.org/TR/turtle/
-        with self.research_object.write_bag_file(basename + ".ttl") as provenance_file:
+        with open(basename + ".ttl", "w") as provenance_file:
             self.document.serialize(provenance_file, format="rdf", rdf_format="turtle")
             prov_ids.append(self.provenance_ns[filename + ".ttl"])
 
         # https://www.w3.org/TR/n-triples/
-        with self.research_object.write_bag_file(basename + ".nt") as provenance_file:
-            self.document.serialize(
-                provenance_file, format="rdf", rdf_format="ntriples"
-            )
+        with open(basename + ".nt", "w") as provenance_file:
+            self.document.serialize(provenance_file, format="rdf", rdf_format="ntriples")
             prov_ids.append(self.provenance_ns[filename + ".nt"])
 
         # https://www.w3.org/TR/json-ld/
         # TODO: Use a nice JSON-LD context
         # see also https://eprints.soton.ac.uk/395985/
         # 404 Not Found on https://provenance.ecs.soton.ac.uk/prov.jsonld :(
-        with self.research_object.write_bag_file(
-            basename + ".jsonld"
-        ) as provenance_file:
+        with open(basename + ".jsonld", "w") as provenance_file:
             self.document.serialize(provenance_file, format="rdf", rdf_format="json-ld")
             prov_ids.append(self.provenance_ns[filename + ".jsonld"])
 
