@@ -494,3 +494,56 @@ def test_find_root(tmpdir, root, basename):
         ROCrate(crate_dir)
         # assert crate.metadata.id == metadata_id
         # assert crate.root_dataset.id == root_id
+
+
+def test_find_root_multiple_entries(tmpdir):
+    """\
+    Detached RO-Crate with two entries that end in "ro-crate-metadata.json".
+    The library should find the correct metadata, root pair based on the fact
+    that the actual root contains (i.e., references via hasPart) the "wrong"
+    metadata file.
+    """
+    root = "https://example.org/crate"
+    nested = "https://example.org/crate/nested"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@graph": [
+            {
+                "@id": f"{root}/ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": root},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+            },
+            {
+                "@id": root,
+                "@type": "Dataset",
+                "hasPart": [
+                    {"@id": f"{nested}/ro-crate-metadata.json"},
+                ],
+            },
+            {
+                "@id": f"{nested}/ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": nested},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+            },
+            {
+                "@id": nested,
+                "@type": "Dataset",
+                "hasPart": [
+                    {"@id": f"{nested}/foo.txt"},
+                ],
+            },
+            {
+                "@id": f"{nested}/foo.txt",
+                "@type": "File",
+            }
+        ]
+    }
+    crate_dir = tmpdir / "test_find_root"
+    crate_dir.mkdir()
+    with open(crate_dir / "ro-crate-metadata.json", "wt") as f:
+        json.dump(metadata, f, indent=4)
+    ROCrate(crate_dir)
+    # assert crate.metadata.id == metadata_id
+    # assert crate.root_dataset.id == root_id

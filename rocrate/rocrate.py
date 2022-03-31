@@ -150,14 +150,27 @@ class ROCrate():
         Return a tuple of the corresponding identifiers (metadata, root).
         If the entities are not found, raise a KeyError.
         """
-        metadata = entities.get(Metadata.BASENAME,
-                                entities.get(LegacyMetadata.BASENAME))
+        metadata = entities.get(Metadata.BASENAME, entities.get(LegacyMetadata.BASENAME))
         if not metadata:
-            bn_map = {k.rsplit("/", 1)[-1]: v for k, v in entities.items()}
-            metadata = bn_map.get(Metadata.BASENAME,
-                                  bn_map.get(LegacyMetadata.BASENAME))
-        if not metadata:
-            raise KeyError("Metadata file descriptor not found")
+            bn_map = {}
+            for k, v in entities.items():
+                bn_map.setdefault(k.rsplit("/", 1)[-1], []).append(v)
+            candidates = bn_map.get(Metadata.BASENAME, bn_map.get(LegacyMetadata.BASENAME))
+            if not candidates:
+                raise KeyError("Metadata file descriptor not found")
+            elif len(candidates) == 1:
+                metadata = candidates[0]
+            else:
+                candidate_ids = set(_["@id"] for _ in candidates)
+                for c in candidates:
+                    try:
+                        root = entities[c["about"]["@id"]]
+                        parts = set(_["@id"] for _ in root["hasPart"])
+                    except KeyError:
+                        continue
+                    if parts >= candidate_ids - {c["@id"]}:
+                        metadata = c
+                        break
         root = entities[metadata["about"]["@id"]]
         return metadata["@id"], root["@id"]
 
