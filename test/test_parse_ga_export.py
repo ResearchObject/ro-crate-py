@@ -31,6 +31,7 @@ def test_ga_history_loading(test_data_dir, tmpdir, helpers):
 def test_ga_history_parsing(test_data_dir, tmpdir, helpers):
     export_dir = "test_ga_history_export"
     export_path = test_data_dir / export_dir / "history_export"
+    prov_path = "/home/padge/Elixir/workflow-export/ro-crate-py/test/test-data/test_ga_history_export/history_export/provenance"
     # prov_name = "ga_export.cwlprov"
     # crate_path = test_data_dir / export_dir / "history_export_crate"
     
@@ -42,6 +43,10 @@ def test_ga_history_parsing(test_data_dir, tmpdir, helpers):
     # with open("test_prov.ttl","w") as provenance_file:
     #         prov.document.serialize(provenance_file,format="rdf", rdf_format="turtle")
     assert isinstance(prov, ProvenanceProfile)
+
+    prov.finalize_prov_profile(out_path=prov_path)
+    # print(serialized_prov_docs.keys())
+
 
 
 def test_create_wf_run_ro_crate(test_data_dir, tmpdir, helpers):

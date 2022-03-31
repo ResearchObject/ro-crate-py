@@ -18,8 +18,10 @@
 # limitations under the License.
 
 from pathlib import Path
+import os
 
 import rocrate.rocrate as roc
+from rocrate.provenance_profile import ProvenanceProfile
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
@@ -77,8 +79,9 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
 
     return wf_crate
 
-def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata, author=None, include_files=[],
-                              fetch_remote=False, cwl=None, diagram=None):
+# WIP
+def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata_path, author=None, orcid=None,
+                              include_files=[], fetch_remote=False, prov_name=None, prov_path=None, cwl=None, diagram=None):
 
     wfr_crate = roc.ROCrate()
     workflow_path = Path(workflow_path)
@@ -86,6 +89,16 @@ def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata, author=None,
         workflow_path, workflow_path.name, fetch_remote=fetch_remote,
         main=True, lang=wf_type, gen_cwl=(cwl is None)
     )
+    wfr_metadata_path = Path(wfr_metadata_path)
+    prov = ProvenanceProfile(wfr_metadata_path, author, orcid)
+    prov_path = "provenance"
+    prov.finalize_prov_profile(out_path=wfr_metadata_path / prov_path)
+
+    # add serialized provenance documents
+    wfr_crate.add_directory(wfr_metadata_path / prov_path)
+    # for doc in serialized_prov_docs.values():
+    #     # print(doc)
+    #     wfr_crate.add_file(doc)
 
     # if the source is a remote URL then add https://schema.org/codeRepository
     # property to it this can be checked by checking if the source is a URL

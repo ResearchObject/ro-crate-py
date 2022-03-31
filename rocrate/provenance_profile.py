@@ -27,6 +27,7 @@ from schema_salad.sourceline import SourceLine
 from typing_extensions import TYPE_CHECKING
 from tools.load_ga_export import load_ga_history_export, GalaxyJob, GalaxyDataset
 from ast import literal_eval
+import os
 
 # from .errors import WorkflowException
 # from .job import CommandLineJob, JobBase
@@ -87,9 +88,10 @@ class ProvenanceProfile:
     def __init__(
         self,
         ga_export: Dict, 
-        full_name: str,
-        orcid: str, 
-        prov_name: str = None,
+        full_name: str = None,
+        orcid: str = None,
+        # prov_name: str = None,
+        # prov_path: Path = None,
         # fsaccess: StdFsAccess,
         run_uuid: Optional[uuid.UUID] = None,
     ) -> None:
@@ -97,7 +99,7 @@ class ProvenanceProfile:
         Initialize the provenance profile.
         Keyword arguments:
             ga_export -- the galaxy metadata export (Dict)
-            full_name -- author name
+            full_name -- author name (optional)
             orcid -- orcid (optional)
             prov_name -- provenance file name
             run_uuid -- uuid for the workflow run
@@ -115,6 +117,7 @@ class ProvenanceProfile:
         self.workflow_run_uuid = run_uuid or uuid.uuid4()
         self.workflow_run_uri = self.workflow_run_uuid.urn  # type: str
         
+        # move to separate function 
         metadata_export = load_ga_history_export(ga_export)
         self.generate_prov_doc()
         self.jobs = []
@@ -124,9 +127,6 @@ class ProvenanceProfile:
             job_attrs.parse_ga_jobs_attrs(job)
             self.jobs.append(job_attrs.attributes)
             self.declare_process(job_attrs.attributes)
-
-        self.finalize_prov_profile(prov_name)
-        # print(self.document.serialize(format="rdf", rdf_format="turtle"))
 
     def __str__(self) -> str:
         """Represent this Provenvance profile as a string."""
@@ -727,8 +727,8 @@ class ProvenanceProfile:
         uris = [i.uri for i in prov_ids]
         # self.research_object.add_annotation(activity, uris, PROV["has_provenance"].uri)
 
-    def finalize_prov_profile(self, name=None):
-        # type: (Optional[str]) -> List[Identifier]
+    def finalize_prov_profile(self, name=None, out_path=None):
+        # type: (Optional[str],Optional[str]) -> Tuple[Dict,List[Identifier]]
         """Transfer the provenance related files to the RO-crate"""
         # NOTE: Relative posix path
         if name is None:
@@ -743,50 +743,63 @@ class ProvenanceProfile:
             # multiple places or iterations
             filename = f"{wf_name}.{self.workflow_run_uuid}.cwlprov"
 
-        # basename = str(PurePosixPath(crate_path) / filename)
-        basename = filename
+        if out_path is not None:
+            basename = str(PurePosixPath(out_path) / filename)
+        # else:
+        #     basename = filename
+
+        if not os.path.exists(out_path):
+            os.makedirs(out_path)
+
         print(basename)
-
-        # TODO: Also support other profiles than CWLProv, e.g. ProvOne
-
+        # serialized prov documents
+        serialized_prov_docs = {}
         # list of prov identifiers of provenance files
         prov_ids = []
 
         # https://www.w3.org/TR/prov-xml/
+        # serialized_prov_docs["xml"] = self.document.serialize(format="xml", indent=4)
+        prov_ids.append(self.provenance_ns[filename + ".xml"])        
         with open(basename + ".xml", "w") as provenance_file:
             self.document.serialize(provenance_file, format="xml", indent=4)
-            prov_ids.append(self.provenance_ns[filename + ".xml"])
 
         # https://www.w3.org/TR/prov-n/
+        # serialized_prov_docs["provn"] = self.document.serialize(format="provn", indent=2)
+        prov_ids.append(self.provenance_ns[filename + ".provn"])
         with open(basename + ".provn", "w") as provenance_file:
             self.document.serialize(provenance_file, format="provn", indent=2)
-            prov_ids.append(self.provenance_ns[filename + ".provn"])
+            
 
         # https://www.w3.org/Submission/prov-json/
+        # serialized_prov_docs["json"] = self.document.serialize(format="json", indent=2)
+        prov_ids.append(self.provenance_ns[filename + ".json"])
         with open(basename + ".json", "w") as provenance_file:
             self.document.serialize(provenance_file, format="json", indent=2)
-            prov_ids.append(self.provenance_ns[filename + ".json"])
 
         # "rdf" aka https://www.w3.org/TR/prov-o/
         # which can be serialized to ttl/nt/jsonld (and more!)
 
         # https://www.w3.org/TR/turtle/
+        # serialized_prov_docs["turtle"] = self.document.serialize(format="rdf", rdf_format="turtle")
+        prov_ids.append(self.provenance_ns[filename + ".ttl"])
         with open(basename + ".ttl", "w") as provenance_file:
             self.document.serialize(provenance_file, format="rdf", rdf_format="turtle")
-            prov_ids.append(self.provenance_ns[filename + ".ttl"])
 
         # https://www.w3.org/TR/n-triples/
+        # serialized_prov_docs["ntriples"] = self.document.serialize(format="rdf", rdf_format="ntriples")
+        prov_ids.append(self.provenance_ns[filename + ".nt"])
         with open(basename + ".nt", "w") as provenance_file:
             self.document.serialize(provenance_file, format="rdf", rdf_format="ntriples")
-            prov_ids.append(self.provenance_ns[filename + ".nt"])
 
         # https://www.w3.org/TR/json-ld/
         # TODO: Use a nice JSON-LD context
         # see also https://eprints.soton.ac.uk/395985/
-        # 404 Not Found on https://provenance.ecs.soton.ac.uk/prov.jsonld :(
+        # 404 Not Found on https://provenance.ecs.soton.ac.uk/prov.jsonld :
+        # serialized_prov_docs["jsonld"] = self.document.serialize(format="rdf", rdf_format="json-ld")
+        prov_ids.append(self.provenance_ns[filename + ".jsonld"])
         with open(basename + ".jsonld", "w") as provenance_file:
             self.document.serialize(provenance_file, format="rdf", rdf_format="json-ld")
-            prov_ids.append(self.provenance_ns[filename + ".jsonld"])
+            
 
         #_logger.debug("[provenance] added provenance: %s", prov_ids)
-        return prov_ids
+        return (serialized_prov_docs, prov_ids)

@@ -1,0 +1,1081 @@
+@prefix data: <urn:hash::sha1:> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix id: <urn:uuid:> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix wf: <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/> .
+@prefix wfprov: <http://purl.org/wf4ever/wfprov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+id:2341e04b-a08b-400e-97ef-3151f01a17fa a wfprov:ProcessRun,
+        prov:Activity ;
+    rdfs:label "Run of ga_export/jobs_attrs.txt#random_lines1"^^xsd:string ;
+    prov:endedAtTime "2021-06-23T10:47:04.837750"^^xsd:dateTime ;
+    prov:qualifiedAssociation [ a prov:Association ;
+            prov:hadPlan <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1> ] ;
+    prov:qualifiedStart [ a prov:Start ;
+            prov:atTime "2021-06-23T10:46:28.526901"^^xsd:dateTime ;
+            prov:hadActivity id:dd421f2f-c538-44d3-aeeb-484022c6541d ] ;
+    prov:qualifiedUsage [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.769026"^^xsd:dateTime ;
+            prov:entity <urn:hash::sha1:/srv/galaxy/mutable-config/tool-data/shared/ucsc/chrom/?.len> ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1/chromInfo> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.770390"^^xsd:dateTime ;
+            prov:entity id:7e6d530d-6c05-48b1-8d69-879b6e790c9d ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1/seed_source> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.769116"^^xsd:dateTime ;
+            prov:entity <urn:hash::sha1:?> ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1/dbkey> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.769772"^^xsd:dateTime ;
+            prov:entity id:fd40a61e-108c-42c4-8b49-c20815d2d9e5 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1/input> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.768651"^^xsd:dateTime ;
+            prov:entity id:8a1a4095-2cbb-468e-80d6-25ebab181a3e ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1/input> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.768810"^^xsd:dateTime ;
+            prov:entity id:6cf20326-6a50-4476-910c-c40be8829bc4 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1/out_file1> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.769848"^^xsd:dateTime ;
+            prov:entity data:3 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1/num_lines> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.768884"^^xsd:dateTime ;
+            prov:entity data:txt ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1/__input_ext> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.768956"^^xsd:dateTime ;
+            prov:entity data:42f21c0ad41011eb87defa163eba836f ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/random_lines1/__workflow_invocation_uuid__> ] ;
+    prov:startedAtTime "2021-06-23T10:46:28.526901"^^xsd:dateTime ;
+    prov:wasAssociatedWith id:24f1df69-3788-45a1-80b3-cdf8fb8bb5bd .
+
+id:414221e9-e943-451a-bde9-ef492e1cf85c a wfprov:ProcessRun,
+        prov:Activity ;
+    rdfs:label "Run of ga_export/jobs_attrs.txt#__DATA_FETCH__"^^xsd:string ;
+    prov:endedAtTime "2021-06-23T10:20:22.202678"^^xsd:dateTime ;
+    prov:qualifiedAssociation [ a prov:Association ;
+            prov:hadPlan <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__> ] ;
+    prov:qualifiedStart [ a prov:Start ;
+            prov:atTime "2021-06-23T10:20:00.981702"^^xsd:dateTime ;
+            prov:hadActivity id:dd421f2f-c538-44d3-aeeb-484022c6541d ] ;
+    prov:qualifiedUsage [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.763491"^^xsd:dateTime ;
+            prov:entity data:1 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/file_count> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.765267"^^xsd:dateTime ;
+            prov:entity id:71e28368-850b-441f-a008-8b6173a866d7 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/request_json> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.763447"^^xsd:dateTime ;
+            prov:entity id:ebf027ac-b671-468a-91c6-1bfd7e45eb36 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/output0> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.763813"^^xsd:dateTime ;
+            prov:entity data: ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/paramfile> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.763772"^^xsd:dateTime ;
+            prov:entity id:7f5d6ad7-2a1a-4c3a-84b4-33c006dd88d3 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/files> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.765313"^^xsd:dateTime ;
+            prov:entity data:1 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/request_version> ] ;
+    prov:startedAtTime "2021-06-23T10:20:00.981702"^^xsd:dateTime ;
+    prov:wasAssociatedWith id:24f1df69-3788-45a1-80b3-cdf8fb8bb5bd .
+
+id:a1a08c93-d0b2-4806-8abb-697cf651f9a4 a wfprov:ProcessRun,
+        prov:Activity ;
+    rdfs:label "Run of ga_export/jobs_attrs.txt#__DATA_FETCH__"^^xsd:string ;
+    prov:endedAtTime "2021-06-23T10:20:42.041319"^^xsd:dateTime ;
+    prov:qualifiedAssociation [ a prov:Association ;
+            prov:hadPlan <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__> ] ;
+    prov:qualifiedStart [ a prov:Start ;
+            prov:atTime "2021-06-23T10:20:22.770291"^^xsd:dateTime ;
+            prov:hadActivity id:dd421f2f-c538-44d3-aeeb-484022c6541d ] ;
+    prov:qualifiedUsage [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.760237"^^xsd:dateTime ;
+            prov:entity id:5c05f71f-74dc-4238-a591-9df8dfa779f8 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/files> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.760286"^^xsd:dateTime ;
+            prov:entity data: ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/paramfile> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.759864"^^xsd:dateTime ;
+            prov:entity id:d4c2d49d-ab80-43ab-b347-a7db85bf7262 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/output0> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.762940"^^xsd:dateTime ;
+            prov:entity id:594019f6-4154-49a8-be37-3d511a35f066 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/request_json> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.759917"^^xsd:dateTime ;
+            prov:entity data:1 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/file_count> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.762994"^^xsd:dateTime ;
+            prov:entity data:1 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/__DATA_FETCH__/request_version> ] ;
+    prov:startedAtTime "2021-06-23T10:20:22.770291"^^xsd:dateTime ;
+    prov:wasAssociatedWith id:24f1df69-3788-45a1-80b3-cdf8fb8bb5bd .
+
+id:cade945a-1ff3-4273-a78e-7b5358804c89 a wfprov:ProcessRun,
+        prov:Activity ;
+    rdfs:label "Run of ga_export/jobs_attrs.txt#cat1"^^xsd:string ;
+    prov:endedAtTime "2021-06-23T10:46:44.738703"^^xsd:dateTime ;
+    prov:qualifiedAssociation [ a prov:Association ;
+            prov:hadPlan <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1> ] ;
+    prov:qualifiedStart [ a prov:Start ;
+            prov:atTime "2021-06-23T10:46:28.351123"^^xsd:dateTime ;
+            prov:hadActivity id:dd421f2f-c538-44d3-aeeb-484022c6541d ] ;
+    prov:qualifiedUsage [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.766037"^^xsd:dateTime ;
+            prov:entity data:42f21c0ad41011eb87defa163eba836f ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1/__workflow_invocation_uuid__> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.765900"^^xsd:dateTime ;
+            prov:entity id:a1110187-8be9-4aff-b03e-3530ed7f6cbf ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1/out_file1> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.765788"^^xsd:dateTime ;
+            prov:entity id:730e5d81-2c3c-44d7-9916-9cc0b7bcdd81 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1/queries_0_input2> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.767885"^^xsd:dateTime ;
+            prov:entity id:682cbd95-9570-4f19-a8bb-a639bfb641e2 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1/queries> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.766105"^^xsd:dateTime ;
+            prov:entity <urn:hash::sha1:/srv/galaxy/mutable-config/tool-data/shared/ucsc/chrom/?.len> ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1/chromInfo> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.765700"^^xsd:dateTime ;
+            prov:entity id:837879db-a58f-45bc-980d-2da57fd19cd1 ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1/input1> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.766169"^^xsd:dateTime ;
+            prov:entity <urn:hash::sha1:?> ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1/dbkey> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.765965"^^xsd:dateTime ;
+            prov:entity data:txt ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1/__input_ext> ],
+        [ a prov:Usage ;
+            prov:atTime "2022-03-31T15:39:11.766787"^^xsd:dateTime ;
+            prov:entity id:a9607900-c633-4837-a4a7-eaee6edcaf3b ;
+            prov:hadRole <arcp://uuid,bdf8ae0f-d0e0-4338-9513-e6fecbbeb255/ga_export/main/cat1/input1> ] ;
+    prov:startedAtTime "2021-06-23T10:46:28.351123"^^xsd:dateTime ;
+    prov:wasAssociatedWith id:24f1df69-3788-45a1-80b3-cdf8fb8bb5bd .
+
+orcid:0000-0002-8940-4946 a schema:Person,
+        prov:Agent,
+        prov:Person ;
+    rdfs:label "PDG"^^xsd:string ;
+    schema:name "PDG"^^xsd:string ;
+    foaf:name "PDG"^^xsd:string .
+
+data:2524d3d3b68ad39a a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "2524d3d3b68ad39a"^^xsd:string .
+
+data:3 a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "3"^^xsd:string .
+
+data:775bc9b3c1750167 a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "775bc9b3c1750167"^^xsd:string .
+
+data:7c1d8e3101dbcdba a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "7c1d8e3101dbcdba"^^xsd:string .
+
+id:062d0748-7b74-4d45-98f3-80bd22ed2672 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:51656ecb-5b39-4ad7-9888-d7b93ca28266,
+        id:a26f2ebd-20b2-4760-b1b9-a9ca804bb747,
+        id:a5dd2be3-47c4-4b8a-b6d5-a98d9620f748 ;
+    prov:hadMember data:2e789aae2475b7da,
+        data:hda,
+        <urn:hash::sha1:urn:uuid:062d0748-7b74-4d45-98f3-80bd22ed2672> .
+
+id:069bb313-b651-474e-9a28-fdc7af0fc87b a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_85x51jn2> ;
+    prov:pairKey "path"^^xsd:string .
+
+id:0ce61ea3-fb0f-4338-b021-b0feb31f7b64 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:bd860612-ca87-49c5-9d5c-d086f706f789 ;
+    prov:pairKey "object_id"^^xsd:string .
+
+id:0f0f39b2-4d72-4163-b3be-eaf5acab40b9 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:cb430f8b-bd1c-4b48-bfaa-bf4970f9b8ad ;
+    prov:pairKey "__current_case__"^^xsd:string .
+
+id:1a5e9eaa-ef75-4886-8870-7cc60e0e2a94 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:fd7fec473f1e6c6b ;
+    prov:pairKey "id"^^xsd:string .
+
+id:1e8684e9-896e-4a38-bfe9-1995d0893fdd a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:594019f6-4154-49a8-be37-3d511a35f066> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:24d7454e-9885-40b1-8a85-cc272df4fa40 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:1a5e9eaa-ef75-4886-8870-7cc60e0e2a94,
+        id:96981ec2-dac6-4477-9ac3-431cdc24f7ac,
+        id:c40c9210-5155-480f-ba36-5f86aaa39d77 ;
+    prov:hadMember data:fd7fec473f1e6c6b,
+        data:hda,
+        <urn:hash::sha1:urn:uuid:24d7454e-9885-40b1-8a85-cc272df4fa40> .
+
+id:279428d4-794f-42cd-9419-0c8c71385b78 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:23fbeb5c-eebc-41ef-a966-be8a191c7ede ;
+    prov:pairKey "values"^^xsd:string .
+
+id:286ffa7a-a1f3-424c-90cf-f36d112b13f0 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:dataset1.txt ;
+    prov:pairKey "name"^^xsd:string .
+
+id:2e6f9bcd-ecc4-4000-90b2-8fd4683c9c99 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:d346895c-e12a-4eff-80d8-ecd5e0f1dbc0> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:34523c4b-aa54-4d13-8d25-76acadcc8df7 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:65dace90-ed17-46f9-b809-d98a90563655 ;
+    prov:pairKey "auto_decompress"^^xsd:string .
+
+id:346a6375-2d0d-47f0-a5d8-bf5cfe3ef9f6 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:70e3cde6-97bb-451e-a958-1d6ecfb0dd98,
+        id:869277c3-8c88-4381-bbef-de17240b1c23,
+        id:a1bb89e0-badf-490a-af30-375efe69c057 ;
+    prov:hadMember <urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_85x51jn2>,
+        <urn:hash::sha1:urn:uuid:346a6375-2d0d-47f0-a5d8-bf5cfe3ef9f6>,
+        id:0c54448a-8444-42cd-9dd1-b65dfb0656ba .
+
+id:3803c3d0-41d3-4e9d-9dda-7ddcbaa2a813 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:7ca3de8f49293d1a ;
+    prov:pairKey "id"^^xsd:string .
+
+id:38d925a2-053b-4bdd-bc21-b9d2c4238fb1 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:368b85e6-a18c-4452-90ef-32ee5ccd0308 ;
+    prov:pairKey "in_place"^^xsd:string .
+
+id:3b176baa-a8f8-426c-ab0d-aa428d41923d a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:e7516c89-e4ed-494b-bf16-74b40fa66bd1 ;
+    prov:pairKey "elements"^^xsd:string .
+
+id:3ca2018c-86dd-4db8-bd27-51575f6fa4e4 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:8dbadfd6-d421-4d18-95ae-36fc4defb317 ;
+    prov:pairKey "elements"^^xsd:string .
+
+id:41848fc9-cfe2-45ee-b2b7-b5a3371232a9 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:069bb313-b651-474e-9a28-fdc7af0fc87b,
+        id:0ce61ea3-fb0f-4338-b021-b0feb31f7b64,
+        id:66fde9d0-4440-4811-8b03-ae8c34cfebb6,
+        id:792b7ecd-597e-41ad-ac59-b0767919b4b7,
+        id:79566035-3dfd-4779-837a-344529381251,
+        id:97939793-b619-47e0-8ec3-d3baf5965151,
+        id:ace28a14-6cc4-4efc-adcb-4668dcc9cd60,
+        id:c0c38d7d-cd18-4050-b5e8-0faf10393207,
+        id:d5ba27cc-fd05-4540-baac-a8e0c6a7de01,
+        id:f45f9536-1278-4069-8b91-7edd97d3ff80,
+        id:f67dbd55-b05c-4a56-aea3-4041399b62d1 ;
+    prov:hadMember <urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_85x51jn2>,
+        <urn:hash::sha1:?>,
+        data:auto,
+        data:dataset2.txt,
+        data:path,
+        <urn:hash::sha1:urn:uuid:41848fc9-cfe2-45ee-b2b7-b5a3371232a9>,
+        id:0f5709cc-12f6-430c-a605-fd3e8978f6c4,
+        id:780092f0-87bd-42bc-a3d8-50143d44998b,
+        id:87e7e990-d873-4d20-a6ee-b15094940df1,
+        id:9e633b9f-343d-4b29-a78a-85afdd8eef53,
+        id:bd860612-ca87-49c5-9d5c-d086f706f789 .
+
+id:43509e98-23c6-4f3c-94fc-5a5e9a11f1be a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:hdas ;
+    prov:pairKey "type"^^xsd:string .
+
+id:4529ad17-6e7b-4493-bba5-475a60c4a11a a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:e6248791-d7c3-49a7-9660-5cb622189a3c ;
+    prov:pairKey "input2"^^xsd:string .
+
+id:4745fa68-123c-4afb-9176-dcf61732f695 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:03d9f2a8-6e48-40b3-84e4-f13e161decf1 ;
+    prov:pairKey "to_posix_lines"^^xsd:string .
+
+id:47d09ccc-4b59-4330-9361-9f1b65b860a8 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:d84bb265-2540-4cad-a026-511b7a21323e ;
+    prov:pairKey "destination"^^xsd:string .
+
+id:51656ecb-5b39-4ad7-9888-d7b93ca28266 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:2e789aae2475b7da ;
+    prov:pairKey "id"^^xsd:string .
+
+id:57844284-ccc8-45f3-a7fa-6ce0246cf99b a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:7827651a-85f5-48a4-8f9d-1427fc02bda4 ;
+    prov:pairKey "values"^^xsd:string .
+
+id:594019f6-4154-49a8-be37-3d511a35f066 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:1e8684e9-896e-4a38-bfe9-1995d0893fdd,
+        id:7067149e-f997-4e01-810a-41ed1aaae3f1,
+        id:e2f3637a-f559-46a0-a630-9f3e47800b70 ;
+    prov:hadMember <urn:hash::sha1:urn:uuid:594019f6-4154-49a8-be37-3d511a35f066>,
+        id:34aa3429-439f-49df-b575-0c7aee2caa81,
+        id:ffdb63df-93ba-4e67-8097-308bfd9ba39d .
+
+id:5ab542a0-7a79-4f00-b120-b14b0542e568 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:88aa880c-c240-4877-b1e7-a0c20e29ef3e,
+        id:d3a55e5b-c1fb-4523-b77d-993b00128b05,
+        id:ef96000b-e230-40a1-a36a-a45f4ca78a0e ;
+    prov:hadMember <urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_asmrlj6a>,
+        <urn:hash::sha1:urn:uuid:5ab542a0-7a79-4f00-b120-b14b0542e568>,
+        id:8cb4f8a5-cc3c-45f4-ae31-5dcdca6b5ab4 .
+
+id:5ba613ce-6eaa-412d-89bf-eb8f580823a3 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:0 ;
+    prov:pairKey "seed"^^xsd:string .
+
+id:5c05f71f-74dc-4238-a591-9df8dfa779f8 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:346a6375-2d0d-47f0-a5d8-bf5cfe3ef9f6 .
+
+id:63d1e8b3-4ec7-4ce1-b4dc-22216683dfe6 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:8bae3361-cfbe-4b69-bfa0-34901d319a21 ;
+    prov:pairKey "hashes"^^xsd:string .
+
+id:641c238b-2832-4fab-b949-f5f4fc01deb1 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:3b176baa-a8f8-426c-ab0d-aa428d41923d,
+        id:47d09ccc-4b59-4330-9361-9f1b65b860a8,
+        id:9f4835d1-a5f0-499e-9315-42fed1edd2a1,
+        id:ab8003d1-3e46-4af7-9325-fffe09639b01 ;
+    prov:hadMember <urn:hash::sha1:urn:uuid:641c238b-2832-4fab-b949-f5f4fc01deb1>,
+        id:d84bb265-2540-4cad-a026-511b7a21323e,
+        id:e7516c89-e4ed-494b-bf16-74b40fa66bd1,
+        id:e8c438c4-7544-4049-8d34-f825ecd3b5e1 .
+
+id:66fde9d0-4440-4811-8b03-ae8c34cfebb6 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:41848fc9-cfe2-45ee-b2b7-b5a3371232a9> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:682cbd95-9570-4f19-a8bb-a639bfb641e2 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:f39be690-c7d7-4911-be28-6afc1abe40b0 .
+
+id:68c6bdfd-f17d-41b8-bdba-eb3a46749940 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:71e28368-850b-441f-a008-8b6173a866d7> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:6cf20326-6a50-4476-910c-c40be8829bc4 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember data:775bc9b3c1750167 .
+
+id:6d29c983-528d-46cf-b420-1c9210619f0d a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:fc84f9f8-5bb4-402d-ba90-697df02824ca ;
+    prov:pairKey "check_content"^^xsd:string .
+
+id:6d494d29-2bc7-4da4-ba43-e816ee0b1266 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:286ffa7a-a1f3-424c-90cf-f36d112b13f0,
+        id:38d925a2-053b-4bdd-bc21-b9d2c4238fb1,
+        id:4745fa68-123c-4afb-9176-dcf61732f695,
+        id:63d1e8b3-4ec7-4ce1-b4dc-22216683dfe6,
+        id:8ced01f6-47ea-4320-b65a-6af7a668fbe9,
+        id:98a55032-1c60-4303-8ca0-5cff21b96b9d,
+        id:ab51fb43-4e4d-459e-ae56-672b92ac89ea,
+        id:b6e76be2-6e91-40d4-9f7c-32a1c0a809d5,
+        id:d9811e1d-402f-4343-bc31-7dd5643dbdac,
+        id:fbca4ec6-e519-477f-84ce-23e70dddcc8b,
+        id:feb54146-911b-4d39-90cf-ef6d66b46fe4 ;
+    prov:hadMember <urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_asmrlj6a>,
+        <urn:hash::sha1:?>,
+        data:auto,
+        data:dataset1.txt,
+        data:path,
+        <urn:hash::sha1:urn:uuid:6d494d29-2bc7-4da4-ba43-e816ee0b1266>,
+        id:03d9f2a8-6e48-40b3-84e4-f13e161decf1,
+        id:368b85e6-a18c-4452-90ef-32ee5ccd0308,
+        id:8bae3361-cfbe-4b69-bfa0-34901d319a21,
+        id:d7865c65-4cfe-4723-bd41-8bd7f69b1f0a,
+        id:f350a230-ff86-44a3-8560-e35c1ba07b59 .
+
+id:7067149e-f997-4e01-810a-41ed1aaae3f1 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:34aa3429-439f-49df-b575-0c7aee2caa81 ;
+    prov:pairKey "targets"^^xsd:string .
+
+id:70e3cde6-97bb-451e-a958-1d6ecfb0dd98 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:0c54448a-8444-42cd-9dd1-b65dfb0656ba ;
+    prov:pairKey "__index__"^^xsd:string .
+
+id:71e28368-850b-441f-a008-8b6173a866d7 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:68c6bdfd-f17d-41b8-bdba-eb3a46749940,
+        id:6d29c983-528d-46cf-b420-1c9210619f0d,
+        id:a75e7105-d7f0-4a77-865c-2ff5b3162e47 ;
+    prov:hadMember <urn:hash::sha1:urn:uuid:71e28368-850b-441f-a008-8b6173a866d7>,
+        id:a35be1e8-a91b-4c48-8fd5-6d388f6b24b1,
+        id:fc84f9f8-5bb4-402d-ba90-697df02824ca .
+
+id:730e5d81-2c3c-44d7-9916-9cc0b7bcdd81 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember data:2e789aae2475b7da .
+
+id:792b7ecd-597e-41ad-ac59-b0767919b4b7 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:9e633b9f-343d-4b29-a78a-85afdd8eef53 ;
+    prov:pairKey "to_posix_lines"^^xsd:string .
+
+id:79566035-3dfd-4779-837a-344529381251 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:auto ;
+    prov:pairKey "ext"^^xsd:string .
+
+id:7e6d530d-6c05-48b1-8d69-879b6e790c9d a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:0f0f39b2-4d72-4163-b3be-eaf5acab40b9,
+        id:5ba613ce-6eaa-412d-89bf-eb8f580823a3,
+        id:903792cc-566c-4ffe-ade9-be65cf4f1fb4,
+        id:9fe8424c-7f09-4ae6-b6b3-64fa7408975e ;
+    prov:hadMember data:0,
+        data:set_seed,
+        <urn:hash::sha1:urn:uuid:7e6d530d-6c05-48b1-8d69-879b6e790c9d>,
+        id:cb430f8b-bd1c-4b48-bfaa-bf4970f9b8ad .
+
+id:7f5d6ad7-2a1a-4c3a-84b4-33c006dd88d3 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:5ab542a0-7a79-4f00-b120-b14b0542e568 .
+
+id:7fc57149-e802-47ce-bf01-348e6e787dd0 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:34523c4b-aa54-4d13-8d25-76acadcc8df7,
+        id:3ca2018c-86dd-4db8-bd27-51575f6fa4e4,
+        id:9e45fea1-39c5-4b99-be26-72b06a5e8786,
+        id:eaf445c5-a30d-41ff-aeb6-40c4a1598f8e ;
+    prov:hadMember <urn:hash::sha1:urn:uuid:7fc57149-e802-47ce-bf01-348e6e787dd0>,
+        id:4fa4bb93-f67a-414c-8420-9272773cb5e2,
+        id:65dace90-ed17-46f9-b809-d98a90563655,
+        id:8dbadfd6-d421-4d18-95ae-36fc4defb317 .
+
+id:8170c31b-5a5f-4150-8531-8b0adac0f282 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:e6248791-d7c3-49a7-9660-5cb622189a3c> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:81d81eab-2874-43f4-9d2e-ce5ad6236054 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:fd40a61e-108c-42c4-8b49-c20815d2d9e5> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:837879db-a58f-45bc-980d-2da57fd19cd1 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember data:7ca3de8f49293d1a .
+
+id:869277c3-8c88-4381-bbef-de17240b1c23 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_85x51jn2> ;
+    prov:pairKey "file_data"^^xsd:string .
+
+id:88aa880c-c240-4877-b1e7-a0c20e29ef3e a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:5ab542a0-7a79-4f00-b120-b14b0542e568> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:8a1a4095-2cbb-468e-80d6-25ebab181a3e a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember data:fd7fec473f1e6c6b .
+
+id:8ced01f6-47ea-4320-b65a-6af7a668fbe9 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:path ;
+    prov:pairKey "src"^^xsd:string .
+
+id:903792cc-566c-4ffe-ade9-be65cf4f1fb4 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:set_seed ;
+    prov:pairKey "seed_source_selector"^^xsd:string .
+
+id:93b6a52a-f266-4837-9e8e-ed928fbd2775 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:4fa4bb93-f67a-414c-8420-9272773cb5e2> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:951bb963-10a7-4234-8119-1b13921f9629 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:f40fd446-41cb-442e-bbb7-9a23d27296e5 ;
+    prov:pairKey "__index__"^^xsd:string .
+
+id:9578a96e-6635-4000-9c81-2951341b65c8 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:f39be690-c7d7-4911-be28-6afc1abe40b0> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:96981ec2-dac6-4477-9ac3-431cdc24f7ac a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:24d7454e-9885-40b1-8a85-cc272df4fa40> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:97939793-b619-47e0-8ec3-d3baf5965151 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:dataset2.txt ;
+    prov:pairKey "name"^^xsd:string .
+
+id:98a55032-1c60-4303-8ca0-5cff21b96b9d a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:?> ;
+    prov:pairKey "dbkey"^^xsd:string .
+
+id:9c7916f8-76a0-4bd5-8774-6e61fce1bea5 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:hdas ;
+    prov:pairKey "type"^^xsd:string .
+
+id:9e45fea1-39c5-4b99-be26-72b06a5e8786 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:4fa4bb93-f67a-414c-8420-9272773cb5e2 ;
+    prov:pairKey "destination"^^xsd:string .
+
+id:9f4835d1-a5f0-499e-9315-42fed1edd2a1 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:641c238b-2832-4fab-b949-f5f4fc01deb1> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:9fe8424c-7f09-4ae6-b6b3-64fa7408975e a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:7e6d530d-6c05-48b1-8d69-879b6e790c9d> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:a1110187-8be9-4aff-b03e-3530ed7f6cbf a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember data:fd7fec473f1e6c6b .
+
+id:a1bb89e0-badf-490a-af30-375efe69c057 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:346a6375-2d0d-47f0-a5d8-bf5cfe3ef9f6> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:a26f2ebd-20b2-4760-b1b9-a9ca804bb747 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:062d0748-7b74-4d45-98f3-80bd22ed2672> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:a5dd2be3-47c4-4b8a-b6d5-a98d9620f748 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:hda ;
+    prov:pairKey "src"^^xsd:string .
+
+id:a75e7105-d7f0-4a77-865c-2ff5b3162e47 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:a35be1e8-a91b-4c48-8fd5-6d388f6b24b1 ;
+    prov:pairKey "targets"^^xsd:string .
+
+id:a9607900-c633-4837-a4a7-eaee6edcaf3b a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:57844284-ccc8-45f3-a7fa-6ce0246cf99b,
+        id:e9967a89-6747-4067-95ed-5160b763f0b1 ;
+    prov:hadMember <urn:hash::sha1:urn:uuid:a9607900-c633-4837-a4a7-eaee6edcaf3b>,
+        id:7827651a-85f5-48a4-8f9d-1427fc02bda4 .
+
+id:ab51fb43-4e4d-459e-ae56-672b92ac89ea a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_asmrlj6a> ;
+    prov:pairKey "path"^^xsd:string .
+
+id:ab8003d1-3e46-4af7-9325-fffe09639b01 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:e8c438c4-7544-4049-8d34-f825ecd3b5e1 ;
+    prov:pairKey "auto_decompress"^^xsd:string .
+
+id:ace28a14-6cc4-4efc-adcb-4668dcc9cd60 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:?> ;
+    prov:pairKey "dbkey"^^xsd:string .
+
+id:b6e76be2-6e91-40d4-9f7c-32a1c0a809d5 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:f350a230-ff86-44a3-8560-e35c1ba07b59 ;
+    prov:pairKey "purge_source"^^xsd:string .
+
+id:c0c38d7d-cd18-4050-b5e8-0faf10393207 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:0f5709cc-12f6-430c-a605-fd3e8978f6c4 ;
+    prov:pairKey "in_place"^^xsd:string .
+
+id:c40c9210-5155-480f-ba36-5f86aaa39d77 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:hda ;
+    prov:pairKey "src"^^xsd:string .
+
+id:c98b0b95-d818-4ba1-b535-11c4e6909fa3 a prov:Agent ;
+    prov:actedOnBehalfOf orcid:0000-0002-8940-4946 .
+
+id:d346895c-e12a-4eff-80d8-ecd5e0f1dbc0 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:2e6f9bcd-ecc4-4000-90b2-8fd4683c9c99,
+        id:3803c3d0-41d3-4e9d-9dda-7ddcbaa2a813,
+        id:f3ef5dcc-06a9-4ed7-bfb8-eb2dc13ba74d ;
+    prov:hadMember data:7ca3de8f49293d1a,
+        data:hda,
+        <urn:hash::sha1:urn:uuid:d346895c-e12a-4eff-80d8-ecd5e0f1dbc0> .
+
+id:d3a55e5b-c1fb-4523-b77d-993b00128b05 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_asmrlj6a> ;
+    prov:pairKey "file_data"^^xsd:string .
+
+id:d4c2d49d-ab80-43ab-b347-a7db85bf7262 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember data:2524d3d3b68ad39a .
+
+id:d5ba27cc-fd05-4540-baac-a8e0c6a7de01 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:path ;
+    prov:pairKey "src"^^xsd:string .
+
+id:d9811e1d-402f-4343-bc31-7dd5643dbdac a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:auto ;
+    prov:pairKey "ext"^^xsd:string .
+
+id:e2f3637a-f559-46a0-a630-9f3e47800b70 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:ffdb63df-93ba-4e67-8097-308bfd9ba39d ;
+    prov:pairKey "check_content"^^xsd:string .
+
+id:e9967a89-6747-4067-95ed-5160b763f0b1 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:a9607900-c633-4837-a4a7-eaee6edcaf3b> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:eaf445c5-a30d-41ff-aeb6-40c4a1598f8e a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:7fc57149-e802-47ce-bf01-348e6e787dd0> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:ebf027ac-b671-468a-91c6-1bfd7e45eb36 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember data:7c1d8e3101dbcdba .
+
+id:ef96000b-e230-40a1-a36a-a45f4ca78a0e a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:8cb4f8a5-cc3c-45f4-ae31-5dcdca6b5ab4 ;
+    prov:pairKey "__index__"^^xsd:string .
+
+id:f39be690-c7d7-4911-be28-6afc1abe40b0 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:4529ad17-6e7b-4493-bba5-475a60c4a11a,
+        id:951bb963-10a7-4234-8119-1b13921f9629,
+        id:9578a96e-6635-4000-9c81-2951341b65c8 ;
+    prov:hadMember <urn:hash::sha1:urn:uuid:f39be690-c7d7-4911-be28-6afc1abe40b0>,
+        id:e6248791-d7c3-49a7-9660-5cb622189a3c,
+        id:f40fd446-41cb-442e-bbb7-9a23d27296e5 .
+
+id:f3ef5dcc-06a9-4ed7-bfb8-eb2dc13ba74d a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity data:hda ;
+    prov:pairKey "src"^^xsd:string .
+
+id:f45f9536-1278-4069-8b91-7edd97d3ff80 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:780092f0-87bd-42bc-a3d8-50143d44998b ;
+    prov:pairKey "hashes"^^xsd:string .
+
+id:f67dbd55-b05c-4a56-aea3-4041399b62d1 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:87e7e990-d873-4d20-a6ee-b15094940df1 ;
+    prov:pairKey "purge_source"^^xsd:string .
+
+id:f923bbf9-1c94-4771-9333-77547e7e828e a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:d84bb265-2540-4cad-a026-511b7a21323e> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:fbca4ec6-e519-477f-84ce-23e70dddcc8b a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:d7865c65-4cfe-4723-bd41-8bd7f69b1f0a ;
+    prov:pairKey "object_id"^^xsd:string .
+
+id:fd40a61e-108c-42c4-8b49-c20815d2d9e5 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:279428d4-794f-42cd-9419-0c8c71385b78,
+        id:81d81eab-2874-43f4-9d2e-ce5ad6236054 ;
+    prov:hadMember <urn:hash::sha1:urn:uuid:fd40a61e-108c-42c4-8b49-c20815d2d9e5>,
+        id:23fbeb5c-eebc-41ef-a966-be8a191c7ede .
+
+id:feb54146-911b-4d39-90cf-ef6d66b46fe4 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity <urn:hash::sha1:urn:uuid:6d494d29-2bc7-4da4-ba43-e816ee0b1266> ;
+    prov:pairKey "@id"^^xsd:string .
+
+id:ff80c261-0171-44d9-86fa-546f8aea6cd8 a prov:Entity,
+        prov:KeyEntityPair ;
+    prov:pairEntity id:55af6a73-efbe-4e5c-8b47-6ff94872e6de ;
+    prov:pairKey "values"^^xsd:string .
+
+data: a wfprov:Artifact,
+        prov:Entity ;
+    prov:value ""^^xsd:string .
+
+<urn:hash::sha1:/srv/galaxy/mutable-config/tool-data/shared/ucsc/chrom/?.len> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "/srv/galaxy/mutable-config/tool-data/shared/ucsc/chrom/?.len"^^xsd:string .
+
+data:0 a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "0"^^xsd:string .
+
+data:42f21c0ad41011eb87defa163eba836f a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "42f21c0ad41011eb87defa163eba836f"^^xsd:string .
+
+data:dataset1.txt a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "dataset1.txt"^^xsd:string .
+
+data:dataset2.txt a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "dataset2.txt"^^xsd:string .
+
+data:set_seed a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "set_seed"^^xsd:string .
+
+data:txt a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "txt"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:062d0748-7b74-4d45-98f3-80bd22ed2672> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:062d0748-7b74-4d45-98f3-80bd22ed2672"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:24d7454e-9885-40b1-8a85-cc272df4fa40> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:24d7454e-9885-40b1-8a85-cc272df4fa40"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:346a6375-2d0d-47f0-a5d8-bf5cfe3ef9f6> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:346a6375-2d0d-47f0-a5d8-bf5cfe3ef9f6"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:41848fc9-cfe2-45ee-b2b7-b5a3371232a9> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:41848fc9-cfe2-45ee-b2b7-b5a3371232a9"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:4fa4bb93-f67a-414c-8420-9272773cb5e2> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:4fa4bb93-f67a-414c-8420-9272773cb5e2"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:594019f6-4154-49a8-be37-3d511a35f066> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:594019f6-4154-49a8-be37-3d511a35f066"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:5ab542a0-7a79-4f00-b120-b14b0542e568> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:5ab542a0-7a79-4f00-b120-b14b0542e568"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:641c238b-2832-4fab-b949-f5f4fc01deb1> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:641c238b-2832-4fab-b949-f5f4fc01deb1"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:6d494d29-2bc7-4da4-ba43-e816ee0b1266> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:6d494d29-2bc7-4da4-ba43-e816ee0b1266"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:71e28368-850b-441f-a008-8b6173a866d7> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:71e28368-850b-441f-a008-8b6173a866d7"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:7e6d530d-6c05-48b1-8d69-879b6e790c9d> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:7e6d530d-6c05-48b1-8d69-879b6e790c9d"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:7fc57149-e802-47ce-bf01-348e6e787dd0> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:7fc57149-e802-47ce-bf01-348e6e787dd0"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:a9607900-c633-4837-a4a7-eaee6edcaf3b> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:a9607900-c633-4837-a4a7-eaee6edcaf3b"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:d346895c-e12a-4eff-80d8-ecd5e0f1dbc0> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:d346895c-e12a-4eff-80d8-ecd5e0f1dbc0"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:d84bb265-2540-4cad-a026-511b7a21323e> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:d84bb265-2540-4cad-a026-511b7a21323e"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:e6248791-d7c3-49a7-9660-5cb622189a3c> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:e6248791-d7c3-49a7-9660-5cb622189a3c"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:f39be690-c7d7-4911-be28-6afc1abe40b0> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:f39be690-c7d7-4911-be28-6afc1abe40b0"^^xsd:string .
+
+<urn:hash::sha1:urn:uuid:fd40a61e-108c-42c4-8b49-c20815d2d9e5> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "urn:uuid:fd40a61e-108c-42c4-8b49-c20815d2d9e5"^^xsd:string .
+
+id:03d9f2a8-6e48-40b3-84e4-f13e161decf1 a prov:Entity ;
+    prov:value true .
+
+id:0c54448a-8444-42cd-9dd1-b65dfb0656ba a prov:Entity ;
+    prov:value "0"^^xsd:int .
+
+id:0f5709cc-12f6-430c-a605-fd3e8978f6c4 a prov:Entity ;
+    prov:value false .
+
+id:23fbeb5c-eebc-41ef-a966-be8a191c7ede a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:24d7454e-9885-40b1-8a85-cc272df4fa40 .
+
+id:34aa3429-439f-49df-b575-0c7aee2caa81 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:641c238b-2832-4fab-b949-f5f4fc01deb1 .
+
+id:368b85e6-a18c-4452-90ef-32ee5ccd0308 a prov:Entity ;
+    prov:value false .
+
+id:4fa4bb93-f67a-414c-8420-9272773cb5e2 a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:43509e98-23c6-4f3c-94fc-5a5e9a11f1be,
+        id:93b6a52a-f266-4837-9e8e-ed928fbd2775 ;
+    prov:hadMember data:hdas,
+        <urn:hash::sha1:urn:uuid:4fa4bb93-f67a-414c-8420-9272773cb5e2> .
+
+id:55af6a73-efbe-4e5c-8b47-6ff94872e6de a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:062d0748-7b74-4d45-98f3-80bd22ed2672 .
+
+id:65dace90-ed17-46f9-b809-d98a90563655 a prov:Entity ;
+    prov:value false .
+
+id:780092f0-87bd-42bc-a3d8-50143d44998b a wfprov:Artifact,
+        prov:Collection,
+        prov:EmptyCollection,
+        prov:Entity .
+
+id:7827651a-85f5-48a4-8f9d-1427fc02bda4 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:d346895c-e12a-4eff-80d8-ecd5e0f1dbc0 .
+
+id:87e7e990-d873-4d20-a6ee-b15094940df1 a prov:Entity ;
+    prov:value false .
+
+id:8bae3361-cfbe-4b69-bfa0-34901d319a21 a wfprov:Artifact,
+        prov:Collection,
+        prov:EmptyCollection,
+        prov:Entity .
+
+id:8cb4f8a5-cc3c-45f4-ae31-5dcdca6b5ab4 a prov:Entity ;
+    prov:value "0"^^xsd:int .
+
+id:8dbadfd6-d421-4d18-95ae-36fc4defb317 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:6d494d29-2bc7-4da4-ba43-e816ee0b1266 .
+
+id:9e633b9f-343d-4b29-a78a-85afdd8eef53 a prov:Entity ;
+    prov:value true .
+
+id:a35be1e8-a91b-4c48-8fd5-6d388f6b24b1 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:7fc57149-e802-47ce-bf01-348e6e787dd0 .
+
+id:bd860612-ca87-49c5-9d5c-d086f706f789 a prov:Entity ;
+    prov:value "155708"^^xsd:int .
+
+id:cb430f8b-bd1c-4b48-bfaa-bf4970f9b8ad a prov:Entity ;
+    prov:value "1"^^xsd:int .
+
+id:d7865c65-4cfe-4723-bd41-8bd7f69b1f0a a prov:Entity ;
+    prov:value "155707"^^xsd:int .
+
+id:d84bb265-2540-4cad-a026-511b7a21323e a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:9c7916f8-76a0-4bd5-8774-6e61fce1bea5,
+        id:f923bbf9-1c94-4771-9333-77547e7e828e ;
+    prov:hadMember data:hdas,
+        <urn:hash::sha1:urn:uuid:d84bb265-2540-4cad-a026-511b7a21323e> .
+
+id:e6248791-d7c3-49a7-9660-5cb622189a3c a wfprov:Artifact,
+        prov:Collection,
+        prov:Dictionary,
+        prov:Entity ;
+    prov:hadDictionaryMember id:8170c31b-5a5f-4150-8531-8b0adac0f282,
+        id:ff80c261-0171-44d9-86fa-546f8aea6cd8 ;
+    prov:hadMember <urn:hash::sha1:urn:uuid:e6248791-d7c3-49a7-9660-5cb622189a3c>,
+        id:55af6a73-efbe-4e5c-8b47-6ff94872e6de .
+
+id:e7516c89-e4ed-494b-bf16-74b40fa66bd1 a wfprov:Artifact,
+        prov:Collection,
+        prov:Entity ;
+    prov:hadMember id:41848fc9-cfe2-45ee-b2b7-b5a3371232a9 .
+
+id:e8c438c4-7544-4049-8d34-f825ecd3b5e1 a prov:Entity ;
+    prov:value false .
+
+id:f350a230-ff86-44a3-8560-e35c1ba07b59 a prov:Entity ;
+    prov:value false .
+
+id:f40fd446-41cb-442e-bbb7-9a23d27296e5 a prov:Entity ;
+    prov:value "0"^^xsd:int .
+
+id:fc84f9f8-5bb4-402d-ba90-697df02824ca a prov:Entity ;
+    prov:value true .
+
+id:ffdb63df-93ba-4e67-8097-308bfd9ba39d a prov:Entity ;
+    prov:value true .
+
+data:2e789aae2475b7da a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "2e789aae2475b7da"^^xsd:string .
+
+data:7ca3de8f49293d1a a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "7ca3de8f49293d1a"^^xsd:string .
+
+<urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_85x51jn2> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_85x51jn2"^^xsd:string .
+
+<urn:hash::sha1:/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_asmrlj6a> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_asmrlj6a"^^xsd:string .
+
+data:1 a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "1"^^xsd:string .
+
+data:auto a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "auto"^^xsd:string .
+
+data:fd7fec473f1e6c6b a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "fd7fec473f1e6c6b"^^xsd:string .
+
+data:hdas a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "hdas"^^xsd:string .
+
+data:path a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "path"^^xsd:string .
+
+id:dd421f2f-c538-44d3-aeeb-484022c6541d a wfprov:WorkflowRun,
+        prov:Activity ;
+    rdfs:label "Run of galaxy workflow"^^xsd:string ;
+    prov:qualifiedAssociation [ a prov:Association ;
+            prov:hadPlan wf:main ] ;
+    prov:qualifiedStart [ a prov:Start ;
+            prov:atTime "2022-03-31T15:39:11.759353"^^xsd:dateTime ;
+            prov:hadActivity id:24f1df69-3788-45a1-80b3-cdf8fb8bb5bd ] ;
+    prov:startedAtTime "2022-03-31T15:39:11.759294"^^xsd:dateTime ;
+    prov:wasAssociatedWith id:24f1df69-3788-45a1-80b3-cdf8fb8bb5bd .
+
+<urn:hash::sha1:?> a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "?"^^xsd:string .
+
+data:hda a wfprov:Artifact,
+        prov:Entity ;
+    prov:value "hda"^^xsd:string .
+
+id:24f1df69-3788-45a1-80b3-cdf8fb8bb5bd a wfprov:WorkflowEngine,
+        prov:Agent,
+        prov:SoftwareAgent ;
+    rdfs:label "galaxy_version_placeholder"^^xsd:string ;
+    prov:qualifiedStart [ a prov:Start ;
+            prov:atTime "2022-03-31T15:39:11.759268"^^xsd:dateTime ;
+            prov:hadActivity id:c98b0b95-d818-4ba1-b535-11c4e6909fa3 ] .
+
