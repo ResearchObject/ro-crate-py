@@ -32,7 +32,7 @@ def test_ga_history_loading(test_data_dir, tmpdir, helpers):
 def test_ga_history_parsing(test_data_dir, tmpdir, helpers):
     export_dir = "test_ga_history_export"
     export_path = test_data_dir / export_dir / "history_export"
-    prov_path = "/home/padge/Elixir/workflow-export/ro-crate-py/test/test-data/test_ga_history_export/history_export/provenance"
+    prov_path = "provenance"
     # prov_name = "ga_export.cwlprov"
     # crate_path = test_data_dir / export_dir / "history_export_crate"
     
