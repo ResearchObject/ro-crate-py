@@ -2,34 +2,22 @@ import json
 import os
 import re
 from typing import (
-    IO,
-    Any,
-    Callable,
     Dict,
-    Generator,
-    Iterable,
-    List,
-    MutableMapping,
-    MutableSequence,
-    NamedTuple,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-    cast,
 )
+
 
 def load_ga_history_export(export_dir):
     fn_list = os.listdir(export_dir)
     export_metadata = {}
-    for f in fn_list :
-        export_dir_path = os.path.join(export_dir,f)
+    for f in fn_list:
+        export_dir_path = os.path.join(export_dir, f)
         if os.path.isfile(export_dir_path):
-            with open(export_dir_path,"r") as fh:
+            with open(export_dir_path, "r") as fh:
                 # create keys for metadata files, removes '.' and 'txt' from fn
-                key = '_'.join(list(filter(None, re.split('\.|txt',f))))
+                key = '_'.join(list(filter(None, re.split(r'\.|txt', f))))
                 export_metadata[key] = json.loads(fh.read())
     return export_metadata
+
 
 class GalaxyJob(Dict):
     def __init__(self):
@@ -57,7 +45,9 @@ class GalaxyJob(Dict):
                     if "params" in key:
                         self.attributes["parameters"].update(job_attrs[key])
 
+
 class GalaxyDataset(Dict):
+
     def __init__(self, ga_export_dataset_attrs):
         """
         Initialize the GalaxyDataset object.

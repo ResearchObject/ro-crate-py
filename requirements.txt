@@ -5,4 +5,4 @@ jinja2
 python-dateutil
 click
 prov
-schema_salad
+typing-extensions

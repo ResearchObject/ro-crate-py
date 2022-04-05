@@ -1,19 +1,12 @@
-import copy
-import pdb
 import datetime
-import logging
 import urllib
 import uuid
 import json
-from io import BytesIO
 from pathlib import PurePath, PurePosixPath
-from socket import getfqdn
 from typing import (
     Any,
     Dict,
-    Iterable,
     List,
-    MutableMapping,
     MutableSequence,
     Optional,
     Tuple,
@@ -23,9 +16,7 @@ from typing import (
 
 from prov.identifier import Identifier
 from prov.model import PROV, PROV_LABEL, PROV_TYPE, PROV_VALUE, ProvDocument, ProvEntity
-from schema_salad.sourceline import SourceLine
-from typing_extensions import TYPE_CHECKING
-from tools.load_ga_export import load_ga_history_export, GalaxyJob, GalaxyDataset
+from tools.load_ga_export import load_ga_history_export, GalaxyJob
 from ast import literal_eval
 import os
 
@@ -36,16 +27,12 @@ import os
 from rocrate.provenance_constants import (
     ACCOUNT_UUID,
     CWLPROV,
-    ENCODING,
-    FOAF,
     METADATA,
     ORE,
     PROVENANCE,
     RO,
     SCHEMA,
     SHA1,
-    SHA256,
-    TEXT_PLAIN,
     UUID,
     WF4EVER,
     WFDESC,
@@ -59,15 +46,17 @@ from rocrate.provenance_constants import (
 #     from rocrate.provenance import ResearchObject
 
 from pathlib import Path
-import rocrate.rocrate as roc
+
 
 def posix_path(local_path: str) -> str:
     return str(PurePosixPath(Path(local_path)))
 
+
 def remove_escapes(s):
     escapes = ''.join([chr(char) for char in range(1, 32)])
     translator = str.maketrans('', '', escapes)
-    t = s.translate(translator)
+    s.translate(translator)
+
 
 def reassign(d):
     for k, v in d.items():
@@ -78,8 +67,9 @@ def reassign(d):
         except ValueError:
             pass
 
+
 class ProvenanceProfile:
-    """
+    """\
     Provenance profile.
 
     Populated from a galaxy workflow export.
@@ -87,7 +77,7 @@ class ProvenanceProfile:
 
     def __init__(
         self,
-        ga_export: Dict, 
+        ga_export: Dict,
         full_name: str = None,
         orcid: str = None,
         # prov_name: str = None,
@@ -112,12 +102,11 @@ class ProvenanceProfile:
         self.base_uri = "arcp://uuid,%s/" % self.ro_uuid
         self.document = ProvDocument()
         # TODO extract engine_uuid from galaxy, type: str
-        self.engine_uuid = "urn:uuid:%s" % uuid.uuid4()  #type: str
+        self.engine_uuid = "urn:uuid:%s" % uuid.uuid4()  # type: str
         self.full_name = full_name
         self.workflow_run_uuid = run_uuid or uuid.uuid4()
         self.workflow_run_uri = self.workflow_run_uuid.urn  # type: str
-        
-        # move to separate function 
+        # move to separate function
         metadata_export = load_ga_history_export(ga_export)
         self.generate_prov_doc()
         self.jobs = []
@@ -143,7 +132,7 @@ class ProvenanceProfile:
         # PROV_TYPE: FOAF["OnlineAccount"],
         # TODO: change how we register galaxy version, probably a declare_version func
         # self.galaxy_version = self.ga_export["jobs_attrs"][0]["galaxy_version"]
-        # TODO: change notation to already imported namespaces? 
+        # TODO: change notation to already imported namespaces?
         self.document.add_namespace("wfprov", "http://purl.org/wf4ever/wfprov#")
         # document.add_namespace('prov', 'http://www.w3.org/ns/prov#')
         self.document.add_namespace("wfdesc", "http://purl.org/wf4ever/wfdesc#")
@@ -166,7 +155,7 @@ class ProvenanceProfile:
             "provenance", self.base_uri + posix_path(PROVENANCE) + "/"
         )
         # TODO: use appropriate refs for ga_export and related inputs
-        ro_identifier_workflow = self.base_uri + "ga_export"  + "/"
+        ro_identifier_workflow = self.base_uri + "ga_export" + "/"
         self.wf_ns = self.document.add_namespace("wf", ro_identifier_workflow)
         ro_identifier_input = (
             self.base_uri + "ga_export/datasets#"
@@ -230,15 +219,15 @@ class ProvenanceProfile:
         """Record the start of each Process."""
         if process_run_id is None:
             process_run_id = uuid.uuid4().urn
-        
-        cmd = ga_export_jobs_attrs["command_line"]
+
+        # cmd = ga_export_jobs_attrs["command_line"]
         process_name = ga_export_jobs_attrs["tool_id"]
-        tool_version = ga_export_jobs_attrs["tool_version"]
+        # tool_version = ga_export_jobs_attrs["tool_version"]
         prov_label = "Run of ga_export/jobs_attrs.txt#" + process_name
         start_time = ga_export_jobs_attrs["create_time"]
         end_time = ga_export_jobs_attrs["update_time"]
 
-        #TODO: Find out how to include commandline as a string
+        # TODO: Find out how to include commandline as a string
         # cmd = self.document.entity(
         #     uuid.uuid4().urn,
         #     {PROV_TYPE: WFPROV["Artifact"], PROV_LABEL: ga_export_jobs_attrs["command_line"]}
@@ -249,9 +238,9 @@ class ProvenanceProfile:
             start_time,
             end_time,
             {
-                PROV_TYPE: WFPROV["ProcessRun"], 
-                PROV_LABEL: prov_label, 
-                #TODO: Find out how to include commandline as a string
+                PROV_TYPE: WFPROV["ProcessRun"],
+                PROV_LABEL: prov_label,
+                # TODO: Find out how to include commandline as a string
                 # PROV_LABEL: cmd
             },
         )
@@ -279,7 +268,7 @@ class ProvenanceProfile:
             base += "/" + process_name
         tool_id = process_metadata["tool_id"]
         base += "/" + tool_id
-        items = ["inputs","outputs","parameters"]
+        items = ["inputs", "outputs", "parameters"]
         # print(process_metadata["params"])
         for item in items:
             # print(item)
@@ -293,8 +282,8 @@ class ProvenanceProfile:
                     value = json.loads(value)
                 if isinstance(key, str):
                     key = key.replace("|", "_")
-                if isinstance(value, str):    
-                    val = value.replace("|", "_")
+                if isinstance(value, str):
+                    value = value.replace("|", "_")
 
                 prov_role = self.wf_ns[f"{base}/{key}"]
 
@@ -307,7 +296,6 @@ class ProvenanceProfile:
 
                 # for artefact in value:
                 try:
-                    # pdb.set_trace()  
                     entity = self.declare_artefact(value)
                     self.document.used(
                         process_run_id,
@@ -346,7 +334,7 @@ class ProvenanceProfile:
             # byte_s = BytesIO(value)
             # data_file = self.research_object.add_data_file(byte_s)
             # FIXME: Don't naively assume add_data_file uses hash in filename!
-            data_id = "data:%s" % str(value) #PurePosixPath(data_file).stem
+            data_id = "data:%s" % str(value)  # PurePosixPath(data_file).stem
             return self.document.entity(
                 data_id,
                 {PROV_TYPE: WFPROV["Artifact"], PROV_VALUE: str(value)},
@@ -383,7 +371,7 @@ class ProvenanceProfile:
             )
 
             if value.get("class"):
-                #_logger.warning("Unknown data class %s.", value["class"])
+                # _logger.warning("Unknown data class %s.", value["class"])
                 # FIXME: The class might be "http://example.com/somethingelse"
                 coll.add_asserted_type(CWLPROV[value["class"]])
 
@@ -393,7 +381,7 @@ class ProvenanceProfile:
                 # clean up unwanted characters
                 if isinstance(key, str):
                     key = key.replace("|", "_")
-                if isinstance(val, str):    
+                if isinstance(val, str):
                     val = val.replace("|", "_")
 
                 v_ent = self.declare_artefact(val)
@@ -440,7 +428,7 @@ class ProvenanceProfile:
             # FIXME: list value does not support adding "@id"
             return coll
         except TypeError:
-            #_logger.warning("Unrecognized type %s of %r", type(value), value)
+            # _logger.warning("Unrecognized type %s of %r", type(value), value)
             # Let's just fall back to Python repr()
             entity = self.document.entity(uuid.uuid4().urn, {PROV_LABEL: repr(value)})
             # self.research_object.add_uri(entity.identifier.uri)
@@ -455,7 +443,7 @@ class ProvenanceProfile:
         if "checksum" in value:
             csum = cast(str, value["checksum"])
             (method, checksum) = csum.split("$", 1)
-            if method == SHA1: # and self.research_object.has_data_file(checksum):
+            if method == SHA1:  # and self.research_object.has_data_file(checksum):
                 entity = self.document.entity("data:" + checksum)
 
         if not entity and "location" in value:
@@ -502,8 +490,8 @@ class ProvenanceProfile:
 
         # Check for secondaries
         for sec in cast(
-            # MutableSequence[CWLObjectType], 
-            value.get("secondaryFiles", [])
+            # MutableSequence[CWLObjectType],
+            value.get("secondaryFiles", [])  # noqa
         ):
             # TODO: Record these in a specializationOf entity with UUID?
             if sec["class"] == "File":
@@ -524,8 +512,10 @@ class ProvenanceProfile:
 
         return file_entity, entity, checksum
 
-    def declare_directory(self
-    # , value: CWLObjectType
+    def declare_directory(
+            self,
+            # value: CWLObjectType
+            value
     ) -> ProvEntity:
         """Register any nested files/directories."""
         # FIXME: Calculate a hash-like identifier for directory
@@ -636,12 +626,11 @@ class ProvenanceProfile:
         # checksum = PurePosixPath(data_file).name
         # FIXME: Don't naively assume add_data_file uses hash in filename!
         value = str(value).replace("|", "_")
-        data_id = "data:%s" % str(value) #PurePosixPath(data_file).stem
+        data_id = "data:%s" % str(value)  # PurePosixPath(data_file).stem
         entity = self.document.entity(
             data_id, {PROV_TYPE: WFPROV["Artifact"], PROV_VALUE: str(value)}
         )  # type: ProvEntity
-        return entity #, checksum
-
+        return entity  # , checksum
 
     def generate_output_prov(
         self,
@@ -724,7 +713,7 @@ class ProvenanceProfile:
         self.document.activity(activity, other_attributes=attribs)
         # Tip: we can't use https://www.w3.org/TR/prov-links/#term-mention
         # as prov:mentionOf() is only for entities, not activities
-        uris = [i.uri for i in prov_ids]
+        # uris = [i.uri for i in prov_ids]
         # self.research_object.add_annotation(activity, uris, PROV["has_provenance"].uri)
 
     def finalize_prov_profile(self, name=None, out_path=None):
@@ -759,7 +748,7 @@ class ProvenanceProfile:
 
         # https://www.w3.org/TR/prov-xml/
         # serialized_prov_docs["xml"] = self.document.serialize(format="xml", indent=4)
-        prov_ids.append(self.provenance_ns[filename + ".xml"])        
+        prov_ids.append(self.provenance_ns[filename + ".xml"])
         with open(basename + ".xml", "w") as provenance_file:
             self.document.serialize(provenance_file, format="xml", indent=4)
 
@@ -768,7 +757,6 @@ class ProvenanceProfile:
         prov_ids.append(self.provenance_ns[filename + ".provn"])
         with open(basename + ".provn", "w") as provenance_file:
             self.document.serialize(provenance_file, format="provn", indent=2)
-            
 
         # https://www.w3.org/Submission/prov-json/
         # serialized_prov_docs["json"] = self.document.serialize(format="json", indent=2)
@@ -799,7 +787,6 @@ class ProvenanceProfile:
         prov_ids.append(self.provenance_ns[filename + ".jsonld"])
         with open(basename + ".jsonld", "w") as provenance_file:
             self.document.serialize(provenance_file, format="rdf", rdf_format="json-ld")
-            
 
-        #_logger.debug("[provenance] added provenance: %s", prov_ids)
+        # _logger.debug("[provenance] added provenance: %s", prov_ids)
         return (serialized_prov_docs, prov_ids)

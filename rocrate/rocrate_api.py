@@ -18,7 +18,6 @@
 # limitations under the License.
 
 from pathlib import Path
-import os
 
 import rocrate.rocrate as roc
 from rocrate.provenance_profile import ProvenanceProfile
@@ -78,6 +77,7 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
         wf_crate.add_file(file_entry)
 
     return wf_crate
+
 
 # WIP
 def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata_path, author=None, orcid=None,
