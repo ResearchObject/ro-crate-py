@@ -35,11 +35,13 @@ class Metadata(File):
     BASENAME = "ro-crate-metadata.json"
     PROFILE = "https://w3id.org/ro/crate/1.1"
 
-    def __init__(self, crate, properties=None):
+    def __init__(self, crate, source=None, dest_path=None, properties=None):
+        if source is None and dest_path is None:
+            dest_path = self.BASENAME
         super().__init__(
             crate,
-            source=None,
-            dest_path=self.BASENAME,
+            source=source,
+            dest_path=dest_path,
             fetch_remote=False,
             validate_url=False,
             properties=properties
@@ -49,7 +51,7 @@ class Metadata(File):
 
     def _empty(self):
         # default properties of the metadata entry
-        val = {"@id": self.BASENAME,
+        val = {"@id": self.id,
                "@type": "CreativeWork",
                "conformsTo": {"@id": self.PROFILE},
                "about": {"@id": "./"}}

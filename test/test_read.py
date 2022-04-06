@@ -491,9 +491,9 @@ def test_find_root(tmpdir, root, basename):
         with pytest.raises(KeyError):
             ROCrate(crate_dir)
     else:
-        ROCrate(crate_dir)
-        # assert crate.metadata.id == metadata_id
-        # assert crate.root_dataset.id == root_id
+        crate = ROCrate(crate_dir)
+        assert crate.metadata.id == metadata_id
+        assert crate.root_dataset.id == root_id
 
 
 def test_find_root_multiple_entries(tmpdir):
@@ -505,11 +505,12 @@ def test_find_root_multiple_entries(tmpdir):
     """
     root = "https://example.org/crate"
     nested = "https://example.org/crate/nested"
+    metadata_id = f"{root}/ro-crate-metadata.json"
     metadata = {
         "@context": "https://w3id.org/ro/crate/1.1/context",
         "@graph": [
             {
-                "@id": f"{root}/ro-crate-metadata.json",
+                "@id": metadata_id,
                 "@type": "CreativeWork",
                 "about": {"@id": root},
                 "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
@@ -544,6 +545,6 @@ def test_find_root_multiple_entries(tmpdir):
     crate_dir.mkdir()
     with open(crate_dir / "ro-crate-metadata.json", "wt") as f:
         json.dump(metadata, f, indent=4)
-    ROCrate(crate_dir)
-    # assert crate.metadata.id == metadata_id
-    # assert crate.root_dataset.id == root_id
+    crate = ROCrate(crate_dir)
+    assert crate.metadata.id == metadata_id
+    assert crate.root_dataset.id == root + "/"

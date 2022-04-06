@@ -178,12 +178,12 @@ class ROCrate():
         metadata_id, root_id = self.find_root_entity_id(entities)
         MetadataClass = metadata_class(metadata_id)
         metadata_properties = entities.pop(metadata_id)
-        self.add(MetadataClass(self, properties=metadata_properties))
+        self.add(MetadataClass(self, metadata_id, properties=metadata_properties))
 
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
         parts = root_entity.pop('hasPart', [])
-        self.add(RootDataset(self, properties=root_entity))
+        self.add(RootDataset(self, root_id, properties=root_entity))
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
             self.add(Preview(self, source / Preview.BASENAME, properties=preview_entity))
