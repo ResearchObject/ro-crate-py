@@ -519,6 +519,7 @@ def test_find_root_multiple_entries(tmpdir):
                 "@id": root,
                 "@type": "Dataset",
                 "hasPart": [
+                    {"@id": nested},
                     {"@id": f"{nested}/ro-crate-metadata.json"},
                 ],
             },
