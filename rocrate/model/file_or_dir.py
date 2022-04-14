@@ -4,6 +4,7 @@
 # Copyright 2020-2022 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2022 Barcelona Supercomputing Center (BSC), ES
 # Copyright 2020-2022 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+# Copyright 2022 École Polytechnique Fédérale de Lausanne, CH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,7 +44,6 @@ class FileOrDir(DataEntity):
                 raise ValueError("dest_path must be provided if source is not a path or URI")
             if is_url(str(source)):
                 identifier = os.path.basename(source) if fetch_remote else source
-                properties.update({'url': source})
             else:
                 identifier = os.path.basename(source)
         super().__init__(crate, identifier, properties)

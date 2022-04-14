@@ -4,6 +4,7 @@
 # Copyright 2020-2022 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2022 Barcelona Supercomputing Center (BSC), ES
 # Copyright 2020-2022 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+# Copyright 2022 École Polytechnique Fédérale de Lausanne, CH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +20,6 @@
 
 import errno
 import json
-import os
 import uuid
 import zipfile
 import atexit
@@ -47,7 +47,7 @@ from .model.testservice import TestService, get_service
 from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEFAULT_VERSION
 from .model.testsuite import TestSuite
 
-from .utils import is_url, subclasses, get_norm_value
+from .utils import is_url, subclasses, get_norm_value, walk
 
 
 def read_metadata(metadata_path):
@@ -81,7 +81,8 @@ def pick_type(json_entity, type_map, fallback=None):
 
 class ROCrate():
 
-    def __init__(self, source=None, gen_preview=False, init=False):
+    def __init__(self, source=None, gen_preview=False, init=False, exclude=None):
+        self.exclude = exclude
         self.__entity_map = {}
         self.default_entities = []
         self.data_entities = []
@@ -108,7 +109,7 @@ class ROCrate():
         if not top_dir.is_dir():
             raise NotADirectoryError(errno.ENOTDIR, f"'{top_dir}': not a directory")
         self.add(RootDataset(self), Metadata(self))
-        for root, dirs, files in os.walk(top_dir):
+        for root, dirs, files in walk(top_dir, exclude=self.exclude):
             root = Path(root)
             for name in dirs:
                 source = root / name
@@ -349,7 +350,7 @@ class ROCrate():
             source=None,
             dest_path=None,
             fetch_remote=False,
-            validate_url=True,
+            validate_url=False,
             properties=None
     ):
         return self.add(File(
@@ -366,7 +367,7 @@ class ROCrate():
             source=None,
             dest_path=None,
             fetch_remote=False,
-            validate_url=True,
+            validate_url=False,
             properties=None
     ):
         return self.add(Dataset(
@@ -453,7 +454,7 @@ class ROCrate():
         # fetch all files defined in the crate
 
     def _copy_unlisted(self, top, base_path):
-        for root, dirs, files in os.walk(top):
+        for root, dirs, files in walk(top, exclude=self.exclude):
             root = Path(root)
             for name in dirs:
                 source = root / name
@@ -490,7 +491,7 @@ class ROCrate():
         return archive
 
     def add_workflow(
-            self, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
+            self, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
             main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow
     ):
         workflow = self.add(cls(
@@ -590,7 +591,7 @@ class ROCrate():
         return instance
 
     def add_test_definition(
-            self, suite, source=None, dest_path=None, fetch_remote=False, validate_url=True, properties=None,
+            self, suite, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
             engine="planemo", engine_version=None
     ):
         if engine_version is None:

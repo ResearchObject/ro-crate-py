@@ -2,6 +2,7 @@
 # Copyright 2020-2022 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2022 Barcelona Supercomputing Center (BSC), ES
 # Copyright 2020-2022 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+# Copyright 2022 École Polytechnique Fédérale de Lausanne, CH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -222,6 +223,29 @@ def test_init(test_data_dir, tmpdir, helpers, override):
     for p in fpaths:
         with open(crate_dir / p) as f1, open(out_path / p) as f2:
             assert f1.read() == f2.read()
+
+
+def test_exclude(test_data_dir, tmpdir, helpers):
+    def check(out=False):
+        for p in "LICENSE", "sort-and-change-case.ga":
+            assert isinstance(crate.dereference(p), File)
+        for p in exclude + ["test/"]:
+            assert not crate.dereference(p)
+            if out:
+                assert not(crate.source / p).exists()
+        for e in crate.data_entities:
+            assert not(e.id.startswith("test"))
+        if out:
+            assert not(crate.source / "test").exists()
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    (crate_dir / helpers.METADATA_FILE_NAME).unlink()
+    exclude = ["test", "README.md"]
+    crate = ROCrate(crate_dir, init=True, exclude=exclude)
+    check()
+    out_path = tmpdir / 'ro_crate_out'
+    crate.write(out_path)
+    crate = ROCrate(out_path)
+    check(out=True)
 
 
 @pytest.mark.parametrize("gen_preview,preview_exists", [(False, False), (False, True), (True, False), (True, True)])

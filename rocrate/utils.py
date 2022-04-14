@@ -4,6 +4,7 @@
 # Copyright 2020-2022 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2022 Barcelona Supercomputing Center (BSC), ES
 # Copyright 2020-2022 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+# Copyright 2022 École Polytechnique Fédérale de Lausanne, CH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +19,7 @@
 # limitations under the License.
 
 import collections
+import os
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
@@ -78,3 +80,12 @@ def get_norm_value(json_entity, prop):
         return [_ if isinstance(_, str) else _["@id"] for _ in value]
     except (TypeError, KeyError):
         raise ValueError(f"Malformed value for {prop!r}: {json_entity.get(prop)!r}")
+
+
+def walk(top, topdown=True, onerror=None, followlinks=False, exclude=None):
+    exclude = frozenset(exclude or [])
+    for root, dirs, files in os.walk(top):
+        if exclude:
+            dirs[:] = [_ for _ in dirs if _ not in exclude]
+            files[:] = [_ for _ in files if _ not in exclude]
+        yield root, dirs, files

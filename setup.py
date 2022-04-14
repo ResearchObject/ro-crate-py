@@ -4,6 +4,7 @@
 # Copyright 2020-2022 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2022 Barcelona Supercomputing Center (BSC), ES
 # Copyright 2020-2022 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+# Copyright 2022 École Polytechnique Fédérale de Lausanne, CH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -59,13 +60,14 @@ setup(
         'Bert Droesbeke',
         'Ignacio Eguinoa',
         'Alban Gaignard',
+        'Sebastiaan Huber',
         'Simone Leo',
         'Luca Pireddu',
         'Laura Rodríguez-Navas',
         'Raül Sirvent',
         'Stian Soiland-Reyes'
     )),
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     author_email='stain@apache.org',
     package_data={'': ['data/*.jsonld', 'templates/*.j2']},
     # SPDX, pending https://github.com/pombredanne/spdx-pypi-pep/pull/2
@@ -82,9 +84,10 @@ setup(
         'Intended Audience :: Information Technology',
         'Topic :: Software Development :: Libraries',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Internet',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: System :: Archiving',

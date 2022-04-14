@@ -64,10 +64,10 @@ $ pip install --upgrade pip
 $ pip install -r requirements.txt
 ```
 
-You can install ro-crate-py via `python setup.py install` or `pip install ./` In this case, to see the effect of any changes you make to the code, you need to reinstall it. However, **at the moment**, ro-crate-py can be run directly from the source tree (e.g., it does not have any extension modules, nor does it generate any other files during the setup process), so you can speed this up by hacking the venv installation dir (replace "3.6" with the actual Python version you are using):
+You can install ro-crate-py via `python setup.py install` or `pip install ./` In this case, to see the effect of any changes you make to the code, you need to reinstall it. However, **at the moment**, ro-crate-py can be run directly from the source tree (e.g., it does not have any extension modules, nor does it generate any other files during the setup process), so you can speed this up by hacking the venv installation dir (replace "3.7" with the actual Python version you are using):
 
 ```
-ln -sr . venv/lib/python3.6/site-packages/rocrate
+ln -sr . venv/lib/python3.7/site-packages/rocrate
 ```
 
 In this way, any changes to the code will be picked up immediately.
