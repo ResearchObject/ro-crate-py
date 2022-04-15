@@ -48,16 +48,16 @@ class GalaxyJob(Dict):
 
 class GalaxyDataset(Dict):
 
-    def __init__(self, ga_export_dataset_attrs):
+    def __init__(self):
         """
         Initialize the GalaxyDataset object.
         """
         self.attributes = {}
         self.attributes["metadata"] = {}
 
-    def parse_ga_dataset_attrs(self, job_attrs):
+    def parse_ga_dataset_attrs(self, dataset_attrs):
 
-        for key, value in job_attrs.items():
+        for key, value in dataset_attrs.items():
             if not isinstance(value, dict):
                 self.attributes[key] = value
             else:
@@ -65,4 +65,4 @@ class GalaxyDataset(Dict):
                     pass
                 else:
                     if "metadata" in key:
-                        self.attributes["metadata"].update(job_attrs[key])
+                        self.attributes["metadata"].update(dataset_attrs[key])

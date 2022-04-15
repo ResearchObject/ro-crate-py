@@ -16,7 +16,7 @@ from typing import (
 
 from prov.identifier import Identifier
 from prov.model import PROV, PROV_LABEL, PROV_TYPE, PROV_VALUE, ProvDocument, ProvEntity
-from tools.load_ga_export import load_ga_history_export, GalaxyJob
+from tools.load_ga_export import load_ga_history_export, GalaxyJob, GalaxyDataset
 from ast import literal_eval
 import os
 
@@ -109,12 +109,26 @@ class ProvenanceProfile:
         # move to separate function
         metadata_export = load_ga_history_export(ga_export)
         self.generate_prov_doc()
-        self.jobs = []
+        
+        self.datasets = {}
         # print(metadata_export["jobs_attrs"][0]["params"])
-        for job in metadata_export["jobs_attrs"]:
+        for i,dataset in enumerate(metadata_export["datasets_attrs"]):
+            datasets_attrs = GalaxyDataset()
+            datasets_attrs.parse_ga_dataset_attrs(dataset)
+            print(i)
+            print(datasets_attrs.attributes['encoded_id'])
+            self.datasets[datasets_attrs.attributes['encoded_id']] = datasets_attrs.attributes
+            # self.declare_process(ds_attrs.attributes)
+            
+        self.jobs = {}
+        for i,job in enumerate(metadata_export["jobs_attrs"]):
             job_attrs = GalaxyJob()
             job_attrs.parse_ga_jobs_attrs(job)
-            self.jobs.append(job_attrs.attributes)
+            print(i)
+            print(job_attrs.attributes.keys())
+            # for k,v in job_attrs.attributes['parameters'].items():
+            #     print(k, "      :     ",v)
+            self.jobs[job_attrs.attributes['encoded_id']] = job_attrs.attributes
             self.declare_process(job_attrs.attributes)
 
     def __str__(self) -> str:
@@ -223,7 +237,8 @@ class ProvenanceProfile:
         # cmd = ga_export_jobs_attrs["command_line"]
         process_name = ga_export_jobs_attrs["tool_id"]
         # tool_version = ga_export_jobs_attrs["tool_version"]
-        prov_label = "Run of ga_export/jobs_attrs.txt#" + process_name
+        # TODO: insert workflow id 
+        prov_label = "Run of workflow_id_placeholder" + process_name
         start_time = ga_export_jobs_attrs["create_time"]
         end_time = ga_export_jobs_attrs["update_time"]
 
