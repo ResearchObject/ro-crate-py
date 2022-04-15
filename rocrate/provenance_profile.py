@@ -109,19 +109,18 @@ class ProvenanceProfile:
         # move to separate function
         metadata_export = load_ga_history_export(ga_export)
         self.generate_prov_doc()
-        
         self.datasets = {}
         # print(metadata_export["jobs_attrs"][0]["params"])
-        for i,dataset in enumerate(metadata_export["datasets_attrs"]):
+        for i, dataset in enumerate(metadata_export["datasets_attrs"]):
             datasets_attrs = GalaxyDataset()
             datasets_attrs.parse_ga_dataset_attrs(dataset)
             print(i)
             print(datasets_attrs.attributes['encoded_id'])
             self.datasets[datasets_attrs.attributes['encoded_id']] = datasets_attrs.attributes
             # self.declare_process(ds_attrs.attributes)
-            
+
         self.jobs = {}
-        for i,job in enumerate(metadata_export["jobs_attrs"]):
+        for i, job in enumerate(metadata_export["jobs_attrs"]):
             job_attrs = GalaxyJob()
             job_attrs.parse_ga_jobs_attrs(job)
             print(i)
@@ -237,7 +236,7 @@ class ProvenanceProfile:
         # cmd = ga_export_jobs_attrs["command_line"]
         process_name = ga_export_jobs_attrs["tool_id"]
         # tool_version = ga_export_jobs_attrs["tool_version"]
-        # TODO: insert workflow id 
+        # TODO: insert workflow id
         prov_label = "Run of workflow_id_placeholder" + process_name
         start_time = ga_export_jobs_attrs["create_time"]
         end_time = ga_export_jobs_attrs["update_time"]
@@ -325,7 +324,8 @@ class ProvenanceProfile:
     def declare_artefact(self, value: Any) -> ProvEntity:
         """Create data artefact entities for all file objects."""
         if value is None:
-            # FIXME: If this can happen we'll need a better way to represent this in PROV
+            # FIXME: If this can happen we'll need a better way to
+            # represent this in PROV
             return self.document.entity(CWLPROV["None"], {PROV_LABEL: "None"})
 
         if isinstance(value, (bool, int, float)):
@@ -357,7 +357,8 @@ class ProvenanceProfile:
 
         if isinstance(value, Dict):
             if "@id" in value:
-                # Already processed this value, but it might not be in this PROV
+                # Already processed this value,
+                # but it might not be in this PROV
                 entities = self.document.get_record(value["@id"])
                 if entities:
                     return entities[0]
