@@ -1,8 +1,7 @@
 import datetime
 import urllib
 import uuid
-import json
-from pathlib import PurePath, PurePosixPath
+from pathlib import PurePosixPath
 from typing import (
     Any,
     Dict,
@@ -32,7 +31,7 @@ from rocrate.provenance_constants import (
     PROVENANCE,
     RO,
     SCHEMA,
-    SHA1,
+    # SHA1,
     UUID,
     WF4EVER,
     WFDESC,
@@ -109,25 +108,33 @@ class ProvenanceProfile:
         # move to separate function
         metadata_export = load_ga_history_export(ga_export)
         self.generate_prov_doc()
-        self.datasets = {}
+        self.datasets = []
         # print(metadata_export["jobs_attrs"][0]["params"])
         for i, dataset in enumerate(metadata_export["datasets_attrs"]):
             datasets_attrs = GalaxyDataset()
             datasets_attrs.parse_ga_dataset_attrs(dataset)
-            print(i)
-            print(datasets_attrs.attributes['encoded_id'])
-            self.datasets[datasets_attrs.attributes['encoded_id']] = datasets_attrs.attributes
+            # print(i)
+            # print(datasets_attrs.attributes['encoded_id'])
+            self.datasets.append(datasets_attrs.attributes)
             # self.declare_process(ds_attrs.attributes)
+
+        # print(self.datasets)
+
+        # print([[d['encoded_id']]+d['copied_from_history_dataset_association_id_chain'] for d in self.datasets])
 
         self.jobs = {}
         for i, job in enumerate(metadata_export["jobs_attrs"]):
             job_attrs = GalaxyJob()
             job_attrs.parse_ga_jobs_attrs(job)
-            print(i)
-            print(job_attrs.attributes.keys())
-            # for k,v in job_attrs.attributes['parameters'].items():
-            #     print(k, "      :     ",v)
+            # print(i)
+            print(job_attrs.attributes)
+            # for k, v in job_attrs.attributes['parameters'].items():
+            #     print(k, "      :     ", v)
             self.jobs[job_attrs.attributes['encoded_id']] = job_attrs.attributes
+            # print("inputs")
+            # print(job_attrs.attributes["inputs"])
+            # print("outputs")
+            # print(job_attrs.attributes["outputs"])
             self.declare_process(job_attrs.attributes)
 
     def __str__(self) -> str:
@@ -230,6 +237,7 @@ class ProvenanceProfile:
         process_run_id: Optional[str] = None,
     ) -> str:
         """Record the start of each Process."""
+        # TODO: change to workflow invocation id?
         if process_run_id is None:
             process_run_id = uuid.uuid4().urn
 
@@ -276,7 +284,8 @@ class ProvenanceProfile:
         process_name: Optional[str] = None,
     ) -> None:
         """Add used() for each data artefact."""
-        # FIXME: Use workflow name if available, "main" is wrong for nested workflows
+        # FIXME: Use workflow name if available, 
+        # "main" is wrong for nested workflows
         base = "main"
         if process_name is not None:
             base += "/" + process_name
@@ -288,12 +297,11 @@ class ProvenanceProfile:
             # print(item)
             # print("-----------")
             # print(process_metadata[item])
-
             for key, value in process_metadata[item].items():
                 if not value:
                     value = ""
-                if "json" in key:
-                    value = json.loads(value)
+                # if "json" in key:
+                #     value = json.loads(value)
                 if isinstance(key, str):
                     key = key.replace("|", "_")
                 if isinstance(value, str):
@@ -301,25 +309,40 @@ class ProvenanceProfile:
 
                 prov_role = self.wf_ns[f"{base}/{key}"]
 
-                # print("key  : ",key)
-                # print("-----------")
-                # print("value: ",value)
-                # print("-----------")
-                # print("type : ",type(value))
-                # print("-----------")
+                if item in ("inputs", "outputs"):
+                    for v in value:
+                        for d in self.datasets:
+                            print([d['encoded_id']])
+                            print(d['copied_from_history_dataset_association_id_chain'])
+                            if v in ([d['encoded_id']] + d['copied_from_history_dataset_association_id_chain']):
+                                self.declare_entity(process_run_id, d, prov_role)
+                else:
+                    self.declare_entity(process_run_id, value, prov_role)
 
-                # for artefact in value:
-                try:
-                    entity = self.declare_artefact(value)
-                    self.document.used(
-                        process_run_id,
-                        entity,
-                        datetime.datetime.now(),
-                        None,
-                        {"prov:role": prov_role},
-                    )
-                except OSError:
-                    pass
+                print("key  : ", key)
+                print("-----------")
+                print("value: ", value)
+                print("-----------")
+                print("type : ", type(value))
+                print("-----------")
+
+    def declare_entity(
+            self,
+            process_run_id,
+            value,
+            prov_role
+            ) -> None:
+        try:
+            entity = self.declare_artefact(value)
+            self.document.used(
+                process_run_id,
+                entity,
+                datetime.datetime.now(),
+                None,
+                {"prov:role": prov_role},
+            )
+        except OSError:
+            pass
 
     def declare_artefact(self, value: Any) -> ProvEntity:
         """Create data artefact entities for all file objects."""
@@ -366,7 +389,7 @@ class ProvenanceProfile:
 
             # Base case - we found a File we need to update
             if value.get("class") == "File":
-                (entity, _, _) = self.declare_file(value)
+                entity = self.declare_file(value)
                 value["@id"] = entity.identifier.uri
                 return entity
 
@@ -454,79 +477,81 @@ class ProvenanceProfile:
         if value["class"] != "File":
             raise ValueError("Must have class:File: %s" % value)
         # Need to determine file hash aka RO filename
+        # TODO: do we need a checksum value?
         entity = None  # type: Optional[ProvEntity]
         checksum = None
-        if "checksum" in value:
-            csum = cast(str, value["checksum"])
-            (method, checksum) = csum.split("$", 1)
-            if method == SHA1:  # and self.research_object.has_data_file(checksum):
-                entity = self.document.entity("data:" + checksum)
+        # if "checksum" in value:
+        #     csum = cast(str, value["checksum"])
+        #     (method, checksum) = csum.split("$", 1)
+        #     if method == SHA1:  # and self.research_object.has_data_file(checksum):
+        #         entity = self.document.entity("data:" + checksum)
 
-        if not entity and "location" in value:
-            location = str(value["location"])
-            # If we made it here, we'll have to add it to the RO
-            with self.fsaccess.open(location, "rb") as fhandle:
-                relative_path = self.research_object.add_data_file(fhandle)
-                # FIXME: This naively relies on add_data_file setting hash as filename
-                checksum = PurePath(relative_path).name
-                entity = self.document.entity(
-                    "data:" + checksum, {PROV_TYPE: WFPROV["Artifact"]}
-                )
-                if "checksum" not in value:
-                    value["checksum"] = f"{SHA1}${checksum}"
+        # if not entity and "location" in value:
+        #     location = str(value["location"])
+        #     # If we made it here, we'll have to add it to the RO
+        #     with self.fsaccess.open(location, "rb") as fhandle:
+        #         relative_path = self.research_object.add_data_file(fhandle)
+        #         # FIXME: This naively relies on add_data_file setting hash as filename
+        #         checksum = PurePath(relative_path).name
+        #         entity = self.document.entity(
+        #             "data:" + checksum, {PROV_TYPE: WFPROV["Artifact"]}
+        #         )
+        #         if "checksum" not in value:
+        #             value["checksum"] = f"{SHA1}${checksum}"
 
-        if not entity and "contents" in value:
-            # Anonymous file, add content as string
-            entity, checksum = self.declare_string(cast(str, value["contents"]))
+        # if not entity and "contents" in value:
+        #     # Anonymous file, add content as string
+        #     entity, checksum = self.declare_string(cast(str, value["contents"]))
 
-        # By here one of them should have worked!
-        if not entity or not checksum:
-            raise ValueError(
-                "class:File but missing checksum/location/content: %r" % value
-            )
+        # # By here one of them should have worked!
+        # if not entity or not checksum:
+        #     raise ValueError(
+        #         "class:File but missing checksum/location/content: %r" % value
+        #     )
 
         # Track filename and extension, this is generally useful only for
         # secondaryFiles. Note that multiple uses of a file might thus record
         # different names for the same entity, so we'll
         # make/track a specialized entity by UUID
-        file_id = value.setdefault("@id", uuid.uuid4().urn)
+        file_id = value.setdefault("@id", uuid.UUID(value["dataset_uuid"]).urn)
         # A specialized entity that has just these names
         file_entity = self.document.entity(
             file_id,
             [(PROV_TYPE, WFPROV["Artifact"]), (PROV_TYPE, WF4EVER["File"])],
         )  # type: ProvEntity
 
-        if "basename" in value:
-            file_entity.add_attributes({CWLPROV["basename"]: value["basename"]})
-        if "nameroot" in value:
-            file_entity.add_attributes({CWLPROV["nameroot"]: value["nameroot"]})
-        if "nameext" in value:
-            file_entity.add_attributes({CWLPROV["nameext"]: value["nameext"]})
-        self.document.specializationOf(file_entity, entity)
+        if "name" in value:
+            file_entity.add_attributes({CWLPROV["basename"]: value["name"]})
+        # if "nameroot" in value:
+        #     file_entity.add_attributes({CWLPROV["nameroot"]: value["nameroot"]})
+        if "extension" in value:
+            file_entity.add_attributes({CWLPROV["nameext"]: value["extension"]})
+        # self.document.specializationOf(file_entity, entity)
 
+        # TODO: figure out if we need to keep track of derived files
         # Check for secondaries
-        for sec in cast(
-            # MutableSequence[CWLObjectType],
-            value.get("secondaryFiles", [])  # noqa
-        ):
-            # TODO: Record these in a specializationOf entity with UUID?
-            if sec["class"] == "File":
-                (sec_entity, _, _) = self.declare_file(sec)
-            elif sec["class"] == "Directory":
-                sec_entity = self.declare_directory(sec)
-            else:
-                raise ValueError(f"Got unexpected secondaryFiles value: {sec}")
-            # We don't know how/when/where the secondary file was generated,
-            # but CWL convention is a kind of summary/index derived
-            # from the original file. As its generally in a different format
-            # then prov:Quotation is not appropriate.
-            self.document.derivation(
-                sec_entity,
-                file_entity,
-                other_attributes={PROV["type"]: CWLPROV["SecondaryFile"]},
-            )
+        # for sec in cast(
+        #     # MutableSequence[CWLObjectType],
+        #     value.get("secondaryFiles", [])  # noqa
+        # ):
+        #     # TODO: Record these in a specializationOf entity with UUID?
+        #     if sec["class"] == "File":
+        #         (sec_entity, _, _) = self.declare_file(sec)
+        #     elif sec["class"] == "Directory":
+        #         sec_entity = self.declare_directory(sec)
+        #     else:
+        #         raise ValueError(f"Got unexpected secondaryFiles value: {sec}")
+        #     # We don't know how/when/where the secondary file was generated,
+        #     # but CWL convention is a kind of summary/index derived
+        #     # from the original file. As its generally in a different format
+        #     # then prov:Quotation is not appropriate.
+        #     self.document.derivation(
+        #         sec_entity,
+        #         file_entity,
+        #         other_attributes={PROV["type"]: CWLPROV["SecondaryFile"]},
+        #     )
 
-        return file_entity, entity, checksum
+        return file_entity  # , entity, checksum
 
     def declare_directory(
             self,
@@ -756,7 +781,7 @@ class ProvenanceProfile:
         if not os.path.exists(out_path):
             os.makedirs(out_path)
 
-        print(basename)
+        # print(basename)
         # serialized prov documents
         serialized_prov_docs = {}
         # list of prov identifiers of provenance files

@@ -43,7 +43,13 @@ class GalaxyJob(Dict):
                     if "output" in key:
                         self.attributes["outputs"].update(job_attrs[key])
                     if "params" in key:
-                        self.attributes["parameters"].update(job_attrs[key])
+                        tmp_dict = {}
+                        for k, v in job_attrs[key].items():
+                            if "json" in k:
+                                v = json.loads(v)
+                            tmp_dict[k] = str(v)
+
+                        self.attributes["parameters"].update(tmp_dict)
 
 
 class GalaxyDataset(Dict):
@@ -54,6 +60,7 @@ class GalaxyDataset(Dict):
         """
         self.attributes = {}
         self.attributes["metadata"] = {}
+        self.attributes["class"] = "File"
 
     def parse_ga_dataset_attrs(self, dataset_attrs):
 
@@ -66,3 +73,8 @@ class GalaxyDataset(Dict):
                 else:
                     if "metadata" in key:
                         self.attributes["metadata"].update(dataset_attrs[key])
+        # self.attributes["used_encoded_id"] = \
+        #     next(
+        #         iter(self.attributes["copied_from_history_dataset_association_id_chain"]),
+        #         self.attributes["encoded_id"]
+        #         )
