@@ -284,7 +284,7 @@ class ProvenanceProfile:
         process_name: Optional[str] = None,
     ) -> None:
         """Add used() for each data artefact."""
-        # FIXME: Use workflow name if available, 
+        # FIXME: Use workflow name if available,
         # "main" is wrong for nested workflows
         base = "main"
         if process_name is not None:
@@ -327,11 +327,11 @@ class ProvenanceProfile:
                 print("-----------")
 
     def declare_entity(
-            self,
-            process_run_id,
-            value,
-            prov_role
-            ) -> None:
+        self,
+        process_run_id,
+        value,
+        prov_role
+    ) -> None:
         try:
             entity = self.declare_artefact(value)
             self.document.used(
@@ -478,8 +478,8 @@ class ProvenanceProfile:
             raise ValueError("Must have class:File: %s" % value)
         # Need to determine file hash aka RO filename
         # TODO: do we need a checksum value?
-        entity = None  # type: Optional[ProvEntity]
-        checksum = None
+        # entity = None  # type: Optional[ProvEntity]
+        # checksum = None
         # if "checksum" in value:
         #     csum = cast(str, value["checksum"])
         #     (method, checksum) = csum.split("$", 1)
