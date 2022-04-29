@@ -140,7 +140,10 @@ def definition(crate_dir, suite, path, engine, engine_version):
     except ValueError:
         # For now, only support marking an existing file as a test definition
         raise ValueError(f"{source} is not in the crate dir {crate_dir}")
-    crate.add_test_definition(suite, source=source, dest_path=dest_path, engine=engine, engine_version=engine_version)
+    crate.add_test_definition(
+        add_hash(suite), source=source, dest_path=dest_path, engine=engine,
+        engine_version=engine_version
+    )
     crate.metadata.write(crate_dir)
 
 
