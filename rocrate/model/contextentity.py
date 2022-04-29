@@ -70,12 +70,9 @@ class ContextEntity(Entity):
         super(ContextEntity, self).__init__(crate, identifier, properties)
 
     def format_id(self, identifier):
-        if is_url(identifier):
+        if not identifier or '#' in identifier or is_url(identifier):
             return identifier
-        elif identifier.startswith('#'):
-            return identifier
-        else:
-            return '#' + identifier
+        return '#' + identifier
 
     def getmany(self, instance):
         for json in as_list(instance.get(self.property)):

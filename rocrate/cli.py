@@ -33,7 +33,7 @@ ENGINE_CHOICES = list(APP_MAP)
 
 
 def add_hash(id_):
-    if id_ is None or id_.startswith("#") or is_url(id_):
+    if id_ is None or "#" in id_ or is_url(id_):
         return id_
     return "#" + id_
 

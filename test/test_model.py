@@ -30,6 +30,7 @@ from rocrate.model.dataset import Dataset
 from rocrate.model.computationalworkflow import ComputationalWorkflow
 from rocrate.model.person import Person
 from rocrate.model.preview import Preview
+from rocrate.model.contextentity import ContextEntity
 
 
 RAW_REPO_URL = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py"
@@ -132,6 +133,24 @@ def test_contextual_entities():
     new_person = crate.add(Person(crate, id_, {'name': 'Josiah Carberry'}))
     person_dereference = crate.dereference(id_)
     assert person_dereference is new_person
+
+
+def test_contextual_entities_hash(test_data_dir):
+    crate = ROCrate()
+    john = crate.add(Person(crate, "john", properties={"name": "John Doe"}))
+    assert john.id == "#john"
+    id_ = "https://orcid.org/0000-0002-1825-0097"
+    josiah = crate.add(Person(crate, id_, properties={"name": "Josiah Carberry"}))
+    assert josiah.id == id_
+    wf_path = test_data_dir / "ro-crate-galaxy-sortchangecase" / "sort-and-change-case.ga"
+    wf_dest_path = wf_path.name
+    wf = crate.add_workflow(wf_path, wf_dest_path, main=True, lang="galaxy")
+    step_id = f"{wf_dest_path}#sort"
+    step = crate.add(ContextEntity(crate, step_id, properties={
+        "@type": "HowToStep",
+    }))
+    wf["hasPart"] = [step]
+    assert step.id == step_id
 
 
 def test_properties():
