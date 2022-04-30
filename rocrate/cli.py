@@ -24,18 +24,12 @@ from .rocrate import ROCrate
 from .model.computerlanguage import LANG_MAP
 from .model.testservice import SERVICE_MAP
 from .model.softwareapplication import APP_MAP
-from .utils import is_url
+from .model.contextentity import add_hash
 
 
 LANG_CHOICES = list(LANG_MAP)
 SERVICE_CHOICES = list(SERVICE_MAP)
 ENGINE_CHOICES = list(APP_MAP)
-
-
-def add_hash(id_):
-    if id_ is None or "#" in id_ or is_url(id_):
-        return id_
-    return "#" + id_
 
 
 class State:
