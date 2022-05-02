@@ -160,6 +160,24 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
             assert "sdDatePublished" in props
 
 
+def test_file_uri(tmpdir):
+    f_name = uuid.uuid4().hex
+    f_path = tmpdir / f_name
+    f_uri = f"file://{f_path}"
+    with open(f_path, "wt") as f:
+        f.write("FOO\n")
+    crate = ROCrate()
+    f_entity = crate.add_file(f_uri, fetch_remote=True)
+    assert f_entity.id == f_name
+
+    out_path = tmpdir / 'ro_crate_out'
+    crate.write(out_path)
+
+    out_crate = ROCrate(out_path)
+    assert out_crate.dereference(f_name) is not None
+    assert (out_path / f_name).is_file()
+
+
 @pytest.mark.slow
 @pytest.mark.parametrize("fetch_remote", [False, True])
 def test_ftp_uri(tmpdir, fetch_remote):
