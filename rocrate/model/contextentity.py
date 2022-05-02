@@ -64,18 +64,19 @@ The corresponding plural setter supports any iterable (e.g. list):
 """
 
 
+def add_hash(id_):
+    if id_ is None or "#" in id_ or is_url(id_):
+        return id_
+    return "#" + id_
+
+
 class ContextEntity(Entity):
 
     def __init__(self, crate, identifier=None, properties=None):
         super(ContextEntity, self).__init__(crate, identifier, properties)
 
     def format_id(self, identifier):
-        if is_url(identifier):
-            return identifier
-        elif identifier.startswith('#'):
-            return identifier
-        else:
-            return '#' + identifier
+        return add_hash(identifier)
 
     def getmany(self, instance):
         for json in as_list(instance.get(self.property)):
