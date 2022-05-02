@@ -87,7 +87,7 @@ crate.write_zip("exp_crate.zip")
 
 You can also add whole directories. A directory in RO-Crate is represented by the `Dataset` entity:
 
-```
+```python
 logs = crate.add_dataset("exp/logs")
 ```
 
@@ -95,7 +95,7 @@ logs = crate.add_dataset("exp/logs")
 
 Data entities can also be remote:
 
-```
+```python
 input_data = crate.add_file("http://example.org/exp_data.zip")
 ```
 
@@ -131,7 +131,7 @@ hackathon = crate.add(ContextEntity(crate, "#bh2021", properties={
 
 Note that entities can have multiple types, e.g.:
 
-```
+```python
     "@type" = ["File", "SoftwareSourceCode"]
 ```
 
@@ -202,7 +202,7 @@ Commands:
 
 The `rocrate init` command explores a directory tree and generates an RO-Crate metadata file (`ro-crate-metadata.json`) listing all files and directories as `File` and `Dataset` entities, respectively.
 
-```
+```console
 $ rocrate init --help
 Usage: rocrate init [OPTIONS]
 
@@ -219,7 +219,7 @@ The command acts on the current directory, unless the `-c` option is specified. 
 
 The `rocrate add` command allows to add workflows and other entity types (currently [testing-related metadata](https://github.com/crs4/life_monitor/wiki/Workflow-Testing-RO-Crate)) to an RO-Crate:
 
-```
+```console
 $ rocrate add --help
 Usage: rocrate add [OPTIONS] COMMAND [ARGS]...
 
