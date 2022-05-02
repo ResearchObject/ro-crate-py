@@ -200,6 +200,17 @@ def test_looks_like_file_uri(tmpdir, monkeypatch):
     assert not (out_path / f_name).is_file()
     assert not (out_path / uri).is_file()
 
+    # Check that the file can be added to the crate using its absolute path
+    entity = crate.add_file(f_path.resolve())
+    assert entity.id == f_name
+
+    out_path = tmpdir / 'ro_crate_out_updated'
+    crate.write(out_path)
+
+    out_crate = ROCrate(out_path)
+    assert out_crate.dereference(f_name) is not None
+    assert (out_path / f_name).is_file()
+
 
 @pytest.mark.slow
 @pytest.mark.parametrize("fetch_remote", [False, True])
