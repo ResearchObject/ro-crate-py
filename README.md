@@ -155,7 +155,7 @@ https://orcid.org/0000-0000-0000-0000 Person
 https://orcid.org/0000-0000-0000-0001 Person
 ```
 
-The first two entities shown in the output are the [metadata file descriptor](https://www.researchobject.org/ro-crate/1.1/metadata.html) and the [root data entity](https://www.researchobject.org/ro-crate/1.1/root-data-entity.html), respectively. These are special entities managed by the ROCrate object, and are always present. The other entities are the ones we added in the [section on RO-Crate creation](creating-an-ro-crate). You can access data entities with `crate.data_entities` and contextual entities with `crate.contextual_entities`. For instance:
+The first two entities shown in the output are the [metadata file descriptor](https://www.researchobject.org/ro-crate/1.1/metadata.html) and the [root data entity](https://www.researchobject.org/ro-crate/1.1/root-data-entity.html), respectively. These are special entities managed by the `ROCrate` object, and are always present. The other entities are the ones we added in the [section on RO-Crate creation](#creating-an-ro-crate). You can access data entities with `crate.data_entities` and contextual entities with `crate.contextual_entities`. For instance:
 
 ```python
 for e in crate.data_entities:
@@ -174,7 +174,7 @@ results.csv 'Alice Doe'
 images/figure.svg 'Bob Doe'
 ```
 
-You can fetch an entity by its id as follows:
+You can fetch an entity by its `@id` as follows:
 
 ```python
 article = crate.dereference("paper.pdf")
@@ -185,7 +185,7 @@ article = crate.dereference("paper.pdf")
 
 `ro-crate-py` includes a hierarchical command line interface: the `rocrate` tool. `rocrate` is the top-level command, while specific functionalities are provided via sub-commands. Currently, the tool allows to initialize a directory tree as an RO-Crate (`rocrate init`) and to modify the metadata of an existing RO-Crate (`rocrate add`).
 
-```
+```console
 $ rocrate --help
 Usage: rocrate [OPTIONS] COMMAND [ARGS]...
 
@@ -213,11 +213,11 @@ Options:
   --help                Show this message and exit.
 ```
 
-The command acts on the current directory, unless the `-c` option is specified. The metadata file is added (overwritten if present) to the directory at the top-level, turning it into an RO-Crate.
+The command acts on the current directory, unless the `-c` option is specified. The metadata file is added (overwritten if present) to the directory at the top level, turning it into an RO-Crate.
 
 ### Adding items to the crate
 
-The `rocrate add` command allows to add workflows and other entity types (currently [testing-related metadata](https://github.com/crs4/life_monitor/wiki/Workflow-Testing-RO-Crate)) to an RO-Crate:
+The `rocrate add` command allows to add workflows and other entity types (currently [testing-related metadata](https://crs4.github.io/life_monitor/workflow_testing_ro_crate)) to an RO-Crate:
 
 ```console
 $ rocrate add --help
@@ -237,20 +237,20 @@ Note that data entities (e.g., workflows) must already be present in the directo
 
 ### Example
 
-```
+```bash
 # From the ro-crate-py repository root
 cd test/test-data/ro-crate-galaxy-sortchangecase
 ```
 
 This directory is already an ro-crate. Delete the metadata file to get a plain directory tree:
 
-```
+```bash
 rm ro-crate-metadata.json
 ```
 
 Now the directory tree contains several files and directories, including a Galaxy workflow and a Planemo test file, but it's not an RO-Crate since there is no metadata file. Initialize the crate:
 
-```
+```bash
 rocrate init
 ```
 
@@ -265,7 +265,7 @@ This creates an `ro-crate-metadata.json` file that lists files and directories r
 
 To register the workflow as a `ComputationalWorkflow`:
 
-```
+```bash
 rocrate add workflow -l galaxy sort-and-change-case.ga
 ```
 
@@ -273,7 +273,7 @@ Now the workflow has a type of `["File", "SoftwareSourceCode", "ComputationalWor
 
 To add [workflow testing metadata](https://github.com/crs4/life_monitor/wiki/Workflow-Testing-RO-Crate) to the crate:
 
-```
+```bash
 rocrate add test-suite -i test1
 rocrate add test-instance test1 http://example.com -r jobs -i test1_1
 rocrate add test-definition test1 test/test1/sort-and-change-case-test.yml -e planemo -v '>=0.70'
