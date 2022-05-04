@@ -18,6 +18,7 @@
 
 import io
 import pytest
+import os
 import uuid
 import zipfile
 from itertools import product
@@ -163,7 +164,7 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
 def test_file_uri(tmpdir):
     f_name = uuid.uuid4().hex
     f_path = (tmpdir / f_name).resolve()
-    f_uri = f"file://{f_path}"
+    f_uri = f"file://{f_path.as_posix()}"
     with open(f_path, "wt") as f:
         f.write("FOO\n")
     crate = ROCrate()
@@ -178,6 +179,7 @@ def test_file_uri(tmpdir):
     assert (out_path / f_name).is_file()
 
 
+@pytest.mark.skipif(os.name != "posix", reason="':' not allowed in dir name")
 def test_looks_like_file_uri(tmpdir, monkeypatch):
     f_name = uuid.uuid4().hex
     f_parent = (tmpdir / "file:")
