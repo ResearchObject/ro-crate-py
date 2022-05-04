@@ -164,7 +164,7 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
 def test_file_uri(tmpdir):
     f_name = uuid.uuid4().hex
     f_path = (tmpdir / f_name).resolve()
-    f_uri = f"file://{f_path.as_posix().split(':', 1)[-1]}"
+    f_uri = f"file:///{f_path}"  # extra slash needed on some windows systems
     with open(f_path, "wt") as f:
         f.write("FOO\n")
     crate = ROCrate()
