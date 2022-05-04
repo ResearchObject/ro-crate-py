@@ -47,7 +47,9 @@ def as_list(list_or_other):
 
 def is_url(string):
     parts = urlsplit(string)
-    return all((parts.scheme, parts.netloc, parts.path))
+    if os.name == "nt" and len(parts.scheme) == 1:
+        return False
+    return all((parts.scheme, parts.path))
 
 
 def iso_now():

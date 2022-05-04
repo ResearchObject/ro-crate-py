@@ -151,6 +151,14 @@ def test_contextual_entities_hash(test_data_dir):
     }))
     wf["hasPart"] = [step]
     assert step.id == step_id
+    email = "jscarberry@example.org"
+    email_uri = f"mailto:{email}"
+    contact_point = crate.add(ContextEntity(crate, email_uri, properties={
+        "@type": "ContactPoint",
+        "email": email
+    }))
+    crate.root_dataset["contactPoint"] = contact_point
+    assert contact_point.id == email_uri
 
 
 def test_properties():

@@ -18,6 +18,7 @@
 
 import io
 import pytest
+import os
 import uuid
 import zipfile
 from itertools import product
@@ -158,6 +159,59 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
         assert {"contentSize", "encodingFormat"}.issubset(props)
         if not fetch_remote:
             assert "sdDatePublished" in props
+
+
+def test_file_uri(tmpdir):
+    f_name = uuid.uuid4().hex
+    f_path = (tmpdir / f_name).resolve()
+    f_uri = f"file:///{f_path}"  # extra slash needed on some windows systems
+    with open(f_path, "wt") as f:
+        f.write("FOO\n")
+    crate = ROCrate()
+    f_entity = crate.add_file(f_uri, fetch_remote=True)
+    assert f_entity.id == f_name
+
+    out_path = tmpdir / 'ro_crate_out'
+    crate.write(out_path)
+
+    out_crate = ROCrate(out_path)
+    assert out_crate.dereference(f_name) is not None
+    assert (out_path / f_name).is_file()
+
+
+@pytest.mark.skipif(os.name != "posix", reason="':' not allowed in dir name")
+def test_looks_like_file_uri(tmpdir, monkeypatch):
+    f_name = uuid.uuid4().hex
+    f_parent = (tmpdir / "file:")
+    f_parent.mkdir()
+    f_path = f_parent / f_name
+    with open(f_path, "wt") as f:
+        f.write("FOO\n")
+    monkeypatch.chdir(tmpdir)
+    crate = ROCrate()
+    # Missing if interpreted as URI, present if intepreted as path
+    uri = f"file:/{f_name}"
+    entity = crate.add_file(uri, fetch_remote=False)
+    assert entity.id == uri
+
+    out_path = tmpdir / 'ro_crate_out'
+    crate.write(out_path)
+
+    out_crate = ROCrate(out_path)
+    assert out_crate.dereference(uri) is not None
+    assert not (out_path / f_name).is_file()
+    assert not (out_path / uri).is_file()
+
+    # Check that the file can be added to the crate using its absolute path
+    entity = crate.add_file(f_path.resolve())
+    assert entity.id == f_name
+
+    out_path = tmpdir / 'ro_crate_out_updated'
+    crate.write(out_path)
+
+    out_crate = ROCrate(out_path)
+    assert out_crate.dereference(f_name) is not None
+    assert (out_path / f_name).is_file()
 
 
 @pytest.mark.slow

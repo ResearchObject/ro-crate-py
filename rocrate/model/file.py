@@ -45,19 +45,20 @@ class File(FileOrDir):
             mode = 'w' + ('b' if isinstance(self.source, BytesIO) else 't')
             with open(out_file_path, mode) as out_file:
                 out_file.write(self.source.getvalue())
-        elif is_url(str(self.source)) and (self.fetch_remote or self.validate_url):
-            with urllib.request.urlopen(self.source) as response:
-                if self.validate_url:
-                    if isinstance(response, HTTPResponse):
-                        self._jsonld.update({
-                            'contentSize': response.getheader('Content-Length'),
-                            'encodingFormat': response.getheader('Content-Type')
-                        })
-                    if not self.fetch_remote:
-                        self._jsonld['sdDatePublished'] = iso_now()
-                if self.fetch_remote:
-                    out_file_path.parent.mkdir(parents=True, exist_ok=True)
-                    urllib.request.urlretrieve(response.url, out_file_path)
+        elif is_url(str(self.source)):
+            if self.fetch_remote or self.validate_url:
+                with urllib.request.urlopen(self.source) as response:
+                    if self.validate_url:
+                        if isinstance(response, HTTPResponse):
+                            self._jsonld.update({
+                                'contentSize': response.getheader('Content-Length'),
+                                'encodingFormat': response.getheader('Content-Type')
+                            })
+                        if not self.fetch_remote:
+                            self._jsonld['sdDatePublished'] = iso_now()
+                    if self.fetch_remote:
+                        out_file_path.parent.mkdir(parents=True, exist_ok=True)
+                        urllib.request.urlretrieve(response.url, out_file_path)
         elif os.path.isfile(self.source):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
             if not out_file_path.exists() or not out_file_path.samefile(self.source):
