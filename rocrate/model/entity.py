@@ -76,10 +76,20 @@ class Entity(MutableMapping):
 
     def __getitem__(self, key):
         v = self._jsonld[key]
-        if v is None or isinstance(v, str) or key.startswith("@"):
+        if v is None or key.startswith("@"):
             return v
         values = v if isinstance(v, list) else [v]
-        deref_values = [self.crate.dereference(_["@id"], _["@id"]) for _ in values]
+        deref_values = []
+        for entry in values:
+            if isinstance(entry, dict):
+                try:
+                    id_ = entry["@id"]
+                except KeyError:
+                    raise ValueError(f"no @id in {entry}")
+                else:
+                    deref_values.append(self.crate.get(id_, id_))
+            else:
+                deref_values.append(entry)
         return deref_values if isinstance(v, list) else deref_values[0]
 
     def __setitem__(self, key: str, value):

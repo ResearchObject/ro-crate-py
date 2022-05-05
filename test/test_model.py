@@ -317,10 +317,23 @@ def test_entity_as_mapping(tmpdir, helpers):
             {"@id": "ro-crate-metadata.json",
              "@type": "CreativeWork",
              "about": {"@id": "./"},
+             "encodingFormat": [
+                 "application/json",
+                 {"@id": "https://www.json.org"},
+             ],
              "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}},
             {"@id": "./",
              "@type": "Dataset",
+             "correction": [
+                 "Fixed typo.",
+                 {"@id": "#correction"},
+                 "http://example.org/correction",
+             ],
              "author": {"@id": orcid}},
+            {"@id": "#correction",
+             "@type": "CorrectionComment",
+             "badProp": {"k": "v"},
+             "text": "Previous version was ugly."},
             {"@id": orcid,
              "@type": "Person",
              "name": None,
@@ -334,7 +347,7 @@ def test_entity_as_mapping(tmpdir, helpers):
         json.dump(metadata, f, indent=4)
     crate = ROCrate(crate_dir)
     person = crate.dereference(orcid)
-    exp_len = len(metadata["@graph"][2])
+    exp_len = len([_ for _ in metadata["@graph"] if _["@id"] == orcid][0])
     assert len(person) == exp_len
     assert len(list(person)) == exp_len
     assert set(person) == set(person.keys()) == {"@id", "@type", "name", "givenName", "familyName"}
@@ -368,3 +381,15 @@ def test_entity_as_mapping(tmpdir, helpers):
     assert twin == person
     assert Person(crate, orcid) != person
     assert crate.root_dataset["author"] is person
+    correction = crate.get("#correction")
+    assert set(crate.root_dataset["correction"]) == {
+        "Fixed typo.",
+        correction,
+        "http://example.org/correction"
+    }
+    assert set(crate.metadata["encodingFormat"]) == {
+        "application/json",
+        "https://www.json.org",
+    }
+    with pytest.raises(ValueError):
+        correction["badProp"]
