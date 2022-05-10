@@ -393,3 +393,13 @@ def test_entity_as_mapping(tmpdir, helpers):
     }
     with pytest.raises(ValueError):
         correction["badProp"]
+
+
+def test_wf_types():
+    foo_crate = ROCrate()
+    foo_wf = foo_crate.add_workflow("foo.cwl", main=True)
+    assert "HowTo" not in foo_wf.type
+    foo_wf.type.append("HowTo")
+    bar_crate = ROCrate()
+    bar_wf = bar_crate.add_workflow("bar.cwl", main=True)
+    assert "HowTo" not in bar_wf.type
