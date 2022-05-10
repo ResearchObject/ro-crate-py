@@ -37,7 +37,7 @@ class ComputationalWorkflow(File):
     def _empty(self):
         return {
             "@id": self.id,
-            "@type": self.TYPES,
+            "@type": self.TYPES[:],
             "name": os.path.splitext(self.id)[0],
         }
 
