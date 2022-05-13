@@ -20,6 +20,7 @@ import json
 import pytest
 import shutil
 import uuid
+import warnings
 import zipfile
 from pathlib import Path
 
@@ -498,8 +499,9 @@ def test_find_root(tmpdir, root, basename):
 
 def test_find_root_multiple_entries(tmpdir):
     """\
-    Detached RO-Crate with two entries that end in "ro-crate-metadata.json".
-    The library should find the correct metadata, root pair based on the fact
+    Detached RO-Crate with two entries that end in "ro-crate-metadata.json"
+    and satisfy all other requirements for metadata file descriptors. In this
+    case we try to find the correct (metadata, root) pair based on the fact
     that the actual root contains (i.e., references via hasPart) the "wrong"
     metadata file.
     """
@@ -546,6 +548,8 @@ def test_find_root_multiple_entries(tmpdir):
     crate_dir.mkdir()
     with open(crate_dir / "ro-crate-metadata.json", "wt") as f:
         json.dump(metadata, f, indent=4)
-    crate = ROCrate(crate_dir)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        crate = ROCrate(crate_dir)
     assert crate.metadata.id == metadata_id
     assert crate.root_dataset.id == root + "/"

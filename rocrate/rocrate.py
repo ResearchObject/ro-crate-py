@@ -25,6 +25,7 @@ import zipfile
 import atexit
 import shutil
 import tempfile
+import warnings
 
 from collections import OrderedDict
 from pathlib import Path
@@ -143,6 +144,17 @@ class ROCrate():
         self.__read_contextual_entities(entities)
         return source
 
+    def __check_metadata(self, metadata, entities):
+        if metadata["@type"] != "CreativeWork":
+            raise ValueError('metadata descriptor must be of type "CreativeWork"')
+        try:
+            root = entities[metadata["about"]["@id"]]
+        except KeyError:
+            raise ValueError("metadata descriptor does not reference the root entity")
+        if root["@type"] != "Dataset":
+            raise ValueError('root entity must be of type "Dataset"')
+        return metadata["@id"], root["@id"]
+
     def find_root_entity_id(self, entities):
         """\
         Find metadata file descriptor and root data entity.
@@ -151,28 +163,31 @@ class ROCrate():
         If the entities are not found, raise a KeyError.
         """
         metadata = entities.get(Metadata.BASENAME, entities.get(LegacyMetadata.BASENAME))
-        if not metadata:
-            bn_map = {}
-            for k, v in entities.items():
-                bn_map.setdefault(k.rsplit("/", 1)[-1], []).append(v)
-            candidates = bn_map.get(Metadata.BASENAME, bn_map.get(LegacyMetadata.BASENAME))
-            if not candidates:
-                raise KeyError("Metadata file descriptor not found")
-            elif len(candidates) == 1:
-                metadata = candidates[0]
-            else:
-                candidate_ids = set(_["@id"] for _ in candidates)
-                for c in candidates:
-                    try:
-                        root = entities[c["about"]["@id"]]
-                        parts = set(_["@id"] for _ in root["hasPart"])
-                    except KeyError:
-                        continue
-                    if parts >= candidate_ids - {c["@id"]}:
-                        metadata = c
-                        break
-        root = entities[metadata["about"]["@id"]]
-        return metadata["@id"], root["@id"]
+        if metadata:
+            return self.__check_metadata(metadata, entities)
+        candidates = []
+        for id_, e in entities.items():
+            basename = id_.rsplit("/", 1)[-1]
+            if basename == Metadata.BASENAME or basename == LegacyMetadata.BASENAME:
+                try:
+                    candidates.append(self.__check_metadata(e, entities))
+                except ValueError:
+                    pass
+        if not candidates:
+            raise KeyError("Metadata file descriptor not found")
+        elif len(candidates) == 1:
+            return candidates[0]
+        else:
+            warnings.warn("multiple metadata file descriptors found, using a heuristic to pick one")
+            metadata_ids = set(_[0] for _ in candidates)
+            for m_id, r_id in candidates:
+                try:
+                    root = entities[r_id]
+                    part_ids = set(_["@id"] for _ in root["hasPart"])
+                except KeyError:
+                    continue
+                if part_ids >= metadata_ids - {m_id}:
+                    return m_id, r_id
 
     def __read_data_entities(self, entities, source, gen_preview):
         metadata_id, root_id = self.find_root_entity_id(entities)
