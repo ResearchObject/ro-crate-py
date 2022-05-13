@@ -160,7 +160,23 @@ class ROCrate():
         Find metadata file descriptor and root data entity.
 
         Return a tuple of the corresponding identifiers (metadata, root).
-        If the entities are not found, raise a KeyError.
+        If the entities are not found, raise KeyError. If they are found,
+        but they don't satisfy the required constraints, raise ValueError.
+
+        In the general case, the metadata file descriptor id can be an
+        absolute URI whose last path segment is "ro-crate-metadata.json[ld]".
+        Since there can be more than one such id in the crate, we need to
+        choose among the corresponding (metadata, root) entity pairs. First, we
+        exclude those that don't satisfy other constraints, such as the
+        metadata entity being of type CreativeWork, etc.; if this doesn't
+        leave us with a single pair, we try to pick one with a
+        heuristic. Suppose we are left with the (m1, r1) and (m2, r2) pairs:
+        if r1 is the actual root of this crate, then m2 and r2 are regular
+        files in it, and as such they must appear in r1's hasPart; r2,
+        however, is not required to have a hasPart property listing other
+        files. Thus, we look for a pair whose root entity "contains" all
+        metadata entities from other pairs. If there is no such pair, or there
+        is more than one, we just return an arbitrary pair.
         """
         metadata = entities.get(Metadata.BASENAME, entities.get(LegacyMetadata.BASENAME))
         if metadata:
@@ -178,7 +194,7 @@ class ROCrate():
         elif len(candidates) == 1:
             return candidates[0]
         else:
-            warnings.warn("multiple metadata file descriptors found, using a heuristic to pick one")
+            warnings.warn("Multiple metadata file descriptors, will pick one with a heuristic")
             metadata_ids = set(_[0] for _ in candidates)
             for m_id, r_id in candidates:
                 try:
@@ -187,7 +203,9 @@ class ROCrate():
                 except KeyError:
                     continue
                 if part_ids >= metadata_ids - {m_id}:
+                    # if True for more than one candidate, this pick is arbitrary
                     return m_id, r_id
+            return candidates[0]  # fall back to arbitrary pick
 
     def __read_data_entities(self, entities, source, gen_preview):
         metadata_id, root_id = self.find_root_entity_id(entities)

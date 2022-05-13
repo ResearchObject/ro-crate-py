@@ -535,59 +535,68 @@ def test_find_root_bad_entities():
         crate.find_root_entity_id(entities)
 
 
-def test_find_root_multiple_entries(tmpdir):
-    """\
-    Detached RO-Crate with two entries that end in "ro-crate-metadata.json"
-    and satisfy all other requirements for metadata file descriptors. In this
-    case we try to find the correct (metadata, root) pair based on the fact
-    that the actual root contains (i.e., references via hasPart) the "wrong"
-    metadata file.
-    """
-    root = "https://example.org/crate"
-    nested = "https://example.org/crate/nested"
-    metadata_id = f"{root}/ro-crate-metadata.json"
-    metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
-        "@graph": [
-            {
-                "@id": metadata_id,
-                "@type": "CreativeWork",
-                "about": {"@id": root},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
-            },
-            {
-                "@id": root,
-                "@type": "Dataset",
-                "hasPart": [
-                    {"@id": nested},
-                    {"@id": f"{nested}/ro-crate-metadata.json"},
-                ],
-            },
-            {
-                "@id": f"{nested}/ro-crate-metadata.json",
-                "@type": "CreativeWork",
-                "about": {"@id": nested},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
-            },
-            {
-                "@id": nested,
-                "@type": "Dataset",
-                "hasPart": [
-                    {"@id": f"{nested}/foo.txt"},
-                ],
-            },
-            {
-                "@id": f"{nested}/foo.txt",
-                "@type": "File",
-            }
-        ]
+@pytest.mark.filterwarnings("ignore")
+def test_find_root_multiple_entries():
+    orig_entities = {
+        "http://example.org/ro-crate-metadata.json": {
+            "@id": "http://example.org/ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {"@id": "http://example.org/"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+        },
+        "http://example.org/": {
+            "@id": "http://example.org/",
+            "@type": "Dataset",
+            "hasPart": [
+                {"@id": "http://example.com/"},
+                {"@id": "http://example.com/ro-crate-metadata.json"}
+            ]
+        },
+        "http://example.com/ro-crate-metadata.json": {
+            "@id": "http://example.com/ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {"@id": "http://example.com/"},
+            "conformsTo": {"@id": "https://w3id.com/ro/crate/1.1"},
+        },
+        "http://example.com/": {
+            "@id": "http://example.com/",
+            "@type": "Dataset",
+        },
     }
-    crate_dir = tmpdir / "test_find_root"
-    crate_dir.mkdir()
-    with open(crate_dir / "ro-crate-metadata.json", "wt") as f:
-        json.dump(metadata, f, indent=4)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        crate = ROCrate(crate_dir)
-    assert crate.metadata.id == metadata_id
-    assert crate.root_dataset.id == root + "/"
+    crate = ROCrate()
+
+    def check_finds_org(entities):
+        m_id, r_id = crate.find_root_entity_id(entities)
+        assert m_id == "http://example.org/ro-crate-metadata.json"
+        assert r_id == "http://example.org/"
+
+    def check_picks_one(entities):
+        m_id, r_id = crate.find_root_entity_id(entities)
+        assert m_id in [f"http://example.{_}/ro-crate-metadata.json" for _ in ("org", "com")]
+        assert r_id in [f"http://example.{_}/" for _ in ("org", "com")]
+
+    check_finds_org(orig_entities)
+    # no root candidate contains the other one
+    mod_entities = deepcopy(orig_entities)
+    del mod_entities["http://example.org/"]["hasPart"]
+    check_picks_one(mod_entities)
+    # each root candidate contains the other one
+    mod_entities = deepcopy(orig_entities)
+    mod_entities["http://example.com/"]["hasPart"] = [
+        {"@id": "http://example.org/"},
+        {"@id": "http://example.org/ro-crate-metadata.json"}
+    ]
+    check_picks_one(mod_entities)
+    # "about" does not reference the root entity
+    mod_entities = deepcopy(orig_entities)
+    for about in "http://google.com", {"@id": "http://google.com"}:
+        mod_entities["http://example.com/ro-crate-metadata.json"]["about"] = about
+        check_finds_org(mod_entities)
+    # metadata type is not CreativeWork
+    mod_entities = deepcopy(orig_entities)
+    mod_entities["http://example.com/ro-crate-metadata.json"]["@type"] = "Thing"
+    check_finds_org(mod_entities)
+    # root type is not Dataset
+    mod_entities = deepcopy(orig_entities)
+    mod_entities["http://example.com/"]["@type"] = "Thing"
+    check_finds_org(mod_entities)
