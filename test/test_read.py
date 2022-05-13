@@ -22,6 +22,7 @@ import shutil
 import uuid
 import warnings
 import zipfile
+from copy import deepcopy
 from pathlib import Path
 
 from rocrate.rocrate import ROCrate
@@ -495,6 +496,43 @@ def test_find_root(tmpdir, root, basename):
         crate = ROCrate(crate_dir)
         assert crate.metadata.id == metadata_id
         assert crate.root_dataset.id == root_id
+
+
+def test_find_root_bad_entities():
+    orig_entities = {
+        "ro-crate-metadata.json": {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {"@id": "./"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+        },
+        "./": {
+            "@id": "./",
+            "@type": "Dataset",
+        },
+    }
+    crate = ROCrate()
+    # missing "about"
+    entities = deepcopy(orig_entities)
+    del entities["ro-crate-metadata.json"]["about"]
+    with pytest.raises(ValueError, match="does not reference"):
+        crate.find_root_entity_id(entities)
+    # "about" does not reference the root entity
+    entities = deepcopy(orig_entities)
+    for about in "http://example.org", {"@id": "http://example.org"}:
+        entities["ro-crate-metadata.json"]["about"] = about
+        with pytest.raises(ValueError, match="does not reference"):
+            crate.find_root_entity_id(entities)
+    # metadata type is not CreativeWork
+    entities = deepcopy(orig_entities)
+    entities["ro-crate-metadata.json"]["@type"] = "Thing"
+    with pytest.raises(ValueError, match="must be of type"):
+        crate.find_root_entity_id(entities)
+    # root type is not Dataset
+    entities = deepcopy(orig_entities)
+    entities["./"]["@type"] = "Thing"
+    with pytest.raises(ValueError, match="must be of type"):
+        crate.find_root_entity_id(entities)
 
 
 def test_find_root_multiple_entries(tmpdir):

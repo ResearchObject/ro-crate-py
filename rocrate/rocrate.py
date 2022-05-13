@@ -149,7 +149,7 @@ class ROCrate():
             raise ValueError('metadata descriptor must be of type "CreativeWork"')
         try:
             root = entities[metadata["about"]["@id"]]
-        except KeyError:
+        except (KeyError, TypeError):
             raise ValueError("metadata descriptor does not reference the root entity")
         if root["@type"] != "Dataset":
             raise ValueError('root entity must be of type "Dataset"')
