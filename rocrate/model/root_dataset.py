@@ -24,11 +24,17 @@ from ..utils import iso_now
 
 class RootDataset(Dataset):
 
-    def __init__(self, crate, properties=None):
-        super().__init__(crate, dest_path='./', properties=properties)
-
-    def format_id(self, identifier):
-        return './'
+    def __init__(self, crate, source=None, dest_path=None, properties=None):
+        if source is None and dest_path is None:
+            dest_path = "./"
+        super().__init__(
+            crate,
+            source=source,
+            dest_path=dest_path,
+            fetch_remote=False,
+            validate_url=False,
+            properties=properties
+        )
 
     def _empty(self):
         val = {

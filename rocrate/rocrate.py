@@ -25,6 +25,7 @@ import zipfile
 import atexit
 import shutil
 import tempfile
+import warnings
 
 from collections import OrderedDict
 from pathlib import Path
@@ -143,55 +144,79 @@ class ROCrate():
         self.__read_contextual_entities(entities)
         return source
 
+    def __check_metadata(self, metadata, entities):
+        if metadata["@type"] != "CreativeWork":
+            raise ValueError('metadata descriptor must be of type "CreativeWork"')
+        try:
+            root = entities[metadata["about"]["@id"]]
+        except (KeyError, TypeError):
+            raise ValueError("metadata descriptor does not reference the root entity")
+        if root["@type"] != "Dataset":
+            raise ValueError('root entity must be of type "Dataset"')
+        return metadata["@id"], root["@id"]
+
     def find_root_entity_id(self, entities):
-        """Find Metadata file and Root Data Entity in RO-Crate.
+        """\
+        Find metadata file descriptor and root data entity.
 
-        Returns a tuple of the @id identifiers (metadata, root)
+        Return a tuple of the corresponding identifiers (metadata, root).
+        If the entities are not found, raise KeyError. If they are found,
+        but they don't satisfy the required constraints, raise ValueError.
+
+        In the general case, the metadata file descriptor id can be an
+        absolute URI whose last path segment is "ro-crate-metadata.json[ld]".
+        Since there can be more than one such id in the crate, we need to
+        choose among the corresponding (metadata, root) entity pairs. First, we
+        exclude those that don't satisfy other constraints, such as the
+        metadata entity being of type CreativeWork, etc.; if this doesn't
+        leave us with a single pair, we try to pick one with a
+        heuristic. Suppose we are left with the (m1, r1) and (m2, r2) pairs:
+        if r1 is the actual root of this crate, then m2 and r2 are regular
+        files in it, and as such they must appear in r1's hasPart; r2,
+        however, is not required to have a hasPart property listing other
+        files. Thus, we look for a pair whose root entity "contains" all
+        metadata entities from other pairs. If there is no such pair, or there
+        is more than one, we just return an arbitrary pair.
         """
-        # Note that for all cases below we will deliberately
-        # throw KeyError if "about" exists but it has no "@id"
-
-        # First let's try conformsTo algorithm in
-        # <https://www.researchobject.org/ro-crate/1.1/root-data-entity.html#finding-the-root-data-entity>
-        for entity in entities.values():
-            about = get_norm_value(entity, "about")
-            if about:
-                for id_ in get_norm_value(entity, "conformsTo"):
-                    if id_.startswith("https://w3id.org/ro/crate/"):
-                        return(entity["@id"], about[0])
-        # ..fall back to a generous look up by filename,
-        for candidate in (
-                Metadata.BASENAME, LegacyMetadata.BASENAME,
-                f"./{Metadata.BASENAME}", f"./{LegacyMetadata.BASENAME}"
-        ):
-            metadata_file = entities.get(candidate)
-            if metadata_file and "about" in metadata_file:
-                return (metadata_file["@id"], metadata_file["about"]["@id"])
-        # No luck! Is there perhaps a root dataset directly in here?
-        root = entities.get("./", {})
-        # FIXME: below will work both for
-        # "@type": "Dataset"
-        # "@type": ["Dataset"]
-        # ..but also the unlikely
-        # "@type": "DatasetSomething"
-        if root and "Dataset" in root.get("@type", []):
-            return (None, "./")
-        # Uh oh..
-        raise KeyError(
-            "Can't find Root Data Entity in RO-Crate, "
-            "see https://www.researchobject.org/ro-crate/1.1/root-data-entity.html"
-        )
+        metadata = entities.get(Metadata.BASENAME, entities.get(LegacyMetadata.BASENAME))
+        if metadata:
+            return self.__check_metadata(metadata, entities)
+        candidates = []
+        for id_, e in entities.items():
+            basename = id_.rsplit("/", 1)[-1]
+            if basename == Metadata.BASENAME or basename == LegacyMetadata.BASENAME:
+                try:
+                    candidates.append(self.__check_metadata(e, entities))
+                except ValueError:
+                    pass
+        if not candidates:
+            raise KeyError("Metadata file descriptor not found")
+        elif len(candidates) == 1:
+            return candidates[0]
+        else:
+            warnings.warn("Multiple metadata file descriptors, will pick one with a heuristic")
+            metadata_ids = set(_[0] for _ in candidates)
+            for m_id, r_id in candidates:
+                try:
+                    root = entities[r_id]
+                    part_ids = set(_["@id"] for _ in root["hasPart"])
+                except KeyError:
+                    continue
+                if part_ids >= metadata_ids - {m_id}:
+                    # if True for more than one candidate, this pick is arbitrary
+                    return m_id, r_id
+            return candidates[0]  # fall back to arbitrary pick
 
     def __read_data_entities(self, entities, source, gen_preview):
         metadata_id, root_id = self.find_root_entity_id(entities)
         MetadataClass = metadata_class(metadata_id)
         metadata_properties = entities.pop(metadata_id)
-        self.add(MetadataClass(self, properties=metadata_properties))
+        self.add(MetadataClass(self, metadata_id, properties=metadata_properties))
 
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
         parts = root_entity.pop('hasPart', [])
-        self.add(RootDataset(self, properties=root_entity))
+        self.add(RootDataset(self, root_id, properties=root_entity))
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
             self.add(Preview(self, source / Preview.BASENAME, properties=preview_entity))
