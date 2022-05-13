@@ -20,7 +20,6 @@ import json
 import pytest
 import shutil
 import uuid
-import warnings
 import zipfile
 from copy import deepcopy
 from pathlib import Path
