@@ -61,10 +61,7 @@ class Preview(File):
             elif type(a) is str:
                 return a
             else:
-                if a._jsonld and a._jsonld['name']:
-                    return a._jsonld['name']
-                else:
-                    return a
+                return a.get("name", a)
 
         @template_function
         def is_object_list(a):
@@ -79,9 +76,9 @@ class Preview(File):
         context_entities = []
         data_entities = []
         for entity in self.crate.contextual_entities:
-            context_entities.append(entity._jsonld)
+            context_entities.append(entity.properties())
         for entity in self.crate.data_entities:
-            data_entities.append(entity._jsonld)
+            data_entities.append(entity.properties())
         out_html = src.render(crate=self.crate, context=context_entities, data=data_entities)
         return out_html
 

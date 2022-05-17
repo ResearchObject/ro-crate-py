@@ -19,13 +19,15 @@
 # limitations under the License.
 
 import uuid
-from collections.abc import MutableMapping
 
 from dateutil.parser import isoparse
 from .. import vocabs
 
 
-class Entity(MutableMapping):
+_NOT_SPECIFIED = object()
+
+
+class Entity(dict):
 
     def __init__(self, crate, identifier=None, properties=None):
         self.crate = crate
@@ -36,23 +38,30 @@ class Entity(MutableMapping):
         if properties:
             empty = self._empty()
             empty.update(properties)
-            self._jsonld = empty
+            super().__init__(empty)
         else:
-            self._jsonld = self._empty()
+            super().__init__(self._empty())
 
-    # Format the given ID with rules appropriate for this type.
-    # For example, Dataset (directory) data entities SHOULD end with /
     def format_id(self, identifier):
+        """\
+        Format the given identifier with rules appropriate for this type.
+        For instance, Dataset identifiers SHOULD end with '/'.
+        """
         return str(identifier)
 
     def __repr__(self):
         return "<%s %s>" % (self.id, self.type)
 
     def properties(self):
-        return self._jsonld
+        rval = {}
+        for k, v in self.items():
+            values = v if isinstance(v, list) else [v]
+            ref_values = [{"@id": _.id} if isinstance(_, Entity) else _ for _ in values]
+            rval[k] = ref_values if isinstance(v, list) else ref_values[0]
+        return rval
 
     def as_jsonld(self):
-        return self._jsonld
+        return self.properties()
 
     @property
     def _default_type(self):
@@ -74,35 +83,22 @@ class Entity(MutableMapping):
         }
         return val
 
-    def __getitem__(self, key):
-        v = self._jsonld[key]
-        if v is None or key.startswith("@"):
-            return v
-        values = v if isinstance(v, list) else [v]
-        deref_values = []
-        for entry in values:
-            if isinstance(entry, dict):
-                try:
-                    id_ = entry["@id"]
-                except KeyError:
-                    raise ValueError(f"no @id in {entry}")
-                else:
-                    deref_values.append(self.crate.get(id_, id_))
-            else:
-                deref_values.append(entry)
-        return deref_values if isinstance(v, list) else deref_values[0]
-
     def __setitem__(self, key: str, value):
         if key.startswith("@"):
             raise KeyError(f"cannot set '{key}'")
-        values = value if isinstance(value, list) else [value]
-        ref_values = [{"@id": _.id} if isinstance(_, Entity) else _ for _ in values]
-        self._jsonld[key] = ref_values if isinstance(value, list) else ref_values[0]
+        super().__setitem__(key, value)
 
     def __delitem__(self, key: str):
         if key.startswith("@"):
             raise KeyError(f"cannot delete '{key}'")
-        del self._jsonld[key]
+        super().__delitem__(key)
+
+    def pop(self, key: str, default=_NOT_SPECIFIED):
+        if key.startswith("@"):
+            raise KeyError(f"cannot delete '{key}'")
+        if default is _NOT_SPECIFIED:
+            return super().pop(key)
+        return super().pop(key, default)
 
     def popitem(self):
         raise NotImplementedError
@@ -110,30 +106,16 @@ class Entity(MutableMapping):
     def clear(self):
         raise NotImplementedError
 
-    def update(self):
-        raise NotImplementedError
-
-    def __iter__(self):
-        return iter(self._jsonld)
-
-    def __len__(self):
-        return len(self._jsonld)
-
-    def __contains__(self, key):
-        return key in self._jsonld
-
     def __eq__(self, other):
         if not isinstance(other, Entity):
             return NotImplemented
-        return self.id == other.id and self._jsonld == other._jsonld
+        if self.id != other.id:
+            return False
+        return super().__eq__(other)
 
     @property
     def type(self):
-        return self._jsonld['@type']
-
-    # @property
-    # def types(self)-> List[str]:
-        # return tuple(as_list(self.get("@type", "Thing")))
+        return self["@type"]
 
     @property
     def datePublished(self):

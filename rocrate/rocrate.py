@@ -142,7 +142,27 @@ class ROCrate():
         _, entities = read_metadata(metadata_path)
         self.__read_data_entities(entities, source, gen_preview)
         self.__read_contextual_entities(entities)
+        self.__resolve_references()
         return source
+
+    def __resolve_references(self):
+        for cid, entity in self.__entity_map.items():
+            for k, v in entity.items():
+                if v is None or k.startswith("@"):
+                    continue
+                values = v if isinstance(v, list) else [v]
+                deref_values = []
+                for entry in values:
+                    if isinstance(entry, dict):
+                        try:
+                            id_ = entry["@id"]
+                        except KeyError:
+                            raise ValueError(f"no @id in {entry}")
+                        else:
+                            deref_values.append(self.get(id_, Entity(self, id_)))
+                    else:
+                        deref_values.append(entry)
+                entity[k] = deref_values if isinstance(v, list) else deref_values[0]
 
     def __check_metadata(self, metadata, entities):
         if metadata["@type"] != "CreativeWork":
@@ -431,9 +451,15 @@ class ROCrate():
                 self.default_entities.append(e)
             elif hasattr(e, "write"):
                 self.data_entities.append(e)
-                if key not in self.__entity_map:
-                    self.root_dataset._jsonld.setdefault("hasPart", [])
-                    self.root_dataset["hasPart"] += [e]
+                parts = self.root_dataset.setdefault("hasPart", [])
+                old_e = self.__entity_map.get(key)
+                if old_e:
+                    # FIXME: this is not efficient
+                    try:
+                        del parts[parts.index(old_e)]
+                    except ValueError:
+                        pass
+                parts.append(e)
             else:
                 self.contextual_entities.append(e)
             self.__entity_map[key] = e
@@ -466,7 +492,7 @@ class ROCrate():
                     pass
                 self.root_dataset["hasPart"] = [_ for _ in self.root_dataset.get("hasPart", []) if _ != e]
                 if not self.root_dataset["hasPart"]:
-                    del self.root_dataset._jsonld["hasPart"]
+                    del self.root_dataset["hasPart"]
             else:
                 try:
                     self.contextual_entities.remove(e)

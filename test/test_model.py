@@ -90,7 +90,7 @@ def test_data_entities(test_data_dir):
     dataset = crate.add(Dataset(crate, test_data_dir / 'test_add_dir'))
     data_entity = crate.add(DataEntity(crate, '#mysterious'))
     assert set(crate.data_entities) == {file_, dataset, data_entity}
-    part_ids = set(_["@id"] for _ in crate.root_dataset._jsonld["hasPart"])
+    part_ids = set(_.id for _ in crate.root_dataset["hasPart"])
     assert set(_.id for _ in (file_, dataset, data_entity)) <= part_ids
 
 
@@ -272,8 +272,8 @@ def test_delete_refs(test_data_dir, tmpdir, helpers):
     definition = crate.dereference(def_path)
     assert suite.definition is definition
     crate.delete(definition)
-    assert suite.definition is not definition  # so far, so good
-    assert suite.definition == str(def_path)  # should probably be set to None
+    assert not crate.dereference(def_path)
+    assert suite.definition is definition  # suite still has a ref, not good
     crate.write("/tmp/crate_out")
     # check json output
     out_path = tmpdir / "ro_crate_out"
@@ -345,6 +345,11 @@ def test_entity_as_mapping(tmpdir, helpers):
     crate_dir.mkdir()
     with open(crate_dir / helpers.METADATA_FILE_NAME, "wt") as f:
         json.dump(metadata, f, indent=4)
+    with pytest.raises(ValueError):
+        crate = ROCrate(crate_dir)
+    del [_ for _ in metadata["@graph"] if _["@id"] == "#correction"][0]["badProp"]
+    with open(crate_dir / helpers.METADATA_FILE_NAME, "wt") as f:
+        json.dump(metadata, f, indent=4)
     crate = ROCrate(crate_dir)
     person = crate.dereference(orcid)
     exp_len = len([_ for _ in metadata["@graph"] if _["@id"] == orcid][0])
@@ -387,12 +392,13 @@ def test_entity_as_mapping(tmpdir, helpers):
         correction,
         "http://example.org/correction"
     }
-    assert set(crate.metadata["encodingFormat"]) == {
-        "application/json",
-        "https://www.json.org",
-    }
-    with pytest.raises(ValueError):
-        correction["badProp"]
+    encodingFormat = set(crate.metadata["encodingFormat"])
+    assert len(encodingFormat) == 2
+    assert "application/json" in encodingFormat
+    encodingFormat.remove("application/json")
+    json_org = encodingFormat.pop()
+    assert json_org.id == "https://www.json.org"
+    assert not crate.dereference(json_org.id)
 
 
 def test_wf_types():

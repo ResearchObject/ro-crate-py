@@ -53,7 +53,7 @@ def test_read(test_data_dir, helpers):
     assert test_service.id == JENKINS
     assert test_service.type == "TestService"
     assert test_service.name == "Jenkins"
-    assert test_service.url == "https://www.jenkins.io"
+    assert test_service.url.id == "https://www.jenkins.io"
 
     test_instance = crate.dereference("#test1_1")
     assert test_instance.id == "#test1_1"
@@ -68,7 +68,7 @@ def test_read(test_data_dir, helpers):
     assert test_engine.id == PLANEMO
     assert test_engine.type == "SoftwareApplication"
     assert test_engine.name == "Planemo"
-    assert test_engine.url == "https://github.com/galaxyproject/planemo"
+    assert test_engine.url.id == "https://github.com/galaxyproject/planemo"
 
     def_id = "test/test1/sort-and-change-case-test.yml"
     test_definition = crate.dereference(def_id)
@@ -96,14 +96,14 @@ def test_create():
     test_service = TestService(crate, identifier=JENKINS)
     crate.add(test_service)
     test_service.name = "Jenkins"
-    test_service.url = {"@id": "https://www.jenkins.io"}
+    test_service.url = "https://www.jenkins.io"
     assert test_service.name == "Jenkins"
     assert test_service.url == "https://www.jenkins.io"
 
     test_instance = TestInstance(crate, identifier="#foo_instance_1")
     crate.add(test_instance)
     test_instance.name = "Foo Instance 1"
-    test_instance.url = {"@id": "http://example.org/foo"}
+    test_instance.url = "http://example.org/foo"
     test_instance.resource = "job/foobar"
     test_instance.runsOn = test_service
     assert test_instance.name == "Foo Instance 1"
@@ -117,7 +117,7 @@ def test_create():
     test_engine = SoftwareApplication(crate, identifier=PLANEMO)
     crate.add(test_engine)
     test_engine.name = "Planemo"
-    test_engine.url = {"@id": "https://github.com/galaxyproject/planemo"}
+    test_engine.url = "https://github.com/galaxyproject/planemo"
     assert test_engine.name == "Planemo"
     assert test_engine.url == "https://github.com/galaxyproject/planemo"
 

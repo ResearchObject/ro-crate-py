@@ -382,7 +382,7 @@ def test_generic_data_entity(tmpdir):
         assert isinstance(rc, DataEntity)
         assert rc.id == rc_id
         assert rc.type == "RepositoryCollection"
-        assert rc._jsonld["name"] == "Test collection"
+        assert rc["name"] == "Test collection"
         assert crate.data_entities == [rc]
         assert not crate.contextual_entities
 
@@ -421,7 +421,7 @@ def test_root_conformsto(tmpdir):
     with open(crate_dir / "ro-crate-metadata.json", "wt") as f:
         json.dump(metadata, f, indent=4)
     crate = ROCrate(crate_dir)
-    assert crate.metadata["conformsTo"] == profiles
+    assert set(_.id for _ in crate.metadata["conformsTo"]) == set(profiles)
 
 
 def test_multi_type_context_entity(tmpdir):

@@ -50,12 +50,12 @@ class File(FileOrDir):
                 with urllib.request.urlopen(self.source) as response:
                     if self.validate_url:
                         if isinstance(response, HTTPResponse):
-                            self._jsonld.update({
+                            self.update({
                                 'contentSize': response.getheader('Content-Length'),
                                 'encodingFormat': response.getheader('Content-Type')
                             })
                         if not self.fetch_remote:
-                            self._jsonld['sdDatePublished'] = iso_now()
+                            self['sdDatePublished'] = iso_now()
                     if self.fetch_remote:
                         out_file_path.parent.mkdir(parents=True, exist_ok=True)
                         urllib.request.urlretrieve(response.url, out_file_path)

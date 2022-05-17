@@ -44,7 +44,7 @@ class Dataset(FileOrDir):
         if is_url(str(self.source)):
             if self.validate_url and not self.fetch_remote:
                 with urlopen(self.source) as _:
-                    self._jsonld['sdDatePublished'] = iso_now()
+                    self['sdDatePublished'] = iso_now()
             if self.fetch_remote:
                 self.__get_parts(out_path)
         else:
@@ -55,7 +55,7 @@ class Dataset(FileOrDir):
     def __get_parts(self, out_path):
         out_path.mkdir(parents=True, exist_ok=True)
         base = self.source.rstrip("/")
-        for entry in self._jsonld.get("hasPart", []):
+        for entry in self.get("hasPart", []):
             try:
                 part = entry["@id"]
             except KeyError:
