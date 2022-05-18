@@ -151,8 +151,8 @@ class ROCrate():
             root = entities[metadata["about"]["@id"]]
         except (KeyError, TypeError):
             raise ValueError("metadata descriptor does not reference the root entity")
-        if root["@type"] != "Dataset":
-            raise ValueError('root entity must be of type "Dataset"')
+        if ("Dataset" not in root["@type"] if isinstance(root["@type"], list) else root["@type"] != "Dataset"):
+            raise ValueError('root entity must have "Dataset" among its types')
         return metadata["@id"], root["@id"]
 
     def find_root_entity_id(self, entities):

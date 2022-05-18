@@ -530,7 +530,7 @@ def test_find_root_bad_entities():
     # root type is not Dataset
     entities = deepcopy(orig_entities)
     entities["./"]["@type"] = "Thing"
-    with pytest.raises(ValueError, match="must be of type"):
+    with pytest.raises(ValueError, match="must have"):
         crate.find_root_entity_id(entities)
 
 
@@ -599,3 +599,30 @@ def test_find_root_multiple_entries():
     mod_entities = deepcopy(orig_entities)
     mod_entities["http://example.com/"]["@type"] = "Thing"
     check_finds_org(mod_entities)
+
+
+def test_find_root_multiple_types():
+    entities = {_["@id"]: _ for _ in [
+        {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {"@id": "./"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+        },
+        {
+            "@id": "./",
+            "@type": ["Dataset", "RepositoryCollection"],
+        },
+    ]}
+    crate = ROCrate()
+    m_id, r_id = crate.find_root_entity_id(entities)
+    assert m_id == "ro-crate-metadata.json"
+    assert r_id == "./"
+    # "Dataset" not included
+    del entities["./"]["@type"][0]
+    with pytest.raises(ValueError):
+        crate.find_root_entity_id(entities)
+    # Check we're not trying to be too clever
+    entities["./"]["@type"] = "NotADataset"
+    with pytest.raises(ValueError):
+        crate.find_root_entity_id(entities)
