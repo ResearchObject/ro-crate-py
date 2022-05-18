@@ -409,3 +409,17 @@ def test_wf_types():
     bar_crate = ROCrate()
     bar_wf = bar_crate.add_workflow("bar.cwl", main=True)
     assert "HowTo" not in bar_wf.type
+
+
+def test_property_append(tmpdir, helpers):
+    crate = ROCrate()
+    crate.root_dataset["author"] = []
+    for n in "alice", "bob":
+        crate.root_dataset["author"].append(crate.add(Person(crate, f"#{n}")))
+    for n in "alice", "bob":
+        assert {"@id": f"#{n}"} in crate.root_dataset.properties()["author"]
+    crate_dir = tmpdir / "out_crate"
+    crate.write(crate_dir)
+    json_entities = helpers.read_json_entities(crate_dir)
+    for n in "alice", "bob":
+        assert {"@id": f"#{n}"} in json_entities["./"]["author"]
