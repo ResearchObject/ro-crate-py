@@ -451,9 +451,8 @@ class ROCrate():
                 parts = self.root_dataset.setdefault("hasPart", [])
                 old_e = self.__entity_map.get(key)
                 if old_e:
-                    # FIXME: this is not efficient
                     try:
-                        del parts[parts.index(old_e)]
+                        parts.remove(old_e)
                     except ValueError:
                         pass
                 parts.append(e)
@@ -485,10 +484,10 @@ class ROCrate():
             elif hasattr(e, "write"):
                 try:
                     self.data_entities.remove(e)
+                    self.root_dataset.get("hasPart", []).remove(e)
                 except ValueError:
                     pass
-                self.root_dataset["hasPart"] = [_ for _ in self.root_dataset.get("hasPart", []) if _ != e]
-                if not self.root_dataset["hasPart"]:
+                if self.root_dataset.get("hasPart") == []:
                     del self.root_dataset["hasPart"]
             else:
                 try:
@@ -557,8 +556,9 @@ class ROCrate():
         if main:
             self.mainEntity = workflow
             profiles = set(_.rstrip("/") for _ in get_norm_value(self.metadata, "conformsTo"))
-            profiles.add(WORKFLOW_PROFILE)
-            self.metadata["conformsTo"] = [{"@id": _} for _ in sorted(profiles)]
+            if WORKFLOW_PROFILE not in profiles:
+                profiles.add(WORKFLOW_PROFILE)
+                self.metadata["conformsTo"] = [Entity(self, _) for _ in sorted(profiles)]
         if gen_cwl and lang_str != "cwl":
             if lang_str != "galaxy":
                 raise ValueError(f"conversion from {lang.name} to abstract CWL not supported")
