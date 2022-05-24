@@ -403,3 +403,28 @@ def test_wf_types():
     bar_crate = ROCrate()
     bar_wf = bar_crate.add_workflow("bar.cwl", main=True)
     assert "HowTo" not in bar_wf.type
+
+
+@pytest.mark.parametrize("compact", [False, True])
+def test_append_to(compact):
+    crate = ROCrate()
+    alice = crate.add(Person(crate, "#alice"))
+    bob = crate.add(Person(crate, "#bob"))
+    rd = crate.root_dataset
+    assert rd.get("author") is None
+    rd.append_to("author", alice, compact=compact)
+    assert rd.get("author") == (alice if compact else [alice])
+    rd.append_to("author", bob, compact=compact)
+    assert set(rd.get("author")) == {alice, bob}
+    # as string
+    don = "https://en.wikipedia.org/wiki/Donald_Duck"
+    rd.append_to("author", don, compact=compact)
+    assert set(rd.get("author")) == {alice, bob, don}
+    # multiple values
+    scrooge = "https://en.wikipedia.org/wiki/Scrooge_McDuck"
+    charlie = crate.add(Person(crate, "#charlie"))
+    rd.append_to("author", [scrooge, charlie], compact=compact)
+    assert set(rd.get("author")) == {alice, bob, don, scrooge, charlie}
+    # exceptions
+    with pytest.raises(KeyError):
+        rd.append_to("@id", "foo", compact=compact)

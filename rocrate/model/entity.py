@@ -150,3 +150,15 @@ class Entity(MutableMapping):
 
     def delete(self):
         self.crate.delete(self)
+
+    def append_to(self, key: str, value, compact=False):
+        if key.startswith("@"):
+            raise KeyError(f"cannot append to '{key}'")
+        current_value = self._jsonld.setdefault(key, [])
+        if not isinstance(current_value, list):
+            current_value = self._jsonld[key] = [current_value]
+        if not isinstance(value, list):
+            value = [value]
+        current_value.extend([{"@id": _.id} if isinstance(_, Entity) else _ for _ in value])
+        if compact and len(current_value) == 1:
+            self._jsonld[key] = current_value[0]
