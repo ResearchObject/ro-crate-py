@@ -432,8 +432,7 @@ class ROCrate():
             elif hasattr(e, "write"):
                 self.data_entities.append(e)
                 if key not in self.__entity_map:
-                    self.root_dataset._jsonld.setdefault("hasPart", [])
-                    self.root_dataset["hasPart"] += [e]
+                    self.root_dataset.append_to("hasPart", e)
             else:
                 self.contextual_entities.append(e)
             self.__entity_map[key] = e
@@ -558,9 +557,7 @@ class ROCrate():
         suite.name = name or suite.id.lstrip("#")
         if main_entity:
             suite["mainEntity"] = main_entity
-        suite_set = set(self.test_suites)
-        suite_set.add(suite)
-        self.root_dataset[test_ref_prop] = list(suite_set)
+        self.root_dataset.append_to(test_ref_prop, suite)
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return suite
 
@@ -576,9 +573,7 @@ class ROCrate():
             self.add(service)
         instance.service = service
         instance.name = name or instance.id.lstrip("#")
-        instance_set = set(suite.instance or [])
-        instance_set.add(instance)
-        suite.instance = list(instance_set)
+        suite.append_to("instance", instance)
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return instance
 
