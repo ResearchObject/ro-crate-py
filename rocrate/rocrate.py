@@ -392,10 +392,6 @@ class ROCrate():
                     pass
             self.__entity_map.pop(e.canonical_id(), None)
 
-    # TODO
-    # def fetch_all(self):
-        # fetch all files defined in the crate
-
     def _copy_unlisted(self, top, base_path):
         for root, dirs, files in walk(top, exclude=self.exclude):
             root = Path(root)

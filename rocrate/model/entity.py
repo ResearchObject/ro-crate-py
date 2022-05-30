@@ -131,10 +131,6 @@ class Entity(MutableMapping):
     def type(self):
         return self._jsonld['@type']
 
-    # @property
-    # def types(self)-> List[str]:
-        # return tuple(as_list(self.get("@type", "Thing")))
-
     @property
     def datePublished(self):
         d = self.get('datePublished')
