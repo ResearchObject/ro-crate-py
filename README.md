@@ -91,6 +91,42 @@ You can also add whole directories. A directory in RO-Crate is represented by th
 logs = crate.add_dataset("exp/logs")
 ```
 
+#### Appending elements to property values
+
+What ro-crate-py entities actually store is their JSON representation:
+
+```python
+paper.properties()
+```
+
+```json
+{
+  "@id": "paper.pdf",
+  "@type": "File",
+  "name": "manuscript",
+  "encodingFormat": "application/pdf",
+  "author": [
+    {"@id": "https://orcid.org/0000-0000-0000-0000"},
+    {"@id": "https://orcid.org/0000-0000-0000-0001"},
+  ]
+}
+```
+
+When `paper["author"]` is accessed, a new list containing the `alice` and `bob` entities is generated on the fly. For this reason, calling `append` on `paper["author"]` won't actually modify the `paper` entity in any way. To add an author, use the `append_to` method instead:
+
+```python
+donald = crate.add(Person(crate, "https://en.wikipedia.org/wiki/Donald_Duck"))
+paper.append_to("author", donald)
+```
+
+Note that `append_to` also works if the property to be updated is missing or has only one value:
+
+```python
+for n in "Mickey_Mouse", "Scrooge_McDuck":
+    p = crate.add(Person(crate, f"https://en.wikipedia.org/wiki/{n}"))
+    donald.append_to("follows", p)
+```
+
 #### Adding remote entities
 
 Data entities can also be remote:
