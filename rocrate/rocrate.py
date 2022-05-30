@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2019-2022 The University of Manchester, UK
 # Copyright 2020-2022 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2022 Barcelona Supercomputing Center (BSC), ES
@@ -19,13 +17,11 @@
 # limitations under the License.
 
 import errno
-import json
 import uuid
 import zipfile
 import atexit
 import shutil
 import tempfile
-import warnings
 
 from collections import OrderedDict
 from pathlib import Path
@@ -49,23 +45,7 @@ from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEF
 from .model.testsuite import TestSuite
 
 from .utils import is_url, subclasses, get_norm_value, walk
-
-
-def read_metadata(metadata_path):
-    """\
-    Read an RO-Crate metadata file.
-
-    Return a tuple of two elements: the context; a dictionary that maps entity
-    ids to the entities themselves.
-    """
-    with open(metadata_path) as f:
-        metadata = json.load(f)
-    try:
-        context = metadata['@context']
-        graph = metadata['@graph']
-    except KeyError:
-        raise ValueError(f"{metadata_path} must have a @context and a @graph")
-    return context, {_["@id"]: _ for _ in graph}
+from .metadata import read_metadata, find_root_entity_id
 
 
 def pick_type(json_entity, type_map, fallback=None):
@@ -144,71 +124,8 @@ class ROCrate():
         self.__read_contextual_entities(entities)
         return source
 
-    def __check_metadata(self, metadata, entities):
-        if metadata["@type"] != "CreativeWork":
-            raise ValueError('metadata descriptor must be of type "CreativeWork"')
-        try:
-            root = entities[metadata["about"]["@id"]]
-        except (KeyError, TypeError):
-            raise ValueError("metadata descriptor does not reference the root entity")
-        if ("Dataset" not in root["@type"] if isinstance(root["@type"], list) else root["@type"] != "Dataset"):
-            raise ValueError('root entity must have "Dataset" among its types')
-        return metadata["@id"], root["@id"]
-
-    def find_root_entity_id(self, entities):
-        """\
-        Find metadata file descriptor and root data entity.
-
-        Return a tuple of the corresponding identifiers (metadata, root).
-        If the entities are not found, raise KeyError. If they are found,
-        but they don't satisfy the required constraints, raise ValueError.
-
-        In the general case, the metadata file descriptor id can be an
-        absolute URI whose last path segment is "ro-crate-metadata.json[ld]".
-        Since there can be more than one such id in the crate, we need to
-        choose among the corresponding (metadata, root) entity pairs. First, we
-        exclude those that don't satisfy other constraints, such as the
-        metadata entity being of type CreativeWork, etc.; if this doesn't
-        leave us with a single pair, we try to pick one with a
-        heuristic. Suppose we are left with the (m1, r1) and (m2, r2) pairs:
-        if r1 is the actual root of this crate, then m2 and r2 are regular
-        files in it, and as such they must appear in r1's hasPart; r2,
-        however, is not required to have a hasPart property listing other
-        files. Thus, we look for a pair whose root entity "contains" all
-        metadata entities from other pairs. If there is no such pair, or there
-        is more than one, we just return an arbitrary pair.
-        """
-        metadata = entities.get(Metadata.BASENAME, entities.get(LegacyMetadata.BASENAME))
-        if metadata:
-            return self.__check_metadata(metadata, entities)
-        candidates = []
-        for id_, e in entities.items():
-            basename = id_.rsplit("/", 1)[-1]
-            if basename == Metadata.BASENAME or basename == LegacyMetadata.BASENAME:
-                try:
-                    candidates.append(self.__check_metadata(e, entities))
-                except ValueError:
-                    pass
-        if not candidates:
-            raise KeyError("Metadata file descriptor not found")
-        elif len(candidates) == 1:
-            return candidates[0]
-        else:
-            warnings.warn("Multiple metadata file descriptors, will pick one with a heuristic")
-            metadata_ids = set(_[0] for _ in candidates)
-            for m_id, r_id in candidates:
-                try:
-                    root = entities[r_id]
-                    part_ids = set(_["@id"] for _ in root["hasPart"])
-                except KeyError:
-                    continue
-                if part_ids >= metadata_ids - {m_id}:
-                    # if True for more than one candidate, this pick is arbitrary
-                    return m_id, r_id
-            return candidates[0]  # fall back to arbitrary pick
-
     def __read_data_entities(self, entities, source, gen_preview):
-        metadata_id, root_id = self.find_root_entity_id(entities)
+        metadata_id, root_id = find_root_entity_id(entities)
         MetadataClass = metadata_class(metadata_id)
         metadata_properties = entities.pop(metadata_id)
         self.add(MetadataClass(self, metadata_id, properties=metadata_properties))
@@ -473,10 +390,6 @@ class ROCrate():
                     pass
             self.__entity_map.pop(e.canonical_id(), None)
 
-    # TODO
-    # def fetch_all(self):
-        # fetch all files defined in the crate
-
     def _copy_unlisted(self, top, base_path):
         for root, dirs, files in walk(top, exclude=self.exclude):
             root = Path(root)
@@ -608,3 +521,16 @@ class ROCrate():
             if suite is None:
                 raise ValueError("suite not found")
         return suite
+
+
+def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
+                          fetch_remote=False, cwl=None, diagram=None):
+    wf_crate = ROCrate()
+    workflow_path = Path(workflow_path)
+    wf_crate.add_workflow(
+        workflow_path, workflow_path.name, fetch_remote=fetch_remote,
+        main=True, lang=wf_type, gen_cwl=(cwl is None)
+    )
+    for file_entry in include_files:
+        wf_crate.add_file(file_entry)
+    return wf_crate
