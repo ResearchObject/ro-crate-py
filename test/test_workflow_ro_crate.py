@@ -16,8 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rocrate import rocrate_api as roc_api
-from rocrate.rocrate import ROCrate
+from rocrate.rocrate import ROCrate, make_workflow_rocrate
 from rocrate.model.computerlanguage import CWL_DEFAULT_VERSION, GALAXY_DEFAULT_VERSION
 
 WF_CRATE = "https://w3id.org/workflowhub/workflow-ro-crate"
@@ -26,7 +25,7 @@ WF_CRATE = "https://w3id.org/workflowhub/workflow-ro-crate"
 def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     wf_id = 'test_galaxy_wf.ga'
     wf_path = test_data_dir / wf_id
-    wf_crate = roc_api.make_workflow_rocrate(wf_path, wf_type='Galaxy')
+    wf_crate = make_workflow_rocrate(wf_path, wf_type='Galaxy')
     assert isinstance(wf_crate, ROCrate)
 
     wf = wf_crate.dereference(wf_id)
@@ -62,7 +61,7 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
 def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
     wf_id = 'sample_cwl_wf.cwl'
     wf_path = test_data_dir / wf_id
-    wf_crate = roc_api.make_workflow_rocrate(wf_path, wf_type='CWL')
+    wf_crate = make_workflow_rocrate(wf_path, wf_type='CWL')
     assert isinstance(wf_crate, ROCrate)
 
     wf = wf_crate.dereference(wf_id)
@@ -91,7 +90,7 @@ def test_create_wf_include(test_data_dir, tmpdir, helpers):
     extra_file1 = test_data_dir / 'test_file_galaxy.txt'
     extra_file2 = test_data_dir / 'test_file_galaxy2.txt'
     files_list = [extra_file1, extra_file2]
-    wf_crate = roc_api.make_workflow_rocrate(
+    wf_crate = make_workflow_rocrate(
         wf_path, wf_type='Galaxy', include_files=files_list
     )
     assert isinstance(wf_crate, ROCrate)

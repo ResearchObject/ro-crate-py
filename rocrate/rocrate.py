@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2019-2022 The University of Manchester, UK
 # Copyright 2020-2022 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2022 Barcelona Supercomputing Center (BSC), ES
@@ -523,3 +521,16 @@ class ROCrate():
             if suite is None:
                 raise ValueError("suite not found")
         return suite
+
+
+def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
+                          fetch_remote=False, cwl=None, diagram=None):
+    wf_crate = ROCrate()
+    workflow_path = Path(workflow_path)
+    wf_crate.add_workflow(
+        workflow_path, workflow_path.name, fetch_remote=fetch_remote,
+        main=True, lang=wf_type, gen_cwl=(cwl is None)
+    )
+    for file_entry in include_files:
+        wf_crate.add_file(file_entry)
+    return wf_crate
