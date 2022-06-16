@@ -32,10 +32,6 @@ SERVICE_CHOICES = list(SERVICE_MAP)
 ENGINE_CHOICES = list(APP_MAP)
 
 
-class State:
-    pass
-
-
 class CSVParamType(click.ParamType):
     name = "csv"
 
