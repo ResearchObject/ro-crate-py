@@ -1,6 +1,5 @@
 import os
-from rocrate.rocrate import ROCrate
-from rocrate import rocrate_api as roc_api
+from rocrate.rocrate import ROCrate, make_workflow_run_rocrate
 from rocrate.provenance_profile import ProvenanceProfile
 
 from tools.load_ga_export import load_ga_history_export, GalaxyJob
@@ -43,7 +42,7 @@ def test_create_wf_run_ro_crate(test_data_dir, tmpdir, helpers):
     wf_id = 'wf_definition.ga'
     wf_path = test_data_dir / export_dir / wf_id
 
-    wf_crate = roc_api.make_workflow_run_rocrate(
+    wf_crate = make_workflow_run_rocrate(
         workflow_path=wf_path, wfr_metadata_path=wfr_metadata_path, author=None, orcid=None,
         wf_type="Galaxy", include_files=files_list, prov_name="test_prov"
     )

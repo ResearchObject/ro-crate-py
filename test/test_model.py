@@ -30,6 +30,7 @@ from rocrate.model.dataset import Dataset
 from rocrate.model.computationalworkflow import ComputationalWorkflow
 from rocrate.model.person import Person
 from rocrate.model.preview import Preview
+from rocrate.model.contextentity import ContextEntity
 
 
 RAW_REPO_URL = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py"
@@ -132,6 +133,32 @@ def test_contextual_entities():
     new_person = crate.add(Person(crate, id_, {'name': 'Josiah Carberry'}))
     person_dereference = crate.dereference(id_)
     assert person_dereference is new_person
+
+
+def test_contextual_entities_hash(test_data_dir):
+    crate = ROCrate()
+    john = crate.add(Person(crate, "john", properties={"name": "John Doe"}))
+    assert john.id == "#john"
+    id_ = "https://orcid.org/0000-0002-1825-0097"
+    josiah = crate.add(Person(crate, id_, properties={"name": "Josiah Carberry"}))
+    assert josiah.id == id_
+    wf_path = test_data_dir / "ro-crate-galaxy-sortchangecase" / "sort-and-change-case.ga"
+    wf_dest_path = wf_path.name
+    wf = crate.add_workflow(wf_path, wf_dest_path, main=True, lang="galaxy")
+    step_id = f"{wf_dest_path}#sort"
+    step = crate.add(ContextEntity(crate, step_id, properties={
+        "@type": "HowToStep",
+    }))
+    wf["hasPart"] = [step]
+    assert step.id == step_id
+    email = "jscarberry@example.org"
+    email_uri = f"mailto:{email}"
+    contact_point = crate.add(ContextEntity(crate, email_uri, properties={
+        "@type": "ContactPoint",
+        "email": email
+    }))
+    crate.root_dataset["contactPoint"] = contact_point
+    assert contact_point.id == email_uri
 
 
 def test_properties():
@@ -290,10 +317,23 @@ def test_entity_as_mapping(tmpdir, helpers):
             {"@id": "ro-crate-metadata.json",
              "@type": "CreativeWork",
              "about": {"@id": "./"},
+             "encodingFormat": [
+                 "application/json",
+                 {"@id": "https://www.json.org"},
+             ],
              "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}},
             {"@id": "./",
              "@type": "Dataset",
+             "correction": [
+                 "Fixed typo.",
+                 {"@id": "#correction"},
+                 "http://example.org/correction",
+             ],
              "author": {"@id": orcid}},
+            {"@id": "#correction",
+             "@type": "CorrectionComment",
+             "badProp": {"k": "v"},
+             "text": "Previous version was ugly."},
             {"@id": orcid,
              "@type": "Person",
              "name": None,
@@ -307,7 +347,7 @@ def test_entity_as_mapping(tmpdir, helpers):
         json.dump(metadata, f, indent=4)
     crate = ROCrate(crate_dir)
     person = crate.dereference(orcid)
-    exp_len = len(metadata["@graph"][2])
+    exp_len = len([_ for _ in metadata["@graph"] if _["@id"] == orcid][0])
     assert len(person) == exp_len
     assert len(list(person)) == exp_len
     assert set(person) == set(person.keys()) == {"@id", "@type", "name", "givenName", "familyName"}
@@ -341,3 +381,50 @@ def test_entity_as_mapping(tmpdir, helpers):
     assert twin == person
     assert Person(crate, orcid) != person
     assert crate.root_dataset["author"] is person
+    correction = crate.get("#correction")
+    assert set(crate.root_dataset["correction"]) == {
+        "Fixed typo.",
+        correction,
+        "http://example.org/correction"
+    }
+    assert set(crate.metadata["encodingFormat"]) == {
+        "application/json",
+        "https://www.json.org",
+    }
+    with pytest.raises(ValueError):
+        correction["badProp"]
+
+
+def test_wf_types():
+    foo_crate = ROCrate()
+    foo_wf = foo_crate.add_workflow("foo.cwl", main=True)
+    assert "HowTo" not in foo_wf.type
+    foo_wf.type.append("HowTo")
+    bar_crate = ROCrate()
+    bar_wf = bar_crate.add_workflow("bar.cwl", main=True)
+    assert "HowTo" not in bar_wf.type
+
+
+@pytest.mark.parametrize("compact", [False, True])
+def test_append_to(compact):
+    crate = ROCrate()
+    alice = crate.add(Person(crate, "#alice"))
+    bob = crate.add(Person(crate, "#bob"))
+    rd = crate.root_dataset
+    assert rd.get("author") is None
+    rd.append_to("author", alice, compact=compact)
+    assert rd.get("author") == (alice if compact else [alice])
+    rd.append_to("author", bob, compact=compact)
+    assert set(rd.get("author")) == {alice, bob}
+    # as string
+    don = "https://en.wikipedia.org/wiki/Donald_Duck"
+    rd.append_to("author", don, compact=compact)
+    assert set(rd.get("author")) == {alice, bob, don}
+    # multiple values
+    scrooge = "https://en.wikipedia.org/wiki/Scrooge_McDuck"
+    charlie = crate.add(Person(crate, "#charlie"))
+    rd.append_to("author", [scrooge, charlie], compact=compact)
+    assert set(rd.get("author")) == {alice, bob, don, scrooge, charlie}
+    # exceptions
+    with pytest.raises(KeyError):
+        rd.append_to("@id", "foo", compact=compact)

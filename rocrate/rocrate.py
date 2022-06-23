@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2019-2022 The University of Manchester, UK
 # Copyright 2020-2022 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2022 Barcelona Supercomputing Center (BSC), ES
@@ -19,7 +17,6 @@
 # limitations under the License.
 
 import errno
-import json
 import uuid
 import zipfile
 import atexit
@@ -48,23 +45,8 @@ from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEF
 from .model.testsuite import TestSuite
 
 from .utils import is_url, subclasses, get_norm_value, walk
-
-
-def read_metadata(metadata_path):
-    """\
-    Read an RO-Crate metadata file.
-
-    Return a tuple of two elements: the context; a dictionary that maps entity
-    ids to the entities themselves.
-    """
-    with open(metadata_path) as f:
-        metadata = json.load(f)
-    try:
-        context = metadata['@context']
-        graph = metadata['@graph']
-    except KeyError:
-        raise ValueError(f"{metadata_path} must have a @context and a @graph")
-    return context, {_["@id"]: _ for _ in graph}
+from .metadata import read_metadata, find_root_entity_id
+from .provenance_profile import ProvenanceProfile
 
 
 def pick_type(json_entity, type_map, fallback=None):
@@ -143,55 +125,16 @@ class ROCrate():
         self.__read_contextual_entities(entities)
         return source
 
-    def find_root_entity_id(self, entities):
-        """Find Metadata file and Root Data Entity in RO-Crate.
-
-        Returns a tuple of the @id identifiers (metadata, root)
-        """
-        # Note that for all cases below we will deliberately
-        # throw KeyError if "about" exists but it has no "@id"
-
-        # First let's try conformsTo algorithm in
-        # <https://www.researchobject.org/ro-crate/1.1/root-data-entity.html#finding-the-root-data-entity>
-        for entity in entities.values():
-            about = get_norm_value(entity, "about")
-            if about:
-                for id_ in get_norm_value(entity, "conformsTo"):
-                    if id_.startswith("https://w3id.org/ro/crate/"):
-                        return(entity["@id"], about[0])
-        # ..fall back to a generous look up by filename,
-        for candidate in (
-                Metadata.BASENAME, LegacyMetadata.BASENAME,
-                f"./{Metadata.BASENAME}", f"./{LegacyMetadata.BASENAME}"
-        ):
-            metadata_file = entities.get(candidate)
-            if metadata_file and "about" in metadata_file:
-                return (metadata_file["@id"], metadata_file["about"]["@id"])
-        # No luck! Is there perhaps a root dataset directly in here?
-        root = entities.get("./", {})
-        # FIXME: below will work both for
-        # "@type": "Dataset"
-        # "@type": ["Dataset"]
-        # ..but also the unlikely
-        # "@type": "DatasetSomething"
-        if root and "Dataset" in root.get("@type", []):
-            return (None, "./")
-        # Uh oh..
-        raise KeyError(
-            "Can't find Root Data Entity in RO-Crate, "
-            "see https://www.researchobject.org/ro-crate/1.1/root-data-entity.html"
-        )
-
     def __read_data_entities(self, entities, source, gen_preview):
-        metadata_id, root_id = self.find_root_entity_id(entities)
+        metadata_id, root_id = find_root_entity_id(entities)
         MetadataClass = metadata_class(metadata_id)
         metadata_properties = entities.pop(metadata_id)
-        self.add(MetadataClass(self, properties=metadata_properties))
+        self.add(MetadataClass(self, metadata_id, properties=metadata_properties))
 
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
         parts = root_entity.pop('hasPart', [])
-        self.add(RootDataset(self, properties=root_entity))
+        self.add(RootDataset(self, root_id, properties=root_entity))
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
             self.add(Preview(self, source / Preview.BASENAME, properties=preview_entity))
@@ -407,8 +350,7 @@ class ROCrate():
             elif hasattr(e, "write"):
                 self.data_entities.append(e)
                 if key not in self.__entity_map:
-                    self.root_dataset._jsonld.setdefault("hasPart", [])
-                    self.root_dataset["hasPart"] += [e]
+                    self.root_dataset.append_to("hasPart", e)
             else:
                 self.contextual_entities.append(e)
             self.__entity_map[key] = e
@@ -448,10 +390,6 @@ class ROCrate():
                 except ValueError:
                     pass
             self.__entity_map.pop(e.canonical_id(), None)
-
-    # TODO
-    # def fetch_all(self):
-        # fetch all files defined in the crate
 
     def _copy_unlisted(self, top, base_path):
         for root, dirs, files in walk(top, exclude=self.exclude):
@@ -566,9 +504,7 @@ class ROCrate():
         suite.name = name or suite.id.lstrip("#")
         if main_entity:
             suite["mainEntity"] = main_entity
-        suite_set = set(self.test_suites)
-        suite_set.add(suite)
-        self.root_dataset[test_ref_prop] = list(suite_set)
+        self.root_dataset.append_to(test_ref_prop, suite)
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return suite
 
@@ -584,9 +520,7 @@ class ROCrate():
             self.add(service)
         instance.service = service
         instance.name = name or instance.id.lstrip("#")
-        instance_set = set(suite.instance or [])
-        instance_set.add(instance)
-        suite.instance = list(instance_set)
+        suite.append_to("instance", instance)
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return instance
 
@@ -621,3 +555,60 @@ class ROCrate():
             if suite is None:
                 raise ValueError("suite not found")
         return suite
+
+
+def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
+                          fetch_remote=False, cwl=None, diagram=None):
+    wf_crate = ROCrate()
+    workflow_path = Path(workflow_path)
+    wf_crate.add_workflow(
+        workflow_path, workflow_path.name, fetch_remote=fetch_remote,
+        main=True, lang=wf_type, gen_cwl=(cwl is None)
+    )
+    for file_entry in include_files:
+        wf_crate.add_file(file_entry)
+    return wf_crate
+
+
+# WIP
+def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata_path,
+                              author=None, orcid=None, include_files=[],
+                              fetch_remote=False, prov_name=None, cwl=None,
+                              diagram=None):
+
+    wfr_crate = ROCrate()
+    workflow_path = Path(workflow_path)
+    print(workflow_path)
+    wf_file = wfr_crate.add_workflow(
+        workflow_path, workflow_path.name, fetch_remote=fetch_remote,
+        main=True, lang=wf_type, gen_cwl=(cwl is None)
+    )
+    if 'url' in wf_file.properties():
+        wf_file['codeRepository'] = wf_file['url']
+
+    # add extra files
+    datasets = Path('datasets')
+    wfr_crate.add_dataset(datasets)
+    for file_entry in include_files:
+        wfr_crate.add_file(file_entry, datasets / file_entry.name)
+
+    wfr_metadata_path = Path(wfr_metadata_path)
+
+    prov = ProvenanceProfile(wfr_metadata_path, author, orcid)
+
+    artifacts = Path('artifacts')
+    wfr_crate.add_dataset(artifacts)
+    for key, value in prov.declared_strings_s.items():
+        dest = artifacts / key
+        wfr_crate.add_file(value, dest)
+
+    prov_docs, _, graph = prov.finalize_prov_profile()
+    # add output files to ro-crate
+    provenance = Path('provenance')
+    wfr_crate.add_dataset(provenance)
+    for key, value in prov_docs.items():
+        dest = provenance / key
+        wfr_crate.add_file(value, dest)
+
+    wfr_crate.add_file(graph, provenance / "graph.png")
+    return wfr_crate

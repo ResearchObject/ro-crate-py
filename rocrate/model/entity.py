@@ -76,10 +76,20 @@ class Entity(MutableMapping):
 
     def __getitem__(self, key):
         v = self._jsonld[key]
-        if v is None or isinstance(v, str) or key.startswith("@"):
+        if v is None or key.startswith("@"):
             return v
         values = v if isinstance(v, list) else [v]
-        deref_values = [self.crate.dereference(_["@id"], _["@id"]) for _ in values]
+        deref_values = []
+        for entry in values:
+            if isinstance(entry, dict):
+                try:
+                    id_ = entry["@id"]
+                except KeyError:
+                    raise ValueError(f"no @id in {entry}")
+                else:
+                    deref_values.append(self.crate.get(id_, id_))
+            else:
+                deref_values.append(entry)
         return deref_values if isinstance(v, list) else deref_values[0]
 
     def __setitem__(self, key: str, value):
@@ -121,10 +131,6 @@ class Entity(MutableMapping):
     def type(self):
         return self._jsonld['@type']
 
-    # @property
-    # def types(self)-> List[str]:
-        # return tuple(as_list(self.get("@type", "Thing")))
-
     @property
     def datePublished(self):
         d = self.get('datePublished')
@@ -140,3 +146,15 @@ class Entity(MutableMapping):
 
     def delete(self):
         self.crate.delete(self)
+
+    def append_to(self, key: str, value, compact=False):
+        if key.startswith("@"):
+            raise KeyError(f"cannot append to '{key}'")
+        current_value = self._jsonld.setdefault(key, [])
+        if not isinstance(current_value, list):
+            current_value = self._jsonld[key] = [current_value]
+        if not isinstance(value, list):
+            value = [value]
+        current_value.extend([{"@id": _.id} if isinstance(_, Entity) else _ for _ in value])
+        if compact and len(current_value) == 1:
+            self._jsonld[key] = current_value[0]
