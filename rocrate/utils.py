@@ -21,21 +21,6 @@
 import os
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
-from typing import (
-    IO,
-    Any,
-    BinaryIO,
-    Callable,
-    Dict,
-    List,
-    MutableMapping,
-    MutableSequence,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-    cast,
-)
 
 
 def is_url(string):
