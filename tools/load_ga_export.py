@@ -35,8 +35,8 @@ class GalaxyJob(Dict):
             if not isinstance(value, dict):
                 self.attributes[key] = value
             else:
-                if len(value) == 0:
-                    pass
+                if not value or len(value) == 0:
+                    continue
                 else:
                     if "input" in key:
                         self.attributes["inputs"].update(job_attrs[key])
@@ -45,9 +45,20 @@ class GalaxyJob(Dict):
                     if "params" in key:
                         tmp_dict = {}
                         for k, v in job_attrs[key].items():
+                            if not v or len(v) == 0:
+                                continue
+                            try:
+                                v = int(v)
+                            except (TypeError, ValueError):
+                                pass  # it was a string, not an int.
+                            # print(k, v)
+                            # print(type(v))
+
                             if "json" in k:
                                 v = json.loads(v)
-                            tmp_dict[k] = str(v)
+                            if isinstance(v, dict) or isinstance(v, list):
+                                v = str(v)
+                            tmp_dict[k] = v
 
                         self.attributes["parameters"].update(tmp_dict)
 

@@ -1,6 +1,10 @@
 import datetime
+# from tokenize import String
+from io import StringIO
 import urllib
 import uuid
+from io import BytesIO
+from hashlib import md5
 from pathlib import PurePosixPath
 from typing import (
     Any,
@@ -12,9 +16,11 @@ from typing import (
     Union,
     cast,
 )
+from xmlrpc.client import Boolean
 
 from prov.identifier import Identifier
 from prov.model import PROV, PROV_LABEL, PROV_TYPE, PROV_VALUE, ProvDocument, ProvEntity
+from prov.dot import prov_to_dot
 from tools.load_ga_export import load_ga_history_export, GalaxyJob, GalaxyDataset
 from ast import literal_eval
 import os
@@ -29,6 +35,8 @@ from rocrate.provenance_constants import (
     METADATA,
     ORE,
     PROVENANCE,
+    ENCODING,
+    # TEXT_PLAIN,
     RO,
     SCHEMA,
     # SHA1,
@@ -76,7 +84,7 @@ class ProvenanceProfile:
 
     def __init__(
         self,
-        ga_export: Dict,
+        ga_export_dir: Path,
         full_name: str = None,
         orcid: str = None,
         # prov_name: str = None,
@@ -88,6 +96,7 @@ class ProvenanceProfile:
         Initialize the provenance profile.
         Keyword arguments:
             ga_export -- the galaxy metadata export (Dict)
+            outpath --
             full_name -- author name (optional)
             orcid -- orcid (optional)
             prov_name -- provenance file name
@@ -95,7 +104,11 @@ class ProvenanceProfile:
         """
         # self.fsaccess = fsaccess
         self.orcid = orcid
-        self.ga_export = ga_export
+        self.ga_export_dir = ga_export_dir
+        # TODO: does it make sense to write all outputs to a tmp dir
+        # chance that temp dir doesnt get removed properly
+        # if out_path is None:
+        #     self.out_path = tempfile.mkdtemp()
         self.ro_uuid = uuid.uuid4()
         # TODO: should be connected to a ro_crate?
         self.base_uri = "arcp://uuid,%s/" % self.ro_uuid
@@ -103,11 +116,11 @@ class ProvenanceProfile:
         # TODO extract engine_uuid from galaxy, type: str
         self.engine_uuid = "urn:uuid:%s" % uuid.uuid4()  # type: str
         self.full_name = full_name
-        self.workflow_run_uuid = run_uuid or uuid.uuid4()
-        self.workflow_run_uri = self.workflow_run_uuid.urn  # type: str
-        # move to separate function
-        metadata_export = load_ga_history_export(ga_export)
-        self.generate_prov_doc()
+        # TODO move to separate function
+        metadata_export = load_ga_history_export(ga_export_dir)
+        # self.tmp_dir = tempfile.mkdtemp()
+        self.declared_strings_s = {}
+
         self.datasets = []
         # print(metadata_export["jobs_attrs"][0]["params"])
         for i, dataset in enumerate(metadata_export["datasets_attrs"]):
@@ -121,21 +134,39 @@ class ProvenanceProfile:
         # print(self.datasets)
 
         # print([[d['encoded_id']]+d['copied_from_history_dataset_association_id_chain'] for d in self.datasets])
-
+        self.workflow_invocation_uuid = set()
         self.jobs = {}
         for i, job in enumerate(metadata_export["jobs_attrs"]):
             job_attrs = GalaxyJob()
             job_attrs.parse_ga_jobs_attrs(job)
             # print(i)
-            print(job_attrs.attributes)
+            # print(job_attrs.attributes)
             # for k, v in job_attrs.attributes['parameters'].items():
             #     print(k, "      :     ", v)
             self.jobs[job_attrs.attributes['encoded_id']] = job_attrs.attributes
+            try:
+                self.workflow_invocation_uuid.add(job_attrs.attributes['parameters']['__workflow_invocation_uuid__'])
+            except KeyError:
+                pass
+            # print('set:')
+            # print(self.workflow_invocation_uuid)
             # print("inputs")
             # print(job_attrs.attributes["inputs"])
             # print("outputs")
             # print(job_attrs.attributes["outputs"])
-            self.declare_process(job_attrs.attributes)
+
+        if self.workflow_invocation_uuid:
+            self.workflow_run_uuid = uuid.UUID(next(iter(self.workflow_invocation_uuid)))
+            self.workflow_run_uri = self.workflow_run_uuid.urn  # type: str
+        else:
+            self.workflow_run_uuid = run_uuid or uuid.uuid4()
+            self.workflow_run_uri = self.workflow_run_uuid.urn  # type: str
+
+        self.generate_prov_doc()
+        for v in self.jobs.values():
+            self.declare_process(v)
+
+        # print(os.listdir(tempfile.gettempdir()))
 
     def __str__(self) -> str:
         """Represent this Provenvance profile as a string."""
@@ -245,7 +276,7 @@ class ProvenanceProfile:
         process_name = ga_export_jobs_attrs["tool_id"]
         # tool_version = ga_export_jobs_attrs["tool_version"]
         # TODO: insert workflow id
-        prov_label = "Run of workflow_id_placeholder" + process_name
+        prov_label = "Run of " + process_name
         start_time = ga_export_jobs_attrs["create_time"]
         end_time = ga_export_jobs_attrs["update_time"]
 
@@ -299,7 +330,7 @@ class ProvenanceProfile:
             # print(process_metadata[item])
             for key, value in process_metadata[item].items():
                 if not value:
-                    value = ""
+                    pass
                 # if "json" in key:
                 #     value = json.loads(value)
                 if isinstance(key, str):
@@ -309,22 +340,23 @@ class ProvenanceProfile:
 
                 prov_role = self.wf_ns[f"{base}/{key}"]
 
+                # if not value or len(value) == 0:
+                # print("key  : ", key)
+                # print("-----------")
+                # print("value: ", value)
+                # print("-----------")
+                # print("type : ", type(value))
+                # print("-----------")
+
                 if item in ("inputs", "outputs"):
                     for v in value:
                         for d in self.datasets:
-                            print([d['encoded_id']])
-                            print(d['copied_from_history_dataset_association_id_chain'])
+                            # print([d['encoded_id']])
+                            # print(d['copied_from_history_dataset_association_id_chain'])
                             if v in ([d['encoded_id']] + d['copied_from_history_dataset_association_id_chain']):
                                 self.declare_entity(process_run_id, d, prov_role)
                 else:
                     self.declare_entity(process_run_id, value, prov_role)
-
-                print("key  : ", key)
-                print("-----------")
-                print("value: ", value)
-                print("-----------")
-                print("type : ", type(value))
-                print("-----------")
 
     def declare_entity(
         self,
@@ -334,6 +366,8 @@ class ProvenanceProfile:
     ) -> None:
         try:
             entity = self.declare_artefact(value)
+            # print("test2")
+            # print(entity)
             self.document.used(
                 process_run_id,
                 entity,
@@ -353,6 +387,7 @@ class ProvenanceProfile:
 
         if isinstance(value, (bool, int, float)):
             # Typically used in job documents for flags
+            # print(value)
 
             # FIXME: Make consistent hash URIs for these
             # that somehow include the type
@@ -361,10 +396,10 @@ class ProvenanceProfile:
             # self.research_object.add_uri(entity.identifier.uri)
             return entity
 
-        if isinstance(value, (str)):
+        if isinstance(value, str):
             # clean up unwanted characters
-            value = value.replace("|", "_")
-            entity = self.declare_string(value)
+            # value = value.replace("|", "_")
+            (entity, _) = self.declare_string(value)
             return entity
 
         if isinstance(value, bytes):
@@ -379,6 +414,9 @@ class ProvenanceProfile:
             )
 
         if isinstance(value, Dict):
+            # print("value: ", value)
+            # print("-----------")
+            # print("type : ", type(value))
             if "@id" in value:
                 # Already processed this value,
                 # but it might not be in this PROV
@@ -662,16 +700,18 @@ class ProvenanceProfile:
 
     def declare_string(self, value: str) -> Tuple[ProvEntity, str]:
         """Save as string in UTF-8."""
-        # byte_s = BytesIO(str(value).encode(ENCODING))
-        # data_file = self.research_object.add_data_file(byte_s, content_type=TEXT_PLAIN)
-        # checksum = PurePosixPath(data_file).name
-        # FIXME: Don't naively assume add_data_file uses hash in filename!
         value = str(value).replace("|", "_")
-        data_id = "data:%s" % str(value)  # PurePosixPath(data_file).stem
+        byte_s = BytesIO(str(value).encode(ENCODING))
+        # data_file = self.research_object.add_data_file(byte_s, content_type=TEXT_PLAIN)
+        checksum = md5(byte_s.getbuffer()).hexdigest()
+        self.declared_strings_s[checksum] = byte_s
+
+        # FIXME: Don't naively assume add_data_file uses hash in filename!
+        data_id = "data:%s" % checksum  # PurePosixPath(data_file).stem
         entity = self.document.entity(
             data_id, {PROV_TYPE: WFPROV["Artifact"], PROV_VALUE: str(value)}
         )  # type: ProvEntity
-        return entity  # , checksum
+        return entity, checksum  # , data_file
 
     def generate_output_prov(
         self,
@@ -757,7 +797,8 @@ class ProvenanceProfile:
         # uris = [i.uri for i in prov_ids]
         # self.research_object.add_annotation(activity, uris, PROV["has_provenance"].uri)
 
-    def finalize_prov_profile(self, name=None, out_path=None):
+    def finalize_prov_profile(self, out_path: Path = None,
+                              serialize: Boolean = False, name=None):
         # type: (Optional[str],Optional[str]) -> Tuple[Dict,List[Identifier]]
         """Transfer the provenance related files to the RO-crate"""
         # NOTE: Relative posix path
@@ -765,7 +806,8 @@ class ProvenanceProfile:
             # main workflow, fixed filenames
             filename = "ga_export.cwlprov"
         else:
-            # ASCII-friendly filename, avoiding % as we don't want %2520 in manifest.json
+            # ASCII-friendly filename,
+            # avoiding % as we don't want %2520 in manifest.json
             wf_name = urllib.parse.quote(str(name), safe="").replace("%", "_")
             # Note that the above could cause overlaps for similarly named
             # workflows, but that's OK as we'll also include run uuid
@@ -773,61 +815,69 @@ class ProvenanceProfile:
             # multiple places or iterations
             filename = f"{wf_name}.{self.workflow_run_uuid}.cwlprov"
 
-        if out_path is not None:
-            basename = str(PurePosixPath(out_path) / filename)
-        # else:
-        #     basename = filename
-
-        if not os.path.exists(out_path):
-            os.makedirs(out_path)
-
         # print(basename)
         # serialized prov documents
         serialized_prov_docs = {}
         # list of prov identifiers of provenance files
         prov_ids = []
-
         # https://www.w3.org/TR/prov-xml/
-        # serialized_prov_docs["xml"] = self.document.serialize(format="xml", indent=4)
+        serialized_prov_docs[filename + ".xml"] = StringIO(self.document.serialize(format="xml", indent=4))
         prov_ids.append(self.provenance_ns[filename + ".xml"])
-        with open(basename + ".xml", "w") as provenance_file:
-            self.document.serialize(provenance_file, format="xml", indent=4)
-
         # https://www.w3.org/TR/prov-n/
-        # serialized_prov_docs["provn"] = self.document.serialize(format="provn", indent=2)
+        serialized_prov_docs[filename + ".provn"] = StringIO(self.document.serialize(format="provn", indent=2))
         prov_ids.append(self.provenance_ns[filename + ".provn"])
-        with open(basename + ".provn", "w") as provenance_file:
-            self.document.serialize(provenance_file, format="provn", indent=2)
-
         # https://www.w3.org/Submission/prov-json/
-        # serialized_prov_docs["json"] = self.document.serialize(format="json", indent=2)
+        serialized_prov_docs[filename + ".json"] = StringIO(self.document.serialize(format="json", indent=2))
         prov_ids.append(self.provenance_ns[filename + ".json"])
-        with open(basename + ".json", "w") as provenance_file:
-            self.document.serialize(provenance_file, format="json", indent=2)
 
         # "rdf" aka https://www.w3.org/TR/prov-o/
         # which can be serialized to ttl/nt/jsonld (and more!)
 
         # https://www.w3.org/TR/turtle/
-        # serialized_prov_docs["turtle"] = self.document.serialize(format="rdf", rdf_format="turtle")
+        serialized_prov_docs[filename + ".ttl"] = StringIO(self.document.serialize(format="rdf", rdf_format="turtle"))
         prov_ids.append(self.provenance_ns[filename + ".ttl"])
-        with open(basename + ".ttl", "w") as provenance_file:
-            self.document.serialize(provenance_file, format="rdf", rdf_format="turtle")
-
         # https://www.w3.org/TR/n-triples/
-        # serialized_prov_docs["ntriples"] = self.document.serialize(format="rdf", rdf_format="ntriples")
+        serialized_prov_docs[filename + ".nt"] = StringIO(self.document.serialize(format="rdf", rdf_format="ntriples"))
         prov_ids.append(self.provenance_ns[filename + ".nt"])
-        with open(basename + ".nt", "w") as provenance_file:
-            self.document.serialize(provenance_file, format="rdf", rdf_format="ntriples")
-
         # https://www.w3.org/TR/json-ld/
         # TODO: Use a nice JSON-LD context
         # see also https://eprints.soton.ac.uk/395985/
         # 404 Not Found on https://provenance.ecs.soton.ac.uk/prov.jsonld :
-        # serialized_prov_docs["jsonld"] = self.document.serialize(format="rdf", rdf_format="json-ld")
+        serialized_prov_docs[filename + ".jsonld"] = StringIO(self.document.serialize(format="rdf", rdf_format="json-ld"))
         prov_ids.append(self.provenance_ns[filename + ".jsonld"])
-        with open(basename + ".jsonld", "w") as provenance_file:
-            self.document.serialize(provenance_file, format="rdf", rdf_format="json-ld")
 
-        # _logger.debug("[provenance] added provenance: %s", prov_ids)
-        return (serialized_prov_docs, prov_ids)
+        graph_dot = prov_to_dot(self.document)
+        png_b = graph_dot.create_png()
+        graph_b = BytesIO()
+        graph_b.write(png_b)
+        # dot.write_png(basename + '.png')
+
+        if serialize:
+            if out_path is not None:
+                basename = str(PurePosixPath(out_path) / filename)
+            else:
+                basename = filename
+
+            if not os.path.exists(out_path):
+                os.makedirs(out_path)
+
+            with open(basename + ".xml", "w") as provenance_file:
+                self.document.serialize(provenance_file, format="xml", indent=4)
+
+            with open(basename + ".provn", "w") as provenance_file:
+                self.document.serialize(provenance_file, format="provn", indent=2)
+
+            with open(basename + ".json", "w") as provenance_file:
+                self.document.serialize(provenance_file, format="json", indent=2)
+
+            with open(basename + ".ttl", "w") as provenance_file:
+                self.document.serialize(provenance_file, format="rdf", rdf_format="turtle")
+
+            with open(basename + ".nt", "w") as provenance_file:
+                self.document.serialize(provenance_file, format="rdf", rdf_format="ntriples")
+
+            with open(basename + ".jsonld", "w") as provenance_file:
+                self.document.serialize(provenance_file, format="rdf", rdf_format="json-ld")
+
+            # _logger.debug("[provenance] added provenance: %s", prov_ids)
+        return (serialized_prov_docs, prov_ids, graph_b)

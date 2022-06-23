@@ -19,6 +19,8 @@
 # limitations under the License.
 
 from pathlib import Path
+import os
+import tempfile
 
 import rocrate.rocrate as roc
 from rocrate.provenance_profile import ProvenanceProfile
@@ -81,34 +83,51 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
 
 
 # WIP
-def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata_path, author=None, orcid=None,
-                              include_files=[], fetch_remote=False, prov_name=None, prov_path=None, cwl=None, diagram=None):
+def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata_path,
+                              author=None, orcid=None, include_files=[],
+                              fetch_remote=False, prov_name=None, cwl=None,
+                              diagram=None):
 
     wfr_crate = roc.ROCrate()
     workflow_path = Path(workflow_path)
+    print(workflow_path)
     wf_file = wfr_crate.add_workflow(
         workflow_path, workflow_path.name, fetch_remote=fetch_remote,
         main=True, lang=wf_type, gen_cwl=(cwl is None)
     )
-    wfr_metadata_path = Path(wfr_metadata_path)
-    prov = ProvenanceProfile(wfr_metadata_path, author, orcid)
-    prov_path = "provenance"
-    prov.finalize_prov_profile(out_path=wfr_metadata_path / prov_path)
-
-    # add serialized provenance documents
-    wfr_crate.add_directory(wfr_metadata_path / prov_path)
-    # for doc in serialized_prov_docs.values():
-    #     # print(doc)
-    #     wfr_crate.add_file(doc)
-
-    # if the source is a remote URL then add https://schema.org/codeRepository
-    # property to it this can be checked by checking if the source is a URL
-    # instead of a local path
     if 'url' in wf_file.properties():
         wf_file['codeRepository'] = wf_file['url']
 
     # add extra files
+    datasets = Path('datasets')
+    wfr_crate.add_dataset(datasets)
     for file_entry in include_files:
-        wfr_crate.add_file(file_entry)
+        print(os.path.basename(file_entry))
+        # print(file_entry)
+        wfr_crate.add_file(file_entry, datasets / os.path.basename(file_entry))
+
+    wfr_metadata_path = Path(wfr_metadata_path)
+
+    prov = ProvenanceProfile(wfr_metadata_path, author, orcid)
+
+    artifacts = Path('artifacts')
+    wfr_crate.add_dataset(artifacts)
+    for key, value in prov.declared_strings_s.items():
+        dest = artifacts / key
+        wfr_crate.add_file(value, dest)
+
+    prov_docs, _, graph = prov.finalize_prov_profile()
+    # add output files to ro-crate
+    provenance = Path('provenance')
+    wfr_crate.add_dataset(provenance)
+    for key, value in prov_docs.items():
+        dest = provenance / key
+        wfr_crate.add_file(value, dest)
+
+    wfr_crate.add_file(graph, provenance / "graph.png")
+
+    # if the source is a remote URL then add https://schema.org/codeRepository
+    # property to it this can be checked by checking if the source is a URL
+    # instead of a local path
 
     return wfr_crate
