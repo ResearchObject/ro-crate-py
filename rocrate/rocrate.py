@@ -46,6 +46,7 @@ from .model.testsuite import TestSuite
 
 from .utils import is_url, subclasses, get_norm_value, walk
 from .metadata import read_metadata, find_root_entity_id
+from .provenance_profile import ProvenanceProfile
 
 
 def pick_type(json_entity, type_map, fallback=None):
@@ -534,3 +535,47 @@ def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
     for file_entry in include_files:
         wf_crate.add_file(file_entry)
     return wf_crate
+
+
+# WIP
+def make_workflow_run_rocrate(workflow_path, wf_type, wfr_metadata_path,
+                              author=None, orcid=None, include_files=[],
+                              fetch_remote=False, prov_name=None, cwl=None,
+                              diagram=None):
+
+    wfr_crate = ROCrate()
+    workflow_path = Path(workflow_path)
+    print(workflow_path)
+    wf_file = wfr_crate.add_workflow(
+        workflow_path, workflow_path.name, fetch_remote=fetch_remote,
+        main=True, lang=wf_type, gen_cwl=(cwl is None)
+    )
+    if 'url' in wf_file.properties():
+        wf_file['codeRepository'] = wf_file['url']
+
+    # add extra files
+    datasets = Path('datasets')
+    wfr_crate.add_dataset(datasets)
+    for file_entry in include_files:
+        wfr_crate.add_file(file_entry, datasets / file_entry.name)
+
+    wfr_metadata_path = Path(wfr_metadata_path)
+
+    prov = ProvenanceProfile(wfr_metadata_path, author, orcid)
+
+    artifacts = Path('artifacts')
+    wfr_crate.add_dataset(artifacts)
+    for key, value in prov.declared_strings_s.items():
+        dest = artifacts / key
+        wfr_crate.add_file(value, dest)
+
+    prov_docs, _, graph = prov.finalize_prov_profile()
+    # add output files to ro-crate
+    provenance = Path('provenance')
+    wfr_crate.add_dataset(provenance)
+    for key, value in prov_docs.items():
+        dest = provenance / key
+        wfr_crate.add_file(value, dest)
+
+    wfr_crate.add_file(graph, provenance / "graph.png")
+    return wfr_crate
