@@ -6,3 +6,5 @@ python-dateutil
 click
 prov
 typing-extensions
+pydot
+graphviz
