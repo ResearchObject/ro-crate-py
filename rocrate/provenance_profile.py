@@ -1,4 +1,5 @@
 import datetime
+
 # from tokenize import String
 from io import StringIO
 import urllib
@@ -20,6 +21,8 @@ from xmlrpc.client import Boolean
 
 from prov.identifier import Identifier
 from prov.model import PROV, PROV_LABEL, PROV_TYPE, PROV_VALUE, ProvDocument, ProvEntity
+
+# import graphviz
 from prov.dot import prov_to_dot
 from tools.load_ga_export import load_ga_history_export, GalaxyJob, GalaxyDataset
 from ast import literal_eval
@@ -45,6 +48,7 @@ from rocrate.provenance_constants import (
     WFDESC,
     WFPROV,
 )
+
 # from .stdfsaccess import StdFsAccess
 # from rocrate.utils_cwl import CWLObjectType, JobsType, get_listing, posix_path, versionstring
 # from .workflow_job import WorkflowJob
@@ -60,8 +64,8 @@ def posix_path(local_path: str) -> str:
 
 
 def remove_escapes(s):
-    escapes = ''.join([chr(char) for char in range(1, 32)])
-    translator = str.maketrans('', '', escapes)
+    escapes = "".join([chr(char) for char in range(1, 32)])
+    translator = str.maketrans("", "", escapes)
     s.translate(translator)
 
 
@@ -143,9 +147,11 @@ class ProvenanceProfile:
             # print(job_attrs.attributes)
             # for k, v in job_attrs.attributes['parameters'].items():
             #     print(k, "      :     ", v)
-            self.jobs[job_attrs.attributes['encoded_id']] = job_attrs.attributes
+            self.jobs[job_attrs.attributes["encoded_id"]] = job_attrs.attributes
             try:
-                self.workflow_invocation_uuid.add(job_attrs.attributes['parameters']['__workflow_invocation_uuid__'])
+                self.workflow_invocation_uuid.add(
+                    job_attrs.attributes["parameters"]["__workflow_invocation_uuid__"]
+                )
             except KeyError:
                 pass
             # print('set:')
@@ -156,7 +162,9 @@ class ProvenanceProfile:
             # print(job_attrs.attributes["outputs"])
 
         if self.workflow_invocation_uuid:
-            self.workflow_run_uuid = uuid.UUID(next(iter(self.workflow_invocation_uuid)))
+            self.workflow_run_uuid = uuid.UUID(
+                next(iter(self.workflow_invocation_uuid))
+            )
             self.workflow_run_uri = self.workflow_run_uuid.urn  # type: str
         else:
             self.workflow_run_uuid = run_uuid or uuid.uuid4()
@@ -208,9 +216,7 @@ class ProvenanceProfile:
         # TODO: use appropriate refs for ga_export and related inputs
         ro_identifier_workflow = self.base_uri + "ga_export" + "/"
         self.wf_ns = self.document.add_namespace("wf", ro_identifier_workflow)
-        ro_identifier_input = (
-            self.base_uri + "ga_export/datasets#"
-        )
+        ro_identifier_input = self.base_uri + "ga_export/datasets#"
         self.document.add_namespace("input", ro_identifier_input)
 
         # More info about the account (e.g. username, fullname)
@@ -353,17 +359,15 @@ class ProvenanceProfile:
                         for d in self.datasets:
                             # print([d['encoded_id']])
                             # print(d['copied_from_history_dataset_association_id_chain'])
-                            if v in ([d['encoded_id']] + d['copied_from_history_dataset_association_id_chain']):
+                            if v in (
+                                [d["encoded_id"]]
+                                + d["copied_from_history_dataset_association_id_chain"]
+                            ):
                                 self.declare_entity(process_run_id, d, prov_role)
                 else:
                     self.declare_entity(process_run_id, value, prov_role)
 
-    def declare_entity(
-        self,
-        process_run_id,
-        value,
-        prov_role
-    ) -> None:
+    def declare_entity(self, process_run_id, value, prov_role) -> None:
         try:
             entity = self.declare_artefact(value)
             # print("test2")
@@ -592,9 +596,9 @@ class ProvenanceProfile:
         return file_entity  # , entity, checksum
 
     def declare_directory(
-            self,
-            # value: CWLObjectType
-            value
+        self,
+        # value: CWLObjectType
+        value,
     ) -> ProvEntity:
         """Register any nested files/directories."""
         # FIXME: Calculate a hash-like identifier for directory
@@ -797,9 +801,10 @@ class ProvenanceProfile:
         # uris = [i.uri for i in prov_ids]
         # self.research_object.add_annotation(activity, uris, PROV["has_provenance"].uri)
 
-    def finalize_prov_profile(self, out_path: Path = None,
-                              serialize: Boolean = False, name=None):
-        # type: (Optional[str],Optional[str]) -> Tuple[Dict,List[Identifier]]
+    def finalize_prov_profile(
+        self, out_path: Path = None, serialize: Boolean = False, name=None
+    ):
+        # type: (Optional[str],Optional[bool],Optional[str]) -> Tuple[Dict,List[Identifier]]
         """Transfer the provenance related files to the RO-crate"""
         # NOTE: Relative posix path
         if name is None:
@@ -821,35 +826,48 @@ class ProvenanceProfile:
         # list of prov identifiers of provenance files
         prov_ids = []
         # https://www.w3.org/TR/prov-xml/
-        serialized_prov_docs[filename + ".xml"] = StringIO(self.document.serialize(format="xml", indent=4))
+        serialized_prov_docs[filename + ".xml"] = StringIO(
+            self.document.serialize(format="xml", indent=4)
+        )
         prov_ids.append(self.provenance_ns[filename + ".xml"])
         # https://www.w3.org/TR/prov-n/
-        serialized_prov_docs[filename + ".provn"] = StringIO(self.document.serialize(format="provn", indent=2))
+        serialized_prov_docs[filename + ".provn"] = StringIO(
+            self.document.serialize(format="provn", indent=2)
+        )
         prov_ids.append(self.provenance_ns[filename + ".provn"])
         # https://www.w3.org/Submission/prov-json/
-        serialized_prov_docs[filename + ".json"] = StringIO(self.document.serialize(format="json", indent=2))
+        serialized_prov_docs[filename + ".json"] = StringIO(
+            self.document.serialize(format="json", indent=2)
+        )
         prov_ids.append(self.provenance_ns[filename + ".json"])
 
         # "rdf" aka https://www.w3.org/TR/prov-o/
         # which can be serialized to ttl/nt/jsonld (and more!)
 
         # https://www.w3.org/TR/turtle/
-        serialized_prov_docs[filename + ".ttl"] = StringIO(self.document.serialize(format="rdf", rdf_format="turtle"))
+        serialized_prov_docs[filename + ".ttl"] = StringIO(
+            self.document.serialize(format="rdf", rdf_format="turtle")
+        )
         prov_ids.append(self.provenance_ns[filename + ".ttl"])
         # https://www.w3.org/TR/n-triples/
-        serialized_prov_docs[filename + ".nt"] = StringIO(self.document.serialize(format="rdf", rdf_format="ntriples"))
+        serialized_prov_docs[filename + ".nt"] = StringIO(
+            self.document.serialize(format="rdf", rdf_format="ntriples")
+        )
         prov_ids.append(self.provenance_ns[filename + ".nt"])
         # https://www.w3.org/TR/json-ld/
         # TODO: Use a nice JSON-LD context
         # see also https://eprints.soton.ac.uk/395985/
         # 404 Not Found on https://provenance.ecs.soton.ac.uk/prov.jsonld :
-        serialized_prov_docs[filename + ".jsonld"] = StringIO(self.document.serialize(format="rdf", rdf_format="json-ld"))
+        serialized_prov_docs[filename + ".jsonld"] = StringIO(
+            self.document.serialize(format="rdf", rdf_format="json-ld")
+        )
         prov_ids.append(self.provenance_ns[filename + ".jsonld"])
 
-        graph_dot = prov_to_dot(self.document)
-        png_b = graph_dot.create_png()
-        graph_b = BytesIO()
-        graph_b.write(png_b)
+        graph = prov_to_dot(self.document).to_string()
+        # graph_s = graph_dot
+        # print(type(graph))
+        graph_s = StringIO()
+        graph_s.write(graph)
         # dot.write_png(basename + '.png')
 
         if serialize:
@@ -871,13 +889,19 @@ class ProvenanceProfile:
                 self.document.serialize(provenance_file, format="json", indent=2)
 
             with open(basename + ".ttl", "w") as provenance_file:
-                self.document.serialize(provenance_file, format="rdf", rdf_format="turtle")
+                self.document.serialize(
+                    provenance_file, format="rdf", rdf_format="turtle"
+                )
 
             with open(basename + ".nt", "w") as provenance_file:
-                self.document.serialize(provenance_file, format="rdf", rdf_format="ntriples")
+                self.document.serialize(
+                    provenance_file, format="rdf", rdf_format="ntriples"
+                )
 
             with open(basename + ".jsonld", "w") as provenance_file:
-                self.document.serialize(provenance_file, format="rdf", rdf_format="json-ld")
+                self.document.serialize(
+                    provenance_file, format="rdf", rdf_format="json-ld"
+                )
 
             # _logger.debug("[provenance] added provenance: %s", prov_ids)
-        return (serialized_prov_docs, prov_ids, graph_b)
+        return (serialized_prov_docs, prov_ids, graph_s)

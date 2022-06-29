@@ -7,4 +7,3 @@ click
 prov
 typing-extensions
 pydot
-graphviz
