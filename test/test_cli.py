@@ -129,7 +129,7 @@ def test_cli_init_exclude(test_data_dir, helpers):
     for p in exclude.split(",") + ["test/"]:
         assert not crate.dereference(p)
     for e in crate.data_entities:
-        assert not(e.id.startswith("test"))
+        assert not e.id.startswith("test")
 
 
 @pytest.mark.parametrize("cwd", [False, True])
