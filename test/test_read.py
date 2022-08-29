@@ -232,11 +232,11 @@ def test_exclude(test_data_dir, tmpdir, helpers):
         for p in exclude + ["test/"]:
             assert not crate.dereference(p)
             if out:
-                assert not(crate.source / p).exists()
+                assert not (crate.source / p).exists()
         for e in crate.data_entities:
-            assert not(e.id.startswith("test"))
+            assert not e.id.startswith("test")
         if out:
-            assert not(crate.source / "test").exists()
+            assert not (crate.source / "test").exists()
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     (crate_dir / helpers.METADATA_FILE_NAME).unlink()
     exclude = ["test", "README.md"]

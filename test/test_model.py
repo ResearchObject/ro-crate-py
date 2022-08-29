@@ -19,6 +19,7 @@
 import datetime
 import json
 import tempfile
+import timeit
 import uuid
 from pathlib import Path
 
@@ -92,6 +93,20 @@ def test_data_entities(test_data_dir):
     assert set(crate.data_entities) == {file_, dataset, data_entity}
     part_ids = set(_["@id"] for _ in crate.root_dataset._jsonld["hasPart"])
     assert set(_.id for _ in (file_, dataset, data_entity)) <= part_ids
+
+
+def test_data_entities_perf():
+    """\
+    Test that adding a data entity happens in constant time.
+
+    See https://github.com/ResearchObject/ro-crate-py/pull/127 (this is a
+    regression test). The time required for 500 iterations should be ~0.01s if
+    entities are added in constant time, ~1s if they are added in linear time.
+    """
+    crate = ROCrate()
+    assert timeit.Timer(
+        "crate.add_file(uuid.uuid4().hex)", "import uuid", globals=locals()
+    ).timeit(500) < 0.1
 
 
 def test_remote_data_entities():
