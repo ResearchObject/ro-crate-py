@@ -347,8 +347,6 @@ class ProvenanceProfile:
                 prov_role = self.wf_ns[f"{base}/{key}"]
 
                 # if not value or len(value) == 0:
-                
-
                 if item in ("inputs", "outputs"):
                     print("key  : ", key)
                     print("-----------")
