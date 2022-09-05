@@ -347,14 +347,15 @@ class ProvenanceProfile:
                 prov_role = self.wf_ns[f"{base}/{key}"]
 
                 # if not value or len(value) == 0:
-                # print("key  : ", key)
-                # print("-----------")
-                # print("value: ", value)
-                # print("-----------")
-                # print("type : ", type(value))
-                # print("-----------")
+                
 
                 if item in ("inputs", "outputs"):
+                    print("key  : ", key)
+                    print("-----------")
+                    print("value: ", value)
+                    print("-----------")
+                    print("type : ", type(value))
+                    print("-----------")
                     for v in value:
                         for d in self.datasets:
                             # print([d['encoded_id']])
@@ -364,14 +365,12 @@ class ProvenanceProfile:
                                 + d["copied_from_history_dataset_association_id_chain"]
                             ):
                                 self.declare_entity(process_run_id, d, prov_role)
-                else:
-                    self.declare_entity(process_run_id, value, prov_role)
+                # else:
+                #     self.declare_entity(process_run_id, value, prov_role)
 
     def declare_entity(self, process_run_id, value, prov_role) -> None:
         try:
             entity = self.declare_artefact(value)
-            # print("test2")
-            # print(entity)
             self.document.used(
                 process_run_id,
                 entity,
