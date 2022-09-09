@@ -51,8 +51,6 @@ class GalaxyJob(Dict):
                                 v = int(v)
                             except (TypeError, ValueError):
                                 pass  # it was a string, not an int.
-                            # print(k, v)
-                            # print(type(v))
 
                             if "json" in k:
                                 v = json.loads(v)

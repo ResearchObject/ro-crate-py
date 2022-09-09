@@ -91,9 +91,6 @@ class ProvenanceProfile:
         ga_export_dir: Path,
         full_name: str = None,
         orcid: str = None,
-        # prov_name: str = None,
-        # prov_path: Path = None,
-        # fsaccess: StdFsAccess,
         run_uuid: Optional[uuid.UUID] = None,
     ) -> None:
         """
@@ -106,13 +103,8 @@ class ProvenanceProfile:
             prov_name -- provenance file name
             run_uuid -- uuid for the workflow run
         """
-        # self.fsaccess = fsaccess
         self.orcid = orcid
         self.ga_export_dir = ga_export_dir
-        # TODO: does it make sense to write all outputs to a tmp dir
-        # chance that temp dir doesnt get removed properly
-        # if out_path is None:
-        #     self.out_path = tempfile.mkdtemp()
         self.ro_uuid = uuid.uuid4()
         # TODO: should be connected to a ro_crate?
         self.base_uri = "arcp://uuid,%s/" % self.ro_uuid
@@ -120,33 +112,22 @@ class ProvenanceProfile:
         # TODO extract engine_uuid from galaxy, type: str
         self.engine_uuid = "urn:uuid:%s" % uuid.uuid4()  # type: str
         self.full_name = full_name
-        # TODO move to separate function
+        # import galaxy history metadata
         metadata_export = load_ga_history_export(ga_export_dir)
-        # self.tmp_dir = tempfile.mkdtemp()
+
         self.declared_strings_s = {}
 
         self.datasets = []
-        # print(metadata_export["jobs_attrs"][0]["params"])
         for i, dataset in enumerate(metadata_export["datasets_attrs"]):
             datasets_attrs = GalaxyDataset()
             datasets_attrs.parse_ga_dataset_attrs(dataset)
-            # print(i)
-            # print(datasets_attrs.attributes['encoded_id'])
             self.datasets.append(datasets_attrs.attributes)
-            # self.declare_process(ds_attrs.attributes)
 
-        # print(self.datasets)
-
-        # print([[d['encoded_id']]+d['copied_from_history_dataset_association_id_chain'] for d in self.datasets])
         self.workflow_invocation_uuid = set()
         self.jobs = {}
         for i, job in enumerate(metadata_export["jobs_attrs"]):
             job_attrs = GalaxyJob()
             job_attrs.parse_ga_jobs_attrs(job)
-            # print(i)
-            # print(job_attrs.attributes)
-            # for k, v in job_attrs.attributes['parameters'].items():
-            #     print(k, "      :     ", v)
             self.jobs[job_attrs.attributes["encoded_id"]] = job_attrs.attributes
             try:
                 self.workflow_invocation_uuid.add(
@@ -154,12 +135,6 @@ class ProvenanceProfile:
                 )
             except KeyError:
                 pass
-            # print('set:')
-            # print(self.workflow_invocation_uuid)
-            # print("inputs")
-            # print(job_attrs.attributes["inputs"])
-            # print("outputs")
-            # print(job_attrs.attributes["outputs"])
 
         if self.workflow_invocation_uuid:
             self.workflow_run_uuid = uuid.UUID(
@@ -173,8 +148,6 @@ class ProvenanceProfile:
         self.generate_prov_doc()
         for v in self.jobs.values():
             self.declare_process(v)
-
-        # print(os.listdir(tempfile.gettempdir()))
 
     def __str__(self) -> str:
         """Represent this Provenvance profile as a string."""
@@ -206,10 +179,7 @@ class ProvenanceProfile:
         # TODO: Change to nih:sha-256; hashes
         #  https://tools.ietf.org/html/rfc6920#section-7
         self.document.add_namespace("data", "urn:hash::sha1:")
-        # Also needed for docker images
-        # self.document.add_namespace(SHA256, "nih:sha-256;")
 
-        # Pre-register provenance directory so we can refer to its files
         self.provenance_ns = self.document.add_namespace(
             "provenance", self.base_uri + posix_path(PROVENANCE) + "/"
         )
@@ -274,11 +244,9 @@ class ProvenanceProfile:
         process_run_id: Optional[str] = None,
     ) -> str:
         """Record the start of each Process."""
-        # TODO: change to workflow invocation id?
         if process_run_id is None:
             process_run_id = uuid.uuid4().urn
 
-        # cmd = ga_export_jobs_attrs["command_line"]
         process_name = ga_export_jobs_attrs["tool_id"]
         # tool_version = ga_export_jobs_attrs["tool_version"]
         # TODO: insert workflow id
@@ -287,6 +255,7 @@ class ProvenanceProfile:
         end_time = ga_export_jobs_attrs["update_time"]
 
         # TODO: Find out how to include commandline as a string
+        # cmd = ga_export_jobs_attrs["command_line"]
         # cmd = self.document.entity(
         #     uuid.uuid4().urn,
         #     {PROV_TYPE: WFPROV["Artifact"], PROV_LABEL: ga_export_jobs_attrs["command_line"]}
@@ -299,7 +268,6 @@ class ProvenanceProfile:
             {
                 PROV_TYPE: WFPROV["ProcessRun"],
                 PROV_LABEL: prov_label,
-                # TODO: Find out how to include commandline as a string
                 # PROV_LABEL: cmd
             },
         )
@@ -310,8 +278,6 @@ class ProvenanceProfile:
             process_run_id, None, self.workflow_run_uri, start_time, None, None
         )
         self.used_artefacts(process_run_id, ga_export_jobs_attrs)
-        # self.generate_output_prov(outputs, process_run_id, process_name)
-        # self.document.wasEndedBy(process_run_id, None, self.workflow_run_uri, when)
         return process_run_id
 
     def used_artefacts(
@@ -329,11 +295,7 @@ class ProvenanceProfile:
         tool_id = process_metadata["tool_id"]
         base += "/" + tool_id
         items = ["inputs", "outputs", "parameters"]
-        # print(process_metadata["params"])
         for item in items:
-            # print(item)
-            # print("-----------")
-            # print(process_metadata[item])
             for key, value in process_metadata[item].items():
                 if not value:
                     pass
@@ -348,16 +310,8 @@ class ProvenanceProfile:
 
                 # if not value or len(value) == 0:
                 if item in ("inputs", "outputs"):
-                    print("key  : ", key)
-                    print("-----------")
-                    print("value: ", value)
-                    print("-----------")
-                    print("type : ", type(value))
-                    print("-----------")
                     for v in value:
                         for d in self.datasets:
-                            # print([d['encoded_id']])
-                            # print(d['copied_from_history_dataset_association_id_chain'])
                             if v in (
                                 [d["encoded_id"]]
                                 + d["copied_from_history_dataset_association_id_chain"]
@@ -388,7 +342,6 @@ class ProvenanceProfile:
 
         if isinstance(value, (bool, int, float)):
             # Typically used in job documents for flags
-            # print(value)
 
             # FIXME: Make consistent hash URIs for these
             # that somehow include the type
@@ -415,9 +368,6 @@ class ProvenanceProfile:
             )
 
         if isinstance(value, Dict):
-            # print("value: ", value)
-            # print("-----------")
-            # print("type : ", type(value))
             if "@id" in value:
                 # Already processed this value,
                 # but it might not be in this PROV
