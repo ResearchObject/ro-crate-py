@@ -302,27 +302,25 @@ def test_remote_uri_exceptions(tmpdir):
 
 
 @pytest.mark.filterwarnings("ignore")
-@pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
-def test_missing_source(test_data_dir, tmpdir, fetch_remote, validate_url):
+def test_missing_source(test_data_dir, tmpdir):
     path = test_data_dir / uuid.uuid4().hex
-    args = {"fetch_remote": fetch_remote, "validate_url": validate_url}
 
     crate = ROCrate()
-    file_ = crate.add_file(path, **args)
+    file_ = crate.add_file(path)
     assert file_ is crate.dereference(path.name)
     out_path = tmpdir / 'ro_crate_out_1'
     with pytest.raises(OSError):
         crate.write(out_path)
 
     crate = ROCrate()
-    file_ = crate.add_file(path, path.name, **args)
+    file_ = crate.add_file(path, path.name)
     assert file_ is crate.dereference(path.name)
     out_path = tmpdir / 'ro_crate_out_2'
     with pytest.raises(OSError):
         crate.write(out_path)
 
     crate = ROCrate()
-    file_ = crate.add_file(None, path.name, **args)
+    file_ = crate.add_file(None, path.name)
     assert file_ is crate.dereference(path.name)
     out_path = tmpdir / 'ro_crate_out_3'
     crate.write(out_path)
