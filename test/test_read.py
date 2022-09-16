@@ -324,6 +324,7 @@ def test_missing_dir(test_data_dir, tmpdir):
     assert not (out_path / 'README.txt').exists()
 
 
+@pytest.mark.filterwarnings("ignore")
 def test_missing_file(test_data_dir, tmpdir):
     crate_dir = test_data_dir / 'read_crate'
     name = 'test_file_galaxy.txt'
@@ -335,8 +336,23 @@ def test_missing_file(test_data_dir, tmpdir):
     assert test_file.id == name
 
     out_path = tmpdir / 'crate_read_out'
+    with pytest.raises(OSError):
+        crate.write(out_path)
+
+    # Two options to get a writable crate
+
+    # 1. Force write the crate as it is
+    test_file.source = None
     crate.write(out_path)
     assert not (out_path / name).exists()
+
+    # 2. Provide an existing source
+    source = tmpdir / "source.txt"
+    text = "foo\nbar\n"
+    source.write_text(text)
+    test_file.source = source
+    crate.write(out_path)
+    assert (out_path / name).read_text() == text
 
 
 def test_generic_data_entity(tmpdir):

@@ -18,10 +18,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from pathlib import Path
 import shutil
 import urllib.request
+import warnings
 from http.client import HTTPResponse
 from io import BytesIO, StringIO
 
@@ -59,7 +59,10 @@ class File(FileOrDir):
                     if self.fetch_remote:
                         out_file_path.parent.mkdir(parents=True, exist_ok=True)
                         urllib.request.urlretrieve(response.url, out_file_path)
-        elif os.path.isfile(self.source):
+        elif self.source is None:
+            # Allows to record a File entity whose @id does not exist, see #73
+            warnings.warn(f"No source for {self.id}")
+        else:
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
             if not out_file_path.exists() or not out_file_path.samefile(self.source):
                 shutil.copy(self.source, out_file_path)
