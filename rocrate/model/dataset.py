@@ -18,6 +18,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import errno
+import os
 import shutil
 from pathlib import Path
 from urllib.request import urlopen
@@ -48,9 +50,16 @@ class Dataset(FileOrDir):
             if self.fetch_remote:
                 self.__get_parts(out_path)
         else:
-            out_path.mkdir(parents=True, exist_ok=True)
-            if not self.crate.source and self.source and Path(self.source).exists():
-                self.crate._copy_unlisted(self.source, out_path)
+            if self.source is None:
+                out_path.mkdir(parents=True, exist_ok=True)
+            else:
+                if not Path(self.source).exists():
+                    raise FileNotFoundError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), str(self.source)
+                    )
+                out_path.mkdir(parents=True, exist_ok=True)
+                if not self.crate.source:
+                    self.crate._copy_unlisted(self.source, out_path)
 
     def __get_parts(self, out_path):
         out_path.mkdir(parents=True, exist_ok=True)

@@ -320,10 +320,27 @@ def test_missing_dir(test_data_dir, tmpdir):
     assert examples_dataset.id == f'{name}/'
 
     out_path = tmpdir / 'crate_read_out'
+    with pytest.raises(OSError):
+        crate.write(out_path)
+
+    # Two options to get a writable crate
+
+    # 1. Set the source to None (will create an empty dir)
+    examples_dataset.source = None
     crate.write(out_path)
-    assert not (out_path / 'README.txt').exists()
+    assert (out_path / name).is_dir()
+
+    shutil.rmtree(out_path)
+
+    # 2. Provide an existing source
+    source = tmpdir / "source"
+    source.mkdir()
+    examples_dataset.source = source
+    crate.write(out_path)
+    assert (out_path / name).is_dir()
 
 
+@pytest.mark.filterwarnings("ignore")
 def test_missing_file(test_data_dir, tmpdir):
     crate_dir = test_data_dir / 'read_crate'
     name = 'test_file_galaxy.txt'
@@ -335,8 +352,25 @@ def test_missing_file(test_data_dir, tmpdir):
     assert test_file.id == name
 
     out_path = tmpdir / 'crate_read_out'
+    with pytest.raises(OSError):
+        crate.write(out_path)
+
+    # Two options to get a writable crate
+
+    # 1. Set the source to None (file will still be missing in the copy)
+    test_file.source = None
     crate.write(out_path)
     assert not (out_path / name).exists()
+
+    shutil.rmtree(out_path)
+
+    # 2. Provide an existing source
+    source = tmpdir / "source.txt"
+    text = "foo\nbar\n"
+    source.write_text(text)
+    test_file.source = source
+    crate.write(out_path)
+    assert (out_path / name).read_text() == text
 
 
 def test_generic_data_entity(tmpdir):

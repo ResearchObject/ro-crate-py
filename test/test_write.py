@@ -301,23 +301,36 @@ def test_remote_uri_exceptions(tmpdir):
     # no error on Windows, or on Linux as root, so we don't use pytest.raises
 
 
-@pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
-def test_missing_source(test_data_dir, tmpdir, fetch_remote, validate_url):
+@pytest.mark.filterwarnings("ignore")
+@pytest.mark.parametrize("what", ["file", "dataset"])
+def test_missing_source(test_data_dir, tmpdir, what):
     path = test_data_dir / uuid.uuid4().hex
-    args = {"fetch_remote": fetch_remote, "validate_url": validate_url}
 
     crate = ROCrate()
-    file_ = crate.add_file(path, **args)
-    assert file_ is crate.dereference(path.name)
-    out_path = tmpdir / 'ro_crate_out_1'
-    crate.write(out_path)
-    assert not (out_path / path.name).exists()
+    entity = getattr(crate, f"add_{what}")(path)
+    assert entity is crate.dereference(path.name)
+    crate_dir = tmpdir / 'ro_crate_out_1'
+    with pytest.raises(OSError):
+        crate.write(crate_dir)
 
     crate = ROCrate()
-    file_ = crate.add_file(path, path.name, **args)
-    assert file_ is crate.dereference(path.name)
-    out_path = tmpdir / 'ro_crate_out_2'
-    assert not (out_path / path.name).exists()
+    entity = getattr(crate, f"add_{what}")(path, path.name)
+    assert entity is crate.dereference(path.name)
+    crate_dir = tmpdir / 'ro_crate_out_2'
+    with pytest.raises(OSError):
+        crate.write(crate_dir)
+
+    crate = ROCrate()
+    entity = getattr(crate, f"add_{what}")(None, path.name)
+    assert entity is crate.dereference(path.name)
+    crate_dir = tmpdir / 'ro_crate_out_3'
+    crate.write(crate_dir)
+    out_path = crate_dir / path.name
+    if what == "file":
+        assert not out_path.exists()
+    else:
+        assert out_path.is_dir()
+        assert not any(out_path.iterdir())
 
 
 @pytest.mark.parametrize("fetch_remote,validate_url", [(False, False), (False, True), (True, False), (True, True)])
@@ -336,12 +349,15 @@ def test_no_source_no_dest(test_data_dir, fetch_remote, validate_url):
 
 def test_dataset(test_data_dir, tmpdir):
     crate = ROCrate()
-    path = test_data_dir / "a" / "b"
-    d1 = crate.add_dataset(path)
+    path_a_b = test_data_dir / "a" / "b"
+    path_c = test_data_dir / "c"
+    for p in path_a_b, path_c:
+        p.mkdir(parents=True)
+    d1 = crate.add_dataset(path_a_b)
     assert crate.dereference("b") is d1
-    d2 = crate.add_dataset(path, "a/b")
+    d2 = crate.add_dataset(path_a_b, "a/b")
     assert crate.dereference("a/b") is d2
-    d_from_str = crate.add_dataset(str(test_data_dir / "c"))
+    d_from_str = crate.add_dataset(str(path_c))
     assert crate.dereference("c") is d_from_str
 
     out_path = tmpdir / 'ro_crate_out'
