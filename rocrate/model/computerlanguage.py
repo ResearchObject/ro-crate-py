@@ -80,6 +80,7 @@ KNIME_DEFAULT_VERSION = "4.5.0"
 NEXTFLOW_DEFAULT_VERSION = "21.10"
 SNAKEMAKE_DEFAULT_VERSION = "6.13"
 COMPSS_DEFAULT_VERSION = "2.10"
+AUTOSUBMIT_DEFAULT_VERSION = "3.14"
 
 
 def cwl(crate, version=CWL_DEFAULT_VERSION):
@@ -163,6 +164,16 @@ def compss(crate, version=COMPSS_DEFAULT_VERSION):
     })
 
 
+def autosubmit(crate, version=AUTOSUBMIT_DEFAULT_VERSION):
+    return ComputerLanguage(crate, identifier="#autosubmit", properties={
+        "name": "Autosubmit",
+        "alternateName": "AS",
+        "url": "https://autosubmit.readthedocs.io/",
+        "citation": "https://doi.org/10.1109/HPCSim.2016.7568429",
+        "version": version
+    })
+
+
 LANG_MAP = {
     "cwl": cwl,
     "galaxy": galaxy,
@@ -170,6 +181,7 @@ LANG_MAP = {
     "nextflow": nextflow,
     "snakemake": snakemake,
     "compss": compss,
+    "autosubmit": autosubmit,
 }
 
 
