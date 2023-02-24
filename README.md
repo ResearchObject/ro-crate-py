@@ -46,7 +46,7 @@ diagram = crate.add_file("exp/diagram.svg", dest_path="images/figure.svg", prope
 })
 ```
 
-We've started by adding the data entitites. Now we need contextual entities to represent Alice and Bob:
+We've started by adding the data entities. Now we need contextual entities to represent Alice and Bob:
 
 ```python
 from rocrate.model.person import Person
