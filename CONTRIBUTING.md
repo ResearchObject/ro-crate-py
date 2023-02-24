@@ -1,6 +1,6 @@
 # Contributing to this repository
 
-ro-crate-py is open-source software distributed under the Apache License, Version 2.0. Contributions are welcome, but please read this guide first. Submitted contributions are assumed to be covered by section 5 of the [license](LICENSE).
+ro-crate-py is open source software distributed under the Apache License, Version 2.0. Contributions are welcome, but please read this guide first. Submitted contributions are assumed to be covered by section 5 of the [license](LICENSE).
 
 
 ## Before you begin
@@ -22,14 +22,14 @@ origin	https://github.com/simleo/ro-crate-py (fetch)
 origin	https://github.com/simleo/ro-crate-py (push)
 ```
 
-To keep a reference to the original (upstream) ro-crate repository, you can add a remote for it:
+To keep a reference to the original (upstream) repository, you can add a remote for it:
 
 ```
 $ git remote add upstream https://github.com/researchobject/ro-crate-py
 $ git fetch upstream
 ```
 
-This allows, amongst other things, to easily keep your fork synced to the upstream repository through time. For instance, to sync your `master` branch:
+This allows, among other things, to easily keep your fork synced to the upstream repository through time. For instance, to sync your `master` branch:
 
 ```
 $ git checkout master
@@ -45,7 +45,7 @@ If you need help with Git and GitHub, head over to the [GitHub docs](https://doc
 
 Contributions can range from fixing a broken link or a typo in the documentation to fixing a bug or adding a new feature to the software. Ideally, contributions (unless trivial) should be related to an [open issue](https://github.com/researchobject/ro-crate-py/issues). If there is no existing issue or [pull request](https://github.com/researchobject/ro-crate-py/pulls) related to the changes you wish to make, you can open a new one.
 
-Make your changes on a branch in your fork, then open a pull request (PR). Please take some time to summarize the proposed changes in the PR's description, especially if they're not obvious. If the PR addresses an open issue, you should [link them](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue).
+Make your changes on a branch in your fork, then open a pull request (PR). Please take some time to summarize the proposed changes in the PR's description, especially if they're not obvious. If the PR addresses an open issue, you should [link it to the issue](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue).
 
 
 ## Contributing documentation
