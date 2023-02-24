@@ -4,3 +4,6 @@ galaxy2cwl
 jinja2
 python-dateutil
 click
+prov
+typing-extensions
+pydot

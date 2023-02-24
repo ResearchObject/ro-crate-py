@@ -1,0 +1,165 @@
+[{
+    "command_line": "python '/srv/galaxy/shared/src/lib/galaxy/tools/data_fetch.py' --galaxy-root '/srv/galaxy/shared/src' --datatypes-registry '/srv/galaxy/shared/etc/tmpdir/jwd/079/79718/registry.xml' --request-version '1' --request '/srv/galaxy/shared/etc/tmpdir/jwd/079/79718/configs/tmpjgi6b5_u'",
+    "create_time": "2021-06-23T10:20:22.770291",
+    "encoded_id": "7b69c80a9f428343",
+    "exit_code": 0,
+    "galaxy_version": "21.01",
+    "implicit_output_dataset_collection_mapping": {},
+    "info": null,
+    "input_dataset_collection_element_mapping": {},
+    "input_dataset_collection_mapping": {},
+    "input_dataset_mapping": {},
+    "job_stderr": "",
+    "job_stdout": "",
+    "model_class": "Job",
+    "output_dataset_collection_mapping": {},
+    "output_dataset_mapping": {
+        "output0": ["2524d3d3b68ad39a"]
+    },
+    "params": {
+        "file_count": "1",
+        "files": [{
+            "__index__": 0,
+            "file_data": "/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_85x51jn2"
+        }],
+        "paramfile": null,
+        "request_json": "{\"targets\": [{\"destination\": {\"type\": \"hdas\"}, \"elements\": [{\"ext\": \"auto\", \"dbkey\": \"?\", \"to_posix_lines\": true, \"src\": \"path\", \"name\": \"dataset2.txt\", \"hashes\": [], \"in_place\": false, \"purge_source\": false, \"path\": \"/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_85x51jn2\", \"object_id\": 155708}], \"auto_decompress\": false}], \"check_content\": true}",
+        "request_version": "1"
+    },
+    "state": "ok",
+    "tool_id": "__DATA_FETCH__",
+    "tool_stderr": "",
+    "tool_stdout": "",
+    "tool_version": "0.1.0",
+    "traceback": null,
+    "update_time": "2021-06-23T10:20:42.041319"
+}, {
+    "command_line": "python '/srv/galaxy/shared/src/lib/galaxy/tools/data_fetch.py' --galaxy-root '/srv/galaxy/shared/src' --datatypes-registry '/srv/galaxy/shared/etc/tmpdir/jwd/079/79717/registry.xml' --request-version '1' --request '/srv/galaxy/shared/etc/tmpdir/jwd/079/79717/configs/tmpmod1j0bw'",
+    "create_time": "2021-06-23T10:20:00.981702",
+    "encoded_id": "77dd7a937748a715",
+    "exit_code": 0,
+    "galaxy_version": "21.01",
+    "implicit_output_dataset_collection_mapping": {},
+    "info": null,
+    "input_dataset_collection_element_mapping": {},
+    "input_dataset_collection_mapping": {},
+    "input_dataset_mapping": {},
+    "job_stderr": "",
+    "job_stdout": "",
+    "model_class": "Job",
+    "output_dataset_collection_mapping": {},
+    "output_dataset_mapping": {
+        "output0": ["7c1d8e3101dbcdba"]
+    },
+    "params": {
+        "file_count": "1",
+        "files": [{
+            "__index__": 0,
+            "file_data": "/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_asmrlj6a"
+        }],
+        "paramfile": null,
+        "request_json": "{\"targets\": [{\"destination\": {\"type\": \"hdas\"}, \"elements\": [{\"ext\": \"auto\", \"dbkey\": \"?\", \"to_posix_lines\": true, \"src\": \"path\", \"name\": \"dataset1.txt\", \"hashes\": [], \"in_place\": false, \"purge_source\": false, \"path\": \"/srv/galaxy/shared/etc/tmpdir/tmp/upload_file_data_asmrlj6a\", \"object_id\": 155707}], \"auto_decompress\": false}], \"check_content\": true}",
+        "request_version": "1"
+    },
+    "state": "ok",
+    "tool_id": "__DATA_FETCH__",
+    "tool_stderr": "",
+    "tool_stdout": "",
+    "tool_version": "0.1.0",
+    "traceback": null,
+    "update_time": "2021-06-23T10:20:22.202678"
+}, {
+    "command_line": "python /srv/galaxy/shared/src/tools/filters/catWrapper.py '/srv/galaxy/shared/etc/tmpdir/jwd/079/79726/outputs/galaxy_dataset_cf936245-b1d6-4840-b79d-2e20af74b921.dat' '/srv/galaxy/shared/database/files/000/134/dataset_134410.dat' '/srv/galaxy/shared/database/files/000/134/dataset_134409.dat'",
+    "create_time": "2021-06-23T10:46:28.351123",
+    "encoded_id": "77cf44871c57dd95",
+    "exit_code": 0,
+    "galaxy_version": "21.01",
+    "implicit_output_dataset_collection_mapping": {},
+    "info": null,
+    "input_dataset_collection_element_mapping": {},
+    "input_dataset_collection_mapping": {},
+    "input_dataset_mapping": {
+        "input1": ["7ca3de8f49293d1a"],
+        "queries_0|input2": ["2e789aae2475b7da"]
+    },
+    "job_stderr": "",
+    "job_stdout": "",
+    "model_class": "Job",
+    "output_dataset_collection_mapping": {},
+    "output_dataset_mapping": {
+        "out_file1": ["fd7fec473f1e6c6b"]
+    },
+    "params": {
+        "__input_ext": "txt",
+        "__workflow_invocation_uuid__": "42f21c0ad41011eb87defa163eba836f",
+        "chromInfo": "/srv/galaxy/mutable-config/tool-data/shared/ucsc/chrom/?.len",
+        "dbkey": "?",
+        "input1": {
+            "values": [{
+                "id": "7ca3de8f49293d1a",
+                "src": "hda"
+            }]
+        },
+        "queries": [{
+            "__index__": 0,
+            "input2": {
+                "values": [{
+                    "id": "2e789aae2475b7da",
+                    "src": "hda"
+                }]
+            }
+        }]
+    },
+    "state": "ok",
+    "tool_id": "cat1",
+    "tool_stderr": "",
+    "tool_stdout": "",
+    "tool_version": "1.0.0",
+    "traceback": null,
+    "update_time": "2021-06-23T10:46:44.738703"
+}, {
+    "command_line": "python '/srv/galaxy/shared/src/tools/filters/random_lines_two_pass.py' '/srv/galaxy/shared/database/files/000/134/dataset_134423.dat' '/srv/galaxy/shared/etc/tmpdir/jwd/079/79727/outputs/galaxy_dataset_d9b5abdc-2a54-4fb7-b3df-1f05e9f2399a.dat' '3' --seed '0'",
+    "create_time": "2021-06-23T10:46:28.526901",
+    "encoded_id": "ea1a7696fd6484de",
+    "exit_code": 0,
+    "galaxy_version": "21.01",
+    "implicit_output_dataset_collection_mapping": {},
+    "info": null,
+    "input_dataset_collection_element_mapping": {},
+    "input_dataset_collection_mapping": {},
+    "input_dataset_mapping": {
+        "input": ["fd7fec473f1e6c6b"]
+    },
+    "job_stderr": "",
+    "job_stdout": "",
+    "model_class": "Job",
+    "output_dataset_collection_mapping": {},
+    "output_dataset_mapping": {
+        "out_file1": ["775bc9b3c1750167"]
+    },
+    "params": {
+        "__input_ext": "txt",
+        "__workflow_invocation_uuid__": "42f21c0ad41011eb87defa163eba836f",
+        "chromInfo": "/srv/galaxy/mutable-config/tool-data/shared/ucsc/chrom/?.len",
+        "dbkey": "?",
+        "input": {
+            "values": [{
+                "id": "fd7fec473f1e6c6b",
+                "src": "hda"
+            }]
+        },
+        "num_lines": "3",
+        "seed_source": {
+            "__current_case__": 1,
+            "seed": "0",
+            "seed_source_selector": "set_seed"
+        }
+    },
+    "state": "ok",
+    "tool_id": "random_lines1",
+    "tool_stderr": "",
+    "tool_stdout": "Kept 3 of 4 total lines.\nUsed random seed of \"0\".\n",
+    "tool_version": "2.0.2",
+    "traceback": null,
+    "update_time": "2021-06-23T10:47:04.837750"
+}]

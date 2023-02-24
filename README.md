@@ -315,6 +315,27 @@ rocrate add test-instance test1 http://example.com -r jobs -i test1_1
 rocrate add test-definition test1 test/test1/sort-and-change-case-test.yml -e planemo -v '>=0.70'
 ```
 
+Exporting a galaxy workflo-run export to an ro-crate.
+
+```python
+from rocrate import rocrate_api
+
+wf_path = base_path + "example-history-export3.ga"
+dataset_path = base_path + "example-history-export3/datasets/"
+wfr_metadata_path = base_path + "example-history-export3"
+files_list = os.listdir(dataset_path)
+files_list = [dataset_path + f for f in files_list]
+
+# Create base package
+wf_crate = rocrate_api.make_workflow_run_rocrate(workflow_path=wf_path,
+                        wfr_metadata_path=wfr_metadata_path, author=None, orcid=None,
+                        wf_type="Galaxy",include_files=files_list, prov_name="test_prov")
+
+# write crate to disk
+out_path = base_path + "example-history-export3-crate-new"
+wf_crate.write(out_path)
+```
+
 
 ## License
 
