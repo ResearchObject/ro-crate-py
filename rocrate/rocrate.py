@@ -26,6 +26,7 @@ import tempfile
 from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urljoin
+from typing import Dict
 
 from .model.contextentity import ContextEntity
 from .model.entity import Entity
@@ -536,6 +537,77 @@ class ROCrate():
         suite.definition = definition
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return definition
+
+    def add_jsonld(self, jsonld: Dict[str, Entity]) -> Entity:
+        """Add a JSON-LD entity to the RO-Crate.
+
+        An ``@id`` must always be present in the JSON-LD dictionary.
+
+        Args:
+            jsonld: A JSON-LD dictionary.
+        Return:
+            The entity added to the RO-Crate file.
+        Raises:
+            ValueError: if the ``jsonld`` object is empty or ``None`` or if the
+                entity already exists (found via ID).
+        """
+        if not jsonld or "@id" not in jsonld:
+            raise ValueError("you must provide a non-empty JSON-LD dictionary")
+        entity_id = jsonld.pop("@id")
+        if self.get(entity_id):
+            raise ValueError(f"entity {entity_id} already exists in the RO-Crate")
+        return self.add(ContextEntity(
+            self,
+            entity_id,
+            properties=jsonld
+        ))
+
+    def update_jsonld(self, jsonld: Dict[str, Entity]) -> Entity:
+        """Update a JSON-LD entity in the RO-Crate.
+
+        An ``@id`` must always be present in the JSON-LD dictionary.
+
+        Args:
+            jsonld: A JSON-LD dictionary.
+        Return:
+            The entity or list of entities added to the RO-Crate file.
+        Raises:
+            ValueError: if the ``jsonld`` object is empty or ``None``, if the
+                ``@id`` was not provided, or if the entity was not found.
+        """
+        if not jsonld or "@id" not in jsonld:
+            raise ValueError("you must provide a non-empty JSON-LD dictionary")
+        entity_id = jsonld.pop("@id")
+        entity: Entity = self.get(entity_id)
+        # TODO: Do we need to remove all keys starting with ``@``? What
+        #       if we did not provide a ``@type`` in the ``jsonld``?
+        if not entity:
+            raise ValueError(f"entity {entity_id} does exists in the RO-Crate")
+        entity._jsonld.update(jsonld)
+        return entity
+
+    def add_or_update_jsonld(self, jsonld):
+        """Add or update a JSON-LD entity in the RO-Crate.
+
+        An ``@id`` must always be present in the JSON-LD dictionary.
+
+        Args:
+            jsonld: A JSON-LD dictionary.
+        Return:
+            The entity or list of entities added to the RO-Crate file.
+        Raises:
+            ValueError: if the ``jsonld`` object is empty or ``None`` or if the
+                ``@id`` was not provided.
+        """
+        if not jsonld or "@id" not in jsonld:
+            raise ValueError("you must provide a non-empty JSON-LD dictionary")
+        entity_id = jsonld.get("@id")
+        if not entity_id:
+            raise ValueError("you must provide a valid entity ID")
+        entity: Entity = self.get(entity_id)
+        if not entity:
+            return self.add_jsonld(jsonld)
+        return self.update_jsonld(jsonld)
 
     def __validate_suite(self, suite):
         if isinstance(suite, TestSuite):
