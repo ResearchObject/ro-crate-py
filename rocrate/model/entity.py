@@ -32,7 +32,7 @@ class Entity(MutableMapping):
         if identifier:
             self.id = self.format_id(identifier)
         else:
-            self.id = "#%s" % uuid.uuid4()
+            self.id = f"#{uuid.uuid4()}"
         if properties:
             empty = self._empty()
             empty.update(properties)
@@ -46,7 +46,7 @@ class Entity(MutableMapping):
         return str(identifier)
 
     def __repr__(self):
-        return "<%s %s>" % (self.id, self.type)
+        return f"<{self.id} {self.type}>"
 
     def properties(self):
         return self._jsonld
