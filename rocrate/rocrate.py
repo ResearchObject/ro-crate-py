@@ -557,7 +557,7 @@ class ROCrate():
         # TODO: Do we need to remove all keys starting with `@`? What
         #       if we did not provide a `@type` in the `jsonld`?
         if not entity:
-            raise ValueError(f"entity {entity_id} does exists in the RO-Crate")
+            raise ValueError(f"entity {entity_id} does not exist in the RO-Crate")
         entity._jsonld.update(jsonld)
         return entity
 
@@ -577,8 +577,6 @@ class ROCrate():
         if not jsonld or "@id" not in jsonld:
             raise ValueError("you must provide a non-empty JSON-LD dictionary")
         entity_id = jsonld.get("@id")
-        if not entity_id:
-            raise ValueError("you must provide a valid entity ID")
         entity: Entity = self.get(entity_id)
         if not entity:
             return self.add_jsonld(jsonld)
