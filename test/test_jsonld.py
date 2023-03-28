@@ -51,6 +51,17 @@ def test_add_jsonld_raises_json_missing_id():
         })
 
 
+def test_add_jsonld_raises_json_missing_type(test_data_dir):
+    crate_dir = test_data_dir / 'read_crate'
+    crate = ROCrate(crate_dir)
+
+    with pytest.raises(ValueError, match='.*@type.*'):
+        crate.add_jsonld({
+            '@id': './',
+            'license': 'NA'
+        })
+
+
 def test_add_jsonld_raises_json_duplicate_id(test_data_dir):
     crate_dir = test_data_dir / 'read_crate'
     crate = ROCrate(crate_dir)
@@ -58,6 +69,7 @@ def test_add_jsonld_raises_json_duplicate_id(test_data_dir):
     with pytest.raises(ValueError, match='.*already exists.*'):
         crate.add_jsonld({
             '@id': './',
+            '@type': 'Dataset',
             'license': 'NA'
         })
 
@@ -133,11 +145,14 @@ def test_update_jsonld(test_data_dir):
     assert entity_added['name'] == 'A test entity'
 
     entity_added['name'] = 'No potatoes today'
-    crate.update_jsonld(entity_added._jsonld)
+    # N.B.: Properties that start with @ are ignored when updating.
+    update_dict = entity_added._jsonld.copy()
+    update_dict['@type'] = 'Dataset'
+    crate.update_jsonld(update_dict)
 
     updated_entity = crate.get(new_entity_id)
     assert entity_added.id == updated_entity.id
-    assert entity_added.type == updated_entity.type
+    assert updated_entity.type == 'ContextEntity'
     assert updated_entity['name'] == 'No potatoes today'
 
 
@@ -151,7 +166,7 @@ def test_add_or_update_jsonld_raises_json_is_none():
         crate.add_or_update_jsonld(None)
 
 
-def test_add_orupdate_jsonld_raises_json_is_empty():
+def test_add_or_update_jsonld_raises_json_is_empty():
     crate = ROCrate()
 
     with pytest.raises(ValueError, match='.*non-empty JSON-LD.*'):
@@ -198,7 +213,7 @@ def test_add_or_update_update_jsonld(test_data_dir):
     assert entity_added['name'] == 'A test entity'
 
     entity_added['name'] = 'No potatoes today'
-    crate.add_or_update_jsonld(entity_added._jsonld)
+    crate.add_or_update_jsonld(entity_added._jsonld.copy())
 
     updated_entity = crate.get(new_entity_id)
     assert entity_added.id == updated_entity.id

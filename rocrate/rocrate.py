@@ -516,18 +516,19 @@ class ROCrate():
     def add_jsonld(self, jsonld):
         """Add a JSON-LD dictionary as an entity to the RO-Crate.
 
-        An `@id` must be present in the JSON-LD dictionary.
+        The `@id` and `@type` items must be present in the JSON-LD dictionary.
 
         Args:
-            jsonld: A JSON-LD dictionary.
+            jsonld: A JSON-LD dictionary containing @id and @type, at least, set.
         Return:
             The entity added to the RO-Crate.
         Raises:
             ValueError: if the jsonld object is empty or None or if the
                 entity already exists (found via @id).
         """
-        if not jsonld or "@id" not in jsonld:
-            raise ValueError("you must provide a non-empty JSON-LD dictionary")
+        required_keys = ("@id", "@type")
+        if not jsonld or not all(required_key in jsonld for required_key in required_keys):
+            raise ValueError("you must provide a non-empty JSON-LD dictionary with @id and @type set")
         entity_id = jsonld.pop("@id")
         if self.get(entity_id):
             raise ValueError(f"entity {entity_id} already exists in the RO-Crate")
@@ -540,7 +541,8 @@ class ROCrate():
     def update_jsonld(self, jsonld):
         """Update an entity in the RO-Crate from a JSON-LD dictionary.
 
-        An `@id` must be present in the JSON-LD dictionary.
+        An `@id` must be present in the JSON-LD dictionary. Any other keys
+        in the JSON-LD dictionary that start with `@` will be removed.
 
         Args:
             jsonld: A JSON-LD dictionary.
@@ -554,10 +556,13 @@ class ROCrate():
             raise ValueError("you must provide a non-empty JSON-LD dictionary")
         entity_id = jsonld.pop("@id")
         entity: Entity = self.get(entity_id)
-        # TODO: Do we need to remove all keys starting with `@`? What
-        #       if we did not provide a `@type` in the `jsonld`?
         if not entity:
             raise ValueError(f"entity {entity_id} does not exist in the RO-Crate")
+        # Keys starting with @ are removed here to avoid messing up things.
+        # https://github.com/ResearchObject/ro-crate-py/pull/149#issuecomment-1487039274
+        for key in list(jsonld.keys()):
+            if key.startswith('@'):
+                del jsonld[key]
         entity._jsonld.update(jsonld)
         return entity
 
