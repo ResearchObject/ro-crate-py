@@ -26,7 +26,6 @@ import tempfile
 from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urljoin
-from typing import Dict
 
 from .model.contextentity import ContextEntity
 from .model.entity import Entity
@@ -62,30 +61,6 @@ def pick_type(json_entity, type_map, fallback=None):
 
 
 class ROCrate():
-    """A class that represents the ROCrate archive.
-
-    Attributes:
-        exclude (list):
-            A list of file names to be excluded.
-        default_entities (list):
-            A list of default entities to be written to the ROCrate file.
-            It is an empty list when the object is created, and gets
-            populated when entities are added (but only it the type of these
-            entities matches RootDataset, Metadata, LegacyMetadata, Preview).
-        contextual_entities (list):
-            A list of entities to be written to the ROCrate file.
-            It is an empty list when the object is created, and gets
-            populated when entities are added (when they are not default
-            entities).
-        uuid (str):
-            A unique ID for the ROCrate file.
-        arcp_base_uri (str):
-            The base arcp (archive and package) URI. Used to
-        preview (Entity):
-            The entity representing the preview of the ROCrate (optional).
-        source (Path):
-            The ROCrate directory (e.g. where an ROCrate was extracted).
-    """
 
     def __init__(self, source=None, gen_preview=False, init=False, exclude=None):
         self.exclude = exclude
@@ -348,7 +323,7 @@ class ROCrate():
 
     add_directory = add_dataset
 
-    def add(self, *entities: Entity):
+    def add(self, *entities):
         """\
         Add one or more entities to this RO-Crate.
 
@@ -538,15 +513,15 @@ class ROCrate():
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return definition
 
-    def add_jsonld(self, jsonld: Dict[str, Entity]) -> Entity:
-        """Add a JSON-LD entity to the RO-Crate.
+    def add_jsonld(self, jsonld):
+        """Add a JSON-LD dictionary as an entity to the RO-Crate.
 
-        An ``@id`` must always be present in the JSON-LD dictionary.
+        An ``@id`` must be present in the JSON-LD dictionary.
 
         Args:
             jsonld: A JSON-LD dictionary.
         Return:
-            The entity added to the RO-Crate file.
+            The entity added to the RO-Crate.
         Raises:
             ValueError: if the ``jsonld`` object is empty or ``None`` or if the
                 entity already exists (found via ID).
@@ -562,15 +537,15 @@ class ROCrate():
             properties=jsonld
         ))
 
-    def update_jsonld(self, jsonld: Dict[str, Entity]) -> Entity:
-        """Update a JSON-LD entity in the RO-Crate.
+    def update_jsonld(self, jsonld):
+        """Update an entity in the RO-Crate from a JSON-LD dictionary.
 
-        An ``@id`` must always be present in the JSON-LD dictionary.
+        An ``@id`` must be present in the JSON-LD dictionary.
 
         Args:
             jsonld: A JSON-LD dictionary.
         Return:
-            The entity or list of entities added to the RO-Crate file.
+            The updated entity.
         Raises:
             ValueError: if the ``jsonld`` object is empty or ``None``, if the
                 ``@id`` was not provided, or if the entity was not found.
@@ -587,14 +562,14 @@ class ROCrate():
         return entity
 
     def add_or_update_jsonld(self, jsonld):
-        """Add or update a JSON-LD entity in the RO-Crate.
+        """Add or update an entity from a JSON-LD dictionary.
 
-        An ``@id`` must always be present in the JSON-LD dictionary.
+        An ``@id`` must be present in the JSON-LD dictionary.
 
         Args:
             jsonld: A JSON-LD dictionary.
         Return:
-            The entity or list of entities added to the RO-Crate file.
+            The added or updated entity.
         Raises:
             ValueError: if the ``jsonld`` object is empty or ``None`` or if the
                 ``@id`` was not provided.
