@@ -171,6 +171,77 @@ Note that entities can have multiple types, e.g.:
     "@type" = ["File", "SoftwareSourceCode"]
 ```
 
+#### Adding entities using JSON-LD data
+
+You can add and update an entity using JSON-LD. It does not need to be a fully
+compliant JSON-LD entity. This may be useful if a WMS does not contain all the
+information necessary to create an RO-Crate.
+
+In such cases, WMS's have two options, the first being to create an extra layer
+where the user provides the missing information in some other way (e.g. YAML,
+INI, custom code, etc.) and the WMS creates `ro-crate-py` objects and calls
+methods like `add` discussed in the previous section.
+
+The second option is using a JSON file with JSON-LD properties such as `@id`
+and `@type`, and letting `ro-crate-py` automatically create the objects and
+add or update the entities to the RO-Crate file. The following example shows
+how that can be applied for a WMS that does not record workflow license, nor
+the list of authors.
+
+```json
+{
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "license": "https://spdx.org/licenses/Apache-2.0.html",
+      "author": [
+        {
+          "@id": "https://orcid.org/0000-0000-0000-0000"
+        }
+      ]
+    },
+    {
+      "@id": "./",
+      "author": [
+        {
+          "@id": "https://orcid.org/0000-0000-0000-0000"
+        }
+      ]
+    }
+  ]
+}
+```
+
+If the WMS is written in Python, the required code and logic to read this
+file and populate the RO-Crate would be similar to this example:
+
+```python
+
+crate = ROCrate()
+# ...
+# Create the RO-Crate file and add as much WMS provenance data as possible,
+# and then:
+json_file = Path(config_path, 'rocrate.json')
+with open(json_file, 'r') as f:
+    json_content = json.load(f)
+
+if '@graph' in json_content:
+    for jsonld_node in json_content['@graph']:
+        # NOTE: @id and @type are important attributes when adding,
+        #       but to update you only need @id. Other keys that
+        #       start with @ are discarded when updating.
+        crate.add_or_update_jsonld(jsonld_node)
+
+# Write RO-Crate ZIP.
+crate.write_zip(Path(config_path, "rocrate.zip"))
+```
+
+The `ROCrate` class provides the methods `add`, `update`, and `add_or_update`
+to, respectively, add a new entity, update an existing entity, or handle
+deciding whether to add (if `@id` does not exist in the JSON-LD metadata)
+or update an entity automatically.
+
 ### Consuming an RO-Crate
 
 An existing RO-Crate package can be loaded from a directory or zip file:
@@ -278,7 +349,7 @@ Note that data entities (e.g., workflows) must already be present in the directo
 cd test/test-data/ro-crate-galaxy-sortchangecase
 ```
 
-This directory is already an ro-crate. Delete the metadata file to get a plain directory tree:
+This directory is already an RO-Crate. Delete the metadata file to get a plain directory tree:
 
 ```bash
 rm ro-crate-metadata.json
@@ -314,7 +385,6 @@ rocrate add test-suite -i test1
 rocrate add test-instance test1 http://example.com -r jobs -i test1_1
 rocrate add test-definition test1 test/test1/sort-and-change-case-test.yml -e planemo -v '>=0.70'
 ```
-
 
 ## License
 
