@@ -516,15 +516,15 @@ class ROCrate():
     def add_jsonld(self, jsonld):
         """Add a JSON-LD dictionary as an entity to the RO-Crate.
 
-        An ``@id`` must be present in the JSON-LD dictionary.
+        An `@id` must be present in the JSON-LD dictionary.
 
         Args:
             jsonld: A JSON-LD dictionary.
         Return:
             The entity added to the RO-Crate.
         Raises:
-            ValueError: if the ``jsonld`` object is empty or ``None`` or if the
-                entity already exists (found via ID).
+            ValueError: if the jsonld object is empty or None or if the
+                entity already exists (found via @id).
         """
         if not jsonld or "@id" not in jsonld:
             raise ValueError("you must provide a non-empty JSON-LD dictionary")
@@ -540,22 +540,22 @@ class ROCrate():
     def update_jsonld(self, jsonld):
         """Update an entity in the RO-Crate from a JSON-LD dictionary.
 
-        An ``@id`` must be present in the JSON-LD dictionary.
+        An `@id` must be present in the JSON-LD dictionary.
 
         Args:
             jsonld: A JSON-LD dictionary.
         Return:
             The updated entity.
         Raises:
-            ValueError: if the ``jsonld`` object is empty or ``None``, if the
-                ``@id`` was not provided, or if the entity was not found.
+            ValueError: if the jsonld object is empty or None, if @id was not
+              provided, or if the entity was not found.
         """
         if not jsonld or "@id" not in jsonld:
             raise ValueError("you must provide a non-empty JSON-LD dictionary")
         entity_id = jsonld.pop("@id")
         entity: Entity = self.get(entity_id)
-        # TODO: Do we need to remove all keys starting with ``@``? What
-        #       if we did not provide a ``@type`` in the ``jsonld``?
+        # TODO: Do we need to remove all keys starting with `@`? What
+        #       if we did not provide a `@type` in the `jsonld`?
         if not entity:
             raise ValueError(f"entity {entity_id} does exists in the RO-Crate")
         entity._jsonld.update(jsonld)
@@ -564,15 +564,15 @@ class ROCrate():
     def add_or_update_jsonld(self, jsonld):
         """Add or update an entity from a JSON-LD dictionary.
 
-        An ``@id`` must be present in the JSON-LD dictionary.
+        An `@id` must be present in the JSON-LD dictionary.
 
         Args:
             jsonld: A JSON-LD dictionary.
         Return:
             The added or updated entity.
         Raises:
-            ValueError: if the ``jsonld`` object is empty or ``None`` or if the
-                ``@id`` was not provided.
+            ValueError: if the jsonld object is empty or None or if @id was not
+              provided.
         """
         if not jsonld or "@id" not in jsonld:
             raise ValueError("you must provide a non-empty JSON-LD dictionary")
