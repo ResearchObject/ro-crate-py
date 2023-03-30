@@ -514,12 +514,12 @@ class ROCrate():
         return definition
 
     def add_jsonld(self, jsonld):
-        """Add a JSON-LD dictionary as an entity to the RO-Crate.
+        """Add a JSON-LD dictionary as a contextual entity to the RO-Crate.
 
-        The `@id` and `@type` items must be present in the JSON-LD dictionary.
+        The `@id` and `@type` keys must be present in the JSON-LD dictionary.
 
         Args:
-            jsonld: A JSON-LD dictionary containing @id and @type, at least, set.
+            jsonld: A JSON-LD dictionary containing at least `@id` and `@type`.
         Return:
             The entity added to the RO-Crate.
         Raises:
