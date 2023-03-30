@@ -85,7 +85,9 @@ def test_add_jsonld(test_data_dir):
         '@type': 'CreativeWork',
         'name': 'A test entity'
     })
-    assert crate.get(new_entity_id) is not None
+    new_entity = crate.get(new_entity_id)
+    assert new_entity.type == 'CreativeWork'
+    assert new_entity["name"] == 'A test entity'
 
 
 # --- update
@@ -141,7 +143,7 @@ def test_update_jsonld(test_data_dir):
     })
 
     entity_added = crate.get(new_entity_id)
-    assert entity_added is not None
+    assert entity_added.type == 'CreativeWork'
     assert entity_added['name'] == 'A test entity'
 
     entity_added['name'] = 'No potatoes today'
@@ -193,7 +195,9 @@ def test_add_or_update_add_jsonld(test_data_dir):
         '@type': 'CreativeWork',
         'name': 'A test entity'
     })
-    assert crate.get(new_entity_id) is not None
+    new_entity = crate.get(new_entity_id)
+    assert new_entity.type == 'CreativeWork'
+    assert new_entity["name"] == 'A test entity'
 
 
 def test_add_or_update_update_jsonld(test_data_dir):
@@ -209,7 +213,7 @@ def test_add_or_update_update_jsonld(test_data_dir):
     })
 
     entity_added = crate.get(new_entity_id)
-    assert entity_added is not None
+    assert entity_added.type == 'CreativeWork'
     assert entity_added['name'] == 'A test entity'
 
     entity_added['name'] = 'No potatoes today'
