@@ -47,7 +47,7 @@ def test_add_jsonld_raises_json_missing_id():
 
     with pytest.raises(ValueError, match='.*non-empty JSON-LD.*'):
         crate.add_jsonld({
-            '@type': 'ContextEntity'
+            '@type': 'CreativeWork'
         })
 
 
@@ -82,7 +82,7 @@ def test_add_jsonld(test_data_dir):
 
     crate.add_jsonld({
         '@id': new_entity_id,
-        '@type': 'ContextEntity',
+        '@type': 'CreativeWork',
         'name': 'A test entity'
     })
     assert crate.get(new_entity_id) is not None
@@ -110,7 +110,7 @@ def test_update_jsonld_raises_json_missing_id():
 
     with pytest.raises(ValueError, match='.*non-empty JSON-LD.*'):
         crate.update_jsonld({
-            '@type': 'ContextEntity'
+            '@type': 'CreativeWork'
         })
 
 
@@ -123,7 +123,7 @@ def test_update_jsonld_raises_id_not_found(test_data_dir):
     with pytest.raises(ValueError, match='.*does not exist.*'):
         crate.update_jsonld({
             '@id': missing_entity_id,
-            '@type': 'ContextEntity',
+            '@type': 'CreativeWork',
             'name': 'This entity does not exist in the RO-Crate'
         })
 
@@ -136,7 +136,7 @@ def test_update_jsonld(test_data_dir):
 
     crate.add_jsonld({
         '@id': new_entity_id,
-        '@type': 'ContextEntity',
+        '@type': 'CreativeWork',
         'name': 'A test entity'
     })
 
@@ -152,7 +152,7 @@ def test_update_jsonld(test_data_dir):
 
     updated_entity = crate.get(new_entity_id)
     assert entity_added.id == updated_entity.id
-    assert updated_entity.type == 'ContextEntity'
+    assert updated_entity.type == 'CreativeWork'
     assert updated_entity['name'] == 'No potatoes today'
 
 
@@ -178,7 +178,7 @@ def test_add_or_update_jsonld_raises_json_missing_id():
 
     with pytest.raises(ValueError, match='.*non-empty JSON-LD.*'):
         crate.add_or_update_jsonld({
-            '@type': 'ContextEntity'
+            '@type': 'CreativeWork'
         })
 
 
@@ -190,7 +190,7 @@ def test_add_or_update_add_jsonld(test_data_dir):
 
     crate.add_or_update_jsonld({
         '@id': new_entity_id,
-        '@type': 'ContextEntity',
+        '@type': 'CreativeWork',
         'name': 'A test entity'
     })
     assert crate.get(new_entity_id) is not None
@@ -204,7 +204,7 @@ def test_add_or_update_update_jsonld(test_data_dir):
 
     crate.add_jsonld({
         '@id': new_entity_id,
-        '@type': 'ContextEntity',
+        '@type': 'CreativeWork',
         'name': 'A test entity'
     })
 
