@@ -526,8 +526,8 @@ class ROCrate():
             ValueError: if the jsonld object is empty or None or if the
                 entity already exists (found via @id).
         """
-        required_keys = ("@id", "@type")
-        if not jsonld or not all(required_key in jsonld for required_key in required_keys):
+        required_keys = {"@id", "@type"}
+        if not jsonld or not required_keys.issubset(jsonld):
             raise ValueError("you must provide a non-empty JSON-LD dictionary with @id and @type set")
         entity_id = jsonld.pop("@id")
         if self.get(entity_id):
