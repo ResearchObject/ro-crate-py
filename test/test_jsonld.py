@@ -157,6 +157,8 @@ def test_update_jsonld(test_data_dir):
     assert updated_entity.type == 'CreativeWork'
     assert updated_entity['name'] == 'No potatoes today'
 
+    assert '@type' in update_dict
+
 
 # --- add or update
 

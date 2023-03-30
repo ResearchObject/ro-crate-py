@@ -558,11 +558,7 @@ class ROCrate():
         entity: Entity = self.get(entity_id)
         if not entity:
             raise ValueError(f"entity {entity_id} does not exist in the RO-Crate")
-        # Keys starting with @ are removed here to avoid messing up things.
-        # https://github.com/ResearchObject/ro-crate-py/pull/149#issuecomment-1487039274
-        for key in list(jsonld.keys()):
-            if key.startswith('@'):
-                del jsonld[key]
+        jsonld = {k: v for k, v in jsonld.items() if not k.startswith('@')}
         entity._jsonld.update(jsonld)
         return entity
 
