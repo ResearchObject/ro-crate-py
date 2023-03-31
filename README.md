@@ -171,6 +171,60 @@ Note that entities can have multiple types, e.g.:
     "@type" = ["File", "SoftwareSourceCode"]
 ```
 
+#### Modifying the crate from JSON-LD dictionaries
+
+The `add_jsonld` method allows to add a contextual entity directly from a
+JSON-LD dictionary containing at least the `@id` and `@type` keys:
+
+```python
+crate.add_jsonld({
+    "@id": "https://orcid.org/0000-0000-0000-0000",
+    "@type": "Person",
+    "name": "Alice Doe"
+})
+```
+
+Existing entities can be updated from JSON-LD dictionaries via `update_jsonld`:
+
+```python
+crate.update_jsonld({
+    "@id": "https://orcid.org/0000-0000-0000-0000",
+    "name": "Alice K. Doe"
+})
+```
+
+There is also an `add_or_update_jsonld` method that adds the entity if it's
+not already in the crate and updates it if it already exists (note that, when
+updating, the `@type` key is ignored). This allows to "patch" an RO-Crate from
+a JSON-LD file. For instance, suppose you have the following `patch.json` file:
+
+```json
+{
+    "@graph": [
+        {
+            "@id": "./",
+            "author": {"@id": "https://orcid.org/0000-0000-0000-0001"}
+        },
+        {
+            "@id": "https://orcid.org/0000-0000-0000-0001",
+            "@type": "Person",
+            "name": "Bob Doe"
+        }
+    ]
+}
+```
+
+Then the following sets Bob as the author of the crate according to the above
+file:
+
+```python
+crate = ROCrate("temp-crate")
+with open("patch.json") as f:
+    json_data = json.load(f)
+for d in json_data.get("@graph", []):
+    crate.add_or_update_jsonld(d)
+```
+
 ### Consuming an RO-Crate
 
 An existing RO-Crate package can be loaded from a directory or zip file:
@@ -278,7 +332,7 @@ Note that data entities (e.g., workflows) must already be present in the directo
 cd test/test-data/ro-crate-galaxy-sortchangecase
 ```
 
-This directory is already an ro-crate. Delete the metadata file to get a plain directory tree:
+This directory is already an RO-Crate. Delete the metadata file to get a plain directory tree:
 
 ```bash
 rm ro-crate-metadata.json
@@ -314,7 +368,6 @@ rocrate add test-suite -i test1
 rocrate add test-instance test1 http://example.com -r jobs -i test1_1
 rocrate add test-definition test1 test/test1/sort-and-change-case-test.yml -e planemo -v '>=0.70'
 ```
-
 
 ## License
 

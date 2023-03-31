@@ -513,6 +513,76 @@ class ROCrate():
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return definition
 
+    def add_jsonld(self, jsonld):
+        """Add a JSON-LD dictionary as a contextual entity to the RO-Crate.
+
+        The `@id` and `@type` keys must be present in the JSON-LD dictionary.
+
+        Args:
+            jsonld: A JSON-LD dictionary containing at least `@id` and `@type`.
+        Return:
+            The entity added to the RO-Crate.
+        Raises:
+            ValueError: if the jsonld object is empty or None or if the
+                entity already exists (found via @id).
+        """
+        required_keys = {"@id", "@type"}
+        if not jsonld or not required_keys.issubset(jsonld):
+            raise ValueError("you must provide a non-empty JSON-LD dictionary with @id and @type set")
+        entity_id = jsonld.pop("@id")
+        if self.get(entity_id):
+            raise ValueError(f"entity {entity_id} already exists in the RO-Crate")
+        return self.add(ContextEntity(
+            self,
+            entity_id,
+            properties=jsonld
+        ))
+
+    def update_jsonld(self, jsonld):
+        """Update an entity in the RO-Crate from a JSON-LD dictionary.
+
+        An `@id` must be present in the JSON-LD dictionary. Any other keys
+        in the JSON-LD dictionary that start with `@` will be removed.
+
+        Args:
+            jsonld: A JSON-LD dictionary.
+        Return:
+            The updated entity.
+        Raises:
+            ValueError: if the jsonld object is empty or None, if @id was not
+              provided, or if the entity was not found.
+        """
+        if not jsonld or "@id" not in jsonld:
+            raise ValueError("you must provide a non-empty JSON-LD dictionary")
+        entity_id = jsonld.pop("@id")
+        entity: Entity = self.get(entity_id)
+        if not entity:
+            raise ValueError(f"entity {entity_id} does not exist in the RO-Crate")
+        jsonld = {k: v for k, v in jsonld.items() if not k.startswith('@')}
+        entity._jsonld.update(jsonld)
+        return entity
+
+    def add_or_update_jsonld(self, jsonld):
+        """Add or update an entity from a JSON-LD dictionary.
+
+        An `@id` must be present in the JSON-LD dictionary.
+
+        Args:
+            jsonld: A JSON-LD dictionary.
+        Return:
+            The added or updated entity.
+        Raises:
+            ValueError: if the jsonld object is empty or None or if @id was not
+              provided.
+        """
+        if not jsonld or "@id" not in jsonld:
+            raise ValueError("you must provide a non-empty JSON-LD dictionary")
+        entity_id = jsonld.get("@id")
+        entity: Entity = self.get(entity_id)
+        if not entity:
+            return self.add_jsonld(jsonld)
+        return self.update_jsonld(jsonld)
+
     def __validate_suite(self, suite):
         if isinstance(suite, TestSuite):
             assert suite.crate is self
