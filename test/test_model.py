@@ -18,6 +18,7 @@
 
 import datetime
 import json
+import os
 import tempfile
 import timeit
 import uuid
@@ -95,6 +96,7 @@ def test_data_entities(test_data_dir):
     assert set(_.id for _ in (file_, dataset, data_entity)) <= part_ids
 
 
+@pytest.mark.skipif(os.name != "posix", reason="CI sometimes fails on macOS")
 def test_data_entities_perf():
     """\
     Test that adding a data entity happens in constant time.

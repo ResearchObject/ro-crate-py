@@ -61,6 +61,7 @@ setup(
         'Ignacio Eguinoa',
         'Alban Gaignard',
         'Sebastiaan Huber',
+        'Bruno Kinoshita',
         'Simone Leo',
         'Luca Pireddu',
         'Laura Rodríguez-Navas',
