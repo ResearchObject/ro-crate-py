@@ -16,8 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
+
 from rocrate.rocrate import ROCrate, make_workflow_rocrate
-from rocrate.model.computerlanguage import CWL_DEFAULT_VERSION, GALAXY_DEFAULT_VERSION
 
 WF_CRATE = "https://w3id.org/workflowhub/workflow-ro-crate"
 
@@ -33,7 +34,6 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference(f"{WF_CRATE}#galaxy")
     assert hasattr(lang, "name")
-    assert lang.version == GALAXY_DEFAULT_VERSION
     assert wf.get("programmingLanguage") is lang
     assert wf.get("subjectOf") is not None
     assert helpers.WORKFLOW_DESC_TYPES.issubset(wf["subjectOf"].type)
@@ -68,7 +68,6 @@ def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference(f"{WF_CRATE}#cwl")
     assert hasattr(lang, "name")
-    assert lang.version == CWL_DEFAULT_VERSION
     assert wf.get("programmingLanguage") is lang
     assert "subjectOf" not in wf
 
@@ -99,7 +98,6 @@ def test_create_wf_include(test_data_dir, tmpdir, helpers):
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference(f"{WF_CRATE}#galaxy")
     assert hasattr(lang, "name")
-    assert lang.version == GALAXY_DEFAULT_VERSION
     assert wf.get("programmingLanguage") is lang
     assert wf.get("subjectOf") is not None
     assert helpers.WORKFLOW_DESC_TYPES.issubset(wf["subjectOf"].type)
@@ -124,3 +122,16 @@ def test_create_wf_include(test_data_dir, tmpdir, helpers):
     assert file2.exists()
     with open(extra_file2) as f1, open(file2) as f2:
         assert f1.read() == f2.read()
+
+
+@pytest.mark.parametrize("lang_version", [None, "1.2"])
+def test_cwl_lang_version(test_data_dir, lang_version):
+    wf_id = 'sample_cwl_wf.cwl'
+    wf_path = test_data_dir / wf_id
+    crate = ROCrate()
+    workflow = crate.add_workflow(wf_path, wf_id, lang_version=lang_version)
+    lang_id = workflow["programmingLanguage"]["identifier"]
+    if lang_version is None:
+        assert lang_id == "https://w3id.org/cwl/"
+    else:
+        assert lang_id == "https://w3id.org/cwl/1.2/"

@@ -438,8 +438,11 @@ class ROCrate():
         if isinstance(lang, ComputerLanguage):
             assert lang.crate is self
         else:
-            kwargs = {"version": lang_version} if lang_version else {}
+            kwargs = {}
+            lang_str = lang
             lang = get_lang(self, lang, **kwargs)
+            if lang_str.lower() == "cwl" and lang_version:
+                lang["identifier"] = f"https://w3id.org/cwl/{lang_version}/"
             self.add(lang)
         lang_str = lang.id.rsplit("#", 1)[1]
         workflow.lang = lang
