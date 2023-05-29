@@ -59,26 +59,43 @@ class ComputerLanguage(ContextEntity):
     def url(self, url):
         self["url"] = url
 
+    # Not listed as a property in "https://schema.org/ComputerLanguage"
+    @property
+    def version(self):
+        return self.get("version")
+
+    @version.setter
+    def version(self, version):
+        self["version"] = version
+
 
 # See https://w3id.org/workflowhub/workflow-ro-crate/1.0
+# (note that it does not specify "version")
 
-def cwl(crate):
+
+def cwl(crate, version=None):
     id_ = "https://w3id.org/workflowhub/workflow-ro-crate#cwl"
-    return ComputerLanguage(crate, identifier=id_, properties={
+    identifier = "https://w3id.org/cwl/"
+    if version:
+        identifier = f"{identifier}{version}/"
+    properties = {
         "name": "Common Workflow Language",
         "alternateName": "CWL",
         "identifier": {
-            "@id": "https://w3id.org/cwl/"
+            "@id": identifier
         },
         "url": {
             "@id": "https://www.commonwl.org/"
-        }
-    })
+        },
+    }
+    if version:
+        properties["version"] = version
+    return ComputerLanguage(crate, identifier=id_, properties=properties)
 
 
-def galaxy(crate):
+def galaxy(crate, version=None):
     id_ = "https://w3id.org/workflowhub/workflow-ro-crate#galaxy"
-    return ComputerLanguage(crate, identifier=id_, properties={
+    properties = {
         "name": "Galaxy",
         "identifier": {
             "@id": "https://galaxyproject.org/"
@@ -86,12 +103,15 @@ def galaxy(crate):
         "url": {
             "@id": "https://galaxyproject.org/"
         }
-    })
+    }
+    if version:
+        properties["version"] = version
+    return ComputerLanguage(crate, identifier=id_, properties=properties)
 
 
-def knime(crate):
+def knime(crate, version=None):
     id_ = "https://w3id.org/workflowhub/workflow-ro-crate#knime"
-    return ComputerLanguage(crate, identifier=id_, properties={
+    properties = {
         "name": "KNIME",
         "identifier": {
             "@id": "https://www.knime.com/"
@@ -99,12 +119,15 @@ def knime(crate):
         "url": {
             "@id": "https://www.knime.com/"
         }
-    })
+    }
+    if version:
+        properties["version"] = version
+    return ComputerLanguage(crate, identifier=id_, properties=properties)
 
 
-def nextflow(crate):
+def nextflow(crate, version=None):
     id_ = "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
-    return ComputerLanguage(crate, identifier=id_, properties={
+    properties = {
         "name": "Nextflow",
         "identifier": {
             "@id": "https://www.nextflow.io/"
@@ -112,12 +135,15 @@ def nextflow(crate):
         "url": {
             "@id": "https://www.nextflow.io/"
         }
-    })
+    }
+    if version:
+        properties["version"] = version
+    return ComputerLanguage(crate, identifier=id_, properties=properties)
 
 
-def snakemake(crate):
+def snakemake(crate, version=None):
     id_ = "https://w3id.org/workflowhub/workflow-ro-crate#snakemake"
-    return ComputerLanguage(crate, identifier=id_, properties={
+    properties = {
         "name": "Snakemake",
         "identifier": {
             "@id": "https://doi.org/10.1093/bioinformatics/bts480"
@@ -125,25 +151,34 @@ def snakemake(crate):
         "url": {
             "@id": "https://snakemake.readthedocs.io"
         }
-    })
+    }
+    if version:
+        properties["version"] = version
+    return ComputerLanguage(crate, identifier=id_, properties=properties)
 
 
-def compss(crate):
-    return ComputerLanguage(crate, identifier="#compss", properties={
+def compss(crate, version=None):
+    properties = {
         "name": "COMPSs Programming Model",
         "alternateName": "COMPSs",
         "url": "http://compss.bsc.es/",
         "citation": "https://doi.org/10.1007/s10723-013-9272-5"
-    })
+    }
+    if version:
+        properties["version"] = version
+    return ComputerLanguage(crate, identifier="#compss", properties=properties)
 
 
-def autosubmit(crate):
-    return ComputerLanguage(crate, identifier="#autosubmit", properties={
+def autosubmit(crate, version=None):
+    properties = {
         "name": "Autosubmit",
         "alternateName": "AS",
         "url": "https://autosubmit.readthedocs.io/",
         "citation": "https://doi.org/10.1109/HPCSim.2016.7568429"
-    })
+    }
+    if version:
+        properties["version"] = version
+    return ComputerLanguage(crate, identifier="#autosubmit", properties=properties)
 
 
 LANG_MAP = {
@@ -157,9 +192,9 @@ LANG_MAP = {
 }
 
 
-def get_lang(crate, name):
+def get_lang(crate, name, version=None):
     try:
         func = LANG_MAP[name.lower()]
     except KeyError:
         raise ValueError(f"Unknown language: {name}")
-    return func(crate)
+    return func(crate, version=version)

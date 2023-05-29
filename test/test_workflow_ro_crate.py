@@ -34,6 +34,7 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference(f"{WF_CRATE}#galaxy")
     assert hasattr(lang, "name")
+    assert "version" not in lang
     assert wf.get("programmingLanguage") is lang
     assert wf.get("subjectOf") is not None
     assert helpers.WORKFLOW_DESC_TYPES.issubset(wf["subjectOf"].type)
@@ -68,6 +69,7 @@ def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference(f"{WF_CRATE}#cwl")
     assert hasattr(lang, "name")
+    assert "version" not in lang
     assert wf.get("programmingLanguage") is lang
     assert "subjectOf" not in wf
 
@@ -98,6 +100,7 @@ def test_create_wf_include(test_data_dir, tmpdir, helpers):
     assert wf_crate.mainEntity is wf
     lang = wf_crate.dereference(f"{WF_CRATE}#galaxy")
     assert hasattr(lang, "name")
+    assert "version" not in lang
     assert wf.get("programmingLanguage") is lang
     assert wf.get("subjectOf") is not None
     assert helpers.WORKFLOW_DESC_TYPES.issubset(wf["subjectOf"].type)
@@ -130,8 +133,11 @@ def test_cwl_lang_version(test_data_dir, lang_version):
     wf_path = test_data_dir / wf_id
     crate = ROCrate()
     workflow = crate.add_workflow(wf_path, wf_id, lang_version=lang_version)
-    lang_id = workflow["programmingLanguage"]["identifier"]
+    lang = workflow["programmingLanguage"]
+    lang_id = lang["identifier"]
     if lang_version is None:
         assert lang_id == "https://w3id.org/cwl/"
+        assert "version" not in lang
     else:
         assert lang_id == "https://w3id.org/cwl/1.2/"
+        assert lang["version"] == "1.2"
