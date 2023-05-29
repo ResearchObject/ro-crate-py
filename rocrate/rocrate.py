@@ -438,8 +438,7 @@ class ROCrate():
         if isinstance(lang, ComputerLanguage):
             assert lang.crate is self
         else:
-            kwargs = {"version": lang_version} if lang_version else {}
-            lang = get_lang(self, lang, **kwargs)
+            lang = get_lang(self, lang, version=lang_version)
             self.add(lang)
         lang_str = lang.id.rsplit("#", 1)[1]
         workflow.lang = lang
