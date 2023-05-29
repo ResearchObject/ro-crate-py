@@ -139,5 +139,5 @@ def test_cwl_lang_version(test_data_dir, lang_version):
         assert lang_id == "https://w3id.org/cwl/"
         assert "version" not in lang
     else:
-        assert lang_id == "https://w3id.org/cwl/1.2/"
+        assert lang_id == "https://w3id.org/cwl/v1.2/"
         assert lang["version"] == "1.2"
