@@ -393,3 +393,42 @@ def test_no_zip_in_zip(test_data_dir, tmpdir):
         zf.extractall(out_path)
 
     assert not (out_path / zip_name).exists()
+
+
+def test_add_tree(test_data_dir, tmpdir):
+    source = test_data_dir / "read_extra"
+    (source / "ro-crate-metadata.json").unlink()
+    crate = ROCrate()
+    crate.add_tree(source)
+    out_path = tmpdir / 'ro_crate_out'
+    crate.write(out_path)
+
+    assert (out_path / "read_extra").is_dir()
+    assert (out_path / "read_extra" / "listed").is_dir()
+    assert (out_path / "read_extra" / "listed" / "listed.txt").is_file()
+    assert (out_path / "read_extra" / "listed" / "not_listed.txt").is_file()
+    assert (out_path / "read_extra" / "not_listed").is_dir()
+    assert (out_path / "read_extra" / "not_listed" / "not_listed.txt").is_file()
+    assert (out_path / "read_extra" / "listed.txt").is_file()
+    assert (out_path / "read_extra" / "not_listed.txt").is_file()
+
+    crate = ROCrate(out_path)
+    top = crate.get("read_extra")
+    assert top.type == "Dataset"
+    listed = crate.get("read_extra/listed")
+    assert listed.type == "Dataset"
+    not_listed = crate.get("read_extra/not_listed")
+    assert not_listed.type == "Dataset"
+    listed_txt = crate.get("read_extra/listed.txt")
+    assert listed_txt.type == "File"
+    not_listed_txt = crate.get("read_extra/not_listed.txt")
+    assert not_listed_txt.type == "File"
+    assert set(top["hasPart"]) == {listed, not_listed, listed_txt, not_listed_txt}
+    listed_listed_txt = crate.get("read_extra/listed/listed.txt")
+    listed_not_listed_txt = crate.get("read_extra/listed/not_listed.txt")
+    assert set(listed["hasPart"]) == {listed_listed_txt, listed_not_listed_txt}
+    not_listed_not_listed_txt = crate.get("read_extra/not_listed/not_listed.txt")
+    assert set(not_listed["hasPart"]) == {not_listed_not_listed_txt}
+
+    with pytest.raises(ValueError):
+        crate.add_tree(None, dest_path="foobar")

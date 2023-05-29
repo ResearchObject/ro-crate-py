@@ -20,6 +20,7 @@ import errno
 import uuid
 import zipfile
 import atexit
+import os
 import shutil
 import tempfile
 
@@ -322,6 +323,21 @@ class ROCrate():
         ))
 
     add_directory = add_dataset
+
+    def add_tree(self, source, dest_path=None, properties=None):
+        if not source:
+            raise ValueError("source must refer to an existing local directory")
+        top = self.add_dataset(source, dest_path=dest_path)
+        dest_path = Path(top.id).as_posix()
+        for e in os.scandir(source):
+            dest = dest_path / Path(e.path).relative_to(source)
+            if e.is_file():
+                file_ = self.add_file(source=e.path, dest_path=dest)
+                top.append_to("hasPart", file_)
+            if e.is_dir():
+                dir_ = self.add_tree(e.path, dest_path=dest)
+                top.append_to("hasPart", dir_)
+        return top
 
     def add(self, *entities):
         """\

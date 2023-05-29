@@ -91,6 +91,9 @@ You can also add whole directories. A directory in RO-Crate is represented by th
 logs = crate.add_dataset("exp/logs")
 ```
 
+Note that the above adds all files and directories contained in `"exp/logs"` recursively to the crate, but only the top-level `"exp/logs"` dataset itself is listed in the metadata file (there is no requirement to represent every file and folder in the JSON-LD). To also add files and directory recursively to the metadata, use `add_tree` (but note that it only works on local directory trees).
+
+
 #### Appending elements to property values
 
 What ro-crate-py entities actually store is their JSON representation:
