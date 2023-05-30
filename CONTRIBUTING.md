@@ -64,13 +64,13 @@ $ pip install --upgrade pip
 $ pip install -r requirements.txt
 ```
 
-You can install ro-crate-py via `python setup.py install` or `pip install ./` In this case, to see the effect of any changes you make to the code, you need to reinstall it. However, **at the moment**, ro-crate-py can be run directly from the source tree (e.g., it does not have any extension modules, nor does it generate any other files during the setup process), so you can speed this up by hacking the venv installation dir (replace "3.7" with the actual Python version you are using):
+For development, it's recommended to install ro-crate-py in [editable mode](https://setuptools.pypa.io/en/latest/userguide/development_mode.html):
 
 ```
-ln -sr . venv/lib/python3.7/site-packages/rocrate
+pip install -e .
 ```
 
-In this way, any changes to the code will be picked up immediately.
+In this way, any changes to the code will be picked up immediately, without the need to reinstall the package.
 
 When you're done with your work, you can deactivate the virtual environment by typing `deactivate` on your shell.
 
