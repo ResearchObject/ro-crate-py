@@ -42,7 +42,7 @@ from .model.computationalworkflow import ComputationalWorkflow, WorkflowDescript
 from .model.computerlanguage import ComputerLanguage, get_lang
 from .model.testinstance import TestInstance
 from .model.testservice import TestService, get_service
-from .model.softwareapplication import SoftwareApplication, get_app, PLANEMO_DEFAULT_VERSION
+from .model.softwareapplication import SoftwareApplication, get_app
 from .model.testsuite import TestSuite
 
 from .utils import is_url, subclasses, get_norm_value, walk
@@ -509,9 +509,6 @@ class ROCrate():
             self, suite, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
             engine="planemo", engine_version=None
     ):
-        if engine_version is None:
-            # FIXME: this should be engine-specific
-            engine_version = PLANEMO_DEFAULT_VERSION
         suite = self.__validate_suite(suite)
         definition = self.add(
             TestDefinition(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
@@ -523,7 +520,8 @@ class ROCrate():
             engine = get_app(self, engine)
             self.add(engine)
         definition.engine = engine
-        definition.engineVersion = engine_version
+        if engine_version is not None:
+            definition.engineVersion = engine_version
         suite.definition = definition
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return definition

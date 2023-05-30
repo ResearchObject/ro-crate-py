@@ -243,6 +243,8 @@ def test_add_test_definition(test_data_dir, engine, engine_version):
     assert crate.dereference(PLANEMO) is d.engine
     if engine_version:
         assert d.engineVersion == engine_version
+    else:
+        assert "engineVersion" not in d
 
 
 def test_test_suites_prop(test_data_dir):
