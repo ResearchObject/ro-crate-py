@@ -54,7 +54,6 @@ class SoftwareApplication(ContextEntity, CreativeWork):
 
 
 PLANEMO_ID = "https://w3id.org/ro/terms/test#PlanemoEngine"
-PLANEMO_DEFAULT_VERSION = "0.74"
 
 
 def planemo(crate):
