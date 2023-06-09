@@ -127,7 +127,7 @@ def test_create_wf_include(test_data_dir, tmpdir, helpers):
         assert f1.read() == f2.read()
 
 
-@pytest.mark.parametrize("lang_version", [None, "1.2"])
+@pytest.mark.parametrize("lang_version", [None, "1.2", "v1.2"])
 def test_cwl_lang_version(test_data_dir, lang_version):
     wf_id = 'sample_cwl_wf.cwl'
     wf_path = test_data_dir / wf_id
@@ -138,6 +138,9 @@ def test_cwl_lang_version(test_data_dir, lang_version):
     if lang_version is None:
         assert lang_id == "https://w3id.org/cwl/"
         assert "version" not in lang
-    else:
+    elif lang_version == "1.2":
         assert lang_id == "https://w3id.org/cwl/v1.2/"
         assert lang["version"] == "1.2"
+    else:
+        assert lang_id == "https://w3id.org/cwl/v1.2/"
+        assert lang["version"] == "v1.2"
