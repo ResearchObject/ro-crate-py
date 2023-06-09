@@ -77,7 +77,7 @@ def cwl(crate, version=None):
     id_ = "https://w3id.org/workflowhub/workflow-ro-crate#cwl"
     identifier = "https://w3id.org/cwl/"
     if version:
-        identifier = f"{identifier}v{version}/"
+        identifier = f"{identifier}v{version.lstrip('v')}/"
     properties = {
         "name": "Common Workflow Language",
         "alternateName": "CWL",
