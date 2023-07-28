@@ -24,9 +24,7 @@ import zipfile
 from pathlib import Path
 
 from rocrate.rocrate import ROCrate
-from rocrate.model.data_entity import DataEntity
-from rocrate.model.file import File
-from rocrate.model.dataset import Dataset
+from rocrate.model import DataEntity, File, Dataset
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')

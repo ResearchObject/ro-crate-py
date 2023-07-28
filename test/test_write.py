@@ -24,8 +24,7 @@ import zipfile
 from itertools import product
 from urllib.error import URLError
 
-from rocrate.model.dataset import Dataset
-from rocrate.model.person import Person
+from rocrate.model import Dataset, Person
 from rocrate.rocrate import ROCrate
 
 

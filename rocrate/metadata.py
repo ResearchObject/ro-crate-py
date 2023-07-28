@@ -19,7 +19,7 @@
 import json
 import warnings
 
-from .model.metadata import Metadata, LegacyMetadata
+from .model import Metadata, LegacyMetadata
 
 
 def read_metadata(metadata_path):

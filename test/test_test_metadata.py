@@ -19,12 +19,14 @@
 import pytest
 
 from rocrate.rocrate import ROCrate
-from rocrate.model.testservice import TestService
-from rocrate.model.testinstance import TestInstance
-from rocrate.model.testdefinition import TestDefinition
-from rocrate.model.testsuite import TestSuite
-from rocrate.model.softwareapplication import SoftwareApplication
-from rocrate.model.computationalworkflow import ComputationalWorkflow
+from rocrate.model import (
+    TestService,
+    TestInstance,
+    TestDefinition,
+    TestSuite,
+    SoftwareApplication,
+    ComputationalWorkflow,
+)
 
 # Tell pytest these are not test classes (so it doesn't try to collect them)
 TestService.__test__ = False

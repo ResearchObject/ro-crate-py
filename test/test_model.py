@@ -26,13 +26,15 @@ from pathlib import Path
 
 import pytest
 from rocrate.rocrate import ROCrate
-from rocrate.model.data_entity import DataEntity
-from rocrate.model.file import File
-from rocrate.model.dataset import Dataset
-from rocrate.model.computationalworkflow import ComputationalWorkflow
-from rocrate.model.person import Person
-from rocrate.model.preview import Preview
-from rocrate.model.contextentity import ContextEntity
+from rocrate.model import (
+    DataEntity,
+    File,
+    Dataset,
+    ComputationalWorkflow,
+    Person,
+    Preview,
+    ContextEntity
+)
 
 
 RAW_REPO_URL = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py"
