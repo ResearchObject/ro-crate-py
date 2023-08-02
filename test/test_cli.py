@@ -22,7 +22,7 @@ from click.testing import CliRunner
 import pytest
 
 from rocrate.cli import cli
-from rocrate.model.file import File
+from rocrate.model import File
 from rocrate.model.metadata import TESTING_EXTRA_TERMS
 from rocrate.rocrate import ROCrate
 

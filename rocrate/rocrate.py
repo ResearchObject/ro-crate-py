@@ -28,22 +28,31 @@ from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urljoin
 
-from .model.contextentity import ContextEntity
-from .model.entity import Entity
-from .model.root_dataset import RootDataset
-from .model.data_entity import DataEntity
-from .model.file_or_dir import FileOrDir
-from .model.file import File
-from .model.dataset import Dataset
-from .model.metadata import WORKFLOW_PROFILE, Metadata, LegacyMetadata, TESTING_EXTRA_TERMS, metadata_class
-from .model.preview import Preview
-from .model.testdefinition import TestDefinition
-from .model.computationalworkflow import ComputationalWorkflow, WorkflowDescription, galaxy_to_abstract_cwl
-from .model.computerlanguage import ComputerLanguage, get_lang
-from .model.testinstance import TestInstance
-from .model.testservice import TestService, get_service
-from .model.softwareapplication import SoftwareApplication, get_app
-from .model.testsuite import TestSuite
+from .model import (
+    ComputationalWorkflow,
+    ComputerLanguage,
+    ContextEntity,
+    DataEntity,
+    Dataset,
+    Entity,
+    File,
+    FileOrDir,
+    LegacyMetadata,
+    Metadata,
+    Preview,
+    RootDataset,
+    SoftwareApplication,
+    TestDefinition,
+    TestInstance,
+    TestService,
+    TestSuite,
+    WorkflowDescription,
+)
+from .model.metadata import WORKFLOW_PROFILE, TESTING_EXTRA_TERMS, metadata_class
+from .model.computationalworkflow import galaxy_to_abstract_cwl
+from .model.computerlanguage import get_lang
+from .model.testservice import get_service
+from .model.softwareapplication import get_app
 
 from .utils import is_url, subclasses, get_norm_value, walk
 from .metadata import read_metadata, find_root_entity_id

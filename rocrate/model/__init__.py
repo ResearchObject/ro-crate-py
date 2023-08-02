@@ -24,3 +24,46 @@ in rocrate_ represented as different Python classes.
 
 .. _rocrate: https://w3id.org/ro/crate/
 """
+
+from .computationalworkflow import ComputationalWorkflow, WorkflowDescription, Workflow
+from .computerlanguage import ComputerLanguage
+from .contextentity import ContextEntity
+from .creativework import CreativeWork
+from .data_entity import DataEntity
+from .dataset import Dataset
+from .entity import Entity
+from .file import File
+from .file_or_dir import FileOrDir
+from .metadata import Metadata, LegacyMetadata
+from .person import Person
+from .root_dataset import RootDataset
+from .softwareapplication import SoftwareApplication
+from .testdefinition import TestDefinition
+from .testinstance import TestInstance
+from .preview import Preview
+from .testservice import TestService
+from .testsuite import TestSuite
+
+__all__ = [
+    "ComputationalWorkflow",
+    "ComputerLanguage",
+    "ContextEntity",
+    "CreativeWork",
+    "DataEntity",
+    "Dataset",
+    "Entity",
+    "File",
+    "FileOrDir",
+    "LegacyMetadata",
+    "Metadata",
+    "Person",
+    "Preview",
+    "RootDataset",
+    "SoftwareApplication",
+    "TestDefinition",
+    "TestInstance",
+    "TestService",
+    "TestSuite",
+    "Workflow",
+    "WorkflowDescription",
+]
