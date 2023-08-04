@@ -447,3 +447,16 @@ def test_append_to(compact):
     # exceptions
     with pytest.raises(KeyError):
         rd.append_to("@id", "foo", compact=compact)
+
+
+def test_get_by_type(test_data_dir):
+    crate = ROCrate()
+    f1 = crate.add_file(test_data_dir / "sample_file.txt")
+    f2 = crate.add_file(test_data_dir / "test_file_galaxy.txt")
+    wf = crate.add_workflow(test_data_dir / "test_galaxy_wf.ga", main=True, lang="galaxy")
+    assert set(crate.get_by_type("File")) == {f1, f2, wf}
+    assert set(crate.get_by_type("File", exact=True)) == {f1, f2}
+    assert crate.get_by_type(["ComputationalWorkflow"]) == [wf]
+    assert crate.get_by_type(["File", "ComputationalWorkflow"]) == [wf]
+    assert crate.get_by_type("Person") == []
+    assert crate.get_by_type("Dataset") == [crate.root_dataset]
