@@ -54,7 +54,7 @@ from .model.computerlanguage import get_lang
 from .model.testservice import get_service
 from .model.softwareapplication import get_app
 
-from .utils import is_url, subclasses, get_norm_value, walk
+from .utils import is_url, subclasses, get_norm_value, walk, as_list
 from .metadata import read_metadata, find_root_entity_id
 
 
@@ -296,6 +296,13 @@ class ROCrate():
         return self.__entity_map.get(canonical_id, default)
 
     get = dereference
+
+    def get_by_type(self, type_, exact=False):
+        type_ = set(as_list(type_))
+        if exact:
+            return [_ for _ in self.get_entities() if type_ == set(as_list(_.type))]
+        else:
+            return [_ for _ in self.get_entities() if type_ <= set(as_list(_.type))]
 
     def add_file(
             self,

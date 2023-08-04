@@ -23,6 +23,12 @@ from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
 
+def as_list(value):
+    if isinstance(value, list):
+        return value
+    return [value]
+
+
 def is_url(string):
     parts = urlsplit(string)
     if os.name == "nt" and len(parts.scheme) == 1:
@@ -53,9 +59,7 @@ def get_norm_value(json_entity, prop):
     """\
     Get a normalized value for a property (always as a list of strings).
     """
-    value = json_entity.get(prop, [])
-    if not isinstance(value, list):
-        value = [value]
+    value = as_list(json_entity.get(prop, []))
     try:
         return [_ if isinstance(_, str) else _["@id"] for _ in value]
     except (TypeError, KeyError):
