@@ -484,3 +484,53 @@ def test_multi_type_context_entity(tmpdir):
     entity = crate.dereference(id_)
     assert entity in crate.contextual_entities
     assert set(entity.type) == set(type_)
+
+
+def test_indirect_data_entity(tmpdir):
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": "./"},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+            },
+            {
+                "@id": "./",
+                "@type": "Dataset",
+                "hasPart": [{"@id": "d1"}]
+            },
+            {
+                "@id": "d1",
+                "@type": "Dataset",
+                "hasPart": [{"@id": "d1/d2"}]
+            },
+            {
+                "@id": "d1/d2",
+                "@type": "Dataset",
+                "hasPart": [{"@id": "d1/d2/f1"}]
+            },
+            {
+                "@id": "d1/d2/f1",
+                "@type": "File"
+            }
+        ]
+    }
+    crate_dir = tmpdir / "test_indirect_data_entity"
+    crate_dir.mkdir()
+    with open(crate_dir / "ro-crate-metadata.json", "wt") as f:
+        json.dump(metadata, f, indent=4)
+    d1 = crate_dir / "d1"
+    d1.mkdir()
+    d2 = d1 / "d2"
+    d2.mkdir()
+    f1 = d2 / "f1"
+    f1.touch()
+    crate = ROCrate(crate_dir)
+    d1_e = crate.dereference("d1")
+    assert d1_e
+    assert d1_e in crate.data_entities
+    d2_e = crate.dereference("d1/d2")
+    assert d2_e
+    assert d2_e in crate.data_entities

@@ -147,6 +147,9 @@ class ROCrate():
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
             self.add(Preview(self, source / Preview.BASENAME, properties=preview_entity))
+        self.__add_parts(parts, entities, source)
+
+    def __add_parts(self, parts, entities, source):
         type_map = OrderedDict((_.__name__, _) for _ in subclasses(FileOrDir))
         for data_entity_ref in parts:
             id_ = data_entity_ref['@id']
@@ -161,6 +164,7 @@ class ROCrate():
                 else:
                     instance = cls(self, source / id_, id_, properties=entity)
             self.add(instance)
+            self.__add_parts(entity.get("hasPart", []), entities, source)
 
     def __read_contextual_entities(self, entities):
         type_map = {_.__name__: _ for _ in subclasses(ContextEntity)}
