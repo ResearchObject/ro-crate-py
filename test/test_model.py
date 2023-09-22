@@ -460,3 +460,18 @@ def test_get_by_type(test_data_dir):
     assert crate.get_by_type(["File", "ComputationalWorkflow"]) == [wf]
     assert crate.get_by_type("Person") == []
     assert crate.get_by_type("Dataset") == [crate.root_dataset]
+
+
+def test_context(helpers):
+    crate = ROCrate()
+    jsonld = crate.metadata.generate()
+    base_context = f"{helpers.PROFILE}/context"
+    assert jsonld["@context"] == base_context
+    wfrun_ctx = "https://w3id.org/ro/terms/workflow-run"
+    crate.metadata.extra_contexts.append(wfrun_ctx)
+    jsonld = crate.metadata.generate()
+    assert jsonld["@context"] == [base_context, wfrun_ctx]
+    k, v = "runsOn", "https://w3id.org/ro/terms/test#runsOn"
+    crate.metadata.extra_terms[k] = v
+    jsonld = crate.metadata.generate()
+    assert jsonld["@context"] == [base_context, wfrun_ctx, {k: v}]

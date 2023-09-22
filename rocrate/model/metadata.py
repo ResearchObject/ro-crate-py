@@ -47,6 +47,7 @@ class Metadata(File):
             properties=properties
         )
         # https://www.researchobject.org/ro-crate/1.1/appendix/jsonld.html#extending-ro-crate
+        self.extra_contexts = []
         self.extra_terms = {}
 
     def _empty(self):
@@ -63,9 +64,12 @@ class Metadata(File):
         graph = []
         for entity in self.crate.get_entities():
             graph.append(entity.properties())
-        context = f'{self.PROFILE}/context'
+        context = [f'{self.PROFILE}/context']
+        context.extend(self.extra_contexts)
         if self.extra_terms:
-            context = [context, self.extra_terms]
+            context.append(self.extra_terms)
+        if len(context) == 1:
+            context = context[0]
         return {'@context': context, '@graph': graph}
 
     def write(self, base_path):
