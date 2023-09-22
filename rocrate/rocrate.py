@@ -153,7 +153,10 @@ class ROCrate():
         type_map = OrderedDict((_.__name__, _) for _ in subclasses(FileOrDir))
         for data_entity_ref in parts:
             id_ = data_entity_ref['@id']
-            entity = entities.pop(id_)
+            try:
+                entity = entities.pop(id_)
+            except KeyError:
+                continue
             assert id_ == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=DataEntity)
             if cls is DataEntity:
