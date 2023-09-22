@@ -142,7 +142,7 @@ class ROCrate():
 
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
-        parts = root_entity.pop('hasPart', [])
+        parts = as_list(root_entity.pop('hasPart', []))
         self.add(RootDataset(self, root_id, properties=root_entity))
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
@@ -167,7 +167,7 @@ class ROCrate():
                 else:
                     instance = cls(self, source / id_, id_, properties=entity)
             self.add(instance)
-            self.__add_parts(entity.get("hasPart", []), entities, source)
+            self.__add_parts(as_list(entity.get("hasPart", [])), entities, source)
 
     def __read_contextual_entities(self, entities):
         type_map = {_.__name__: _ for _ in subclasses(ContextEntity)}

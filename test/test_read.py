@@ -499,17 +499,17 @@ def test_indirect_data_entity(tmpdir):
             {
                 "@id": "./",
                 "@type": "Dataset",
-                "hasPart": [{"@id": "d1"}]
+                "hasPart": {"@id": "d1"}
             },
             {
                 "@id": "d1",
                 "@type": "Dataset",
-                "hasPart": [{"@id": "d1/d2"}]
+                "hasPart": {"@id": "d1/d2"}
             },
             {
                 "@id": "d1/d2",
                 "@type": "Dataset",
-                "hasPart": [{"@id": "d1/d2/f1"}]
+                "hasPart": {"@id": "d1/d2/f1"}
             },
             {
                 "@id": "d1/d2/f1",
