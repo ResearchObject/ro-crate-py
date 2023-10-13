@@ -475,3 +475,33 @@ def test_context(helpers):
     crate.metadata.extra_terms[k] = v
     jsonld = crate.metadata.generate()
     assert jsonld["@context"] == [base_context, wfrun_ctx, {k: v}]
+
+
+def test_add_no_duplicates(test_data_dir, tmpdir):
+    source = test_data_dir / "sample_file.txt"
+    crate = ROCrate()
+    f1 = crate.add_file(source, properties={"name": "sample file"})
+    ret = crate.get(source.name)
+    assert ret is f1
+    assert ret["name"] == "sample file"
+    assert ret in crate.get_entities()
+    assert crate.data_entities == [f1]
+    f2 = crate.add_file(source, properties={"name": "foobar"})
+    ret = crate.get(source.name)
+    assert ret is f2
+    assert ret["name"] == "foobar"
+    assert ret in crate.get_entities()
+    assert f1 not in crate.get_entities()
+    assert crate.data_entities == [f2]
+    joe = crate.add(Person(crate, "#joe", properties={"name": "Joe"}))
+    ret = crate.get("#joe")
+    assert ret is joe
+    assert ret in crate.get_entities()
+    assert ret["name"] == "Joe"
+    assert crate.contextual_entities == [joe]
+    jim = crate.add(Person(crate, "#joe", properties={"name": "Jim"}))
+    ret = crate.get("#joe")
+    assert ret is jim
+    assert ret["name"] == "Jim"
+    assert ret in crate.get_entities()
+    assert crate.contextual_entities == [jim]
