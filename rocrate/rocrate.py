@@ -75,9 +75,6 @@ class ROCrate():
     def __init__(self, source=None, gen_preview=False, init=False, exclude=None):
         self.exclude = exclude
         self.__entity_map = {}
-        self.default_entities = []
-        self.data_entities = []
-        self.contextual_entities = []
         # TODO: add this as @base in the context? At least when loading
         # from zip
         self.uuid = uuid.uuid4()
@@ -136,14 +133,14 @@ class ROCrate():
 
     def __read_data_entities(self, entities, source, gen_preview):
         metadata_id, root_id = find_root_entity_id(entities)
-        MetadataClass = metadata_class(metadata_id)
-        metadata_properties = entities.pop(metadata_id)
-        self.add(MetadataClass(self, metadata_id, properties=metadata_properties))
-
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
         parts = as_list(root_entity.pop('hasPart', []))
         self.add(RootDataset(self, root_id, properties=root_entity))
+        MetadataClass = metadata_class(metadata_id)
+        metadata_properties = entities.pop(metadata_id)
+        self.add(MetadataClass(self, metadata_id, properties=metadata_properties))
+
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
             self.add(Preview(self, source / Preview.BASENAME, properties=preview_entity))
@@ -175,6 +172,23 @@ class ROCrate():
             assert identifier == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=ContextEntity)
             self.add(cls(self, identifier, entity))
+
+    @property
+    def default_entities(self):
+        return [e for e in self.__entity_map.values()
+                if isinstance(e, (RootDataset, Metadata, LegacyMetadata, Preview))]
+
+    @property
+    def data_entities(self):
+        return [e for e in self.__entity_map.values()
+                if not isinstance(e, (RootDataset, Metadata, LegacyMetadata, Preview))
+                and hasattr(e, "write")]
+
+    @property
+    def contextual_entities(self):
+        return [e for e in self.__entity_map.values()
+                if not isinstance(e, (RootDataset, Metadata, LegacyMetadata, Preview))
+                and not hasattr(e, "write")]
 
     @property
     def name(self):
@@ -379,18 +393,13 @@ class ROCrate():
             key = e.canonical_id()
             if isinstance(e, RootDataset):
                 self.root_dataset = e
-            if isinstance(e, (Metadata, LegacyMetadata)):
+            elif isinstance(e, (Metadata, LegacyMetadata)):
                 self.metadata = e
-            if isinstance(e, Preview):
+            elif isinstance(e, Preview):
                 self.preview = e
-            if isinstance(e, (RootDataset, Metadata, LegacyMetadata, Preview)):
-                self.default_entities.append(e)
             elif hasattr(e, "write"):
-                self.data_entities.append(e)
                 if key not in self.__entity_map:
                     self.root_dataset.append_to("hasPart", e)
-            else:
-                self.contextual_entities.append(e)
             self.__entity_map[key] = e
         return entities[0] if len(entities) == 1 else entities
 
@@ -412,21 +421,11 @@ class ROCrate():
             if e is self.metadata:
                 raise ValueError("cannot delete the metadata entity")
             if e is self.preview:
-                self.default_entities.remove(e)
                 self.preview = None
             elif hasattr(e, "write"):
-                try:
-                    self.data_entities.remove(e)
-                except ValueError:
-                    pass
                 self.root_dataset["hasPart"] = [_ for _ in self.root_dataset.get("hasPart", []) if _ != e]
                 if not self.root_dataset["hasPart"]:
                     del self.root_dataset._jsonld["hasPart"]
-            else:
-                try:
-                    self.contextual_entities.remove(e)
-                except ValueError:
-                    pass
             self.__entity_map.pop(e.canonical_id(), None)
 
     def _copy_unlisted(self, top, base_path):
