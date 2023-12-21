@@ -33,7 +33,7 @@ def is_url(string):
     parts = urlsplit(string)
     if os.name == "nt" and len(parts.scheme) == 1:
         return False
-    return all((parts.scheme, parts.path))
+    return bool(parts.scheme)
 
 
 def iso_now():
