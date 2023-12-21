@@ -30,15 +30,19 @@ class Entity(MutableMapping):
     def __init__(self, crate, identifier=None, properties=None):
         self.crate = crate
         if identifier:
-            self.id = self.format_id(identifier)
+            self.__id = self.format_id(identifier)
         else:
-            self.id = f"#{uuid.uuid4()}"
+            self.__id = f"#{uuid.uuid4()}"
         if properties:
             empty = self._empty()
             empty.update(properties)
             self._jsonld = empty
         else:
             self._jsonld = self._empty()
+
+    @property
+    def id(self):
+        return self.__id
 
     # Format the given ID with rules appropriate for this type.
     # For example, Dataset (directory) data entities SHOULD end with /

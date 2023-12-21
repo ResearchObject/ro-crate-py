@@ -505,3 +505,10 @@ def test_add_no_duplicates(test_data_dir, tmpdir):
     assert ret["name"] == "Jim"
     assert ret in crate.get_entities()
     assert crate.contextual_entities == [jim]
+
+
+def test_immutable_id():
+    crate = ROCrate()
+    p = crate.add(Person(crate, "#foo"))
+    with pytest.raises(AttributeError):
+        p.id = "#bar"
