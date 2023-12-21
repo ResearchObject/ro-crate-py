@@ -18,7 +18,7 @@
 
 import pytest
 
-from rocrate.utils import subclasses, get_norm_value
+from rocrate.utils import subclasses, get_norm_value, is_url
 
 
 class Pet:
@@ -53,3 +53,12 @@ def test_get_norm_value():
     assert get_norm_value({"@id": "#xyz"}, "name") == []
     with pytest.raises(ValueError):
         get_norm_value({"@id": "#xyz", "name": [["foo"]]}, "name")
+
+
+def test_is_url():
+    assert is_url("http://example.com/index.html")
+    assert is_url("http://example.com/")
+    assert is_url("http://example.com")
+    assert not is_url("/etc/")
+    assert not is_url("/etc")
+    assert not is_url("/")
