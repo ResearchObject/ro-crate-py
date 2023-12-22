@@ -150,6 +150,7 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
     if fetch_remote:
         out_file = out_crate.dereference(file_.id)
         assert (out_path / relpath).is_file()
+        assert out_file["contentUrl"] == url
     else:
         out_file = out_crate.dereference(url)
         assert not (out_path / relpath).exists()
