@@ -59,6 +59,7 @@ class File(FileOrDir):
                     if self.fetch_remote:
                         out_file_path.parent.mkdir(parents=True, exist_ok=True)
                         urllib.request.urlretrieve(response.url, out_file_path)
+                        self._jsonld['contentUrl'] = str(self.source)
         elif self.source is None:
             # Allows to record a File entity whose @id does not exist, see #73
             warnings.warn(f"No source for {self.id}")
