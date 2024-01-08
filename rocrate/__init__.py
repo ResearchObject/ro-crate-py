@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-# Copyright 2019-2023 The University of Manchester, UK
-# Copyright 2020-2023 Vlaams Instituut voor Biotechnologie (VIB), BE
-# Copyright 2020-2023 Barcelona Supercomputing Center (BSC), ES
-# Copyright 2020-2023 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
-# Copyright 2022-2023 École Polytechnique Fédérale de Lausanne, CH
+# Copyright 2019-2024 The University of Manchester, UK
+# Copyright 2020-2024 Vlaams Instituut voor Biotechnologie (VIB), BE
+# Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
+# Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+# Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,11 +41,11 @@ __author__ = ", ".join((
     'Stian Soiland-Reyes'
 ))
 __copyright__ = """\
-Copyright 2019-2023 The University of Manchester, UK
-Copyright 2020-2023 Vlaams Instituut voor Biotechnologie (VIB), BE
-Copyright 2020-2023 Barcelona Supercomputing Center (BSC), ES
-Copyright 2020-2023 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
-Copyright 2022-2023 École Polytechnique Fédérale de Lausanne, CH
+Copyright 2019-2024 The University of Manchester, UK
+Copyright 2020-2024 Vlaams Instituut voor Biotechnologie (VIB), BE
+Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
+Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 """
 __license__ = ("Apache License, version 2.0 "
                "<https://www.apache.org/licenses/LICENSE-2.0>")
