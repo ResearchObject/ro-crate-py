@@ -70,6 +70,36 @@ def add():
 
 
 @add.command()
+@click.argument('path', type=click.Path(exists=True, dir_okay=False))
+@OPTION_CRATE_PATH
+def file(crate_dir, path):
+    crate = ROCrate(crate_dir, init=False, gen_preview=False)
+    source = Path(path).resolve(strict=True)
+    try:
+        dest_path = source.relative_to(crate_dir)
+    except ValueError:
+        # For now, only support adding an existing file to the metadata
+        raise ValueError(f"{source} is not in the crate dir {crate_dir}")
+    crate.add_file(source, dest_path)
+    crate.metadata.write(crate_dir)
+
+
+@add.command()
+@click.argument('path', type=click.Path(exists=True, file_okay=False))
+@OPTION_CRATE_PATH
+def dataset(crate_dir, path):
+    crate = ROCrate(crate_dir, init=False, gen_preview=False)
+    source = Path(path).resolve(strict=True)
+    try:
+        dest_path = source.relative_to(crate_dir)
+    except ValueError:
+        # For now, only support adding an existing directory to the metadata
+        raise ValueError(f"{source} is not in the crate dir {crate_dir}")
+    crate.add_dataset(source, dest_path)
+    crate.metadata.write(crate_dir)
+
+
+@add.command()
 @click.argument('path', type=click.Path(exists=True))
 @click.option('-l', '--language', type=click.Choice(LANG_CHOICES), default="cwl")
 @OPTION_CRATE_PATH

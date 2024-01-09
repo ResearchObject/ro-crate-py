@@ -20,6 +20,7 @@ import json
 import click
 from click.testing import CliRunner
 import pytest
+import shutil
 
 from rocrate.cli import cli
 from rocrate.model import File
@@ -130,6 +131,58 @@ def test_cli_init_exclude(test_data_dir, helpers):
         assert not crate.dereference(p)
     for e in crate.data_entities:
         assert not e.id.startswith("test")
+
+
+@pytest.mark.parametrize("cwd", [False, True])
+def test_cli_add_file(tmpdir, test_data_dir, helpers, monkeypatch, cwd):
+    # init
+    crate_dir = tmpdir / "crate"
+    crate_dir.mkdir()
+    runner = CliRunner()
+    assert runner.invoke(cli, ["init", "-c", str(crate_dir)]).exit_code == 0
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert set(json_entities) == {"./", "ro-crate-metadata.json"}
+    # add
+    shutil.copy(test_data_dir / "sample_file.txt", crate_dir)
+    file_path = crate_dir / "sample_file.txt"
+    args = ["add", "file"]
+    if cwd:
+        monkeypatch.chdir(str(crate_dir))
+        file_path = file_path.relative_to(crate_dir)
+    else:
+        args.extend(["-c", str(crate_dir)])
+    args.append(str(file_path))
+    result = runner.invoke(cli, args)
+    assert result.exit_code == 0
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert "sample_file.txt" in json_entities
+    assert json_entities["sample_file.txt"]["@type"] == "File"
+
+
+@pytest.mark.parametrize("cwd", [False, True])
+def test_cli_add_dataset(tmpdir, test_data_dir, helpers, monkeypatch, cwd):
+    # init
+    crate_dir = tmpdir / "crate"
+    crate_dir.mkdir()
+    runner = CliRunner()
+    assert runner.invoke(cli, ["init", "-c", str(crate_dir)]).exit_code == 0
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert set(json_entities) == {"./", "ro-crate-metadata.json"}
+    # add
+    dataset_path = crate_dir / "test_add_dir"
+    shutil.copytree(test_data_dir / "test_add_dir", dataset_path)
+    args = ["add", "dataset"]
+    if cwd:
+        monkeypatch.chdir(str(crate_dir))
+        dataset_path = dataset_path.relative_to(crate_dir)
+    else:
+        args.extend(["-c", str(crate_dir)])
+    args.append(str(dataset_path))
+    result = runner.invoke(cli, args)
+    assert result.exit_code == 0
+    json_entities = helpers.read_json_entities(crate_dir)
+    assert "test_add_dir/" in json_entities
+    assert json_entities["test_add_dir/"]["@type"] == "Dataset"
 
 
 @pytest.mark.parametrize("cwd", [False, True])
