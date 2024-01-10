@@ -44,8 +44,20 @@ class CSVParamType(click.ParamType):
             self.fail(f"{value!r} is not splittable", param, ctx)
 
 
+class KeyValueParamType(click.ParamType):
+    name = "key_value"
+
+    def convert(self, value, param, ctx):
+        try:
+            return tuple(value.split("=", 1)) if value else ()
+        except AttributeError:
+            self.fail(f"{value!r} is not splittable", param, ctx)
+
+
 CSV = CSVParamType()
+KeyValue = KeyValueParamType()
 OPTION_CRATE_PATH = click.option('-c', '--crate-dir', type=click.Path(), default=os.getcwd)
+OPTION_PROPS = click.option('-P', '--property', type=KeyValue, multiple=True, metavar="KEY=VALUE")
 
 
 @click.group()
@@ -72,7 +84,8 @@ def add():
 @add.command()
 @click.argument('path', type=click.Path(exists=True, dir_okay=False))
 @OPTION_CRATE_PATH
-def file(crate_dir, path):
+@OPTION_PROPS
+def file(crate_dir, path, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     source = Path(path).resolve(strict=True)
     try:
@@ -80,14 +93,15 @@ def file(crate_dir, path):
     except ValueError:
         # For now, only support adding an existing file to the metadata
         raise ValueError(f"{source} is not in the crate dir {crate_dir}")
-    crate.add_file(source, dest_path)
+    crate.add_file(source, dest_path, properties=dict(property))
     crate.metadata.write(crate_dir)
 
 
 @add.command()
 @click.argument('path', type=click.Path(exists=True, file_okay=False))
 @OPTION_CRATE_PATH
-def dataset(crate_dir, path):
+@OPTION_PROPS
+def dataset(crate_dir, path, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     source = Path(path).resolve(strict=True)
     try:
@@ -95,7 +109,7 @@ def dataset(crate_dir, path):
     except ValueError:
         # For now, only support adding an existing directory to the metadata
         raise ValueError(f"{source} is not in the crate dir {crate_dir}")
-    crate.add_dataset(source, dest_path)
+    crate.add_dataset(source, dest_path, properties=dict(property))
     crate.metadata.write(crate_dir)
 
 
@@ -103,7 +117,8 @@ def dataset(crate_dir, path):
 @click.argument('path', type=click.Path(exists=True))
 @click.option('-l', '--language', type=click.Choice(LANG_CHOICES), default="cwl")
 @OPTION_CRATE_PATH
-def workflow(crate_dir, path, language):
+@OPTION_PROPS
+def workflow(crate_dir, path, language, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     source = Path(path).resolve(strict=True)
     try:
@@ -112,7 +127,7 @@ def workflow(crate_dir, path, language):
         # For now, only support marking an existing file as a workflow
         raise ValueError(f"{source} is not in the crate dir {crate_dir}")
     # TODO: add command options for main and gen_cwl
-    crate.add_workflow(source, dest_path, main=True, lang=language, gen_cwl=False)
+    crate.add_workflow(source, dest_path, main=True, lang=language, gen_cwl=False, properties=dict(property))
     crate.metadata.write(crate_dir)
 
 
@@ -121,9 +136,13 @@ def workflow(crate_dir, path, language):
 @click.option('-n', '--name')
 @click.option('-m', '--main-entity')
 @OPTION_CRATE_PATH
-def suite(crate_dir, identifier, name, main_entity):
+@OPTION_PROPS
+def suite(crate_dir, identifier, name, main_entity, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
-    suite = crate.add_test_suite(identifier=add_hash(identifier), name=name, main_entity=main_entity)
+    suite = crate.add_test_suite(
+        identifier=add_hash(identifier), name=name, main_entity=main_entity,
+        properties=dict(property)
+    )
     crate.metadata.write(crate_dir)
     print(suite.id)
 
@@ -136,11 +155,12 @@ def suite(crate_dir, identifier, name, main_entity):
 @click.option('-i', '--identifier')
 @click.option('-n', '--name')
 @OPTION_CRATE_PATH
-def instance(crate_dir, suite, url, resource, service, identifier, name):
+@OPTION_PROPS
+def instance(crate_dir, suite, url, resource, service, identifier, name, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     instance_ = crate.add_test_instance(
         add_hash(suite), url, resource=resource, service=service,
-        identifier=add_hash(identifier), name=name
+        identifier=add_hash(identifier), name=name, properties=dict(property)
     )
     crate.metadata.write(crate_dir)
     print(instance_.id)
@@ -152,7 +172,8 @@ def instance(crate_dir, suite, url, resource, service, identifier, name):
 @click.option('-e', '--engine', type=click.Choice(ENGINE_CHOICES), default="planemo")
 @click.option('-v', '--engine-version')
 @OPTION_CRATE_PATH
-def definition(crate_dir, suite, path, engine, engine_version):
+@OPTION_PROPS
+def definition(crate_dir, suite, path, engine, engine_version, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     source = Path(path).resolve(strict=True)
     try:
@@ -162,7 +183,7 @@ def definition(crate_dir, suite, path, engine, engine_version):
         raise ValueError(f"{source} is not in the crate dir {crate_dir}")
     crate.add_test_definition(
         add_hash(suite), source=source, dest_path=dest_path, engine=engine,
-        engine_version=engine_version
+        engine_version=engine_version, properties=dict(property)
     )
     crate.metadata.write(crate_dir)
 

@@ -310,7 +310,7 @@ The command acts on the current directory, unless the `-c` option is specified. 
 
 ### Adding items to the crate
 
-The `rocrate add` command allows to add workflows and other entity types (currently [testing-related metadata](https://crs4.github.io/life_monitor/workflow_testing_ro_crate)) to an RO-Crate:
+The `rocrate add` command allows to add file, datasets (directories), workflows and other entity types (currently [testing-related metadata](https://crs4.github.io/life_monitor/workflow_testing_ro_crate)) to an RO-Crate:
 
 ```console
 $ rocrate add --help
@@ -320,6 +320,8 @@ Options:
   --help  Show this message and exit.
 
 Commands:
+  dataset
+  file
   test-definition
   test-instance
   test-suite
@@ -371,6 +373,29 @@ rocrate add test-suite -i test1
 rocrate add test-instance test1 http://example.com -r jobs -i test1_1
 rocrate add test-definition test1 test/test1/sort-and-change-case-test.yml -e planemo -v '>=0.70'
 ```
+
+To add files or directories after crate initialization:
+
+```bash
+cp ../sample_file.txt .
+rocrate add file sample_file.txt -P name=sample -P description="Sample file"
+cp -r ../test_add_dir .
+rocrate add dataset test_add_dir
+```
+
+The above example also shows how to set arbitrary properties for the entity with `-P`. This is supported by most `rocrate add` subcommands.
+
+```console
+$ rocrate add workflow --help
+Usage: rocrate add workflow [OPTIONS] PATH
+
+Options:
+  -l, --language [cwl|galaxy|knime|nextflow|snakemake|compss|autosubmit]
+  -c, --crate-dir PATH
+  -P, --property KEY=VALUE
+  --help                          Show this message and exit.
+```
+
 
 ## License
 
