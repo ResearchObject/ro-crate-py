@@ -57,7 +57,7 @@ class KeyValueParamType(click.ParamType):
 CSV = CSVParamType()
 KeyValue = KeyValueParamType()
 OPTION_CRATE_PATH = click.option('-c', '--crate-dir', type=click.Path(), default=os.getcwd)
-OPTION_PROPS = click.option('-P', '--property', type=KeyValue, multiple=True)
+OPTION_PROPS = click.option('-P', '--property', type=KeyValue, multiple=True, metavar="KEY=VALUE")
 
 
 @click.group()
