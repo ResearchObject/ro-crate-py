@@ -497,23 +497,24 @@ class ROCrate():
             workflow.subjectOf = cwl_workflow
         return workflow
 
-    def add_test_suite(self, identifier=None, name=None, main_entity=None):
+    def add_test_suite(self, identifier=None, name=None, main_entity=None, properties=None):
         test_ref_prop = "mentions"
         if not main_entity:
             main_entity = self.mainEntity
             if not main_entity:
                 test_ref_prop = "about"
-        suite = self.add(TestSuite(self, identifier))
-        suite.name = name or suite.id.lstrip("#")
+        suite = self.add(TestSuite(self, identifier, properties=properties))
+        if not properties or "name" not in properties:
+            suite.name = name or suite.id.lstrip("#")
         if main_entity:
             suite["mainEntity"] = main_entity
         self.root_dataset.append_to(test_ref_prop, suite)
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return suite
 
-    def add_test_instance(self, suite, url, resource="", service="jenkins", identifier=None, name=None):
+    def add_test_instance(self, suite, url, resource="", service="jenkins", identifier=None, name=None, properties=None):
         suite = self.__validate_suite(suite)
-        instance = self.add(TestInstance(self, identifier))
+        instance = self.add(TestInstance(self, identifier, properties=properties))
         instance.url = url
         instance.resource = resource
         if isinstance(service, TestService):
@@ -522,7 +523,8 @@ class ROCrate():
             service = get_service(self, service)
             self.add(service)
         instance.service = service
-        instance.name = name or instance.id.lstrip("#")
+        if not properties or "name" not in properties:
+            instance.name = name or instance.id.lstrip("#")
         suite.append_to("instance", instance)
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return instance
