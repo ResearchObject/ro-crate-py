@@ -139,7 +139,10 @@ def workflow(crate_dir, path, language, property):
 @OPTION_PROPS
 def suite(crate_dir, identifier, name, main_entity, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
-    suite = crate.add_test_suite(identifier=add_hash(identifier), name=name, main_entity=main_entity, properties=dict(property))
+    suite = crate.add_test_suite(
+        identifier=add_hash(identifier), name=name, main_entity=main_entity,
+        properties=dict(property)
+    )
     crate.metadata.write(crate_dir)
     print(suite.id)
 
