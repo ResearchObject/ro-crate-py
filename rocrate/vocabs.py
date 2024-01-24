@@ -19,15 +19,11 @@
 # limitations under the License.
 
 import json
-import pkg_resources
+import importlib.resources
 
 # FIXME: Avoid eager loading?
-RO_CRATE = json.loads(pkg_resources.resource_string(
-    __name__, "data/ro-crate.jsonld"
-))
-SCHEMA = json.loads(pkg_resources.resource_string(
-    __name__, "data/schema.jsonld"
-))
+RO_CRATE = json.loads(importlib.resources.read_text(__name__, "data/ro-crate.jsonld"))
+SCHEMA = json.loads(importlib.resources.read_text(__name__, "data/schema.jsonld"))
 SCHEMA_MAP = dict((e["@id"], e) for e in SCHEMA["@graph"])
 
 
