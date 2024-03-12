@@ -18,16 +18,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import json
-import importlib.resources
+if sys.version_info.minor < 9:
+    import pkg_resources
+else:
+    import importlib.resources
 
 # FIXME: Avoid eager loading?
-RO_CRATE = json.loads(
-    importlib.resources.files(__package__).joinpath("data/ro-crate.jsonld").read_text()
-)
-SCHEMA = json.loads(
-    importlib.resources.files(__package__).joinpath("data/schema.jsonld").read_text()
-)
+if sys.version_info.minor < 9:
+    RO_CRATE = json.loads(pkg_resources.resource_string(
+        __name__, "data/ro-crate.jsonld"
+    ))
+    SCHEMA = json.loads(pkg_resources.resource_string(
+        __name__, "data/schema.jsonld"
+    ))
+else:
+    RO_CRATE = json.loads(
+        importlib.resources.files(__package__).joinpath("data/ro-crate.jsonld").read_text()
+    )
+    SCHEMA = json.loads(
+        importlib.resources.files(__package__).joinpath("data/schema.jsonld").read_text()
+    )
 SCHEMA_MAP = dict((e["@id"], e) for e in SCHEMA["@graph"])
 
 
