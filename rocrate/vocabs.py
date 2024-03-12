@@ -22,8 +22,12 @@ import json
 import importlib.resources
 
 # FIXME: Avoid eager loading?
-RO_CRATE = json.loads(importlib.resources.read_text(__name__, "data/ro-crate.jsonld"))
-SCHEMA = json.loads(importlib.resources.read_text(__name__, "data/schema.jsonld"))
+RO_CRATE = json.loads(
+    importlib.resources.files(__package__).joinpath("data/ro-crate.jsonld").read_text()
+)
+SCHEMA = json.loads(
+    importlib.resources.files(__package__).joinpath("data/schema.jsonld").read_text()
+)
 SCHEMA_MAP = dict((e["@id"], e) for e in SCHEMA["@graph"])
 
 
