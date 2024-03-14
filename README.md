@@ -405,15 +405,15 @@ Options:
  * Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
  * Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 
-Licensed under the 
-Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>, 
+Licensed under the
+Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>,
 see the file `LICENSE.txt` for details.
 
 ## Cite as
 
 [![DOI](https://zenodo.org/badge/216605684.svg)](https://zenodo.org/badge/latestdoi/216605684)
 
-The above DOI corresponds to the latest versioned release as [published to Zenodo](https://zenodo.org/record/3956493), where you will find all earlier releases. 
+The above DOI corresponds to the latest versioned release as [published to Zenodo](https://zenodo.org/record/3956493), where you will find all earlier releases.
 To cite `ro-crate-py` independent of version, use <https://doi.org/10.5281/zenodo.3956493>, which will always redirect to the latest release.
 
 You may also be interested in the paper [Packaging research artefacts with RO-Crate](https://doi.org/10.3233/DS-210053).
