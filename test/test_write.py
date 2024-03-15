@@ -20,6 +20,7 @@ import io
 import pytest
 import os
 import uuid
+import sys
 import zipfile
 from itertools import product
 from urllib.error import URLError
@@ -214,6 +215,7 @@ def test_looks_like_file_uri(tmpdir, monkeypatch):
     assert (out_path / f_name).is_file()
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="FTP opening broken on macOS CI instances")
 @pytest.mark.slow
 @pytest.mark.parametrize("fetch_remote", [False, True])
 def test_ftp_uri(tmpdir, fetch_remote):
