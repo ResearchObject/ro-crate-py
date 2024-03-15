@@ -35,10 +35,10 @@ if sys.version_info.minor < 9:
     ))
 else:
     RO_CRATE = json.loads(
-        importlib.resources.files(__package__).joinpath("data/ro-crate.jsonld").read_text()
+        importlib.resources.files(__package__).joinpath("data/ro-crate.jsonld").read_text("utf8")
     )
     SCHEMA = json.loads(
-        importlib.resources.files(__package__).joinpath("data/schema.jsonld").read_text()
+        importlib.resources.files(__package__).joinpath("data/schema.jsonld").read_text("utf8")
     )
 SCHEMA_MAP = dict((e["@id"], e) for e in SCHEMA["@graph"])
 
