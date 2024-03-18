@@ -57,6 +57,7 @@ setup(
     long_description_content_type='text/markdown',
     long_description=long_description,
     author=", ".join((
+        'Eli Chadwick',
         'Paul De Geest',
         'Bert Droesbeke',
         'Ignacio Eguinoa',

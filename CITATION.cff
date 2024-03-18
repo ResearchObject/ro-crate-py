@@ -1,6 +1,9 @@
 cff-version: 1.1.0
 message: "Cite as"
 authors:
+  - family-names: Chadwick
+    given-names: Eli
+    orcid: https://orcid.org/0000-0002-0035-6475
   - family-names: De Geest
     given-names: Paul
     orcid: https://orcid.org/0000-0002-8940-4946

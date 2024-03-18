@@ -29,6 +29,7 @@ RO-Crate metadata, see rocrate_
 """
 
 __author__ = ", ".join((
+    'Eli Chadwick',
     'Paul De Geest',
     'Bert Droesbeke',
     'Ignacio Eguinoa',
