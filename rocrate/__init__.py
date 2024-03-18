@@ -5,6 +5,7 @@
 # Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
 # Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
+# Copyright 2024 Data Centre, SciLifeLab, SE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,10 +29,12 @@ RO-Crate metadata, see rocrate_
 """
 
 __author__ = ", ".join((
+    'Eli Chadwick',
     'Paul De Geest',
     'Bert Droesbeke',
     'Ignacio Eguinoa',
     'Alban Gaignard',
+    'Matthias Hörtenhuber',
     'Sebastiaan Huber',
     'Bruno Kinoshita',
     'Simone Leo',
@@ -46,6 +49,7 @@ Copyright 2020-2024 Vlaams Instituut voor Biotechnologie (VIB), BE
 Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
 Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
+Copyright 2024 Data Centre, SciLifeLab, SE
 """
 __license__ = ("Apache License, version 2.0 "
                "<https://www.apache.org/licenses/LICENSE-2.0>")

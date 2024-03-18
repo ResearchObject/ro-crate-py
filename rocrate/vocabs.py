@@ -5,6 +5,7 @@
 # Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
 # Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
+# Copyright 2024 Data Centre, SciLifeLab, SE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,16 +19,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import json
-import pkg_resources
+if sys.version_info.minor < 9:
+    import pkg_resources
+else:
+    import importlib.resources
 
 # FIXME: Avoid eager loading?
-RO_CRATE = json.loads(pkg_resources.resource_string(
-    __name__, "data/ro-crate.jsonld"
-))
-SCHEMA = json.loads(pkg_resources.resource_string(
-    __name__, "data/schema.jsonld"
-))
+if sys.version_info.minor < 9:
+    RO_CRATE = json.loads(pkg_resources.resource_string(
+        __name__, "data/ro-crate.jsonld"
+    ))
+    SCHEMA = json.loads(pkg_resources.resource_string(
+        __name__, "data/schema.jsonld"
+    ))
+else:
+    RO_CRATE = json.loads(
+        importlib.resources.files(__package__).joinpath("data/ro-crate.jsonld").read_text("utf8")
+    )
+    SCHEMA = json.loads(
+        importlib.resources.files(__package__).joinpath("data/schema.jsonld").read_text("utf8")
+    )
 SCHEMA_MAP = dict((e["@id"], e) for e in SCHEMA["@graph"])
 
 

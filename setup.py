@@ -5,6 +5,7 @@
 # Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
 # Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
+# Copyright 2024 Data Centre, SciLifeLab, SE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,10 +57,12 @@ setup(
     long_description_content_type='text/markdown',
     long_description=long_description,
     author=", ".join((
+        'Eli Chadwick',
         'Paul De Geest',
         'Bert Droesbeke',
         'Ignacio Eguinoa',
         'Alban Gaignard',
+        'Matthias Hörtenhuber',
         'Sebastiaan Huber',
         'Bruno Kinoshita',
         'Simone Leo',

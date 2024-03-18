@@ -404,6 +404,7 @@ Options:
  * Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
  * Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
  * Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
+ * Copyright 2024 Data Centre, SciLifeLab, SE
 
 Licensed under the
 Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>,
