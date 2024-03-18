@@ -61,6 +61,7 @@ setup(
         'Bert Droesbeke',
         'Ignacio Eguinoa',
         'Alban Gaignard',
+        'Matthias Hörtenhuber',
         'Sebastiaan Huber',
         'Bruno Kinoshita',
         'Simone Leo',
