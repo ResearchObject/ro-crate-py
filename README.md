@@ -24,7 +24,16 @@ pip install .
 
 In its simplest form, an RO-Crate is a directory tree with an `ro-crate-metadata.json` file at the top level that contains metadata about the other files and directories, represented by [data entities](https://www.researchobject.org/ro-crate/1.1/data-entities.html). These metadata consist both of properties of the data entities themselves and of other, non-digital entities called [contextual entities](https://www.researchobject.org/ro-crate/1.1/contextual-entities.html) (representing, e.g., a person or an organization).
 
-Suppose Alice and Bob worked on a research task together, which resulted in a manuscript written by both; additionally, Alice prepared a spreadsheet containing the experimental data, which Bob used to generate a diagram. Let's make an RO-Crate to package all this:
+Suppose Alice and Bob worked on a research task together, which resulted in a manuscript written by both; additionally, Alice prepared a spreadsheet containing the experimental data, which Bob used to generate a diagram. For the purpose of this tutorial, you can just create dummy files for the documents:
+
+```bash
+mkdir exp
+touch exp/paper.pdf
+touch exp/results.csv
+touch exp/diagram.svg
+```
+
+Let's make an RO-Crate to package all this:
 
 ```python
 from rocrate.rocrate import ROCrate
