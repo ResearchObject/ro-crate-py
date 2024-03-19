@@ -2,7 +2,6 @@
 
 ro-crate-py is a Python library to create and consume [Research Object Crates](https://w3id.org/ro/crate). It currently supports the [RO-Crate 1.1](https://w3id.org/ro/crate/1.1) specification.
 
-
 ## Installation
 
 ro-crate-py requires Python 3.7 or later. The easiest way to install is via [pip](https://docs.python.org/3/installing/):
@@ -18,7 +17,6 @@ git clone https://github.com/ResearchObject/ro-crate-py
 cd ro-crate-py
 pip install .
 ```
-
 
 ## Usage
 
@@ -93,7 +91,6 @@ logs = crate.add_dataset("exp/logs")
 
 Note that the above adds all files and directories contained in `"exp/logs"` recursively to the crate, but only the top-level `"exp/logs"` dataset itself is listed in the metadata file (there is no requirement to represent every file and folder in the JSON-LD). To also add files and directory recursively to the metadata, use `add_tree` (but note that it only works on local directory trees).
 
-
 #### Appending elements to property values
 
 What ro-crate-py entities actually store is their JSON representation:
@@ -150,7 +147,6 @@ By default the file won't be downloaded, and will be referenced by its URI in th
 If you add `fetch_remote=True` to the `add_file` call, however, the library (when `crate.write` is called) will try to download the file and include it in the output crate.
 
 Another option that influences the behavior when dealing with remote entities is `validate_url`, also `False` by default: if it's set to `True`, when the crate is serialized, the library will try to open the URL to add / update metadata bits such as the content's length and format (but it won't try to download the file unless `fetch_remote` is also set).
-
 
 #### Adding entities with an arbitrary type
 
@@ -239,8 +235,8 @@ for e in crate.get_entities():
 ```
 
 ```
-ro-crate-metadata.json CreativeWork
 ./ Dataset
+ro-crate-metadata.json CreativeWork
 paper.pdf File
 results.csv File
 images/figure.svg File
@@ -248,7 +244,7 @@ https://orcid.org/0000-0000-0000-0000 Person
 https://orcid.org/0000-0000-0000-0001 Person
 ```
 
-The first two entities shown in the output are the [metadata file descriptor](https://www.researchobject.org/ro-crate/1.1/metadata.html) and the [root data entity](https://www.researchobject.org/ro-crate/1.1/root-data-entity.html), respectively. These are special entities managed by the `ROCrate` object, and are always present. The other entities are the ones we added in the [section on RO-Crate creation](#creating-an-ro-crate). You can access data entities with `crate.data_entities` and contextual entities with `crate.contextual_entities`. For instance:
+The first two entities shown in the output are the [root data entity](https://www.researchobject.org/ro-crate/1.1/root-data-entity.html) and the [metadata file descriptor](https://www.researchobject.org/ro-crate/1.1/metadata.html), respectively. These are special entities managed by the `ROCrate` object, and are always present. The other entities are the ones we added in the [section on RO-Crate creation](#creating-an-ro-crate). You can access data entities with `crate.data_entities` and contextual entities with `crate.contextual_entities`. For instance:
 
 ```python
 for e in crate.data_entities:
@@ -272,7 +268,6 @@ You can fetch an entity by its `@id` as follows:
 ```python
 article = crate.dereference("paper.pdf")
 ```
-
 
 ## Command Line Interface
 
@@ -396,15 +391,14 @@ Options:
   --help                          Show this message and exit.
 ```
 
-
 ## License
 
- * Copyright 2019-2024 The University of Manchester, UK
- * Copyright 2020-2024 Vlaams Instituut voor Biotechnologie (VIB), BE
- * Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
- * Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
- * Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
- * Copyright 2024 Data Centre, SciLifeLab, SE
+* Copyright 2019-2024 The University of Manchester, UK
+* Copyright 2020-2024 Vlaams Instituut voor Biotechnologie (VIB), BE
+* Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
+* Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+* Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
+* Copyright 2024 Data Centre, SciLifeLab, SE
 
 Licensed under the
 Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>,
