@@ -191,7 +191,56 @@ Note that entities can have multiple types, e.g.:
     "@type" = ["File", "SoftwareSourceCode"]
 ```
 
-#### Modifying the crate from JSON-LD dictionaries
+### Consuming an RO-Crate
+
+An existing RO-Crate package can be loaded from a directory or zip file:
+
+```python
+crate = ROCrate('exp_crate')  # or ROCrate('exp_crate.zip')
+for e in crate.get_entities():
+    print(e.id, e.type)
+```
+
+```
+./ Dataset
+ro-crate-metadata.json CreativeWork
+paper.pdf File
+results.csv File
+images/figure.svg File
+https://orcid.org/0000-0000-0000-0000 Person
+https://orcid.org/0000-0000-0000-0001 Person
+```
+
+The first two entities shown in the output are the [root data entity](https://www.researchobject.org/ro-crate/1.1/root-data-entity.html) and the [metadata file descriptor](https://www.researchobject.org/ro-crate/1.1/metadata.html), respectively. The former represents the whole crate, while the latter represents the metadata file. These are special entities managed by the `ROCrate` object, and are always present. The other entities are the ones we added in the [section on RO-Crate creation](#creating-an-ro-crate).
+
+As shown above, `get_entities` allows to iterate over all entities in the crate. You can also access only data entities with `crate.data_entities` and only contextual entities with `crate.contextual_entities`. For instance:
+
+```python
+for e in crate.data_entities:
+    author = e.get("author")
+    if not author:
+        continue
+    elif isinstance(author, list):
+        print(e.id, [p["name"] for p in author])
+    else:
+        print(e.id, repr(author["name"]))
+```
+
+```
+paper.pdf ['Alice Doe', 'Bob Doe']
+results.csv 'Alice Doe'
+images/figure.svg 'Bob Doe'
+```
+
+You can fetch an entity by its `@id` as follows:
+
+```python
+article = crate.dereference("paper.pdf")
+```
+
+## Advanced features
+
+### Modifying the crate from JSON-LD dictionaries
 
 The `add_jsonld` method allows to add a contextual entity directly from a
 JSON-LD dictionary containing at least the `@id` and `@type` keys:
@@ -243,53 +292,6 @@ with open("patch.json") as f:
     json_data = json.load(f)
 for d in json_data.get("@graph", []):
     crate.add_or_update_jsonld(d)
-```
-
-### Consuming an RO-Crate
-
-An existing RO-Crate package can be loaded from a directory or zip file:
-
-```python
-crate = ROCrate('exp_crate')  # or ROCrate('exp_crate.zip')
-for e in crate.get_entities():
-    print(e.id, e.type)
-```
-
-```
-./ Dataset
-ro-crate-metadata.json CreativeWork
-paper.pdf File
-results.csv File
-images/figure.svg File
-https://orcid.org/0000-0000-0000-0000 Person
-https://orcid.org/0000-0000-0000-0001 Person
-```
-
-The first two entities shown in the output are the [root data entity](https://www.researchobject.org/ro-crate/1.1/root-data-entity.html) and the [metadata file descriptor](https://www.researchobject.org/ro-crate/1.1/metadata.html), respectively. The former represents the whole crate, while the latter represents the metadata file. These are special entities managed by the `ROCrate` object, and are always present. The other entities are the ones we added in the [section on RO-Crate creation](#creating-an-ro-crate).
-
-As shown above, `get_entities` allows to iterate over all entities in the crate. You can also access only data entities with `crate.data_entities` and only contextual entities with `crate.contextual_entities`. For instance:
-
-```python
-for e in crate.data_entities:
-    author = e.get("author")
-    if not author:
-        continue
-    elif isinstance(author, list):
-        print(e.id, [p["name"] for p in author])
-    else:
-        print(e.id, repr(author["name"]))
-```
-
-```
-paper.pdf ['Alice Doe', 'Bob Doe']
-results.csv 'Alice Doe'
-images/figure.svg 'Bob Doe'
-```
-
-You can fetch an entity by its `@id` as follows:
-
-```python
-article = crate.dereference("paper.pdf")
 ```
 
 ## Command Line Interface
