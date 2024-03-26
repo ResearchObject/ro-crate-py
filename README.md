@@ -384,7 +384,7 @@ To register the workflow as a `ComputationalWorkflow`:
 rocrate add workflow -l galaxy sort-and-change-case.ga
 ```
 
-Now the workflow has a type of `["File", "SoftwareSourceCode", "ComputationalWorkflow"]` and points to a `ComputerLanguage` entity that represents the Galaxy workflow language. Also, the workflow is listed as the crate's `mainEntity` (see the [Workflow RO-Crate profile](https://w3id.org/workflowhub/workflow-ro-crate/1.0)).
+Now the workflow has a type of `["File", "SoftwareSourceCode", "ComputationalWorkflow"]` and points to a `ComputerLanguage` entity that represents the Galaxy workflow language. Also, the workflow is listed as the crate's `mainEntity` (this is required by the [Workflow RO-Crate profile](https://w3id.org/workflowhub/workflow-ro-crate/1.0), a subtype of RO-Crate which provides extra specifications for workflow metadata).
 
 To add [workflow testing metadata](https://crs4.github.io/life_monitor/workflow_testing_ro_crate) to the crate:
 
