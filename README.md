@@ -318,9 +318,12 @@ $ rocrate init --help
 Usage: rocrate init [OPTIONS]
 
 Options:
-  --gen-preview
-  -e, --exclude CSV
-  -c, --crate-dir PATH
+  --gen-preview         Generate a HTML preview file for the crate.
+  -e, --exclude NAME    Exclude files or directories from the metadata file.
+                        NAME may be a single name or a comma-separated list of
+                        names.
+  -c, --crate-dir PATH  The path to the root data entity of the crate.
+                        Defaults to the current working directory.
   --help                Show this message and exit.
 ```
 
@@ -409,8 +412,13 @@ Usage: rocrate add workflow [OPTIONS] PATH
 
 Options:
   -l, --language [cwl|galaxy|knime|nextflow|snakemake|compss|autosubmit]
-  -c, --crate-dir PATH
-  -P, --property KEY=VALUE
+                                  The workflow language.
+  -c, --crate-dir PATH            The path to the root data entity of the
+                                  crate. Defaults to the current working
+                                  directory.
+  -P, --property KEY=VALUE        Add an additional property to the metadata
+                                  for this entity. Can be used multiple times
+                                  to set multiple properties.
   --help                          Show this message and exit.
 ```
 
