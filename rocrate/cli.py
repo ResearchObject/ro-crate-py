@@ -57,8 +57,21 @@ class KeyValueParamType(click.ParamType):
 
 CSV = CSVParamType()
 KeyValue = KeyValueParamType()
-OPTION_CRATE_PATH = click.option('-c', '--crate-dir', type=click.Path(), default=os.getcwd)
-OPTION_PROPS = click.option('-P', '--property', type=KeyValue, multiple=True, metavar="KEY=VALUE")
+OPTION_CRATE_PATH = click.option(
+    "-c",
+    "--crate-dir",
+    type=click.Path(),
+    default=os.getcwd,
+    help="The path to the root data entity of the crate. Defaults to the current working directory.",
+)
+OPTION_PROPS = click.option(
+    "-P",
+    "--property",
+    type=KeyValue,
+    multiple=True,
+    metavar="KEY=VALUE",
+    help="Add an additional property to the metadata for this entity. Can be used multiple times to set multiple properties.",
+)
 
 
 @click.group()
@@ -67,8 +80,16 @@ def cli():
 
 
 @cli.command()
-@click.option('--gen-preview', is_flag=True)
-@click.option('-e', '--exclude', type=CSV)
+@click.option(
+    "--gen-preview", is_flag=True, help="Generate a HTML preview file for the crate."
+)
+@click.option(
+    "-e",
+    "--exclude",
+    type=CSV,
+    metavar="NAME",
+    help="Exclude files or directories from the metadata file. NAME may be a single name or a comma-separated list of names.",
+)
 @OPTION_CRATE_PATH
 def init(crate_dir, gen_preview, exclude):
     crate = ROCrate(crate_dir, init=True, gen_preview=gen_preview, exclude=exclude)
@@ -83,7 +104,7 @@ def add():
 
 
 @add.command()
-@click.argument('path', type=click.Path(exists=True, dir_okay=False))
+@click.argument("path", type=click.Path(exists=True, dir_okay=False))
 @OPTION_CRATE_PATH
 @OPTION_PROPS
 def file(crate_dir, path, property):
@@ -99,7 +120,7 @@ def file(crate_dir, path, property):
 
 
 @add.command()
-@click.argument('path', type=click.Path(exists=True, file_okay=False))
+@click.argument("path", type=click.Path(exists=True, file_okay=False))
 @OPTION_CRATE_PATH
 @OPTION_PROPS
 def dataset(crate_dir, path, property):
@@ -115,8 +136,14 @@ def dataset(crate_dir, path, property):
 
 
 @add.command()
-@click.argument('path', type=click.Path(exists=True))
-@click.option('-l', '--language', type=click.Choice(LANG_CHOICES), default="cwl")
+@click.argument("path", type=click.Path(exists=True))
+@click.option(
+    "-l",
+    "--language",
+    type=click.Choice(LANG_CHOICES),
+    default="cwl",
+    help="The workflow language.",
+)
 @OPTION_CRATE_PATH
 @OPTION_PROPS
 def workflow(crate_dir, path, language, property):
@@ -128,50 +155,64 @@ def workflow(crate_dir, path, language, property):
         # For now, only support marking an existing file as a workflow
         raise ValueError(f"{source} is not in the crate dir {crate_dir}")
     # TODO: add command options for main and gen_cwl
-    crate.add_workflow(source, dest_path, main=True, lang=language, gen_cwl=False, properties=dict(property))
+    crate.add_workflow(
+        source,
+        dest_path,
+        main=True,
+        lang=language,
+        gen_cwl=False,
+        properties=dict(property),
+    )
     crate.metadata.write(crate_dir)
 
 
 @add.command(name="test-suite")
-@click.option('-i', '--identifier')
-@click.option('-n', '--name')
-@click.option('-m', '--main-entity')
+@click.option("-i", "--identifier")
+@click.option("-n", "--name")
+@click.option("-m", "--main-entity")
 @OPTION_CRATE_PATH
 @OPTION_PROPS
 def suite(crate_dir, identifier, name, main_entity, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     suite = crate.add_test_suite(
-        identifier=add_hash(identifier), name=name, main_entity=main_entity,
-        properties=dict(property)
+        identifier=add_hash(identifier),
+        name=name,
+        main_entity=main_entity,
+        properties=dict(property),
     )
     crate.metadata.write(crate_dir)
     print(suite.id)
 
 
 @add.command(name="test-instance")
-@click.argument('suite')
-@click.argument('url')
-@click.option('-r', '--resource', default="")
-@click.option('-s', '--service', type=click.Choice(SERVICE_CHOICES), default="jenkins")
-@click.option('-i', '--identifier')
-@click.option('-n', '--name')
+@click.argument("suite")
+@click.argument("url")
+@click.option("-r", "--resource", default="")
+@click.option("-s", "--service", type=click.Choice(SERVICE_CHOICES), default="jenkins")
+@click.option("-i", "--identifier")
+@click.option("-n", "--name")
 @OPTION_CRATE_PATH
 @OPTION_PROPS
 def instance(crate_dir, suite, url, resource, service, identifier, name, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     instance_ = crate.add_test_instance(
-        add_hash(suite), url, resource=resource, service=service,
-        identifier=add_hash(identifier), name=name, properties=dict(property)
+        add_hash(suite),
+        url,
+        resource=resource,
+        service=service,
+        identifier=add_hash(identifier),
+        name=name,
+        properties=dict(property),
     )
     crate.metadata.write(crate_dir)
     print(instance_.id)
 
 
 @add.command(name="test-definition")
-@click.argument('suite')
-@click.argument('path', type=click.Path(exists=True))
-@click.option('-e', '--engine', type=click.Choice(ENGINE_CHOICES), default="planemo")
-@click.option('-v', '--engine-version')
+@click.argument("suite")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("-e", "--engine", type=click.Choice(ENGINE_CHOICES), default="planemo")
+@click.option("-v", "--engine-version")
 @OPTION_CRATE_PATH
 @OPTION_PROPS
 def definition(crate_dir, suite, path, engine, engine_version, property):
@@ -183,19 +224,23 @@ def definition(crate_dir, suite, path, engine, engine_version, property):
         # For now, only support marking an existing file as a test definition
         raise ValueError(f"{source} is not in the crate dir {crate_dir}")
     crate.add_test_definition(
-        add_hash(suite), source=source, dest_path=dest_path, engine=engine,
-        engine_version=engine_version, properties=dict(property)
+        add_hash(suite),
+        source=source,
+        dest_path=dest_path,
+        engine=engine,
+        engine_version=engine_version,
+        properties=dict(property),
     )
     crate.metadata.write(crate_dir)
 
 
 @cli.command()
-@click.argument('dst', type=click.Path(writable=True))
+@click.argument("dst", type=click.Path(writable=True))
 @OPTION_CRATE_PATH
 def write_zip(crate_dir, dst):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     crate.write_zip(dst)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
