@@ -19,6 +19,7 @@
 
 import io
 import pytest
+import requests
 import os
 import uuid
 import sys
@@ -435,3 +436,19 @@ def test_add_tree(test_data_dir, tmpdir):
 
     with pytest.raises(ValueError):
         crate.add_tree(None, dest_path="foobar")
+
+
+def test_http_header(tmpdir):
+    crate = ROCrate()
+    url = "https://zenodo.org/records/10782431/files/lysozyme_datasets.zip"
+    file_ = crate.add_file(url, validate_url=True)
+    assert file_.id == url
+    out_path = tmpdir / 'ro_crate_out'
+    crate.write(out_path)
+    out_crate = ROCrate(out_path)
+    out_file = out_crate.dereference(url)
+    props = out_file.properties()
+    assert props.get("encodingFormat") == "application/octet-stream"
+    assert "sdDatePublished" in props
+    with requests.head(url) as response:
+        assert props["sdDatePublished"] == response.headers.get("last-modified")
