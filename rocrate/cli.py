@@ -88,7 +88,7 @@ def cli():
     "--exclude",
     type=CSV,
     metavar="NAME",
-    help="Exclude files or directories from the RO-Crate. NAME may be a single name or a comma-separated list of names.",
+    help="Exclude files or directories from the metadata file. NAME may be a single name or a comma-separated list of names.",
 )
 @OPTION_CRATE_PATH
 def init(crate_dir, gen_preview, exclude):
