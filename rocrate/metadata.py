@@ -30,8 +30,11 @@ def read_metadata(metadata_path):
     Return a tuple of two elements: the context; a dictionary that maps entity
     ids to the entities themselves.
     """
-    with open(metadata_path) as f:
-        metadata = json.load(f)
+    if isinstance(metadata_path, dict):
+        metadata = metadata_path
+    else:
+        with open(metadata_path) as f:
+            metadata = json.load(f)
     try:
         context = metadata['@context']
         graph = metadata['@graph']

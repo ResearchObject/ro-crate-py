@@ -535,3 +535,61 @@ def test_indirect_data_entity(tmpdir):
     d2_e = crate.dereference("d1/d2")
     assert d2_e
     assert d2_e in crate.data_entities
+
+
+@pytest.mark.filterwarnings("ignore")
+def test_from_dict(tmpdir):
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": "./"},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+            },
+            {
+                "@id": "./",
+                "@type": "Dataset",
+                "creator": {"@id": "#josiah"},
+                "hasPart": {"@id": "d1"}
+            },
+            {
+                "@id": "d1",
+                "@type": "Dataset",
+                "hasPart": {"@id": "d1/d2"}
+            },
+            {
+                "@id": "d1/d2",
+                "@type": "Dataset",
+                "hasPart": {"@id": "d1/d2/f1"}
+            },
+            {
+                "@id": "d1/d2/f1",
+                "@type": "File"
+            },
+            {
+                "@id": "#josiah",
+                "@type": "Person",
+                'name': 'Josiah Carberry'
+            },
+        ]
+    }
+    crate = ROCrate(metadata)
+    d1 = crate.dereference("d1")
+    assert d1
+    d2 = crate.dereference("d1/d2")
+    assert d2
+    f1 = crate.dereference("d1/d2/f1")
+    assert f1
+    p = crate.dereference("#josiah")
+    assert p
+    assert set(crate.data_entities) == {d1, d2, f1}
+    assert set(crate.contextual_entities) == {p}
+    out_path = tmpdir / 'out_crate'
+    with pytest.raises(OSError):
+        crate.write(out_path)
+    # make it writable
+    for entity in d1, d2, f1:
+        entity.source = None
+    crate.write(out_path)

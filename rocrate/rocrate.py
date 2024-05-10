@@ -113,26 +113,31 @@ class ROCrate():
                     self.add(Preview(self, source))
 
     def __read(self, source, gen_preview=False):
-        source = Path(source)
-        if not source.exists():
-            raise FileNotFoundError(errno.ENOENT, f"'{source}' not found")
-        if zipfile.is_zipfile(source):
-            zip_path = tempfile.mkdtemp(prefix="rocrate_")
-            atexit.register(shutil.rmtree, zip_path)
-            with zipfile.ZipFile(source, "r") as zf:
-                zf.extractall(zip_path)
-            source = Path(zip_path)
-        metadata_path = source / Metadata.BASENAME
-        if not metadata_path.is_file():
-            metadata_path = source / LegacyMetadata.BASENAME
-        if not metadata_path.is_file():
-            raise ValueError(f"Not a valid RO-Crate: missing {Metadata.BASENAME}")
+        if isinstance(source, dict):
+            metadata_path = source
+        else:
+            source = Path(source)
+            if not source.exists():
+                raise FileNotFoundError(errno.ENOENT, f"'{source}' not found")
+            if zipfile.is_zipfile(source):
+                zip_path = tempfile.mkdtemp(prefix="rocrate_")
+                atexit.register(shutil.rmtree, zip_path)
+                with zipfile.ZipFile(source, "r") as zf:
+                    zf.extractall(zip_path)
+                source = Path(zip_path)
+            metadata_path = source / Metadata.BASENAME
+            if not metadata_path.is_file():
+                metadata_path = source / LegacyMetadata.BASENAME
+            if not metadata_path.is_file():
+                raise ValueError(f"Not a valid RO-Crate: missing {Metadata.BASENAME}")
         _, entities = read_metadata(metadata_path)
         self.__read_data_entities(entities, source, gen_preview)
         self.__read_contextual_entities(entities)
         return source
 
     def __read_data_entities(self, entities, source, gen_preview):
+        if isinstance(source, dict):
+            source = Path("")
         metadata_id, root_id = find_root_entity_id(entities)
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
@@ -447,7 +452,7 @@ class ROCrate():
     def write(self, base_path):
         base_path = Path(base_path)
         base_path.mkdir(parents=True, exist_ok=True)
-        if self.source:
+        if self.source and not isinstance(self.source, dict):
             self._copy_unlisted(self.source, base_path)
         for writable_entity in self.data_entities + self.default_entities:
             writable_entity.write(base_path)
