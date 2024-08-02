@@ -269,12 +269,12 @@ class ROCrate():
         self.root_dataset['image'] = value
 
     @property
-    def CreativeWorkStatus(self):
-        return self.root_dataset.get('CreativeWorkStatus')
+    def creativeWorkStatus(self):
+        return self.root_dataset.get('creativeWorkStatus')
 
-    @CreativeWorkStatus.setter
-    def CreativeWorkStatus(self, value):
-        self.root_dataset['CreativeWorkStatus'] = value
+    @creativeWorkStatus.setter
+    def creativeWorkStatus(self, value):
+        self.root_dataset['creativeWorkStatus'] = value
 
     @property
     def mainEntity(self):
