@@ -556,6 +556,22 @@ class ROCrate():
         self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
         return definition
 
+    def add_action(self, instrument, identifier=None, object=None, result=None, properties=None):
+        if properties is None:
+            properties = {}
+        if "@type" not in properties:
+            properties["@type"] = "CreateAction"
+        action = self.add(ContextEntity(self, identifier, properties=properties))
+        action["instrument"] = instrument
+        if "name" not in properties:
+            action.name = action.id.lstrip("#")
+        if object:
+            action["object"] = object
+        if result:
+            action["result"] = result
+        self.root_dataset.append_to("mentions", action)
+        return action
+
     def add_jsonld(self, jsonld):
         """Add a JSON-LD dictionary as a contextual entity to the RO-Crate.
 
