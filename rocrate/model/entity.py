@@ -34,12 +34,13 @@ class Entity(MutableMapping):
             self.__id = self.format_id(identifier)
         else:
             self.__id = f"#{uuid.uuid4()}"
+        self._jsonld = self._empty()
         if properties:
-            empty = self._empty()
-            empty.update(properties)
-            self._jsonld = empty
-        else:
-            self._jsonld = self._empty()
+            for name, value in properties.items():
+                if name.startswith("@"):
+                    self._jsonld[name] = value
+                else:
+                    self[name] = value
 
     @property
     def id(self):

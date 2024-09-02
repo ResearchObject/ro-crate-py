@@ -513,3 +513,52 @@ def test_immutable_id():
     p = crate.add(Person(crate, "#foo"))
     with pytest.raises(AttributeError):
         p.id = "#bar"
+
+
+def test_entity_in_properties(tmpdir):
+    file_id = "data.csv"
+    file_path = tmpdir / file_id
+    with open(file_path, "wt") as fout:
+        fout.write("DATA\n")
+    crate = ROCrate()
+    alice_id = "https://orcid.org/0000-0000-0000-0000"
+    bob_id = "https://orcid.org/0000-0000-0000-0001"
+    alice = crate.add(Person(crate, alice_id, properties={
+        "name": "Alice Doe",
+        "affiliation": "University of Flatland",
+    }))
+    bob = crate.add(Person(crate, bob_id, properties={
+        "name": "Bob Doe",
+        "affiliation": "University of Flatland",
+    }))
+    data = crate.add_file(file_path, properties={
+        "name": "Data file",
+        "encodingFormat": "text/csv",
+        "author": [alice, bob],
+    })
+    authors = data["author"]
+    assert len(authors) == 2
+    assert authors[0] is alice
+    assert authors[1] is bob
+
+    book = crate.add(ContextEntity(crate, "#44cats", properties={
+        "@type": "Book",
+        "name": "44 Cats",
+        "author": alice,
+    }))
+    assert book.type == "Book"
+    assert book["author"] is alice
+
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    assert (out_path / file_id).is_file()
+    out_crate = ROCrate(out_path)
+    out_alice = out_crate.get(alice_id)
+    out_bob = out_crate.get(bob_id)
+    out_data = out_crate.get(file_id)
+    out_authors = out_data["author"]
+    assert len(out_authors) == 2
+    assert out_authors[0] is out_alice
+    assert out_authors[1] is out_bob
+    assert out_alice == alice
+    assert out_bob == bob
