@@ -365,6 +365,11 @@ def test_entity_as_mapping(tmpdir, helpers):
     crate_dir.mkdir()
     with open(crate_dir / helpers.METADATA_FILE_NAME, "wt") as f:
         json.dump(metadata, f, indent=4)
+    with pytest.raises(ValueError):
+        crate = ROCrate(crate_dir)
+    del metadata["@graph"][2]["badProp"]
+    with open(crate_dir / helpers.METADATA_FILE_NAME, "wt") as f:
+        json.dump(metadata, f, indent=4)
     crate = ROCrate(crate_dir)
     person = crate.dereference(orcid)
     exp_len = len([_ for _ in metadata["@graph"] if _["@id"] == orcid][0])
@@ -411,6 +416,7 @@ def test_entity_as_mapping(tmpdir, helpers):
         "application/json",
         "https://www.json.org",
     }
+    correction._jsonld["badProp"] = {"k": "v"}
     with pytest.raises(ValueError):
         correction["badProp"]
 
