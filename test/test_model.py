@@ -365,7 +365,7 @@ def test_entity_as_mapping(tmpdir, helpers):
     crate_dir.mkdir()
     with open(crate_dir / helpers.METADATA_FILE_NAME, "wt") as f:
         json.dump(metadata, f, indent=4)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # due to "badProp", which has no "@id"
         crate = ROCrate(crate_dir)
     del metadata["@graph"][2]["badProp"]
     with open(crate_dir / helpers.METADATA_FILE_NAME, "wt") as f:
@@ -416,7 +416,9 @@ def test_entity_as_mapping(tmpdir, helpers):
         "application/json",
         "https://www.json.org",
     }
-    correction._jsonld["badProp"] = {"k": "v"}
+    with pytest.raises(ValueError):
+        correction["badProp"] = {"k": "v"}  # value has no "@id"
+    correction._jsonld["badProp"] = {"k": "v"}  # force set using _jsonld
     with pytest.raises(ValueError):
         correction["badProp"]
 
