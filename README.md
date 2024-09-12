@@ -53,6 +53,8 @@ diagram = crate.add_file("exp/diagram.svg", dest_path="images/figure.svg", prope
 })
 ```
 
+The `dest_path` argument is used to specify the relative path of the file with respect to the crate's directory (which will be determined when the crate is written). Note that the first two `add_file` calls do not specify `dest_path`: in this case, it will be set to the source file's basename (`"paper.pdf"` in the first case), so the file will be at the crate's top level when it is written.
+
 We've started by adding the data entities. Now we need contextual entities to represent Alice and Bob:
 
 ```python
@@ -98,7 +100,19 @@ Finally, we serialize the crate to disk:
 crate.write("exp_crate")
 ```
 
-Now the `exp_crate` directory should contain copies of all the files we added and an `ro-crate-metadata.json` file with a [JSON-LD](https://json-ld.org) representation of the entities and relationships we created. Note that we have chosen a different destination path for the diagram, while the other two files have been placed at the top level with their names unchanged (the default).
+Now the `exp_crate` directory should contain copies of all the files we added and an `ro-crate-metadata.json` file with a [JSON-LD](https://json-ld.org) representation of the entities and relationships we created, with the following layout:
+
+```
+exp_crate/
+|-- images
+|   `-- figure.svg
+|-- logs
+|   |-- log1.txt
+|   `-- log2.txt
+|-- paper.pdf
+|-- results.csv
+`-- ro-crate-metadata.json
+```
 
 Exploring the `exp_crate` directory, we see that all files and directories contained in `exp/logs` have been added recursively to the crate. However, in the `ro-crate-metadata.json` file, only the top level Dataset with `@id` `"exp/logs"` is listed. This is because we used `crate.add_dataset("exp/logs")` rather than adding every file individually. There is no requirement to represent every file and folder within the crate in the `ro-crate-metadata.json` file. If you do want to add files and directories recursively to the metadata, use `crate.add_tree` instead of `crate.add_dataset` (but note that it only works on local directory trees).
 
