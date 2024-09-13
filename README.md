@@ -104,9 +104,9 @@ Now the `exp_crate` directory should contain copies of all the files we added an
 
 ```
 exp_crate/
-|-- images
+|-- images/
 |   `-- figure.svg
-|-- logs
+|-- logs/
 |   |-- log1.txt
 |   `-- log2.txt
 |-- paper.pdf
