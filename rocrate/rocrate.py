@@ -24,6 +24,7 @@ import atexit
 import os
 import shutil
 import tempfile
+import warnings
 
 from collections import OrderedDict
 from pathlib import Path
@@ -174,7 +175,11 @@ class ROCrate():
 
     def __read_contextual_entities(self, entities):
         type_map = {_.__name__: _ for _ in subclasses(ContextEntity)}
+        # types *commonly* used for data entities
+        data_entity_types = {"File", "Dataset"}
         for identifier, entity in entities.items():
+            if data_entity_types.intersection(as_list(entity.get("@type", []))):
+                warnings.warn(f"{entity['@id']} looks like a data entity but it's not listed in the root dataset's hasPart")
             assert identifier == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=ContextEntity)
             self.add(cls(self, identifier, entity))
