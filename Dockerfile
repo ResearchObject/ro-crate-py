@@ -1,4 +1,4 @@
-FROM python:3.7-buster
+FROM python:3.12
 
 COPY ./ /ro-crate-py
 WORKDIR /ro-crate-py

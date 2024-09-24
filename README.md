@@ -4,7 +4,7 @@ ro-crate-py is a Python library to create and consume [Research Object Crates](h
 
 ## Installation
 
-ro-crate-py requires Python 3.7 or later. The easiest way to install is via [pip](https://docs.python.org/3/installing/):
+ro-crate-py requires Python 3.9 or later. The easiest way to install is via [pip](https://docs.python.org/3/installing/):
 
 ```
 pip install rocrate
