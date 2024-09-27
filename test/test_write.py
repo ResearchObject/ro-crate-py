@@ -49,7 +49,7 @@ def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
     file_subdir_id = 'sample_file_subdir.txt'
 
     sample_file = test_data_dir / sample_file_id
-    file_returned = crate.add_file(sample_file)
+    file_returned = crate.add_file(sample_file, record_size=True)
     assert file_returned.id == sample_file_id
     file_returned_subdir = crate.add_file(sample_file, sample_file2_id)
     assert file_returned_subdir.id == sample_file2_id
@@ -99,6 +99,8 @@ def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
     assert json_entities[formatted_creator_id]["name"] == creator_name
     if gen_preview:
         assert helpers.PREVIEW_FILE_NAME in json_entities
+    file_entity = json_entities[sample_file_id]
+    assert file_entity["contentSize"] == str(file1.stat().st_size)
 
 
 @pytest.mark.parametrize("stream_cls", [io.BytesIO, io.StringIO])
@@ -106,8 +108,8 @@ def test_in_mem_stream(stream_cls, tmpdir, helpers):
     crate = ROCrate()
 
     test_file_id = 'a/b/test_file.txt'
-    file_content = b'\x00\x01' if stream_cls is io.BytesIO else 'foo\n'
-    file_returned = crate.add_file(stream_cls(file_content), test_file_id)
+    file_content = b'\x00\x01\x02' if stream_cls is io.BytesIO else 'foo'
+    file_returned = crate.add_file(stream_cls(file_content), test_file_id, record_size=True)
     assert file_returned.id == test_file_id
 
     out_path = tmpdir / 'ro_crate_out'
@@ -121,6 +123,9 @@ def test_in_mem_stream(stream_cls, tmpdir, helpers):
     mode = 'r' + ('b' if stream_cls is io.BytesIO else 't')
     with open(file1, mode) as f:
         assert f.read() == file_content
+    json_entities = helpers.read_json_entities(out_path)
+    file_entity = json_entities[test_file_id]
+    assert file_entity['contentSize'] == '3'
 
 
 @pytest.mark.parametrize(

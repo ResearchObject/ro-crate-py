@@ -342,7 +342,8 @@ class ROCrate():
             dest_path=None,
             fetch_remote=False,
             validate_url=False,
-            properties=None
+            properties=None,
+            record_size=False
     ):
         return self.add(File(
             self,
@@ -350,7 +351,8 @@ class ROCrate():
             dest_path=dest_path,
             fetch_remote=fetch_remote,
             validate_url=validate_url,
-            properties=properties
+            properties=properties,
+            record_size=record_size
         ))
 
     def add_dataset(
@@ -478,11 +480,12 @@ class ROCrate():
 
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
-            main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow
+            main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow,
+            record_size=False
     ):
         workflow = self.add(cls(
             self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
-            validate_url=validate_url, properties=properties
+            validate_url=validate_url, properties=properties, record_size=record_size
         ))
         if isinstance(lang, ComputerLanguage):
             assert lang.crate is self
@@ -503,7 +506,7 @@ class ROCrate():
             cwl_dest_path = Path(source).with_suffix(".cwl").name
             cwl_workflow = self.add_workflow(
                 source=cwl_source, dest_path=cwl_dest_path, fetch_remote=fetch_remote, properties=properties,
-                main=False, lang="cwl", gen_cwl=False, cls=WorkflowDescription
+                main=False, lang="cwl", gen_cwl=False, cls=WorkflowDescription, record_size=record_size
             )
             workflow.subjectOf = cwl_workflow
         return workflow
@@ -542,12 +545,12 @@ class ROCrate():
 
     def add_test_definition(
             self, suite, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
-            engine="planemo", engine_version=None
+            engine="planemo", engine_version=None, record_size=False
     ):
         suite = self.__validate_suite(suite)
         definition = self.add(
             TestDefinition(self, source=source, dest_path=dest_path, fetch_remote=fetch_remote,
-                           validate_url=validate_url, properties=properties)
+                           validate_url=validate_url, properties=properties, record_size=record_size)
         )
         if isinstance(engine, SoftwareApplication):
             assert engine.crate is self
