@@ -29,11 +29,12 @@ from ..utils import is_url
 class FileOrDir(DataEntity):
 
     def __init__(self, crate, source=None, dest_path=None, fetch_remote=False,
-                 validate_url=False, properties=None):
+                 validate_url=False, properties=None, record_size=False):
         if properties is None:
             properties = {}
         self.fetch_remote = fetch_remote
         self.validate_url = validate_url
+        self.record_size = record_size
         self.source = source
         if dest_path:
             dest_path = Path(dest_path)

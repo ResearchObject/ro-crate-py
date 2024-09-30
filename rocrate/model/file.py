@@ -45,7 +45,10 @@ class File(FileOrDir):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
             mode = 'w' + ('b' if isinstance(self.source, BytesIO) else 't')
             with open(out_file_path, mode) as out_file:
-                out_file.write(self.source.getvalue())
+                content = self.source.getvalue()
+                out_file.write(content)
+                if self.record_size:
+                    self._jsonld['contentSize'] = str(len(content))
         elif is_url(str(self.source)):
             if self.fetch_remote or self.validate_url:
                 if self.validate_url:
@@ -62,6 +65,8 @@ class File(FileOrDir):
                     out_file_path.parent.mkdir(parents=True, exist_ok=True)
                     urllib.request.urlretrieve(self.source, out_file_path)
                     self._jsonld['contentUrl'] = str(self.source)
+                    if self.record_size:
+                        self._jsonld['contentSize'] = str(out_file_path.stat().st_size)
         elif self.source is None:
             # Allows to record a File entity whose @id does not exist, see #73
             warnings.warn(f"No source for {self.id}")
@@ -69,3 +74,5 @@ class File(FileOrDir):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
             if not out_file_path.exists() or not out_file_path.samefile(self.source):
                 shutil.copy(self.source, out_file_path)
+            if self.record_size:
+                self._jsonld['contentSize'] = str(out_file_path.stat().st_size)
