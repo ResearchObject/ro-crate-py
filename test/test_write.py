@@ -137,7 +137,11 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
     url = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/'
            'master/test/test-data/sample_file.txt')
     relpath = "a/b/sample_file.txt"
-    kw = {"fetch_remote": fetch_remote, "validate_url": validate_url}
+    kw = {
+        "fetch_remote": fetch_remote,
+        "validate_url": validate_url,
+        "record_size": True,
+    }
     if fetch_remote:
         file_ = crate.add_file(url, relpath, **kw)
         assert file_.id == relpath
@@ -159,6 +163,7 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
         out_file = out_crate.dereference(file_.id)
         assert (out_path / relpath).is_file()
         assert out_file["contentUrl"] == url
+        assert out_file["contentSize"] == str((out_path / file_.id).stat().st_size)
     else:
         out_file = out_crate.dereference(url)
         assert not (out_path / relpath).exists()
