@@ -404,9 +404,9 @@ Now the workflow has a type of `["File", "SoftwareSourceCode", "ComputationalWor
 To add [workflow testing metadata](https://crs4.github.io/life_monitor/workflow_testing_ro_crate) to the crate:
 
 ```bash
-rocrate add test-suite -i test1
-rocrate add test-instance test1 http://example.com -r jobs -i test1_1
-rocrate add test-definition test1 test/test1/sort-and-change-case-test.yml -e planemo -v '>=0.70'
+rocrate add test-suite -i '#test1'
+rocrate add test-instance '#test1' http://example.com -r jobs -i '#test1_1'
+rocrate add test-definition '#test1' test/test1/sort-and-change-case-test.yml -e planemo -v '>=0.70'
 ```
 
 To add files or directories after crate initialization:

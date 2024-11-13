@@ -279,8 +279,7 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     assert set(TESTING_EXTRA_TERMS.items()).issubset(extra_terms.items())
 
 
-@pytest.mark.parametrize("hash_", [False, True])
-def test_cli_add_test_metadata_explicit_ids(test_data_dir, helpers, monkeypatch, hash_):
+def test_cli_add_test_metadata_explicit_ids(test_data_dir, helpers, monkeypatch):
     # init
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     runner = CliRunner()
@@ -290,17 +289,15 @@ def test_cli_add_test_metadata_explicit_ids(test_data_dir, helpers, monkeypatch,
     assert runner.invoke(cli, ["add", "workflow", "-c", str(crate_dir), "-l", "galaxy", str(wf_path)]).exit_code == 0
     # add test suite
     suite_id = "#foo"
-    cli_suite_id = suite_id if hash_ else suite_id[1:]
-    result = runner.invoke(cli, ["add", "test-suite", "-c", str(crate_dir), "-i", cli_suite_id])
+    result = runner.invoke(cli, ["add", "test-suite", "-c", str(crate_dir), "-i", suite_id])
     assert result.exit_code == 0
     assert result.output.strip() == suite_id
     json_entities = helpers.read_json_entities(crate_dir)
     assert suite_id in json_entities
     # add test instance
     instance_id = "#bar"
-    cli_instance_id = instance_id if hash_ else instance_id[1:]
     args = [
-        "add", "test-instance", cli_suite_id, "http://example.com", "-c", str(crate_dir), "-r", "jobs", "-i", cli_instance_id
+        "add", "test-instance", suite_id, "http://example.com", "-c", str(crate_dir), "-r", "jobs", "-i", instance_id
     ]
     result = runner.invoke(cli, args)
     assert result.exit_code == 0
@@ -310,7 +307,7 @@ def test_cli_add_test_metadata_explicit_ids(test_data_dir, helpers, monkeypatch,
     # add test definition
     def_id = "test/test1/sort-and-change-case-test.yml"
     def_path = crate_dir / def_id
-    args = ["add", "test-definition", "-c", str(crate_dir), "-e", "planemo", "-v", ">=0.70", cli_suite_id, str(def_path)]
+    args = ["add", "test-definition", "-c", str(crate_dir), "-e", "planemo", "-v", ">=0.70", suite_id, str(def_path)]
     result = runner.invoke(cli, args)
     assert result.exit_code == 0
     json_entities = helpers.read_json_entities(crate_dir)

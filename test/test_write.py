@@ -36,7 +36,7 @@ def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
     crate = ROCrate(gen_preview=gen_preview)
     crate_name = 'Test crate'
     crate.name = crate_name
-    creator_id = '001'
+    creator_id = '#001'
     creator_name = 'Lee Ritenour'
     new_person = Person(crate, creator_id, {'name': creator_name})
     crate.add(new_person)
@@ -93,10 +93,9 @@ def test_file_writing(test_data_dir, tmpdir, helpers, gen_preview, to_zip):
     root = json_entities["./"]
     assert root["name"] == crate_name
     assert "datePublished" in root
-    formatted_creator_id = f"#{creator_id}"
-    assert root["creator"] == {"@id": formatted_creator_id}
-    assert formatted_creator_id in json_entities
-    assert json_entities[formatted_creator_id]["name"] == creator_name
+    assert root["creator"] == {"@id": creator_id}
+    assert creator_id in json_entities
+    assert json_entities[creator_id]["name"] == creator_name
     if gen_preview:
         assert helpers.PREVIEW_FILE_NAME in json_entities
     file_entity = json_entities[sample_file_id]

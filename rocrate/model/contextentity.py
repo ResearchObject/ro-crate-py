@@ -19,20 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ..utils import is_url
 from .entity import Entity
 
 
-def add_hash(id_):
-    if id_ is None or "#" in id_ or is_url(id_):
-        return id_
-    return "#" + id_
-
-
 class ContextEntity(Entity):
-
-    def __init__(self, crate, identifier=None, properties=None):
-        super(ContextEntity, self).__init__(crate, identifier, properties)
-
-    def format_id(self, identifier):
-        return add_hash(identifier)
+    pass
