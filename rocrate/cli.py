@@ -25,7 +25,6 @@ from .rocrate import ROCrate
 from .model.computerlanguage import LANG_MAP
 from .model.testservice import SERVICE_MAP
 from .model.softwareapplication import APP_MAP
-from .model.contextentity import add_hash
 
 
 LANG_CHOICES = list(LANG_MAP)
@@ -175,7 +174,7 @@ def workflow(crate_dir, path, language, property):
 def suite(crate_dir, identifier, name, main_entity, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     suite = crate.add_test_suite(
-        identifier=add_hash(identifier),
+        identifier=identifier,
         name=name,
         main_entity=main_entity,
         properties=dict(property),
@@ -196,11 +195,11 @@ def suite(crate_dir, identifier, name, main_entity, property):
 def instance(crate_dir, suite, url, resource, service, identifier, name, property):
     crate = ROCrate(crate_dir, init=False, gen_preview=False)
     instance_ = crate.add_test_instance(
-        add_hash(suite),
+        suite,
         url,
         resource=resource,
         service=service,
-        identifier=add_hash(identifier),
+        identifier=identifier,
         name=name,
         properties=dict(property),
     )
@@ -224,7 +223,7 @@ def definition(crate_dir, suite, path, engine, engine_version, property):
         # For now, only support marking an existing file as a test definition
         raise ValueError(f"{source} is not in the crate dir {crate_dir}")
     crate.add_test_definition(
-        add_hash(suite),
+        suite,
         source=source,
         dest_path=dest_path,
         engine=engine,
