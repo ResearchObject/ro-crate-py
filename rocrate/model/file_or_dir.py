@@ -47,5 +47,5 @@ class FileOrDir(DataEntity):
             if is_url(str(source)):
                 identifier = os.path.basename(source) if fetch_remote else source
             else:
-                identifier = "./" if source == "./" else os.path.basename(source)
+                identifier = os.path.basename(str(source).rstrip(os.sep))
         super().__init__(crate, identifier, properties)
