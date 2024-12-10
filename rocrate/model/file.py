@@ -41,10 +41,16 @@ class File(FileOrDir):
 
     def write(self, base_path):
         out_file_path = Path(base_path) / self.id
-        if isinstance(self.source, (BytesIO, StringIO)):
+        if isinstance(self.source, StringIO):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
-            mode = 'w' + ('b' if isinstance(self.source, BytesIO) else 't')
-            with open(out_file_path, mode) as out_file:
+            with open(out_file_path, 'wt', encoding='utf-8') as out_file:
+                content = self.source.getvalue()
+                out_file.write(content)
+                if self.record_size:
+                    self._jsonld['contentSize'] = str(len(content))
+        elif isinstance(self.source, BytesIO):
+            out_file_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(out_file_path, 'wb') as out_file:
                 content = self.source.getvalue()
                 out_file.write(content)
                 if self.record_size:
