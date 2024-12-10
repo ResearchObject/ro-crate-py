@@ -32,8 +32,11 @@ def read_metadata(metadata_path):
     """
     if isinstance(metadata_path, dict):
         metadata = metadata_path
+    elif isinstance(metadata_path, str):
+        with open(metadata_path, 'r', encoding='utf-8') as f:
+            metadata = json.load(f)
     else:
-        with open(metadata_path) as f:
+        with open(metadata_path, 'rb') as f:
             metadata = json.load(f)
     try:
         context = metadata['@context']
