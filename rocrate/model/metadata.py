@@ -76,7 +76,7 @@ class Metadata(File):
     def write(self, base_path):
         write_path = Path(base_path) / self.id
         as_jsonld = self.generate()
-        with open(write_path, 'w') as outfile:
+        with open(write_path, 'w', encoding='utf-8') as outfile:
             json.dump(as_jsonld, outfile, indent=4, sort_keys=True)
 
     @property
