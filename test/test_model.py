@@ -41,7 +41,7 @@ from rocrate.model import (
 RAW_REPO_URL = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py"
 
 
-def test_dereferencing(test_data_dir, helpers):
+def test_dereferencing(test_data_dir, helpers, monkeypatch):
     crate = ROCrate(gen_preview=True)
 
     # verify default entities
@@ -68,6 +68,12 @@ def test_dereferencing(test_data_dir, helpers):
 
     # alias
     assert crate.get(readme_url) is readme_entity
+
+    # dereference local dir added with trailing slash
+    monkeypatch.chdir(test_data_dir)
+    local_dir = "test_add_dir/"
+    local_dir_entity = crate.add_dataset(local_dir)
+    assert crate.dereference(local_dir) is local_dir_entity
 
 
 @pytest.mark.parametrize("name", [".foo", "foo.", ".foo/", "foo./"])
