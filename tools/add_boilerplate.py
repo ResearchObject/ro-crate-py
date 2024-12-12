@@ -4,6 +4,7 @@
 # Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
+# Copyright 2024 National Institute of Informatics (NII), JP
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +38,7 @@ START_YEAR_MAP = {
     "Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT": "2020",
     "École Polytechnique Fédérale de Lausanne, CH": "2022",
     "Data Centre, SciLifeLab, SE": "2024",
+    "National Institute of Informatics (NII), JP": "2024",
 }
 THIS_YEAR = str(datetime.date.today().year)
 BOILERPLATE_START = "Copyright [yyyy] [name of copyright owner]"

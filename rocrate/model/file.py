@@ -6,6 +6,7 @@
 # Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
+# Copyright 2024 National Institute of Informatics (NII), JP
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +45,8 @@ class File(FileOrDir):
         if isinstance(self.source, (BytesIO, StringIO)):
             out_file_path.parent.mkdir(parents=True, exist_ok=True)
             mode = 'w' + ('b' if isinstance(self.source, BytesIO) else 't')
-            with open(out_file_path, mode) as out_file:
+            kw = {} if isinstance(self.source, BytesIO) else {'encoding': 'utf-8'}
+            with open(out_file_path, mode, **kw) as out_file:
                 content = self.source.getvalue()
                 out_file.write(content)
                 if self.record_size:

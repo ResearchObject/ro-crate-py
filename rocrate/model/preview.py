@@ -6,6 +6,7 @@
 # Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
+# Copyright 2024 National Institute of Informatics (NII), JP
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,7 +49,10 @@ class Preview(File):
 
     def generate_html(self):
         base_path = os.path.abspath(os.path.dirname(__file__))
-        template = open(os.path.join(base_path, '..', 'templates', 'preview_template.html.j2'))
+        template = open(
+            os.path.join(base_path, '..', 'templates', 'preview_template.html.j2'),
+            'r', encoding='utf-8'
+        )
         src = Template(template.read())
 
         def template_function(func):
@@ -92,5 +96,5 @@ class Preview(File):
         else:
             write_path = Path(dest_base) / self.id
             out_html = self.generate_html()
-            with open(write_path, 'w') as outfile:
+            with open(write_path, 'w', encoding='utf-8') as outfile:
                 outfile.write(out_html)

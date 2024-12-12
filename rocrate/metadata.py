@@ -4,6 +4,7 @@
 # Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
+# Copyright 2024 National Institute of Informatics (NII), JP
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +34,7 @@ def read_metadata(metadata_path):
     if isinstance(metadata_path, dict):
         metadata = metadata_path
     else:
-        with open(metadata_path) as f:
+        with open(metadata_path, 'r', encoding='utf-8') as f:
             metadata = json.load(f)
     try:
         context = metadata['@context']
