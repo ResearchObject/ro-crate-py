@@ -82,6 +82,9 @@ setup(
                   f'{__version__}.tar.gz'),
     keywords="researchobject ro-crate ro metadata jsonld",
     install_requires=[required],
+    extras_require={
+        'ga2cwl': ['galaxy2cwl'],
+    },
     classifiers=[
         'Operating System :: OS Independent',
         'Development Status :: 3 - Alpha',

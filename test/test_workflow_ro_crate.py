@@ -21,10 +21,17 @@
 import pytest
 
 from rocrate.rocrate import ROCrate, make_workflow_rocrate
+try:
+    import galaxy2cwl  # noqa: F401
+except ImportError:
+    CAN_CONVERT_TO_CWL = False
+else:
+    CAN_CONVERT_TO_CWL = True
 
 WF_CRATE = "https://w3id.org/workflowhub/workflow-ro-crate"
 
 
+@pytest.mark.skipif(not CAN_CONVERT_TO_CWL, reason="cwl gen not enabled")
 def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     wf_id = 'test_galaxy_wf.ga'
     wf_path = test_data_dir / wf_id
@@ -87,6 +94,7 @@ def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
         assert f1.read() == f2.read()
 
 
+@pytest.mark.skipif(not CAN_CONVERT_TO_CWL, reason="cwl gen not enabled")
 def test_create_wf_include(test_data_dir, tmpdir, helpers):
     wf_id = 'test_galaxy_wf.ga'
     wf_path = test_data_dir / wf_id

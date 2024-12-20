@@ -24,7 +24,6 @@ import atexit
 import os
 import tempfile
 from contextlib import redirect_stdout
-from galaxy2cwl import get_cwl_interface
 
 from .file import File
 
@@ -76,6 +75,10 @@ class Workflow(ComputationalWorkflow):
 
 
 def galaxy_to_abstract_cwl(workflow_path, delete=True):
+    try:
+        from galaxy2cwl import get_cwl_interface
+    except ImportError:
+        raise RuntimeError("conversion to cwl not available: package was not installed with the 'ga2cwl' option")
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".cwl") as f:
         with redirect_stdout(f):
             get_cwl_interface.main(['1', str(workflow_path)])
