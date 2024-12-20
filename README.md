@@ -10,6 +10,12 @@ ro-crate-py requires Python 3.9 or later. The easiest way to install is via [pip
 pip install rocrate
 ```
 
+To install the package with support for converting Galaxy workflows to CWL:
+
+```
+pip install rocrate[ga2cwl]
+```
+
 To install manually from this code base (e.g., to try the latest development revision):
 
 ```
