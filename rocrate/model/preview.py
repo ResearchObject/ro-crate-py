@@ -22,6 +22,7 @@
 
 import os
 from pathlib import Path
+from typing import Generator
 
 from jinja2 import Template
 from .file import File
@@ -90,11 +91,15 @@ class Preview(File):
         out_html = src.render(crate=self.crate, context=context_entities, data=data_entities)
         return out_html
 
-    def write(self, dest_base):
+    def stream(self) -> Generator[tuple[str, bytes], None, None]:
         if self.source:
-            super().write(dest_base)
+            yield from super().stream()
         else:
-            write_path = Path(dest_base) / self.id
-            out_html = self.generate_html()
-            with open(write_path, 'w', encoding='utf-8') as outfile:
-                outfile.write(out_html)
+            yield self.id, str.encode(self.generate_html(), encoding='utf-8')
+
+    def _has_writeable_stream(self):
+        return True
+
+    def write(self, dest_base):
+        write_path = Path(dest_base) / self.id
+        super()._write_from_stream(write_path)
