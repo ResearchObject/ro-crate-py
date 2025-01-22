@@ -28,10 +28,10 @@ import tempfile
 import warnings
 
 from collections import OrderedDict
+from io import BytesIO
 from pathlib import Path
 from urllib.parse import urljoin
 
-from .memory_buffer import MemoryBuffer
 from .model import (
     ComputationalWorkflow,
     ComputerLanguage,
@@ -482,10 +482,9 @@ class ROCrate():
 
     def stream_zip(self):
         """ Create a stream of bytes representing the RO-Crate as a ZIP file. """
-        buffer = MemoryBuffer()
+        buffer = BytesIO()
         with zipfile.ZipFile(buffer, mode='w', compression=zipfile.ZIP_DEFLATED) as archive:
-            entities = self.data_entities + self.default_entities
-            for writeable_entity in entities: #self.data_entities + self.default_entities:
+            for writeable_entity in self.data_entities + self.default_entities:
                 current_file_path, current_out_file = None, None
                 for path, chunk in writeable_entity.stream():
                     if path != current_file_path:
@@ -494,9 +493,11 @@ class ROCrate():
                         current_file_path = path
                         current_out_file = archive.open(path, mode='w')
                     current_out_file.write(chunk)
+                    buffer.seek(0)
                     yield buffer.read()
                 if current_out_file:
                     current_out_file.close()
+        buffer.seek(0)
         yield buffer.read()
         buffer.close()
 
