@@ -83,13 +83,15 @@ class Dataset(FileOrDir):
             self._copy_folder(base_path)
 
     def stream(self) -> Generator[tuple[str, bytes], None, None]:
-        if is_url(str(self.source)):
+        if self.source is None:
+            return
+        elif is_url(str(self.source)):
             yield from self._stream_folder_from_url()
         else:
             yield from self._stream_folder_from_path()
 
     def _stream_folder_from_path(self) -> Generator[tuple[str, bytes], None, None]:
-        if not Path(self.source).exists():
+        if not Path(str(self.source)).exists():
             raise FileNotFoundError(
                 errno.ENOENT, os.strerror(errno.ENOENT), str(self.source)
             )
@@ -100,7 +102,7 @@ class Dataset(FileOrDir):
                     source = root / name
                     dest = source.relative_to(self.source.parent)
                     with open(source, 'rb') as f:
-                        yield dest, f.read()
+                        yield str(dest), f.read()
 
     def _stream_folder_from_url(self) -> Generator[tuple[str, bytes], None, None]:
         if not self.fetch_remote:
@@ -120,6 +122,6 @@ class Dataset(FileOrDir):
                     with urlopen(part_uri) as response:
                         chunk_size = 8192
                         while chunk := response.read(chunk_size):
-                            yield rel_out_path, chunk
+                            yield str(rel_out_path), chunk
                 except KeyError:
                     warnings.warn(f"'hasPart' entry in {self.id} is missing '@id'. Skipping.")
