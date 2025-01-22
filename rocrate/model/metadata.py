@@ -22,6 +22,7 @@
 
 import json
 from pathlib import Path
+from typing import Generator
 
 from .file import File
 from .dataset import Dataset
@@ -74,11 +75,16 @@ class Metadata(File):
             context = context[0]
         return {'@context': context, '@graph': graph}
 
-    def write(self, base_path):
-        write_path = Path(base_path) / self.id
-        as_jsonld = self.generate()
-        with open(write_path, 'w', encoding='utf-8') as outfile:
-            json.dump(as_jsonld, outfile, indent=4, sort_keys=True)
+    def stream(self) -> Generator[tuple[str, bytes], None, None]:
+        content = self.generate()
+        yield self.id, str.encode(json.dumps(content, indent=4, sort_keys=True), encoding='utf-8')
+
+    def _has_writeable_stream(self):
+        return True
+
+    def write(self, dest_base):
+        write_path = Path(dest_base) / self.id
+        super()._write_from_stream(write_path)
 
     @property
     def root(self) -> Dataset:
