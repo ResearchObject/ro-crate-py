@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from typing import Generator
 
 # Copyright 2019-2024 The University of Manchester, UK
 # Copyright 2020-2024 Vlaams Instituut voor Biotechnologie (VIB), BE
@@ -30,7 +29,7 @@ class DataEntity(Entity):
     def write(self, base_path):
         pass
 
-    def stream(self, chunk_size=8192) -> Generator[tuple[str, bytes], None, None]:
+    def stream(self, chunk_size=8192):
         """ Stream the data from the source. Each chunk of the content is yielded as a tuple
         containing the name of the destination file relative to the crate and the chunk of data.
         The destination file name is required because a DataEntity can be a file or a

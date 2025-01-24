@@ -22,7 +22,6 @@
 
 import json
 from pathlib import Path
-from typing import Generator
 
 from .file import File
 from .dataset import Dataset
@@ -75,7 +74,7 @@ class Metadata(File):
             context = context[0]
         return {'@context': context, '@graph': graph}
 
-    def stream(self, chunk_size=8192) -> Generator[tuple[str, bytes], None, None]:
+    def stream(self, chunk_size=8192):
         content = self.generate()
         yield self.id, str.encode(json.dumps(content, indent=4, sort_keys=True), encoding='utf-8')
 

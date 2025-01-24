@@ -24,7 +24,6 @@ import errno
 import os
 import warnings
 from pathlib import Path
-from typing import Generator
 from urllib.request import urlopen
 
 from .file_or_dir import FileOrDir
@@ -82,7 +81,7 @@ class Dataset(FileOrDir):
         else:
             self._copy_folder(base_path)
 
-    def stream(self, chunk_size=8192) -> Generator[tuple[str, bytes], None, None]:
+    def stream(self, chunk_size=8192):
         if self.source is None:
             return
         elif is_url(str(self.source)):

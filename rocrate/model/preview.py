@@ -22,7 +22,6 @@
 
 import os
 from pathlib import Path
-from typing import Generator
 
 from jinja2 import Template
 from .file import File
@@ -91,7 +90,7 @@ class Preview(File):
         out_html = src.render(crate=self.crate, context=context_entities, data=data_entities)
         return out_html
 
-    def stream(self, chunk_size=8192) -> Generator[tuple[str, bytes], None, None]:
+    def stream(self, chunk_size=8192):
         if self.source:
             yield from super().stream()
         else:

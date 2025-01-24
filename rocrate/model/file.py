@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 # Copyright 2019-2024 The University of Manchester, UK
 # Copyright 2020-2024 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
@@ -21,8 +22,6 @@
 
 from pathlib import Path
 import requests
-from typing import Generator
-
 import shutil
 import urllib.request
 import warnings
@@ -125,7 +124,7 @@ class File(FileOrDir):
         if self.record_size:
             self._jsonld['contentSize'] = str(size)
 
-    def stream(self, chunk_size=8192) -> Generator[tuple[str, bytes], None, None]:
+    def stream(self, chunk_size=8192):
         if isinstance(self.source, (BytesIO, StringIO)):
             yield from self._stream_from_stream(self.source)
         elif is_url(str(self.source)):
