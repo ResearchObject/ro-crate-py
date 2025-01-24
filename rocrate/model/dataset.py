@@ -100,9 +100,10 @@ class Dataset(FileOrDir):
                 root = Path(root)
                 for name in files:
                     source = root / name
-                    dest = source.relative_to(self.source.parent)
+                    dest = source.relative_to(Path(self.source).parent)
                     with open(source, 'rb') as f:
-                        yield str(dest), f.read()
+                        for chunk in f:
+                            yield str(dest), chunk
 
     def _stream_folder_from_url(self) -> Generator[tuple[str, bytes], None, None]:
         if not self.fetch_remote:
