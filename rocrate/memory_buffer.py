@@ -26,3 +26,6 @@ class MemoryBuffer(RawIOBase):
             data = self._buffer[:size]
             self._buffer = self._buffer[size:]
         return data
+
+    def __len__(self):
+        return len(self._buffer)

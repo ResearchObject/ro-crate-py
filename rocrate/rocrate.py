@@ -480,24 +480,26 @@ class ROCrate():
             shutil.rmtree(tmp_dir)
         return archive
 
-    def stream_zip(self):
+    def stream_zip(self, chunk_size=8192):
         """ Create a stream of bytes representing the RO-Crate as a ZIP file. """
         with MemoryBuffer() as buffer:
             with zipfile.ZipFile(buffer, mode='w', compression=zipfile.ZIP_DEFLATED) as archive:
                 for writeable_entity in self.data_entities + self.default_entities:
                     current_file_path, current_out_file = None, None
-                    for path, chunk in writeable_entity.stream():
+                    for path, chunk in writeable_entity.stream(chunk_size=chunk_size):
                         if path != current_file_path:
                             if current_out_file:
                                 current_out_file.close()
                             current_file_path = path
                             current_out_file = archive.open(path, mode='w')
                         current_out_file.write(chunk)
-                        yield buffer.read()
+                        while len(buffer) >= chunk_size:
+                            yield buffer.read(chunk_size)
                     if current_out_file:
                         current_out_file.close()
 
-            yield buffer.read()
+            while chunk := buffer.read(chunk_size):
+                yield chunk
 
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,

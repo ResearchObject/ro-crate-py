@@ -75,7 +75,7 @@ class Metadata(File):
             context = context[0]
         return {'@context': context, '@graph': graph}
 
-    def stream(self) -> Generator[tuple[str, bytes], None, None]:
+    def stream(self, chunk_size=8192) -> Generator[tuple[str, bytes], None, None]:
         content = self.generate()
         yield self.id, str.encode(json.dumps(content, indent=4, sort_keys=True), encoding='utf-8')
 

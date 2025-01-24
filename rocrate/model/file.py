@@ -93,7 +93,7 @@ class File(FileOrDir):
         if self.record_size:
             self._jsonld['contentSize'] = str(size)
 
-    def _stream_from_url(self, url) -> Generator[tuple[str, bytes], None, None]:
+    def _stream_from_url(self, url, chunk_size=8192):
         if self.fetch_remote or self.validate_url:
             if self.validate_url:
                 if url.startswith("http"):
@@ -109,7 +109,6 @@ class File(FileOrDir):
                 size = 0
                 self._jsonld['contentUrl'] = str(url)
                 with urllib.request.urlopen(url) as response:
-                    chunk_size = 8192
                     while chunk := response.read(chunk_size):
                         yield self.id, chunk
                         size += len(chunk)
@@ -117,22 +116,22 @@ class File(FileOrDir):
                 if self.record_size:
                     self._jsonld['contentSize'] = str(size)
 
-    def _stream_from_file(self, path):
+    def _stream_from_file(self, path, chunk_size=8192):
         size = 0
         with open(path, 'rb') as f:
-            for chunk in f:
+            while chunk := f.read(chunk_size):
                 yield self.id, chunk
                 size += len(chunk)
         if self.record_size:
             self._jsonld['contentSize'] = str(size)
 
-    def stream(self) -> Generator[tuple[str, bytes], None, None]:
+    def stream(self, chunk_size=8192) -> Generator[tuple[str, bytes], None, None]:
         if isinstance(self.source, (BytesIO, StringIO)):
             yield from self._stream_from_stream(self.source)
         elif is_url(str(self.source)):
-            yield from self._stream_from_url(self.source)
+            yield from self._stream_from_url(self.source, chunk_size)
         elif self.source is None:
             # Allows to record a File entity whose @id does not exist, see #73
             warnings.warn(f"No source for {self.id}")
         else:
-            yield from self._stream_from_file(self.source)
+            yield from self._stream_from_file(self.source, chunk_size)

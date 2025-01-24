@@ -82,15 +82,15 @@ class Dataset(FileOrDir):
         else:
             self._copy_folder(base_path)
 
-    def stream(self) -> Generator[tuple[str, bytes], None, None]:
+    def stream(self, chunk_size=8192) -> Generator[tuple[str, bytes], None, None]:
         if self.source is None:
             return
         elif is_url(str(self.source)):
-            yield from self._stream_folder_from_url()
+            yield from self._stream_folder_from_url(chunk_size)
         else:
-            yield from self._stream_folder_from_path()
+            yield from self._stream_folder_from_path(chunk_size)
 
-    def _stream_folder_from_path(self) -> Generator[tuple[str, bytes], None, None]:
+    def _stream_folder_from_path(self, chunk_size=8192):
         if not Path(str(self.source)).exists():
             raise FileNotFoundError(
                 errno.ENOENT, os.strerror(errno.ENOENT), str(self.source)
@@ -102,10 +102,10 @@ class Dataset(FileOrDir):
                     source = root / name
                     dest = source.relative_to(Path(self.source).parent)
                     with open(source, 'rb') as f:
-                        for chunk in f:
+                        while chunk := f.read(chunk_size):
                             yield str(dest), chunk
 
-    def _stream_folder_from_url(self) -> Generator[tuple[str, bytes], None, None]:
+    def _stream_folder_from_url(self, chunk_size=8192):
         if not self.fetch_remote:
             if self.validate_url:
                 with urlopen(self.source) as _:
@@ -121,7 +121,6 @@ class Dataset(FileOrDir):
                     rel_out_path = Path(self.id) / part
 
                     with urlopen(part_uri) as response:
-                        chunk_size = 8192
                         while chunk := response.read(chunk_size):
                             yield str(rel_out_path), chunk
                 except KeyError:
