@@ -470,15 +470,10 @@ class ROCrate():
 
     def write_zip(self, out_path):
         out_path = Path(out_path)
-        if out_path.suffix == ".zip":
-            out_path = out_path.parent / out_path.stem
-        tmp_dir = tempfile.mkdtemp(prefix="rocrate_")
-        try:
-            self.write(tmp_dir)
-            archive = shutil.make_archive(out_path, "zip", tmp_dir)
-        finally:
-            shutil.rmtree(tmp_dir)
-        return archive
+        with open(out_path, "wb") as f:
+            for chunk in self.stream_zip(out_path=out_path):
+                f.write(chunk)
+        return out_path
 
     def stream_zip(self, chunk_size=8192, out_path=None):
         """ Create a stream of bytes representing the RO-Crate as a ZIP file.
