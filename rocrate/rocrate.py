@@ -480,8 +480,11 @@ class ROCrate():
             shutil.rmtree(tmp_dir)
         return archive
 
-    def stream_zip(self, chunk_size=8192):
-        """ Create a stream of bytes representing the RO-Crate as a ZIP file. """
+    def stream_zip(self, chunk_size=8192, out_path=None):
+        """ Create a stream of bytes representing the RO-Crate as a ZIP file.
+        The out_path argument is used to exclude the file from the ZIP stream if the output is inside the crate folder
+        and can be omitted if the stream is not written into a file inside the crate dir.
+        """
         with MemoryBuffer() as buffer:
             with zipfile.ZipFile(buffer, mode='w', compression=zipfile.ZIP_DEFLATED) as archive:
                 for writeable_entity in self.data_entities + self.default_entities:
@@ -497,6 +500,27 @@ class ROCrate():
                             yield buffer.read(chunk_size)
                     if current_out_file:
                         current_out_file.close()
+
+                # add additional unlisted files to stream
+                listed_files = [archived_file for archived_file in archive.namelist()]
+                for root, dirs, files in walk(str(self.source), exclude=self.exclude):
+                    root = Path(root)
+                    for name in dirs:
+                        source = root / name
+                        dest = source.relative_to(self.source)
+                        dest.mkdir(parents=True, exist_ok=True)
+                    for name in files:
+                        source = root / name
+                        rel = source.relative_to(self.source)
+                        if not self.dereference(str(rel)) and not out_path.samefile(source):
+                            dest = rel
+                            if not str(dest) in listed_files:
+                                with archive.open(str(dest), mode='w') as f:
+                                    with open(source, 'rb') as r:
+                                        while chunk := r.read(chunk_size):
+                                            f.write(chunk)
+                                            while len(buffer) >= chunk_size:
+                                                yield buffer.read(chunk_size)
 
             while chunk := buffer.read(chunk_size):
                 yield chunk
