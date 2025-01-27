@@ -471,11 +471,15 @@ class ROCrate():
     def write_zip(self, out_path):
         out_path = Path(out_path)
         with open(out_path, "wb") as f:
-            for chunk in self.stream_zip(out_path=out_path):
+            for chunk in self._stream_zip(out_path=out_path):
                 f.write(chunk)
         return out_path
 
-    def stream_zip(self, chunk_size=8192, out_path=None):
+    def stream_zip(self, chunk_size=8192):
+        """ Create a stream of bytes representing the RO-Crate as a ZIP file. """
+        yield from self._stream_zip(chunk_size=chunk_size)
+
+    def _stream_zip(self, chunk_size=8192, out_path=None):
         """ Create a stream of bytes representing the RO-Crate as a ZIP file.
         The out_path argument is used to exclude the file from the ZIP stream if the output is inside the crate folder
         and can be omitted if the stream is not written into a file inside the crate dir.
