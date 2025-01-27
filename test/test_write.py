@@ -462,3 +462,18 @@ def test_http_header(tmpdir):
     assert "sdDatePublished" in props
     with requests.head(url) as response:
         assert props["sdDatePublished"] == response.headers.get("last-modified")
+
+
+def test_stream(test_data_dir, tmpdir):
+    source = test_data_dir / "read_crate"
+    crate = ROCrate(source)
+
+    out_path = tmpdir / 'ro_crate_out.zip'
+    with open(out_path, "wb") as out:
+        for chunk in crate.stream_zip():
+            out.write(chunk)
+
+    with zipfile.ZipFile(out_path, "r") as zf:
+        assert not zf.testzip()
+        for info in zf.infolist():
+            assert info.file_size > 0
