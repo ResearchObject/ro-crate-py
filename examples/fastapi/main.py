@@ -16,6 +16,7 @@ from io import StringIO
 
 app = FastAPI()
 
+
 @app.get("/crate")
 async def get():
     crate = ROCrate()
@@ -40,6 +41,3 @@ async def get():
             "Content-Disposition": "attachment; filename=crate.zip",
         }
     )
-
-
-
