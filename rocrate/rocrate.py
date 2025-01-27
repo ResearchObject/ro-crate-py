@@ -507,7 +507,7 @@ class ROCrate():
                     for name in files:
                         source = root / name
                         rel = source.relative_to(self.source)
-                        if not self.dereference(str(rel)) and not out_path.samefile(source):
+                        if not self.dereference(str(rel)) and (out_path and not out_path.samefile(source)):
                             dest = rel
                             if not str(dest) in listed_files:
                                 with archive.open(str(dest), mode='w') as f:
