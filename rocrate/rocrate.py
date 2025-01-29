@@ -503,23 +503,20 @@ class ROCrate():
                 # add additional unlisted files to stream
                 listed_files = [archived_file for archived_file in archive.namelist()]
                 for root, dirs, files in walk(str(self.source), exclude=self.exclude):
-                    root = Path(root)
-                    for name in dirs:
-                        source = root / name
-                        dest = source.relative_to(self.source)
-                        dest.mkdir(parents=True, exist_ok=True)
                     for name in files:
-                        source = root / name
+                        source = Path(root) / name
+
+                        # ignore out_path to not include a zip in itself
+                        if out_path and out_path.samefile(source):
+                            continue
+
                         rel = source.relative_to(self.source)
-                        if not self.dereference(str(rel)) and (out_path and not out_path.samefile(source)):
-                            dest = rel
-                            if not str(dest) in listed_files:
-                                with archive.open(str(dest), mode='w') as f:
-                                    with open(source, 'rb') as r:
-                                        while chunk := r.read(chunk_size):
-                                            f.write(chunk)
-                                            while len(buffer) >= chunk_size:
-                                                yield buffer.read(chunk_size)
+                        if not self.dereference(str(rel)) and not str(rel) in listed_files:
+                            with archive.open(str(rel), mode='w') as out_file, open(source, 'rb') as in_file:
+                                while chunk := in_file.read(chunk_size):
+                                    out_file.write(chunk)
+                                    while len(buffer) >= chunk_size:
+                                        yield buffer.read(chunk_size)
 
             while chunk := buffer.read(chunk_size):
                 yield chunk
