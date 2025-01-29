@@ -395,6 +395,21 @@ def test_no_parts(tmpdir, helpers):
     assert "hasPart" not in json_entities["./"]
 
 
+def test_write_zip_copy_unlisted(test_data_dir, tmpdir):
+    crate_dir = test_data_dir / 'ro-crate-galaxy-sortchangecase'
+    crate = ROCrate(crate_dir)
+
+    zip_name = 'ro_crate_out.crate.zip'
+    zip_path = tmpdir / zip_name
+    crate.write_zip(zip_path)
+    out_path = tmpdir / 'ro_crate_out'
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        zf.extractall(out_path)
+
+    assert (out_path / "test" / "test1" / "input.bed").is_file()
+    assert (out_path / "test" / "test1" / "output_exp.bed").is_file()
+
+
 def test_no_zip_in_zip(test_data_dir, tmpdir):
     crate_dir = test_data_dir / 'ro-crate-galaxy-sortchangecase'
     crate = ROCrate(crate_dir)
@@ -477,3 +492,10 @@ def test_stream(test_data_dir, tmpdir):
         assert not zf.testzip()
         for info in zf.infolist():
             assert info.file_size > 0
+
+    extract_path = tmpdir / 'ro_crate_out'
+    with zipfile.ZipFile(out_path, "r") as zf:
+        zf.extractall(extract_path)
+    assert (extract_path / "ro-crate-metadata.jsonld").is_file()
+    assert (extract_path / "examples" / "README.txt").is_file()
+    assert (extract_path / "test" / "test-metadata.json").is_file()
