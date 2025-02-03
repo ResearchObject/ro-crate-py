@@ -30,6 +30,7 @@ RO-Crate metadata, see rocrate_
 """
 
 __author__ = ", ".join((
+    'Daniel Bauer',
     'Eli Chadwick',
     'Paul De Geest',
     'Bert Droesbeke',

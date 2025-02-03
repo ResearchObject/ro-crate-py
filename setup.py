@@ -58,6 +58,7 @@ setup(
     long_description_content_type='text/markdown',
     long_description=long_description,
     author=", ".join((
+        'Daniel Bauer',
         'Eli Chadwick',
         'Paul De Geest',
         'Bert Droesbeke',
