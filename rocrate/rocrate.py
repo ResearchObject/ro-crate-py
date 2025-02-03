@@ -493,7 +493,7 @@ class ROCrate():
                             if current_out_file:
                                 current_out_file.close()
                             current_file_path = path
-                            current_out_file = archive.open(path, mode='w')
+                            current_out_file = archive.open(path, mode='w', force_zip64=True)
                         current_out_file.write(chunk)
                         while len(buffer) >= chunk_size:
                             yield buffer.read(chunk_size)

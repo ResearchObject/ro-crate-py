@@ -38,4 +38,4 @@ class DataEntity(Entity):
         meaning once the destination name changes, a file can be closed and the next one can be
         openend.
         """
-        raise NotImplementedError
+        yield from ()
