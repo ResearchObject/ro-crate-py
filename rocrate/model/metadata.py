@@ -7,6 +7,7 @@
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
 # Copyright 2024 National Institute of Informatics (NII), JP
+# Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
