@@ -1,10 +1,10 @@
-# Copyright 2019-2024 The University of Manchester, UK
-# Copyright 2020-2024 Vlaams Instituut voor Biotechnologie (VIB), BE
-# Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
-# Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
-# Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
-# Copyright 2024 Data Centre, SciLifeLab, SE
-# Copyright 2024 National Institute of Informatics (NII), JP
+# Copyright 2019-2025 The University of Manchester, UK
+# Copyright 2020-2025 Vlaams Instituut voor Biotechnologie (VIB), BE
+# Copyright 2020-2025 Barcelona Supercomputing Center (BSC), ES
+# Copyright 2020-2025 Center for Advanced Studies, Research and Development in Sardinia (CRS4), IT
+# Copyright 2022-2025 École Polytechnique Fédérale de Lausanne, CH
+# Copyright 2024-2025 Data Centre, SciLifeLab, SE
+# Copyright 2024-2025 National Institute of Informatics (NII), JP
 # Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +40,7 @@ START_YEAR_MAP = {
     "École Polytechnique Fédérale de Lausanne, CH": "2022",
     "Data Centre, SciLifeLab, SE": "2024",
     "National Institute of Informatics (NII), JP": "2024",
+    "Senckenberg Society for Nature Research (SGN), DE": "2025",
 }
 THIS_YEAR = str(datetime.date.today().year)
 BOILERPLATE_START = "Copyright [yyyy] [name of copyright owner]"
