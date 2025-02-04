@@ -7,6 +7,7 @@
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
 # Copyright 2024 National Institute of Informatics (NII), JP
+# Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,11 +91,15 @@ class Preview(File):
         out_html = src.render(crate=self.crate, context=context_entities, data=data_entities)
         return out_html
 
-    def write(self, dest_base):
+    def stream(self, chunk_size=8192):
         if self.source:
-            super().write(dest_base)
+            yield from super().stream()
         else:
-            write_path = Path(dest_base) / self.id
-            out_html = self.generate_html()
-            with open(write_path, 'w', encoding='utf-8') as outfile:
-                outfile.write(out_html)
+            yield self.id, str.encode(self.generate_html(), encoding='utf-8')
+
+    def _has_writeable_stream(self):
+        return True
+
+    def write(self, dest_base):
+        write_path = Path(dest_base) / self.id
+        super()._write_from_stream(write_path)

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2019-2024 The University of Manchester, UK
 # Copyright 2020-2024 Vlaams Instituut voor Biotechnologie (VIB), BE
 # Copyright 2020-2024 Barcelona Supercomputing Center (BSC), ES
@@ -21,8 +19,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .entity import Entity
+from io import RawIOBase
 
 
-class CreativeWork(Entity):
-    pass
+class MemoryBuffer(RawIOBase):
+    """
+    A buffer class that supports reading and writing binary data.
+    The buffer automatically resets upon reading to make sure all data is read only once.
+    """
+
+    def __init__(self):
+        self._buffer = b''
+
+    def write(self, data):
+        if self.closed:
+            raise ValueError('write to closed file')
+        self._buffer += data
+        return len(data)
+
+    def read(self, size=-1):
+        if self.closed:
+            raise ValueError('read from closed file')
+        if size < 0:
+            data = self._buffer
+            self._buffer = b''
+        else:
+            data = self._buffer[:size]
+            self._buffer = self._buffer[size:]
+        return data
+
+    def __len__(self):
+        return len(self._buffer)

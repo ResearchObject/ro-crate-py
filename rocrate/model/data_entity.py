@@ -7,6 +7,7 @@
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
 # Copyright 2024 National Institute of Informatics (NII), JP
+# Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,3 +29,14 @@ class DataEntity(Entity):
 
     def write(self, base_path):
         pass
+
+    def stream(self, chunk_size=8192):
+        """ Stream the data from the source. Each chunk of the content is yielded as a tuple
+        containing the name of the destination file relative to the crate and the chunk of data.
+        The destination file name is required because a DataEntity can be a file or a
+        collection of files (Dataset) and the caller need to know to which file a chunk belongs.
+        For collection of files, the caller can assume that files are streamed one after another,
+        meaning once the destination name changes, a file can be closed and the next one can be
+        openend.
+        """
+        yield from ()

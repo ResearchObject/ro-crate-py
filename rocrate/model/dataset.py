@@ -7,6 +7,7 @@
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
 # Copyright 2024 National Institute of Informatics (NII), JP
+# Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +23,7 @@
 
 import errno
 import os
-import shutil
+import warnings
 from pathlib import Path
 from urllib.request import urlopen
 
@@ -43,37 +44,84 @@ class Dataset(FileOrDir):
     def format_id(self, identifier):
         return identifier.rstrip("/") + "/"
 
+    def _write_from_url(self, base_path):
+        if self.validate_url and not self.fetch_remote:
+            with urlopen(self.source) as _:
+                self._jsonld['sdDatePublished'] = iso_now()
+        if self.fetch_remote:
+            out_file_path, out_file = None, None
+            for rel_path, chunk in self._stream_folder_from_url():
+                path = base_path / rel_path
+                if path != out_file_path:
+                    if out_file:
+                        out_file.close()
+                    out_file_path = Path(path)
+                    out_file_path.parent.mkdir(parents=True, exist_ok=True)
+                    out_file = open(out_file_path, 'wb')
+                out_file.write(chunk)
+            if out_file:
+                out_file.close()
+
+    def _copy_folder(self, base_path):
+        abs_out_path = base_path / self.id
+        if self.source is None:
+            abs_out_path.mkdir(parents=True, exist_ok=True)
+        else:
+            if not Path(self.source).exists():
+                raise FileNotFoundError(
+                    errno.ENOENT, os.strerror(errno.ENOENT), str(self.source)
+                )
+            abs_out_path.mkdir(parents=True, exist_ok=True)
+            if not self.crate.source:
+                self.crate._copy_unlisted(self.source, abs_out_path)
+
     def write(self, base_path):
-        out_path = Path(base_path) / self.id
+        base_path = Path(base_path)
         if is_url(str(self.source)):
-            if self.validate_url and not self.fetch_remote:
+            self._write_from_url(base_path)
+        else:
+            self._copy_folder(base_path)
+
+    def stream(self, chunk_size=8192):
+        if self.source is None:
+            return
+        elif is_url(str(self.source)):
+            yield from self._stream_folder_from_url(chunk_size)
+        else:
+            yield from self._stream_folder_from_path(chunk_size)
+
+    def _stream_folder_from_path(self, chunk_size=8192):
+        if not Path(str(self.source)).exists():
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), str(self.source)
+            )
+        if not self.crate.source:
+            for root, _, files in os.walk(self.source):
+                root = Path(root)
+                for name in files:
+                    source = root / name
+                    dest = source.relative_to(Path(self.source).parent)
+                    with open(source, 'rb') as f:
+                        while chunk := f.read(chunk_size):
+                            yield str(dest), chunk
+
+    def _stream_folder_from_url(self, chunk_size=8192):
+        if not self.fetch_remote:
+            if self.validate_url:
                 with urlopen(self.source) as _:
                     self._jsonld['sdDatePublished'] = iso_now()
-            if self.fetch_remote:
-                self.__get_parts(out_path)
         else:
-            if self.source is None:
-                out_path.mkdir(parents=True, exist_ok=True)
-            else:
-                if not Path(self.source).exists():
-                    raise FileNotFoundError(
-                        errno.ENOENT, os.strerror(errno.ENOENT), str(self.source)
-                    )
-                out_path.mkdir(parents=True, exist_ok=True)
-                if not self.crate.source:
-                    self.crate._copy_unlisted(self.source, out_path)
+            base = self.source.rstrip("/")
+            for entry in self._jsonld.get("hasPart", []):
+                try:
+                    part = entry["@id"]
+                    if is_url(part) or part.startswith("/"):
+                        raise RuntimeError(f"'{self.source}': part '{part}' is not a relative path")
+                    part_uri = f"{base}/{part}"
+                    rel_out_path = Path(self.id) / part
 
-    def __get_parts(self, out_path):
-        out_path.mkdir(parents=True, exist_ok=True)
-        base = self.source.rstrip("/")
-        for entry in self._jsonld.get("hasPart", []):
-            try:
-                part = entry["@id"]
-            except KeyError:
-                continue
-            if is_url(part) or part.startswith("/"):
-                raise RuntimeError(f"'{self.source}': part '{part}' is not a relative path")
-            part_uri = f"{base}/{part}"
-            part_out_path = out_path / part
-            with urlopen(part_uri) as r, open(part_out_path, 'wb') as f:
-                shutil.copyfileobj(r, f)
+                    with urlopen(part_uri) as response:
+                        while chunk := response.read(chunk_size):
+                            yield str(rel_out_path), chunk
+                except KeyError:
+                    warnings.warn(f"'hasPart' entry in {self.id} is missing '@id'. Skipping.")

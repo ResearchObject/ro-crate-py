@@ -1,6 +1,9 @@
 cff-version: 1.1.0
 message: "Cite as"
-authors:
+author:
+  - family-names: Bauer
+    given-names: Daniel
+    orcid: https://orcid.org/0000-0001-9447-460X
   - family-names: Chadwick
     given-names: Eli
     orcid: https://orcid.org/0000-0002-0035-6475

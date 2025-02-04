@@ -5,6 +5,7 @@
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
 # Copyright 2024 National Institute of Informatics (NII), JP
+# Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +32,7 @@ from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urljoin
 
+from .memory_buffer import MemoryBuffer
 from .model import (
     ComputationalWorkflow,
     ComputerLanguage,
@@ -469,15 +471,56 @@ class ROCrate():
 
     def write_zip(self, out_path):
         out_path = Path(out_path)
-        if out_path.suffix == ".zip":
-            out_path = out_path.parent / out_path.stem
-        tmp_dir = tempfile.mkdtemp(prefix="rocrate_")
-        try:
-            self.write(tmp_dir)
-            archive = shutil.make_archive(out_path, "zip", tmp_dir)
-        finally:
-            shutil.rmtree(tmp_dir)
-        return archive
+        with open(out_path, "wb") as f:
+            for chunk in self._stream_zip(out_path=out_path):
+                f.write(chunk)
+        return out_path
+
+    def stream_zip(self, chunk_size=8192):
+        """ Create a stream of bytes representing the RO-Crate as a ZIP file. """
+        yield from self._stream_zip(chunk_size=chunk_size)
+
+    def _stream_zip(self, chunk_size=8192, out_path=None):
+        """ Create a stream of bytes representing the RO-Crate as a ZIP file.
+        The out_path argument is used to exclude the file from the ZIP stream if the output is inside the crate folder
+        and can be omitted if the stream is not written into a file inside the crate dir.
+        """
+        with MemoryBuffer() as buffer:
+            with zipfile.ZipFile(buffer, mode='w', compression=zipfile.ZIP_DEFLATED) as archive:
+                for writeable_entity in self.data_entities + self.default_entities:
+                    current_file_path, current_out_file = None, None
+                    for path, chunk in writeable_entity.stream(chunk_size=chunk_size):
+                        if path != current_file_path:
+                            if current_out_file:
+                                current_out_file.close()
+                            current_file_path = path
+                            current_out_file = archive.open(path, mode='w', force_zip64=True)
+                        current_out_file.write(chunk)
+                        while len(buffer) >= chunk_size:
+                            yield buffer.read(chunk_size)
+                    if current_out_file:
+                        current_out_file.close()
+
+                # add additional unlisted files to stream
+                listed_files = [archived_file for archived_file in archive.namelist()]
+                for root, dirs, files in walk(str(self.source), exclude=self.exclude):
+                    for name in files:
+                        source = Path(root) / name
+
+                        # ignore out_path to not include a zip in itself
+                        if out_path and out_path.samefile(source):
+                            continue
+
+                        rel = source.relative_to(self.source)
+                        if not self.dereference(str(rel)) and not str(rel) in listed_files:
+                            with archive.open(str(rel), mode='w') as out_file, open(source, 'rb') as in_file:
+                                while chunk := in_file.read(chunk_size):
+                                    out_file.write(chunk)
+                                    while len(buffer) >= chunk_size:
+                                        yield buffer.read(chunk_size)
+
+            while chunk := buffer.read(chunk_size):
+                yield chunk
 
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,

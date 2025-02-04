@@ -5,6 +5,7 @@
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
 # Copyright 2024 National Institute of Informatics (NII), JP
+# Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -395,6 +396,21 @@ def test_no_parts(tmpdir, helpers):
     assert "hasPart" not in json_entities["./"]
 
 
+def test_write_zip_copy_unlisted(test_data_dir, tmpdir):
+    crate_dir = test_data_dir / 'ro-crate-galaxy-sortchangecase'
+    crate = ROCrate(crate_dir)
+
+    zip_name = 'ro_crate_out.crate.zip'
+    zip_path = tmpdir / zip_name
+    crate.write_zip(zip_path)
+    out_path = tmpdir / 'ro_crate_out'
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        zf.extractall(out_path)
+
+    assert (out_path / "test" / "test1" / "input.bed").is_file()
+    assert (out_path / "test" / "test1" / "output_exp.bed").is_file()
+
+
 def test_no_zip_in_zip(test_data_dir, tmpdir):
     crate_dir = test_data_dir / 'ro-crate-galaxy-sortchangecase'
     crate = ROCrate(crate_dir)
@@ -462,3 +478,25 @@ def test_http_header(tmpdir):
     assert "sdDatePublished" in props
     with requests.head(url) as response:
         assert props["sdDatePublished"] == response.headers.get("last-modified")
+
+
+def test_stream(test_data_dir, tmpdir):
+    source = test_data_dir / "read_crate"
+    crate = ROCrate(source)
+
+    out_path = tmpdir / 'ro_crate_out.zip'
+    with open(out_path, "wb") as out:
+        for chunk in crate.stream_zip():
+            out.write(chunk)
+
+    with zipfile.ZipFile(out_path, "r") as zf:
+        assert not zf.testzip()
+        for info in zf.infolist():
+            assert info.file_size > 0
+
+    extract_path = tmpdir / 'ro_crate_out'
+    with zipfile.ZipFile(out_path, "r") as zf:
+        zf.extractall(extract_path)
+    assert (extract_path / "ro-crate-metadata.jsonld").is_file()
+    assert (extract_path / "examples" / "README.txt").is_file()
+    assert (extract_path / "test" / "test-metadata.json").is_file()

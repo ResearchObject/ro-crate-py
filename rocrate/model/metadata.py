@@ -7,6 +7,7 @@
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
 # Copyright 2024 National Institute of Informatics (NII), JP
+# Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,11 +75,16 @@ class Metadata(File):
             context = context[0]
         return {'@context': context, '@graph': graph}
 
-    def write(self, base_path):
-        write_path = Path(base_path) / self.id
-        as_jsonld = self.generate()
-        with open(write_path, 'w', encoding='utf-8') as outfile:
-            json.dump(as_jsonld, outfile, indent=4, sort_keys=True)
+    def stream(self, chunk_size=8192):
+        content = self.generate()
+        yield self.id, str.encode(json.dumps(content, indent=4, sort_keys=True), encoding='utf-8')
+
+    def _has_writeable_stream(self):
+        return True
+
+    def write(self, dest_base):
+        write_path = Path(dest_base) / self.id
+        super()._write_from_stream(write_path)
 
     @property
     def root(self) -> Dataset:

@@ -7,6 +7,7 @@
 # Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 # Copyright 2024 Data Centre, SciLifeLab, SE
 # Copyright 2024 National Institute of Informatics (NII), JP
+# Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +31,7 @@ RO-Crate metadata, see rocrate_
 """
 
 __author__ = ", ".join((
+    'Daniel Bauer',
     'Eli Chadwick',
     'Paul De Geest',
     'Bert Droesbeke',
@@ -52,6 +54,7 @@ Copyright 2020-2024 Center for Advanced Studies, Research and Development in Sar
 Copyright 2022-2024 École Polytechnique Fédérale de Lausanne, CH
 Copyright 2024 Data Centre, SciLifeLab, SE
 Copyright 2024 National Institute of Informatics (NII), JP
+Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
 """
 __license__ = ("Apache License, version 2.0 "
                "<https://www.apache.org/licenses/LICENSE-2.0>")
