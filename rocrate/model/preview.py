@@ -78,8 +78,7 @@ class Preview(File):
                 for obj in a:
                     if obj is not str:
                         return True
-            else:
-                return False
+            return False
 
         template.close()
         context_entities = []
