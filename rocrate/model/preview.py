@@ -70,7 +70,7 @@ class Preview(File):
                 if a._jsonld and a._jsonld['name']:
                     return a._jsonld['name']
                 else:
-                    return a
+                    return str(a)
 
         @template_function
         def is_object_list(a):
@@ -78,8 +78,7 @@ class Preview(File):
                 for obj in a:
                     if obj is not str:
                         return True
-            else:
-                return False
+            return False
 
         template.close()
         context_entities = []
