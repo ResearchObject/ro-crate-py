@@ -595,3 +595,5 @@ def test_from_dict(tmpdir):
     for entity in d1, d2, f1:
         entity.source = None
     crate.write(out_path)
+    with pytest.raises(ValueError):
+        ROCrate(metadata, init=True)

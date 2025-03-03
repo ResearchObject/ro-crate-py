@@ -91,6 +91,8 @@ class ROCrate():
             # create a new ro-crate
             self.add(RootDataset(self), Metadata(self))
         elif init:
+            if isinstance(source, dict):
+                raise ValueError("parameter 'init' is not compatible with a dict source")
             self.__init_from_tree(source, gen_preview=gen_preview)
         else:
             source = self.__read(source, gen_preview=gen_preview)
