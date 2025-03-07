@@ -176,7 +176,8 @@ class ROCrate():
                 else:
                     instance = cls(self, source / id_, id_, properties=entity)
             self.add(instance)
-            self.__add_parts(as_list(entity.get("hasPart", [])), entities, source)
+            if instance.type == "Dataset":
+                self.__add_parts(as_list(entity.get("hasPart", [])), entities, source)
 
     def __read_contextual_entities(self, entities):
         type_map = {_.__name__: _ for _ in subclasses(ContextEntity)}

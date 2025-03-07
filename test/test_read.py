@@ -537,6 +537,9 @@ def test_indirect_data_entity(tmpdir):
     d2_e = crate.dereference("d1/d2")
     assert d2_e
     assert d2_e in crate.data_entities
+    f1_e = crate.dereference("d1/d2/f1")
+    assert f1_e
+    assert f1_e in crate.data_entities
 
 
 @pytest.mark.filterwarnings("ignore")
@@ -597,3 +600,62 @@ def test_from_dict(tmpdir):
     crate.write(out_path)
     with pytest.raises(ValueError):
         ROCrate(metadata, init=True)
+
+
+def test_no_data_entity_link_from_file():
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": "./"},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+            },
+            {
+                "@id": "./",
+                "@type": "Dataset",
+                "hasPart": [
+                    {"@id": "d1"},
+                    {"@id": "packed.cwl"}
+                ]
+            },
+            {
+                "@id": "d1",
+                "@type": "Dataset"
+            },
+            {
+                "@id": "packed.cwl",
+                "@type": [
+                    "File",
+                    "SoftwareSourceCode",
+                    "ComputationalWorkflow"
+                ],
+                "hasPart": [
+                    {"@id": "packed.cwl#do_this.cwl"},
+                    {"@id": "packed.cwl#do_that.cwl"}
+                ]
+            },
+            {
+                "@id": "packed.cwl#do_this.cwl",
+                "@type": "SoftwareApplication",
+            },
+            {
+                "@id": "packed.cwl#do_that.cwl",
+                "@type": "SoftwareApplication",
+            }
+        ]
+    }
+    crate = ROCrate(metadata)
+    d1 = crate.dereference("d1")
+    assert d1
+    assert d1 in crate.data_entities
+    assert d1 not in crate.contextual_entities
+    wf = crate.dereference("packed.cwl")
+    assert wf
+    assert wf in crate.data_entities
+    assert wf not in crate.contextual_entities
+    t1 = crate.dereference("packed.cwl#do_this.cwl")
+    assert t1
+    assert t1 not in crate.data_entities
+    assert t1 in crate.contextual_entities
