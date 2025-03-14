@@ -78,6 +78,7 @@ def pick_type(json_entity, type_map, fallback=None):
 class ROCrate():
 
     def __init__(self, source=None, gen_preview=False, init=False, exclude=None):
+        self.source = source
         self.exclude = exclude
         self.__entity_map = {}
         # TODO: add this as @base in the context? At least when loading
