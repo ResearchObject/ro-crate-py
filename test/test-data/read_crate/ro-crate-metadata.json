@@ -33,6 +33,9 @@
                 },
                 {
                     "@id": "test/"
+                },
+                {
+                    "@id": "with%20space.txt"
                 }
             ],
             "mainEntity": {
@@ -88,6 +91,10 @@
         {
             "@id": "test/",
             "@type": "Dataset"
+        },
+        {
+            "@id": "with%20space.txt",
+            "@type": "File"
         }
     ]
 }

@@ -27,6 +27,7 @@ import shutil
 import urllib.request
 import warnings
 from io import BytesIO, StringIO
+from urllib.parse import unquote
 
 from .file_or_dir import FileOrDir
 from ..utils import is_url, iso_now
@@ -62,6 +63,7 @@ class File(FileOrDir):
                 out_file.write(chunk)
 
     def _copy_file(self, path, out_file_path):
+        path = unquote(str(path))
         out_file_path.parent.mkdir(parents=True, exist_ok=True)
         if not out_file_path.exists() or not out_file_path.samefile(path):
             shutil.copy(path, out_file_path)
@@ -69,7 +71,7 @@ class File(FileOrDir):
             self._jsonld['contentSize'] = str(out_file_path.stat().st_size)
 
     def write(self, base_path):
-        out_file_path = Path(base_path) / self.id
+        out_file_path = Path(base_path) / unquote(self.id)
         if isinstance(self.source, (BytesIO, StringIO)) or is_url(str(self.source)):
             self._write_from_stream(out_file_path)
         elif self.source is None:
@@ -117,6 +119,7 @@ class File(FileOrDir):
                     self._jsonld['contentSize'] = str(size)
 
     def _stream_from_file(self, path, chunk_size=8192):
+        path = unquote(str(path))
         size = 0
         with open(path, 'rb') as f:
             while chunk := f.read(chunk_size):

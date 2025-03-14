@@ -54,6 +54,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
         "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/sample_file.txt",
         "examples/",
         "test/",
+        "with%20space.txt",
     }
     assert set(_["@id"] for _ in crate.contextual_entities) == {"#joe"}
 
