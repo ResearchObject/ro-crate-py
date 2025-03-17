@@ -276,7 +276,6 @@ def test_delete_refs(test_data_dir, tmpdir, helpers):
     crate.delete(definition)
     assert suite.definition is not definition  # so far, so good
     assert suite.definition == str(def_path)  # should probably be set to None
-    crate.write("/tmp/crate_out")
     # check json output
     out_path = tmpdir / "ro_crate_out"
     crate.write(out_path)

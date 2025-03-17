@@ -166,6 +166,22 @@ for n in "Mickey_Mouse", "Scrooge_McDuck":
     donald.append_to("follows", p)
 ```
 
+#### Handling of special characters
+
+Since RO-Crate entity identifiers are URIs (relative or absolute), special characters in them must be percent-encoded. When adding data entities from the local file system, this is handled automatically by the library:
+
+```pycon
+>>> crate = ROCrate()
+>>> d = crate.add_dataset("read_crate/a b")
+>>> d.id
+'a%20b/'
+>>> f = crate.add_file("read_crate/a b/c d.txt", dest_path="data/a b/c d.txt")
+>>> f.id
+'data/a%20b/c%20d.txt'
+```
+
+When adding an entity whose identifier is an absolute URI (see next section), on the other hand, the identifier provided by the user is expected to be a valid URI, in particular with any special characters in path components already percent-encoded.
+
 #### Adding remote entities
 
 Data entities can also be remote:

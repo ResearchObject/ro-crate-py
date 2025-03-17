@@ -500,3 +500,26 @@ def test_stream(test_data_dir, tmpdir):
     assert (extract_path / "ro-crate-metadata.jsonld").is_file()
     assert (extract_path / "examples" / "README.txt").is_file()
     assert (extract_path / "test" / "test-metadata.json").is_file()
+
+
+def test_percent_escape(test_data_dir, tmpdir, helpers):
+    crate = ROCrate()
+    f_path = test_data_dir / "read_crate" / "with space.txt"
+    f1 = crate.add_file(f_path)
+    assert f1.id == "with%20space.txt"
+    f2 = crate.add_file(f_path, dest_path="subdir/with space.txt")
+    assert f2.id == "subdir/with%20space.txt"
+    d_path = test_data_dir / "read_crate" / "a b"
+    d1 = crate.add_dataset(d_path)
+    assert d1.id == "a%20b/"
+    d2 = crate.add_dataset(d_path, dest_path="subdir/a b")
+    assert d2.id == "subdir/a%20b/"
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    json_entities = helpers.read_json_entities(out_path)
+    assert "with%20space.txt" in json_entities
+    assert "subdir/with%20space.txt" in json_entities
+    assert "a%20b/" in json_entities
+    assert "subdir/a%20b/" in json_entities
+    assert (out_path / "a b" / "c d.txt").is_file()
+    assert (out_path / "subdir" / "a b" / "c d.txt").is_file()

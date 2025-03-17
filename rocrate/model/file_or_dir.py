@@ -23,6 +23,7 @@
 
 import os
 from pathlib import Path
+from urllib.parse import quote
 
 from .data_entity import DataEntity
 from ..utils import is_url
@@ -43,6 +44,8 @@ class FileOrDir(DataEntity):
             if dest_path.is_absolute():
                 raise ValueError("if provided, dest_path must be relative")
             identifier = dest_path.as_posix()
+            if not crate.source:
+                identifier = quote(identifier)
         else:
             if not isinstance(source, (str, Path)):
                 raise ValueError("dest_path must be provided if source is not a path or URI")
@@ -50,4 +53,6 @@ class FileOrDir(DataEntity):
                 identifier = os.path.basename(source) if fetch_remote else source
             else:
                 identifier = os.path.basename(str(source).rstrip("/"))
+                if not crate.source:
+                    identifier = quote(identifier)
         super().__init__(crate, identifier, properties)
