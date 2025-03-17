@@ -26,6 +26,7 @@ import os
 import warnings
 from pathlib import Path
 from urllib.request import urlopen
+from urllib.parse import unquote
 
 from .file_or_dir import FileOrDir
 from ..utils import is_url, iso_now
@@ -63,17 +64,18 @@ class Dataset(FileOrDir):
                 out_file.close()
 
     def _copy_folder(self, base_path):
-        abs_out_path = base_path / self.id
+        abs_out_path = base_path / unquote(self.id)
         if self.source is None:
             abs_out_path.mkdir(parents=True, exist_ok=True)
         else:
-            if not Path(self.source).exists():
+            path = unquote(str(self.source))
+            if not Path(path).exists():
                 raise FileNotFoundError(
-                    errno.ENOENT, os.strerror(errno.ENOENT), str(self.source)
+                    errno.ENOENT, os.strerror(errno.ENOENT), path
                 )
             abs_out_path.mkdir(parents=True, exist_ok=True)
             if not self.crate.source:
-                self.crate._copy_unlisted(self.source, abs_out_path)
+                self.crate._copy_unlisted(path, abs_out_path)
 
     def write(self, base_path):
         base_path = Path(base_path)
@@ -91,16 +93,17 @@ class Dataset(FileOrDir):
             yield from self._stream_folder_from_path(chunk_size)
 
     def _stream_folder_from_path(self, chunk_size=8192):
-        if not Path(str(self.source)).exists():
+        path = unquote(str(self.source))
+        if not Path(path).exists():
             raise FileNotFoundError(
-                errno.ENOENT, os.strerror(errno.ENOENT), str(self.source)
+                errno.ENOENT, os.strerror(errno.ENOENT), str(path)
             )
         if not self.crate.source:
-            for root, _, files in os.walk(self.source):
+            for root, _, files in os.walk(path):
                 root = Path(root)
                 for name in files:
                     source = root / name
-                    dest = source.relative_to(Path(self.source).parent)
+                    dest = source.relative_to(Path(path).parent)
                     with open(source, 'rb') as f:
                         while chunk := f.read(chunk_size):
                             yield str(dest), chunk

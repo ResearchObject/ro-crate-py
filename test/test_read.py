@@ -55,6 +55,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
         "examples/",
         "test/",
         "with%20space.txt",
+        "a%20b/",
     }
     assert set(_["@id"] for _ in crate.contextual_entities) == {"#joe"}
 
