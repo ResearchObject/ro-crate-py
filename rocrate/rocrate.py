@@ -628,19 +628,20 @@ class ROCrate():
             action["result"] = result
         self.root_dataset.append_to("mentions", action)
         return action
-    
+
     def add_formal_parameter(self,
-                             name:str,
-                             additionalType : Literal["Text", "Boolean", "Integer", "File", "Dataset"], 
-                             identifier: Optional[str] = None, 
-                             description : Optional[str] = None,
-                             valueRequired = False,
-                             defaultValue = None) -> ContextEntity:
+                             name: str,
+                             additionalType: Literal["Text", "Boolean", "Integer", "File", "Dataset"],
+                             identifier: Optional[str] = None,
+                             description: Optional[str] = None,
+                             valueRequired=False,
+                             defaultValue=None) -> ContextEntity:
         """
-        Create a FormalParameter to describe an input or output of a workflow.    
-        
-        A FormalParameter describes the data-type of an input or output, not its value.  
-        The value a parameter takes for a run of the workflow is documented by a separate Data entity, referring to the associated FormalParameter via the `exampleOfWork` attribute.
+        Create a FormalParameter to describe an input or output of a workflow.
+
+        A FormalParameter describes the data-type of an input or output, not its value.
+        The value a parameter takes for a run of the workflow is documented by a separate Data entity,
+        referring to the associated FormalParameter via the `exampleOfWork` attribute.
 
         additionalType
         --------------
@@ -654,28 +655,26 @@ class ROCrate():
 
         returns
         -------
-        The created FormalParameter entity.  
+        The created FormalParameter entity.
         It can be associated to a workflow e.g as an input using the syntax
         >>> workflow_entity.append_to("input", formal_parameter_entity)
         """
         properties = {"@type": "FormalParameter",
-                      "additionalType" : additionalType,
-                      "valueRequired" : valueRequired,
-                      "conformsTo": {
-                                "@id": "https://bioschemas.org/profiles/FormalParameter/1.0-RELEASE"
-                                },
-                      "name" : name
-                    }
-        
+                      "additionalType": additionalType,
+                      "valueRequired": valueRequired,
+                      "conformsTo": {"@id": "https://bioschemas.org/profiles/FormalParameter/1.0-RELEASE"},
+                      "name": name
+                      }
+
         if description:
             properties["description"] = description
 
         if defaultValue:
             properties["defaultValue"] = defaultValue
 
-        return self.add(ContextEntity(self, 
-                                      identifier = identifier,
-                                      properties = properties))
+        return self.add(ContextEntity(self,
+                                      identifier=identifier,
+                                      properties=properties))
 
     def add_jsonld(self, jsonld):
         """Add a JSON-LD dictionary as a contextual entity to the RO-Crate.
