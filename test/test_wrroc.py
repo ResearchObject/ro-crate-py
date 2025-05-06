@@ -79,3 +79,36 @@ def test_add_action(tmpdir):
     assert "result" not in activate_action
     assert activate_action.get("name") == f"Run 2 of {instrument.id}"
     assert activate_action.get("endTime") == "2018-10-25T16:48:41.021563"
+
+
+def test_add_formal_parameter():
+    crate = ROCrate()
+
+    name = "test_json_param"
+    additionalType = "File"
+    encodingFormat = "application/json"
+
+    fp = crate.add_formal_parameter(name=name,
+                                    additionalType=additionalType,
+                                    properties={"encodingFormat": encodingFormat})
+
+    assert fp.type == "FormalParameter"
+    assert fp.get("name") == name
+    assert fp.get("additionalType") == additionalType
+    assert not fp.get("valueRequired")
+    assert not "defaultValue" in fp
+    assert fp.get("encodingFormat") == encodingFormat
+    assert fp.get("conformsTo") == "https://bioschemas.org/profiles/FormalParameter/1.0-RELEASE"
+
+    list_formal_parameter = crate.get_by_type("FormalParameter")
+    assert list_formal_parameter == [fp]
+
+    # Test with defaultValue and valueRequired
+    defaultValue = "default"
+    fp2 = crate.add_formal_parameter(name="param_string",
+                                     additionalType="Text",
+                                     defaultValue=defaultValue,
+                                     valueRequired=True)
+
+    assert fp2.get("defaultValue") == defaultValue
+    assert fp2.get("valueRequired")
