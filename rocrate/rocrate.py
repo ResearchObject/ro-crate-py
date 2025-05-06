@@ -630,9 +630,9 @@ class ROCrate():
 
     def add_formal_parameter(
             self,
+            name,
             additionalType,
             identifier=None,
-            name=None,
             description=None,
             valueRequired=False,
             defaultValue=None,
@@ -653,14 +653,13 @@ class ROCrate():
             properties = {}
         props = {
             "@type": "FormalParameter",
+            "name": name,
             "additionalType": additionalType,
             "valueRequired": valueRequired,
             "conformsTo": {
                 "@id": "https://bioschemas.org/profiles/FormalParameter/1.0-RELEASE"
             }
         }
-        if name:
-            props["name"] = name
         if description:
             props["description"] = description
         if defaultValue:
