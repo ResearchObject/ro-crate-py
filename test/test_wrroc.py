@@ -83,15 +83,14 @@ def test_add_action(tmpdir):
 
 def test_add_formal_parameter():
     crate = ROCrate()
-
     name = "test_json_param"
     additionalType = "File"
     encodingFormat = "application/json"
-
-    fp = crate.add_formal_parameter(name=name,
-                                    additionalType=additionalType,
-                                    properties={"encodingFormat": encodingFormat})
-
+    fp = crate.add_formal_parameter(
+        name=name,
+        additionalType=additionalType,
+        properties={"encodingFormat": encodingFormat}
+    )
     assert fp.type == "FormalParameter"
     assert fp.get("name") == name
     assert fp.get("additionalType") == additionalType
@@ -105,10 +104,11 @@ def test_add_formal_parameter():
 
     # Test with defaultValue and valueRequired
     defaultValue = "default"
-    fp2 = crate.add_formal_parameter(name="param_string",
-                                     additionalType="Text",
-                                     defaultValue=defaultValue,
-                                     valueRequired=True)
-
+    fp2 = crate.add_formal_parameter(
+        name="param_string",
+        additionalType="Text",
+        defaultValue=defaultValue,
+        valueRequired=True
+    )
     assert fp2.get("defaultValue") == defaultValue
     assert fp2.get("valueRequired")
