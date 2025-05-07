@@ -96,7 +96,7 @@ def test_add_formal_parameter():
     assert fp.get("name") == name
     assert fp.get("additionalType") == additionalType
     assert not fp.get("valueRequired")
-    assert not "defaultValue" in fp
+    assert "defaultValue" not in fp
     assert fp.get("encodingFormat") == encodingFormat
     assert fp.get("conformsTo") == "https://bioschemas.org/profiles/FormalParameter/1.0-RELEASE"
 
