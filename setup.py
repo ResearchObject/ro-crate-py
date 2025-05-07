@@ -72,7 +72,8 @@ setup(
         'Luca Pireddu',
         'Laura Rodríguez-Navas',
         'Raül Sirvent',
-        'Stian Soiland-Reyes'
+        'Stian Soiland-Reyes',
+        'Laurent Thomas'
     )),
     python_requires='>=3.9',
     author_email='stain@apache.org',
