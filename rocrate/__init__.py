@@ -57,6 +57,7 @@ Copyright 2022-2025 École Polytechnique Fédérale de Lausanne, CH
 Copyright 2024-2025 Data Centre, SciLifeLab, SE
 Copyright 2024-2025 National Institute of Informatics (NII), JP
 Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
+Copyright 2025 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
 """
 __license__ = ("Apache License, version 2.0 "
                "<https://www.apache.org/licenses/LICENSE-2.0>")

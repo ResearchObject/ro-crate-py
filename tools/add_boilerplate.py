@@ -42,6 +42,7 @@ START_YEAR_MAP = {
     "Data Centre, SciLifeLab, SE": "2024",
     "National Institute of Informatics (NII), JP": "2024",
     "Senckenberg Society for Nature Research (SGN), DE": "2025",
+    "European Molecular Biology Laboratory (EMBL), Heidelberg, DE": "2025",
 }
 THIS_YEAR = str(datetime.date.today().year)
 BOILERPLATE_START = "Copyright [yyyy] [name of copyright owner]"
