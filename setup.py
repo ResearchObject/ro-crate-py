@@ -8,6 +8,7 @@
 # Copyright 2024-2025 Data Centre, SciLifeLab, SE
 # Copyright 2024-2025 National Institute of Informatics (NII), JP
 # Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
+# Copyright 2025 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -72,7 +73,8 @@ setup(
         'Luca Pireddu',
         'Laura Rodríguez-Navas',
         'Raül Sirvent',
-        'Stian Soiland-Reyes'
+        'Stian Soiland-Reyes',
+        'Laurent Thomas'
     )),
     python_requires='>=3.9',
     author_email='stain@apache.org',

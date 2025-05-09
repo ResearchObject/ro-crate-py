@@ -6,6 +6,7 @@
 # Copyright 2024-2025 Data Centre, SciLifeLab, SE
 # Copyright 2024-2025 National Institute of Informatics (NII), JP
 # Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
+# Copyright 2025 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -627,6 +628,47 @@ class ROCrate():
             action["result"] = result
         self.root_dataset.append_to("mentions", action)
         return action
+
+    def add_formal_parameter(
+            self,
+            name,
+            additionalType,
+            identifier=None,
+            description=None,
+            valueRequired=False,
+            defaultValue=None,
+            properties=None
+    ):
+        """\
+        Add a FormalParameter to describe an input or output of a workflow.
+
+        A FormalParameter represents an input or output slot of a workflow, not
+        the actual value taken by a parameter. For further information see
+        https://w3id.org/ro/wfrun/workflow
+
+        Returns the created FormalParameter entity, which can be associated to
+        a workflow (e.g. as an input) using the syntax:
+          workflow_entity.append_to("input", formal_parameter_entity)
+        """
+        if properties is None:
+            properties = {}
+        props = {
+            "@type": "FormalParameter",
+            "name": name,
+            "additionalType": additionalType,
+            "valueRequired": valueRequired,
+            "conformsTo": {
+                "@id": "https://bioschemas.org/profiles/FormalParameter/1.0-RELEASE"
+            }
+        }
+        if description:
+            props["description"] = description
+        if defaultValue:
+            props["defaultValue"] = defaultValue
+        props.update(properties)
+        return self.add(
+            ContextEntity(self, identifier=identifier, properties=props)
+        )
 
     def add_jsonld(self, jsonld):
         """Add a JSON-LD dictionary as a contextual entity to the RO-Crate.

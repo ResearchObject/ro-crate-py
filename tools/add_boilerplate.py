@@ -6,6 +6,7 @@
 # Copyright 2024-2025 Data Centre, SciLifeLab, SE
 # Copyright 2024-2025 National Institute of Informatics (NII), JP
 # Copyright 2025 Senckenberg Society for Nature Research (SGN), DE
+# Copyright 2025 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,6 +42,7 @@ START_YEAR_MAP = {
     "Data Centre, SciLifeLab, SE": "2024",
     "National Institute of Informatics (NII), JP": "2024",
     "Senckenberg Society for Nature Research (SGN), DE": "2025",
+    "European Molecular Biology Laboratory (EMBL), Heidelberg, DE": "2025",
 }
 THIS_YEAR = str(datetime.date.today().year)
 BOILERPLATE_START = "Copyright [yyyy] [name of copyright owner]"
