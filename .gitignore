@@ -103,5 +103,7 @@ ENV/
 
 # vim 
 *.swp
+
+# other
 .DS_Store
 /.vscode
