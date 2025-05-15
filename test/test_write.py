@@ -524,3 +524,26 @@ def test_percent_escape(test_data_dir, tmpdir, helpers):
     assert "subdir/a%20b/" in json_entities
     assert (out_path / "a b" / "c d.txt").is_file()
     assert (out_path / "subdir" / "a b" / "c d.txt").is_file()
+
+def test_stream_empty_file(test_data_dir, tmpdir):
+    """
+    Test that empty files are written correctly to the zip file.
+    """
+    crate = ROCrate()
+    crate_dir = test_data_dir / "empty_file_crate"
+    crate.add_file(crate_dir / "empty.txt")
+    crate.add_directory(crate_dir / "folder")
+
+    # write the crate to a zip file 
+    out_path = tmpdir / 'ro_crate_out.zip'
+    crate.write_zip(out_path)
+
+    # Check that the zip file contains empty files
+    assert out_path.is_file()
+    files_in_zip = {}
+    with zipfile.ZipFile(out_path, "r") as zf:
+        for info in zf.infolist():
+            files_in_zip[info.filename] = info.file_size
+
+    assert files_in_zip["empty.txt"] == 0
+    assert files_in_zip["folder/empty_not_listed.txt"] == 0
