@@ -105,9 +105,15 @@ class Dataset(FileOrDir):
                 for name in files:
                     source = root / name
                     dest = source.relative_to(Path(path).parent)
+                    is_empty = True
                     with open(source, 'rb') as f:
                         while chunk := f.read(chunk_size):
+                            is_empty = False
                             yield str(dest), chunk
+
+                    # yield once for an empty file
+                    if is_empty:
+                        yield str(dest), b""
 
     def _stream_folder_from_url(self, chunk_size=8192):
         if not self.fetch_remote:
@@ -124,8 +130,14 @@ class Dataset(FileOrDir):
                     part_uri = f"{base}/{part}"
                     rel_out_path = Path(self.id) / part
 
+                    is_empty = True
                     with urlopen(part_uri) as response:
                         while chunk := response.read(chunk_size):
+                            is_empty = False
                             yield str(rel_out_path), chunk
+
+                    # yield once for an empty file
+                    if is_empty:
+                        yield str(rel_out_path), b""
                 except KeyError:
                     warnings.warn(f"'hasPart' entry in {self.id} is missing '@id'. Skipping.")

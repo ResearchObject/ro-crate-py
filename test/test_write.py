@@ -525,6 +525,7 @@ def test_percent_escape(test_data_dir, tmpdir, helpers):
     assert (out_path / "a b" / "c d.txt").is_file()
     assert (out_path / "subdir" / "a b" / "c d.txt").is_file()
 
+
 def test_stream_empty_file(test_data_dir, tmpdir):
     """
     Test that empty files are written correctly to the zip file.
@@ -534,7 +535,7 @@ def test_stream_empty_file(test_data_dir, tmpdir):
     crate.add_file(crate_dir / "empty.txt")
     crate.add_directory(crate_dir / "folder")
 
-    # write the crate to a zip file 
+    # write the crate to a zip file
     out_path = tmpdir / 'ro_crate_out.zip'
     crate.write_zip(out_path)
 
