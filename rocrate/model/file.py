@@ -116,6 +116,10 @@ class File(FileOrDir):
                         yield self.id, chunk
                         size += len(chunk)
 
+                # yield once for an empty file
+                if size == 0:
+                    yield self.id, b""
+
                 if self.record_size:
                     self._jsonld['contentSize'] = str(size)
 
@@ -126,6 +130,11 @@ class File(FileOrDir):
             while chunk := f.read(chunk_size):
                 yield self.id, chunk
                 size += len(chunk)
+
+        # yield once for an empty file
+        if size == 0:
+            yield self.id, b""
+
         if self.record_size:
             self._jsonld['contentSize'] = str(size)
 
