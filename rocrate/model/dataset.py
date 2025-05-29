@@ -30,7 +30,7 @@ from urllib.request import urlopen
 from urllib.parse import unquote
 
 from .file_or_dir import FileOrDir
-from ..utils import is_url, iso_now
+from ..utils import is_url, iso_now, Mode
 
 
 class Dataset(FileOrDir):
@@ -75,7 +75,7 @@ class Dataset(FileOrDir):
                     errno.ENOENT, os.strerror(errno.ENOENT), path
                 )
             abs_out_path.mkdir(parents=True, exist_ok=True)
-            if not self.crate.source:
+            if self.crate.mode == Mode.CREATE:
                 self.crate._copy_unlisted(path, abs_out_path)
 
     def write(self, base_path):
@@ -99,7 +99,7 @@ class Dataset(FileOrDir):
             raise FileNotFoundError(
                 errno.ENOENT, os.strerror(errno.ENOENT), str(path)
             )
-        if not self.crate.source:
+        if self.crate.mode == Mode.CREATE:
             for root, _, files in os.walk(path):
                 root = Path(root)
                 for name in files:
