@@ -22,6 +22,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from enum import Enum
 import os
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
@@ -77,3 +78,9 @@ def walk(top, topdown=True, onerror=None, followlinks=False, exclude=None):
             dirs[:] = [_ for _ in dirs if _ not in exclude]
             files[:] = [_ for _ in files if _ not in exclude]
         yield root, dirs, files
+
+
+class Mode(Enum):
+    READ = 1
+    INIT = 2
+    CREATE = 3

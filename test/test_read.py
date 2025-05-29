@@ -662,3 +662,24 @@ def test_no_data_entity_link_from_file():
     assert t1
     assert t1 not in crate.data_entities
     assert t1 in crate.contextual_entities
+
+
+def test_init_percent_escape(tmpdir, helpers):
+    in_crate = tmpdir / "in_crate"
+    in_file = in_crate / "in file.txt"
+    in_dir = in_crate / "in dir"
+    deep_file = in_crate / "in dir" / "deep file.txt"
+    out_crate = tmpdir / "out_crate"
+    in_crate.mkdir()
+    in_file.write_text("IN FILE\n")
+    in_dir.mkdir()
+    deep_file.write_text("DEEP FILE\n")
+    crate = ROCrate(in_crate, init=True)
+    crate.write(out_crate)
+    json_entities = helpers.read_json_entities(out_crate)
+    assert "in%20file.txt" in json_entities
+    assert "in%20dir/" in json_entities
+    assert "in%20dir/deep%20file.txt" in json_entities
+    assert (out_crate / "in file.txt").is_file()
+    assert (out_crate / "in dir").is_dir()
+    assert (out_crate / "in dir" / "deep file.txt").is_file()

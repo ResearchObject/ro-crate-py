@@ -60,7 +60,7 @@ from .model.computerlanguage import get_lang
 from .model.testservice import get_service
 from .model.softwareapplication import get_app
 
-from .utils import is_url, subclasses, get_norm_value, walk, as_list
+from .utils import is_url, subclasses, get_norm_value, walk, as_list, Mode
 from .metadata import read_metadata, find_root_entity_id
 
 
@@ -79,6 +79,7 @@ def pick_type(json_entity, type_map, fallback=None):
 class ROCrate():
 
     def __init__(self, source=None, gen_preview=False, init=False, exclude=None):
+        self.mode = None
         self.source = source
         self.exclude = exclude
         self.__entity_map = {}
@@ -90,13 +91,15 @@ class ROCrate():
         if gen_preview:
             self.add(Preview(self))
         if not source:
-            # create a new ro-crate
+            self.mode = Mode.CREATE
             self.add(RootDataset(self), Metadata(self))
         elif init:
+            self.mode = Mode.INIT
             if isinstance(source, dict):
                 raise ValueError("parameter 'init' is not compatible with a dict source")
             self.__init_from_tree(source, gen_preview=gen_preview)
         else:
+            self.mode = Mode.READ
             source = self.__read(source, gen_preview=gen_preview)
         # in the zip case, self.source is the extracted dir
         self.source = source
