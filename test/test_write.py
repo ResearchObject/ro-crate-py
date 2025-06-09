@@ -517,6 +517,8 @@ def test_percent_escape(test_data_dir, tmpdir, helpers):
     assert d1.id == "a%20b/"
     d2 = crate.add_dataset(d_path, dest_path="subdir/a b")
     assert d2.id == "subdir/a%20b/"
+    d3 = crate.add_dataset(test_data_dir / "read_crate" / "j%20k")
+    assert d3.id == "j%2520k/"
     out_path = tmpdir / "ro_crate_out"
     crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
@@ -525,11 +527,13 @@ def test_percent_escape(test_data_dir, tmpdir, helpers):
     assert "without%2520space.txt" in json_entities
     assert "a%20b/" in json_entities
     assert "subdir/a%20b/" in json_entities
+    assert "j%2520k/" in json_entities
     assert (out_path / "with space.txt").is_file()
     assert (out_path / "subdir" / "with space.txt").is_file()
     assert (out_path / "without%20space.txt").is_file()
     assert (out_path / "a b" / "c d.txt").is_file()
     assert (out_path / "subdir" / "a b" / "c d.txt").is_file()
+    assert (out_path / "j%20k" / "l%20m.txt").is_file()
 
 
 def test_stream_empty_file(test_data_dir, tmpdir):

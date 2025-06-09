@@ -69,7 +69,10 @@ class Dataset(FileOrDir):
         if self.source is None:
             abs_out_path.mkdir(parents=True, exist_ok=True)
         else:
-            path = unquote(str(self.source))
+            if self.crate.mode == Mode.READ:
+                path = unquote(str(self.source))
+            else:
+                path = self.source
             if not Path(path).exists():
                 raise FileNotFoundError(
                     errno.ENOENT, os.strerror(errno.ENOENT), path
