@@ -31,7 +31,7 @@ from io import BytesIO, StringIO
 from urllib.parse import unquote
 
 from .file_or_dir import FileOrDir
-from ..utils import is_url, iso_now
+from ..utils import is_url, iso_now, Mode
 
 
 class File(FileOrDir):
@@ -64,7 +64,6 @@ class File(FileOrDir):
                 out_file.write(chunk)
 
     def _copy_file(self, path, out_file_path):
-        path = unquote(str(path))
         out_file_path.parent.mkdir(parents=True, exist_ok=True)
         if not out_file_path.exists() or not out_file_path.samefile(path):
             shutil.copy(path, out_file_path)
@@ -79,7 +78,11 @@ class File(FileOrDir):
             # Allows to record a File entity whose @id does not exist, see #73
             warnings.warn(f"No source for {self.id}")
         else:
-            self._copy_file(self.source, out_file_path)
+            if self.crate.mode == Mode.READ:
+                in_file_path = unquote(str(self.source))
+            else:
+                in_file_path = self.source
+            self._copy_file(in_file_path, out_file_path)
 
     def _stream_from_stream(self, stream):
         size = 0
@@ -124,11 +127,10 @@ class File(FileOrDir):
                     self._jsonld['contentSize'] = str(size)
 
     def _stream_from_file(self, path, chunk_size=8192):
-        path = unquote(str(path))
         size = 0
         with open(path, 'rb') as f:
             while chunk := f.read(chunk_size):
-                yield self.id, chunk
+                yield unquote(self.id), chunk
                 size += len(chunk)
 
         # yield once for an empty file
@@ -147,4 +149,8 @@ class File(FileOrDir):
             # Allows to record a File entity whose @id does not exist, see #73
             warnings.warn(f"No source for {self.id}")
         else:
-            yield from self._stream_from_file(self.source, chunk_size)
+            if self.crate.mode == Mode.READ:
+                path = unquote(str(self.source))
+            else:
+                path = self.source
+            yield from self._stream_from_file(path, chunk_size)

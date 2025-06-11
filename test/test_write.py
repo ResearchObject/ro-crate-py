@@ -510,20 +510,48 @@ def test_percent_escape(test_data_dir, tmpdir, helpers):
     assert f1.id == "with%20space.txt"
     f2 = crate.add_file(f_path, dest_path="subdir/with space.txt")
     assert f2.id == "subdir/with%20space.txt"
+    f3 = crate.add_file(test_data_dir / "read_crate" / "without%20space.txt")
+    assert f3.id == "without%2520space.txt"
     d_path = test_data_dir / "read_crate" / "a b"
     d1 = crate.add_dataset(d_path)
     assert d1.id == "a%20b/"
     d2 = crate.add_dataset(d_path, dest_path="subdir/a b")
     assert d2.id == "subdir/a%20b/"
+    d3 = crate.add_dataset(test_data_dir / "read_crate" / "j%20k")
+    assert d3.id == "j%2520k/"
     out_path = tmpdir / "ro_crate_out"
     crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
     assert "with%20space.txt" in json_entities
     assert "subdir/with%20space.txt" in json_entities
+    assert "without%2520space.txt" in json_entities
     assert "a%20b/" in json_entities
     assert "subdir/a%20b/" in json_entities
+    assert "j%2520k/" in json_entities
+    assert (out_path / "with space.txt").is_file()
+    assert (out_path / "subdir" / "with space.txt").is_file()
+    assert (out_path / "without%20space.txt").is_file()
     assert (out_path / "a b" / "c d.txt").is_file()
     assert (out_path / "subdir" / "a b" / "c d.txt").is_file()
+    assert (out_path / "j%20k" / "l%20m.txt").is_file()
+    out_zip_path = tmpdir / "ro_crate_out.zip"
+    crate.write_zip(out_zip_path)
+    unpack_path = tmpdir / "unpack"
+    with zipfile.ZipFile(out_zip_path, "r") as zf:
+        zf.extractall(unpack_path)
+    json_entities = helpers.read_json_entities(unpack_path)
+    assert "with%20space.txt" in json_entities
+    assert "subdir/with%20space.txt" in json_entities
+    assert "without%2520space.txt" in json_entities
+    assert "a%20b/" in json_entities
+    assert "subdir/a%20b/" in json_entities
+    assert "j%2520k/" in json_entities
+    assert (unpack_path / "with space.txt").is_file()
+    assert (unpack_path / "subdir" / "with space.txt").is_file()
+    assert (unpack_path / "without%20space.txt").is_file()
+    assert (unpack_path / "a b" / "c d.txt").is_file()
+    assert (unpack_path / "subdir" / "a b" / "c d.txt").is_file()
+    assert (unpack_path / "j%20k" / "l%20m.txt").is_file()
 
 
 def test_stream_empty_file(test_data_dir, tmpdir):
@@ -548,3 +576,24 @@ def test_stream_empty_file(test_data_dir, tmpdir):
 
     assert files_in_zip["empty.txt"] == 0
     assert files_in_zip["folder/empty_not_listed.txt"] == 0
+
+
+def test_write_zip_nested_dest(tmpdir, helpers):
+    root = tmpdir / "root"
+    root.mkdir()
+    (root / "a b").mkdir()
+    (root / "a b" / "c d.txt").write_text("C D\n")
+    (root / "a b" / "j k").mkdir()
+    (root / "a b" / "j k" / "l m.txt").write_text("L M\n")
+    crate = ROCrate()
+    d1 = crate.add_dataset(root / "a b", dest_path="subdir/a b")
+    assert d1.id == "subdir/a%20b/"
+    out_zip_path = tmpdir / "ro_crate_out.zip"
+    crate.write_zip(out_zip_path)
+    unpack_path = tmpdir / "unpack"
+    with zipfile.ZipFile(out_zip_path, "r") as zf:
+        zf.extractall(unpack_path)
+    json_entities = helpers.read_json_entities(unpack_path)
+    assert "subdir/a%20b/" in json_entities
+    assert (unpack_path / "subdir" / "a b" / "c d.txt").is_file()
+    assert (unpack_path / "subdir" / "a b" / "j k" / "l m.txt").is_file()
