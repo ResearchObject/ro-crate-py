@@ -127,11 +127,10 @@ class File(FileOrDir):
                     self._jsonld['contentSize'] = str(size)
 
     def _stream_from_file(self, path, chunk_size=8192):
-        path = unquote(str(path))
         size = 0
         with open(path, 'rb') as f:
             while chunk := f.read(chunk_size):
-                yield self.id, chunk
+                yield unquote(self.id), chunk
                 size += len(chunk)
 
         # yield once for an empty file
@@ -150,4 +149,8 @@ class File(FileOrDir):
             # Allows to record a File entity whose @id does not exist, see #73
             warnings.warn(f"No source for {self.id}")
         else:
-            yield from self._stream_from_file(self.source, chunk_size)
+            if self.crate.mode == Mode.READ:
+                path = unquote(str(self.source))
+            else:
+                path = self.source
+            yield from self._stream_from_file(path, chunk_size)

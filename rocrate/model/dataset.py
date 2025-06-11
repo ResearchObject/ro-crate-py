@@ -97,7 +97,10 @@ class Dataset(FileOrDir):
             yield from self._stream_folder_from_path(chunk_size)
 
     def _stream_folder_from_path(self, chunk_size=8192):
-        path = unquote(str(self.source))
+        if self.crate.mode == Mode.READ:
+            path = unquote(str(self.source))
+        else:
+            path = self.source
         if not Path(path).exists():
             raise FileNotFoundError(
                 errno.ENOENT, os.strerror(errno.ENOENT), str(path)
@@ -107,7 +110,7 @@ class Dataset(FileOrDir):
                 root = Path(root)
                 for name in files:
                     source = root / name
-                    dest = source.relative_to(Path(path).parent)
+                    dest = Path(unquote(self.id)) / source.relative_to(path)
                     is_empty = True
                     with open(source, 'rb') as f:
                         while chunk := f.read(chunk_size):
