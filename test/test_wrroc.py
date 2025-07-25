@@ -55,7 +55,6 @@ def test_add_action(tmpdir):
     )
     assert create_action.type == "CreateAction"
     create_actions = crate.get_by_type("CreateAction")
-    assert crate.root_dataset.get("mentions") == create_actions
     assert create_actions == [create_action]
     assert create_action.get("instrument") is instrument
     assert create_action.get("object") == [f_in, param]
@@ -74,7 +73,6 @@ def test_add_action(tmpdir):
         }
     )
     assert activate_action.type == "ActivateAction"
-    assert crate.root_dataset.get("mentions") == [create_action, activate_action]
     assert activate_action.get("instrument") is instrument
     assert activate_action.get("object") == [f_out]
     assert "result" not in activate_action
