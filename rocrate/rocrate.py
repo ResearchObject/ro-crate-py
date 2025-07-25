@@ -629,7 +629,6 @@ class ROCrate():
             action["object"] = object
         if result:
             action["result"] = result
-        self.root_dataset.append_to("mentions", action)
         return action
 
     def add_formal_parameter(
