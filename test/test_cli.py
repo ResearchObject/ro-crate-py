@@ -53,7 +53,7 @@ def get_command_paths(command):
     """
 
     def resolve_commands(command, command_path, commands):
-        if isinstance(command, click.MultiCommand):
+        if isinstance(command, click.Group):
             for subcommand in command.commands.values():
                 command_subpath = command_path + [subcommand.name]
                 resolve_commands(subcommand, command_subpath, commands)
