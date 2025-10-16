@@ -54,7 +54,7 @@ from .model import (
     TestSuite,
     WorkflowDescription,
 )
-from .model.metadata import WORKFLOW_PROFILE, TESTING_EXTRA_TERMS, metadata_class
+from .model.metadata import WORKFLOW_PROFILE, TESTING_EXTRA_TERMS, DEFAULT_VERSION, metadata_class
 from .model.computationalworkflow import galaxy_to_abstract_cwl
 from .model.computerlanguage import get_lang
 from .model.testservice import get_service
@@ -78,7 +78,7 @@ def pick_type(json_entity, type_map, fallback=None):
 
 class ROCrate():
 
-    def __init__(self, source=None, gen_preview=False, init=False, exclude=None):
+    def __init__(self, source=None, gen_preview=False, init=False, exclude=None, version=DEFAULT_VERSION):
         self.mode = None
         self.source = source
         self.exclude = exclude
@@ -92,7 +92,7 @@ class ROCrate():
             self.add(Preview(self))
         if not source:
             self.mode = Mode.CREATE
-            self.add(RootDataset(self), Metadata(self))
+            self.add(RootDataset(self), Metadata(self, version=version))
         elif init:
             self.mode = Mode.INIT
             if isinstance(source, dict):
@@ -104,11 +104,11 @@ class ROCrate():
         # in the zip case, self.source is the extracted dir
         self.source = source
 
-    def __init_from_tree(self, top_dir, gen_preview=False):
+    def __init_from_tree(self, top_dir, gen_preview=False, version=DEFAULT_VERSION):
         top_dir = Path(top_dir)
         if not top_dir.is_dir():
             raise NotADirectoryError(errno.ENOTDIR, f"'{top_dir}': not a directory")
-        self.add(RootDataset(self), Metadata(self))
+        self.add(RootDataset(self), Metadata(self, version=version))
         for root, dirs, files in walk(top_dir, exclude=self.exclude):
             root = Path(root)
             for name in dirs:

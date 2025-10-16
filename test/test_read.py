@@ -74,8 +74,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     assert md_prop['@id'] == helpers.METADATA_FILE_NAME
     assert md_prop['@type'] == 'CreativeWork'
     assert md_prop['about'] == {'@id': './'}
-    # conformsTo is currently hardcoded in the Metadata class, not read from the crate
-    assert md_prop['conformsTo'] == {'@id': helpers.PROFILE}
+    assert md_prop['conformsTo'] == {'@id': "https://w3id.org/ro/crate/1.2"}
     assert metadata.root is root
 
     preview = crate.dereference(helpers.PREVIEW_FILE_NAME)
@@ -170,7 +169,7 @@ def test_legacy_crate(test_data_dir, tmpdir, helpers):
     md_prop = crate.metadata.properties()
 
     assert crate.dereference(helpers.LEGACY_METADATA_FILE_NAME) is crate.metadata
-    assert md_prop['conformsTo'] == {'@id': helpers.LEGACY_PROFILE}
+    assert md_prop['conformsTo'] == {'@id': "https://w3id.org/ro/crate/1.0"}
 
     main_wf = crate.dereference('test_galaxy_wf.ga')
     wf_prop = main_wf.properties()

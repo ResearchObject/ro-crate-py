@@ -30,6 +30,8 @@ from .dataset import Dataset
 
 
 WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
+SUPPORTED_VERSIONS = {"1.0", "1.1", "1.2"}
+DEFAULT_VERSION = "1.2"
 
 
 class Metadata(File):
@@ -37,9 +39,12 @@ class Metadata(File):
     RO-Crate metadata file.
     """
     BASENAME = "ro-crate-metadata.json"
-    PROFILE = "https://w3id.org/ro/crate/1.1"
 
-    def __init__(self, crate, source=None, dest_path=None, properties=None):
+    def __init__(self, crate, source=None, dest_path=None, properties=None, version=DEFAULT_VERSION):
+        if version not in SUPPORTED_VERSIONS:
+            raise ValueError(f"version {version!r} not supported")
+        self.version = version
+        self.profile = f"https://w3id.org/ro/crate/{self.version}"
         if source is None and dest_path is None:
             dest_path = self.BASENAME
         super().__init__(
@@ -58,7 +63,7 @@ class Metadata(File):
         # default properties of the metadata entry
         val = {"@id": self.id,
                "@type": "CreativeWork",
-               "conformsTo": {"@id": self.PROFILE},
+               "conformsTo": {"@id": self.profile},
                "about": {"@id": "./"}}
         return val
 
@@ -68,7 +73,7 @@ class Metadata(File):
         graph = []
         for entity in self.crate.get_entities():
             graph.append(entity.properties())
-        context = [f'{self.PROFILE}/context']
+        context = [f'{self.profile}/context']
         context.extend(self.extra_contexts)
         if self.extra_terms:
             context.append(self.extra_terms)
@@ -95,7 +100,17 @@ class Metadata(File):
 class LegacyMetadata(Metadata):
 
     BASENAME = "ro-crate-metadata.jsonld"
-    PROFILE = "https://w3id.org/ro/crate/1.0"
+
+    def __init__(self, crate, source=None, dest_path=None, properties=None, version="1.0"):
+        if version != "1.0":
+            raise ValueError("LegacyMetadata instance must have version 1.0")
+        super().__init__(
+            crate,
+            source=source,
+            dest_path=dest_path,
+            properties=properties,
+            version=version
+        )
 
 
 # https://github.com/ResearchObject/ro-terms/tree/master/test

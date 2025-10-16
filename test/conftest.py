@@ -31,14 +31,12 @@ from rocrate.utils import get_norm_value
 THIS_DIR = pathlib.Path(__file__).absolute().parent
 TEST_DATA_NAME = 'test-data'
 BASE_URL = 'https://w3id.org/ro/crate'
-VERSION = '1.1'
+DEFAULT_VERSION = '1.2'
 LEGACY_VERSION = '1.0'
 
 
 class Helpers:
 
-    PROFILE = f"{BASE_URL}/{VERSION}"
-    LEGACY_PROFILE = f"{BASE_URL}/{LEGACY_VERSION}"
     WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
     METADATA_FILE_NAME = 'ro-crate-metadata.json'
     LEGACY_METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
@@ -55,14 +53,14 @@ class Helpers:
         return {_["@id"]: _ for _ in json_data["@graph"]}
 
     @classmethod
-    def check_crate(cls, json_entities, root_id="./", data_entity_ids=None):
+    def check_crate(cls, json_entities, root_id="./", data_entity_ids=None, version=DEFAULT_VERSION):
         assert root_id in json_entities
         root = json_entities[root_id]
         assert root["@type"] == "Dataset"
         assert cls.METADATA_FILE_NAME in json_entities
         metadata = json_entities[cls.METADATA_FILE_NAME]
         assert metadata["@type"] == "CreativeWork"
-        assert cls.PROFILE in get_norm_value(metadata, "conformsTo")
+        assert f"{BASE_URL}/{version}" in get_norm_value(metadata, "conformsTo")
         assert metadata["about"] == {"@id": root_id}
         if data_entity_ids:
             data_entity_ids = set(data_entity_ids)

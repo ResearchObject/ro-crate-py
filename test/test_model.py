@@ -39,6 +39,7 @@ from rocrate.model import (
     Preview,
     ContextEntity
 )
+from .conftest import BASE_URL, DEFAULT_VERSION
 
 
 RAW_REPO_URL = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py"
@@ -456,7 +457,7 @@ def test_get_by_type(test_data_dir):
 def test_context(helpers):
     crate = ROCrate()
     jsonld = crate.metadata.generate()
-    base_context = f"{helpers.PROFILE}/context"
+    base_context = f"{BASE_URL}/{DEFAULT_VERSION}/context"
     assert jsonld["@context"] == base_context
     wfrun_ctx = "https://w3id.org/ro/terms/workflow-run"
     crate.metadata.extra_contexts.append(wfrun_ctx)
