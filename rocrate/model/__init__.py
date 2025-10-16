@@ -38,7 +38,7 @@ from .dataset import Dataset
 from .entity import Entity
 from .file import File
 from .file_or_dir import FileOrDir
-from .metadata import Metadata, LegacyMetadata
+from .metadata import Metadata
 from .person import Person
 from .root_dataset import RootDataset
 from .softwareapplication import SoftwareApplication
@@ -58,7 +58,6 @@ __all__ = [
     "Entity",
     "File",
     "FileOrDir",
-    "LegacyMetadata",
     "Metadata",
     "Person",
     "Preview",

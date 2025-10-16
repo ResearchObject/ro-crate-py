@@ -21,14 +21,14 @@
 # limitations under the License.
 
 import json
-import pathlib
 import shutil
+from pathlib import Path
 
 import pytest
 from rocrate.utils import get_norm_value
 
 
-THIS_DIR = pathlib.Path(__file__).absolute().parent
+THIS_DIR = Path(__file__).absolute().parent
 TEST_DATA_NAME = 'test-data'
 BASE_URL = 'https://w3id.org/ro/crate'
 DEFAULT_VERSION = '1.2'
@@ -47,7 +47,10 @@ class Helpers:
 
     @classmethod
     def read_json_entities(cls, crate_base_path):
-        metadata_path = pathlib.Path(crate_base_path) / cls.METADATA_FILE_NAME
+        crate_base_path = Path(crate_base_path)
+        metadata_path = crate_base_path / cls.METADATA_FILE_NAME
+        if not metadata_path.is_file():
+            metadata_path = crate_base_path / cls.LEGACY_METADATA_FILE_NAME
         with open(metadata_path, "rt") as f:
             json_data = json.load(f)
         return {_["@id"]: _ for _ in json_data["@graph"]}
@@ -89,7 +92,7 @@ def helpers():
 # pytest's default tmpdir returns a py.path object
 @pytest.fixture
 def tmpdir(tmpdir):
-    return pathlib.Path(tmpdir)
+    return Path(tmpdir)
 
 
 @pytest.fixture

@@ -29,24 +29,25 @@ from .file import File
 from .dataset import Dataset
 
 
-WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
 SUPPORTED_VERSIONS = {"1.0", "1.1", "1.2"}
 DEFAULT_VERSION = "1.2"
+BASENAME = "ro-crate-metadata.json"
+LEGACY_BASENAME = "ro-crate-metadata.jsonld"
+
+WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
 
 
 class Metadata(File):
     """\
     RO-Crate metadata file.
     """
-    BASENAME = "ro-crate-metadata.json"
-
     def __init__(self, crate, source=None, dest_path=None, properties=None, version=DEFAULT_VERSION):
         if version not in SUPPORTED_VERSIONS:
             raise ValueError(f"version {version!r} not supported")
         self.version = version
         self.profile = f"https://w3id.org/ro/crate/{self.version}"
         if source is None and dest_path is None:
-            dest_path = self.BASENAME
+            dest_path = LEGACY_BASENAME if version == "1.0" else BASENAME
         super().__init__(
             crate,
             source=source,
@@ -97,22 +98,6 @@ class Metadata(File):
         return self.crate.root_dataset
 
 
-class LegacyMetadata(Metadata):
-
-    BASENAME = "ro-crate-metadata.jsonld"
-
-    def __init__(self, crate, source=None, dest_path=None, properties=None, version="1.0"):
-        if version != "1.0":
-            raise ValueError("LegacyMetadata instance must have version 1.0")
-        super().__init__(
-            crate,
-            source=source,
-            dest_path=dest_path,
-            properties=properties,
-            version=version
-        )
-
-
 # https://github.com/ResearchObject/ro-terms/tree/master/test
 TESTING_EXTRA_TERMS = {
     "TestSuite": "https://w3id.org/ro/terms/test#TestSuite",
@@ -129,13 +114,3 @@ TESTING_EXTRA_TERMS = {
     "definition": "https://w3id.org/ro/terms/test#definition",
     "engineVersion": "https://w3id.org/ro/terms/test#engineVersion"
 }
-
-
-def metadata_class(descriptor_id):
-    basename = descriptor_id.rsplit("/", 1)[-1]
-    if basename == Metadata.BASENAME:
-        return Metadata
-    elif basename == LegacyMetadata.BASENAME:
-        return LegacyMetadata
-    else:
-        raise ValueError(f"Invalid metadata descriptor ID: {descriptor_id!r}")

@@ -43,7 +43,6 @@ from .model import (
     Entity,
     File,
     FileOrDir,
-    LegacyMetadata,
     Metadata,
     Preview,
     RootDataset,
@@ -54,7 +53,7 @@ from .model import (
     TestSuite,
     WorkflowDescription,
 )
-from .model.metadata import WORKFLOW_PROFILE, TESTING_EXTRA_TERMS, DEFAULT_VERSION, metadata_class
+from .model.metadata import WORKFLOW_PROFILE, TESTING_EXTRA_TERMS, DEFAULT_VERSION, BASENAME, LEGACY_BASENAME
 from .model.computationalworkflow import galaxy_to_abstract_cwl
 from .model.computerlanguage import get_lang
 from .model.testservice import get_service
@@ -116,7 +115,7 @@ class ROCrate():
                 self.add_dataset(source, source.relative_to(top_dir))
             for name in files:
                 source = root / name
-                if source == top_dir / Metadata.BASENAME or source == top_dir / LegacyMetadata.BASENAME:
+                if source == top_dir / BASENAME or source == top_dir / LEGACY_BASENAME:
                     continue
                 if source != top_dir / Preview.BASENAME:
                     self.add_file(source, source.relative_to(top_dir))
@@ -136,11 +135,11 @@ class ROCrate():
                 with zipfile.ZipFile(source, "r") as zf:
                     zf.extractall(zip_path)
                 source = Path(zip_path)
-            metadata_path = source / Metadata.BASENAME
+            metadata_path = source / BASENAME
             if not metadata_path.is_file():
-                metadata_path = source / LegacyMetadata.BASENAME
+                metadata_path = source / LEGACY_BASENAME
             if not metadata_path.is_file():
-                raise ValueError(f"Not a valid RO-Crate: missing {Metadata.BASENAME}")
+                raise ValueError(f"Not a valid RO-Crate: missing {BASENAME}")
         _, entities = read_metadata(metadata_path)
         self.__read_data_entities(entities, source, gen_preview)
         self.__read_contextual_entities(entities)
@@ -154,9 +153,8 @@ class ROCrate():
         assert root_id == root_entity.pop('@id')
         parts = as_list(root_entity.pop('hasPart', []))
         self.add(RootDataset(self, root_id, properties=root_entity))
-        MetadataClass = metadata_class(metadata_id)
         metadata_properties = entities.pop(metadata_id)
-        self.add(MetadataClass(self, metadata_id, properties=metadata_properties))
+        self.add(Metadata(self, metadata_id, properties=metadata_properties))
 
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
@@ -198,18 +196,18 @@ class ROCrate():
     @property
     def default_entities(self):
         return [e for e in self.__entity_map.values()
-                if isinstance(e, (RootDataset, Metadata, LegacyMetadata, Preview))]
+                if isinstance(e, (RootDataset, Metadata, Preview))]
 
     @property
     def data_entities(self):
         return [e for e in self.__entity_map.values()
-                if not isinstance(e, (RootDataset, Metadata, LegacyMetadata, Preview))
+                if not isinstance(e, (RootDataset, Metadata, Preview))
                 and hasattr(e, "write")]
 
     @property
     def contextual_entities(self):
         return [e for e in self.__entity_map.values()
-                if not isinstance(e, (RootDataset, Metadata, LegacyMetadata, Preview))
+                if not isinstance(e, (RootDataset, Metadata, Preview))
                 and not hasattr(e, "write")]
 
     @property
@@ -417,7 +415,7 @@ class ROCrate():
             key = e.canonical_id()
             if isinstance(e, RootDataset):
                 self.root_dataset = e
-            elif isinstance(e, (Metadata, LegacyMetadata)):
+            elif isinstance(e, Metadata):
                 self.metadata = e
             elif isinstance(e, Preview):
                 self.preview = e
