@@ -75,6 +75,14 @@ def pick_type(json_entity, type_map, fallback=None):
     return fallback
 
 
+def get_version(metadata_properties):
+    for uri in get_norm_value(metadata_properties, "conformsTo"):
+        base_uri, version = uri.rsplit("/", 1)
+        if base_uri.startswith("https://w3id.org/ro/crate"):
+            return version
+    return None
+
+
 class ROCrate():
 
     def __init__(self, source=None, gen_preview=False, init=False, exclude=None, version=DEFAULT_VERSION):
@@ -154,7 +162,8 @@ class ROCrate():
         parts = as_list(root_entity.pop('hasPart', []))
         self.add(RootDataset(self, root_id, properties=root_entity))
         metadata_properties = entities.pop(metadata_id)
-        self.add(Metadata(self, metadata_id, properties=metadata_properties))
+        version = get_version(metadata_properties) or DEFAULT_VERSION
+        self.add(Metadata(self, metadata_id, properties=metadata_properties, version=version))
 
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
@@ -297,6 +306,10 @@ class ROCrate():
     @mainEntity.setter
     def mainEntity(self, value):
         self.root_dataset['mainEntity'] = value
+
+    @property
+    def version(self):
+        return self.metadata.version
 
     @property
     def test_dir(self):

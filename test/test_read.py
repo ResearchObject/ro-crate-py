@@ -43,6 +43,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     else:
         crate = ROCrate(crate_dir, gen_preview=gen_preview)
 
+    assert crate.version == "1.2"
     assert set(_["@id"] for _ in crate.default_entities) == {
         "./",
         "ro-crate-metadata.json",
@@ -682,3 +683,10 @@ def test_init_percent_escape(tmpdir, helpers):
     assert (out_crate / "in file.txt").is_file()
     assert (out_crate / "in dir").is_dir()
     assert (out_crate / "in dir" / "deep file.txt").is_file()
+
+
+def test_read_version(test_data_dir):
+    crate = ROCrate(test_data_dir / "crate-1.0")
+    assert crate.version == "1.0"
+    crate = ROCrate(test_data_dir / "crate-1.1")
+    assert crate.version == "1.1"
