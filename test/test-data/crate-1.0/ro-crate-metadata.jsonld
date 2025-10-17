@@ -2,7 +2,7 @@
     "@context": "https://w3id.org/ro/crate/1.0/context",
     "@graph": [
         {
-            "@id": "ro-crate-metadata.json",
+            "@id": "ro-crate-metadata.jsonld",
             "@type": "CreativeWork",
             "about": {"@id": "./"},
             "conformsTo": {"@id": "https://w3id.org/ro/crate/1.0"}
