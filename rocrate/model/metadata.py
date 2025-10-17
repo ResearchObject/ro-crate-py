@@ -29,6 +29,11 @@ from .file import File
 from .dataset import Dataset
 
 
+SUPPORTED_VERSIONS = {"1.0", "1.1", "1.2"}
+DEFAULT_VERSION = "1.2"
+BASENAME = "ro-crate-metadata.json"
+LEGACY_BASENAME = "ro-crate-metadata.jsonld"
+
 WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
 
 
@@ -36,12 +41,13 @@ class Metadata(File):
     """\
     RO-Crate metadata file.
     """
-    BASENAME = "ro-crate-metadata.json"
-    PROFILE = "https://w3id.org/ro/crate/1.1"
-
-    def __init__(self, crate, source=None, dest_path=None, properties=None):
+    def __init__(self, crate, source=None, dest_path=None, properties=None, version=DEFAULT_VERSION):
+        if version not in SUPPORTED_VERSIONS:
+            raise ValueError(f"version {version!r} not supported")
+        self.version = version
+        self.profile = f"https://w3id.org/ro/crate/{self.version}"
         if source is None and dest_path is None:
-            dest_path = self.BASENAME
+            dest_path = LEGACY_BASENAME if version == "1.0" else BASENAME
         super().__init__(
             crate,
             source=source,
@@ -58,7 +64,7 @@ class Metadata(File):
         # default properties of the metadata entry
         val = {"@id": self.id,
                "@type": "CreativeWork",
-               "conformsTo": {"@id": self.PROFILE},
+               "conformsTo": {"@id": self.profile},
                "about": {"@id": "./"}}
         return val
 
@@ -68,7 +74,7 @@ class Metadata(File):
         graph = []
         for entity in self.crate.get_entities():
             graph.append(entity.properties())
-        context = [f'{self.PROFILE}/context']
+        context = [f'{self.profile}/context']
         context.extend(self.extra_contexts)
         if self.extra_terms:
             context.append(self.extra_terms)
@@ -92,12 +98,6 @@ class Metadata(File):
         return self.crate.root_dataset
 
 
-class LegacyMetadata(Metadata):
-
-    BASENAME = "ro-crate-metadata.jsonld"
-    PROFILE = "https://w3id.org/ro/crate/1.0"
-
-
 # https://github.com/ResearchObject/ro-terms/tree/master/test
 TESTING_EXTRA_TERMS = {
     "TestSuite": "https://w3id.org/ro/terms/test#TestSuite",
@@ -114,13 +114,3 @@ TESTING_EXTRA_TERMS = {
     "definition": "https://w3id.org/ro/terms/test#definition",
     "engineVersion": "https://w3id.org/ro/terms/test#engineVersion"
 }
-
-
-def metadata_class(descriptor_id):
-    basename = descriptor_id.rsplit("/", 1)[-1]
-    if basename == Metadata.BASENAME:
-        return Metadata
-    elif basename == LegacyMetadata.BASENAME:
-        return LegacyMetadata
-    else:
-        raise ValueError(f"Invalid metadata descriptor ID: {descriptor_id!r}")

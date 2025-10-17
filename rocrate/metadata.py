@@ -23,7 +23,7 @@
 import json
 import warnings
 
-from .model import Metadata, LegacyMetadata
+from .model.metadata import BASENAME, LEGACY_BASENAME
 
 
 def read_metadata(metadata_path):
@@ -85,13 +85,13 @@ def find_root_entity_id(entities):
     is more than one, we just return an arbitrary pair.
 
     """
-    descriptor = entities.get(Metadata.BASENAME, entities.get(LegacyMetadata.BASENAME))
+    descriptor = entities.get(BASENAME, entities.get(LEGACY_BASENAME))
     if descriptor:
         return _check_descriptor(descriptor, entities)
     candidates = []
     for id_, e in entities.items():
         basename = id_.rsplit("/", 1)[-1]
-        if basename == Metadata.BASENAME or basename == LegacyMetadata.BASENAME:
+        if basename == BASENAME or basename == LEGACY_BASENAME:
             try:
                 candidates.append(_check_descriptor(e, entities))
             except ValueError:

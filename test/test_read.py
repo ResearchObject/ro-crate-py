@@ -43,6 +43,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     else:
         crate = ROCrate(crate_dir, gen_preview=gen_preview)
 
+    assert crate.version == "1.2"
     assert set(_["@id"] for _ in crate.default_entities) == {
         "./",
         "ro-crate-metadata.json",
@@ -74,8 +75,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     assert md_prop['@id'] == helpers.METADATA_FILE_NAME
     assert md_prop['@type'] == 'CreativeWork'
     assert md_prop['about'] == {'@id': './'}
-    # conformsTo is currently hardcoded in the Metadata class, not read from the crate
-    assert md_prop['conformsTo'] == {'@id': helpers.PROFILE}
+    assert md_prop['conformsTo'] == {'@id': "https://w3id.org/ro/crate/1.2"}
     assert metadata.root is root
 
     preview = crate.dereference(helpers.PREVIEW_FILE_NAME)
@@ -170,7 +170,7 @@ def test_legacy_crate(test_data_dir, tmpdir, helpers):
     md_prop = crate.metadata.properties()
 
     assert crate.dereference(helpers.LEGACY_METADATA_FILE_NAME) is crate.metadata
-    assert md_prop['conformsTo'] == {'@id': helpers.LEGACY_PROFILE}
+    assert md_prop['conformsTo'] == {'@id': "https://w3id.org/ro/crate/1.0"}
 
     main_wf = crate.dereference('test_galaxy_wf.ga')
     wf_prop = main_wf.properties()
@@ -683,3 +683,10 @@ def test_init_percent_escape(tmpdir, helpers):
     assert (out_crate / "in file.txt").is_file()
     assert (out_crate / "in dir").is_dir()
     assert (out_crate / "in dir" / "deep file.txt").is_file()
+
+
+def test_read_version(test_data_dir):
+    crate = ROCrate(test_data_dir / "crate-1.0")
+    assert crate.version == "1.0"
+    crate = ROCrate(test_data_dir / "crate-1.1")
+    assert crate.version == "1.1"

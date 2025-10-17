@@ -21,6 +21,7 @@
 # limitations under the License.
 
 import io
+import json
 import pytest
 import requests
 import os
@@ -597,3 +598,19 @@ def test_write_zip_nested_dest(tmpdir, helpers):
     assert "subdir/a%20b/" in json_entities
     assert (unpack_path / "subdir" / "a b" / "c d.txt").is_file()
     assert (unpack_path / "subdir" / "a b" / "j k" / "l m.txt").is_file()
+
+
+@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
+def test_write_version(tmpdir, helpers, version):
+    basename = helpers.LEGACY_METADATA_FILE_NAME if version == "1.0" else helpers.METADATA_FILE_NAME
+    crate = ROCrate(version=version)
+    assert crate.metadata.version == version
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    assert (out_path / basename).is_file()
+    json_entities = helpers.read_json_entities(out_path)
+    assert (md := json_entities.get(basename)) is not None
+    assert md["conformsTo"]["@id"] == f"https://w3id.org/ro/crate/{version}"
+    with open(out_path / basename, "rt") as f:
+        data = json.load(f)
+    assert data["@context"] == f"https://w3id.org/ro/crate/{version}/context"

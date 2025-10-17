@@ -1,6 +1,6 @@
 [![Python package](https://github.com/ResearchObject/ro-crate-py/workflows/Python%20package/badge.svg)](https://github.com/ResearchObject/ro-crate-py/actions?query=workflow%3A%22Python+package%22) [![Upload Python Package](https://github.com/ResearchObject/ro-crate-py/workflows/Upload%20Python%20Package/badge.svg)](https://github.com/ResearchObject/ro-crate-py/actions?query=workflow%3A%22Upload+Python+Package%22) [![PyPI version](https://badge.fury.io/py/rocrate.svg)](https://pypi.org/project/rocrate/) [![DOI](https://zenodo.org/badge/216605684.svg)](https://zenodo.org/badge/latestdoi/216605684)
 
-ro-crate-py is a Python library to create and consume [Research Object Crates](https://w3id.org/ro/crate). It currently supports the [RO-Crate 1.1](https://w3id.org/ro/crate/1.1) specification.
+ro-crate-py is a Python library to create and consume [Research Object Crates](https://w3id.org/ro/crate). It supports the current [RO-Crate 1.2](https://w3id.org/ro/crate/1.2) specification as well as the older [RO-Crate 1.1](https://w3id.org/ro/crate/1.1) and [RO-Crate 1.0](https://w3id.org/ro/crate/1.0).
 
 ## Installation
 
@@ -224,6 +224,25 @@ Note that entities can have multiple types, e.g.:
 ```python
     "@type" = ["File", "SoftwareSourceCode"]
 ```
+
+#### Selecting the RO-Crate specification version
+
+By default, a newly created RO-Crate conforms to the [RO-Crate 1.2](https://w3id.org/ro/crate/1.2) specification, but 1.0 and 1.1 are still supported:
+
+```pycon
+>>> from rocrate.rocrate import ROCrate
+>>> crate = ROCrate()
+>>> crate.version
+'1.2'
+>>> crate = ROCrate(version="1.0")
+>>> crate.version
+'1.0'
+>>> crate.metadata.id
+'ro-crate-metadata.jsonld'
+```
+
+When consuming an RO-Crate (see below), the `version` parameter is ignored, and the RO-Crate version is read from the metadata descriptor instead.
+
 
 ### Consuming an RO-Crate
 
