@@ -27,7 +27,6 @@ import atexit
 import os
 import shutil
 import tempfile
-import warnings
 
 from collections import OrderedDict
 from pathlib import Path
@@ -61,6 +60,15 @@ from .model.softwareapplication import get_app
 
 from .utils import is_url, subclasses, get_norm_value, walk, as_list, Mode
 from .metadata import read_metadata, find_root_entity_id
+
+
+DATA_ENTITY_TYPES = {"File", "Dataset"}
+
+
+def is_data_entity(entity):
+    if entity["@id"].startswith("#"):
+        return False
+    return DATA_ENTITY_TYPES.intersection(as_list(entity.get("@type", [])))
 
 
 def pick_type(json_entity, type_map, fallback=None):
@@ -172,8 +180,8 @@ class ROCrate():
 
     def __add_parts(self, parts, entities, source):
         type_map = OrderedDict((_.__name__, _) for _ in subclasses(FileOrDir))
-        for data_entity_ref in parts:
-            id_ = data_entity_ref['@id']
+        for ref in parts:
+            id_ = ref['@id']
             try:
                 entity = entities.pop(id_)
             except KeyError:
@@ -193,11 +201,9 @@ class ROCrate():
 
     def __read_contextual_entities(self, entities):
         type_map = {_.__name__: _ for _ in subclasses(ContextEntity)}
-        # types *commonly* used for data entities
-        data_entity_types = {"File", "Dataset"}
         for identifier, entity in entities.items():
-            if data_entity_types.intersection(as_list(entity.get("@type", []))):
-                warnings.warn(f"{entity['@id']} looks like a data entity but it's not listed in the root dataset's hasPart")
+            if is_data_entity(entity):
+                raise ValueError(f"{entity['@id']} is a data entity but it's not linked from the root dataset's hasPart")
             assert identifier == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=ContextEntity)
             self.add(cls(self, identifier, entity))
