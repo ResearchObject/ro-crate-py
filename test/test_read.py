@@ -167,6 +167,7 @@ def test_legacy_crate(test_data_dir, tmpdir, helpers):
     # Remove the metadata file, leaving only the legacy one
     (crate_dir / helpers.METADATA_FILE_NAME).unlink()
     crate = ROCrate(crate_dir)
+    assert crate.version == "1.0"
     md_prop = crate.metadata.properties()
 
     assert crate.dereference(helpers.LEGACY_METADATA_FILE_NAME) is crate.metadata
@@ -443,14 +444,15 @@ def test_generic_data_entity(tmpdir, version):
     check_rc()
 
 
-def test_root_conformsto(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_root_conformsto(tmpdir, version):
     # actually not a valid workflow ro-crate, but here it does not matter
     profiles = [
-        "https://w3id.org/ro/crate/1.1",
+        f"https://w3id.org/ro/crate/{version}",
         "https://w3id.org/workflowhub/workflow-ro-crate/1.0",
     ]
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
@@ -472,16 +474,17 @@ def test_root_conformsto(tmpdir):
     assert crate.metadata["conformsTo"] == profiles
 
 
-def test_multi_type_context_entity(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_multi_type_context_entity(tmpdir, version):
     id_, type_ = "#xyz", ["Project", "Organization"]
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "about": {"@id": "./"},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
             },
             {
                 "@id": "./",
@@ -503,15 +506,16 @@ def test_multi_type_context_entity(tmpdir):
     assert set(entity.type) == set(type_)
 
 
-def test_indirect_data_entity(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_indirect_data_entity(tmpdir, version):
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "about": {"@id": "./"},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
             },
             {
                 "@id": "./",
@@ -557,15 +561,16 @@ def test_indirect_data_entity(tmpdir):
 
 
 @pytest.mark.filterwarnings("ignore")
-def test_from_dict(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_from_dict(tmpdir, version):
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "about": {"@id": "./"},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
             },
             {
                 "@id": "./",
@@ -616,15 +621,16 @@ def test_from_dict(tmpdir):
         ROCrate(metadata, init=True)
 
 
-def test_no_data_entity_link_from_file():
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_no_data_entity_link_from_file(version):
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "about": {"@id": "./"},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
             },
             {
                 "@id": "./",
