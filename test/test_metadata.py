@@ -42,7 +42,7 @@ def test_find_root(root, basename):
             "@type": "CreativeWork",
             "about": {"@id": root_id},
             "conformsTo": [
-                {"@id": "https://w3id.org/ro/crate/1.1"},
+                {"@id": "https://w3id.org/ro/crate/1.2"},
                 {"@id": "https://example.org/fancy-ro-crate/1.0"},
             ]
         },
@@ -64,7 +64,7 @@ def test_find_root_bad_entities():
             "@id": "ro-crate-metadata.json",
             "@type": "CreativeWork",
             "about": {"@id": "./"},
-            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
         },
         "./": {
             "@id": "./",
@@ -101,7 +101,7 @@ def test_find_root_multiple_entries():
             "@id": "http://example.org/ro-crate-metadata.json",
             "@type": "CreativeWork",
             "about": {"@id": "http://example.org/"},
-            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
         },
         "http://example.org/": {
             "@id": "http://example.org/",
@@ -115,7 +115,7 @@ def test_find_root_multiple_entries():
             "@id": "http://example.com/ro-crate-metadata.json",
             "@type": "CreativeWork",
             "about": {"@id": "http://example.com/"},
-            "conformsTo": {"@id": "https://w3id.com/ro/crate/1.1"},
+            "conformsTo": {"@id": "https://w3id.com/ro/crate/1.2"},
         },
         "http://example.com/": {
             "@id": "http://example.com/",
@@ -166,7 +166,7 @@ def test_find_root_multiple_types():
             "@id": "ro-crate-metadata.json",
             "@type": "CreativeWork",
             "about": {"@id": "./"},
-            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
         },
         {
             "@id": "./",

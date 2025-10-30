@@ -33,6 +33,8 @@ from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urljoin
 
+from packaging.version import Version
+
 from .memory_buffer import MemoryBuffer
 from .model import (
     ComputationalWorkflow,
@@ -61,6 +63,15 @@ from .model.softwareapplication import get_app
 
 from .utils import is_url, subclasses, get_norm_value, walk, as_list, Mode
 from .metadata import read_metadata, find_root_entity_id
+
+
+DATA_ENTITY_TYPES = {"File", "Dataset"}
+
+
+def is_data_entity(entity):
+    if entity["@id"].startswith("#"):
+        return False
+    return DATA_ENTITY_TYPES.intersection(as_list(entity.get("@type", [])))
 
 
 def pick_type(json_entity, type_map, fallback=None):
@@ -172,12 +183,14 @@ class ROCrate():
 
     def __add_parts(self, parts, entities, source):
         type_map = OrderedDict((_.__name__, _) for _ in subclasses(FileOrDir))
-        for data_entity_ref in parts:
-            id_ = data_entity_ref['@id']
-            try:
-                entity = entities.pop(id_)
-            except KeyError:
+        for ref in parts:
+            id_ = ref['@id']
+            if id_ not in entities:
                 continue
+            if self.version_obj >= Version("1.2"):
+                if not is_data_entity(entities[id_]):
+                    continue
+            entity = entities.pop(id_)
             assert id_ == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=DataEntity)
             if cls is DataEntity:
@@ -193,11 +206,13 @@ class ROCrate():
 
     def __read_contextual_entities(self, entities):
         type_map = {_.__name__: _ for _ in subclasses(ContextEntity)}
-        # types *commonly* used for data entities
-        data_entity_types = {"File", "Dataset"}
         for identifier, entity in entities.items():
-            if data_entity_types.intersection(as_list(entity.get("@type", []))):
-                warnings.warn(f"{entity['@id']} looks like a data entity but it's not listed in the root dataset's hasPart")
+            if is_data_entity(entity):
+                id_ = entity['@id']
+                if self.version_obj >= Version("1.2"):
+                    raise ValueError(f"'{id_}' is a data entity but it's not linked to from the root dataset's hasPart")
+                else:
+                    warnings.warn(f"'{id_}' looks like a data entity but it's not listed in the root dataset's hasPart")
             assert identifier == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=ContextEntity)
             self.add(cls(self, identifier, entity))
@@ -310,6 +325,10 @@ class ROCrate():
     @property
     def version(self):
         return self.metadata.version
+
+    @property
+    def version_obj(self):
+        return self.metadata.version_obj
 
     @property
     def test_dir(self):
