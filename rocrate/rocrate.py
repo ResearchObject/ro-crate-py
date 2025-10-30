@@ -27,6 +27,7 @@ import atexit
 import os
 import shutil
 import tempfile
+import warnings
 
 from collections import OrderedDict
 from pathlib import Path
@@ -207,7 +208,11 @@ class ROCrate():
         type_map = {_.__name__: _ for _ in subclasses(ContextEntity)}
         for identifier, entity in entities.items():
             if is_data_entity(entity):
-                raise ValueError(f"{entity['@id']} is a data entity but it's not linked from the root dataset's hasPart")
+                id_ = entity['@id']
+                if self.version_obj >= Version("1.2"):
+                    raise ValueError(f"'{id_}' is a data entity but it's not linked to from the root dataset's hasPart")
+                else:
+                    warnings.warn(f"'{id_}' looks like a data entity but it's not listed in the root dataset's hasPart")
             assert identifier == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=ContextEntity)
             self.add(cls(self, identifier, entity))

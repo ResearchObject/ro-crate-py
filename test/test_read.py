@@ -709,6 +709,7 @@ def test_read_version(test_data_dir):
     assert crate.version == "1.1"
 
 
+@pytest.mark.filterwarnings("ignore")
 @pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
 def test_data_entity_not_linked(version):
     metadata = {
@@ -737,8 +738,13 @@ def test_data_entity_not_linked(version):
             }
         ]
     }
-    with pytest.raises(ValueError, match="hasPart"):
-        ROCrate(metadata)
+    if version == "1.2":
+        with pytest.raises(ValueError, match="hasPart"):
+            ROCrate(metadata)
+    else:
+        crate = ROCrate(metadata)
+        f1 = crate.get("f1.txt")
+        assert f1 in crate.contextual_entities
 
 
 @pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
