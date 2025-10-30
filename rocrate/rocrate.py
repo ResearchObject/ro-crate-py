@@ -32,6 +32,8 @@ from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urljoin
 
+from packaging.version import Version
+
 from .memory_buffer import MemoryBuffer
 from .model import (
     ComputationalWorkflow,
@@ -182,10 +184,12 @@ class ROCrate():
         type_map = OrderedDict((_.__name__, _) for _ in subclasses(FileOrDir))
         for ref in parts:
             id_ = ref['@id']
-            try:
-                entity = entities.pop(id_)
-            except KeyError:
+            if id_ not in entities:
                 continue
+            if self.version_obj >= Version("1.2"):
+                if not is_data_entity(entities[id_]):
+                    continue
+            entity = entities.pop(id_)
             assert id_ == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=DataEntity)
             if cls is DataEntity:
@@ -316,6 +320,10 @@ class ROCrate():
     @property
     def version(self):
         return self.metadata.version
+
+    @property
+    def version_obj(self):
+        return self.metadata.version_obj
 
     @property
     def test_dir(self):
