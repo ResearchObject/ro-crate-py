@@ -28,7 +28,7 @@ import zipfile
 from pathlib import Path
 
 from rocrate.rocrate import ROCrate
-from rocrate.model import DataEntity, File, Dataset
+from rocrate.model import DataEntity, ContextEntity, File, Dataset
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
@@ -377,11 +377,12 @@ def test_missing_file(test_data_dir, tmpdir):
     assert (out_path / name).read_text() == text
 
 
-def test_generic_data_entity(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_generic_data_entity(tmpdir, version):
     rc_id = "#collection"
     metadata = {
         "@context": [
-            "https://w3id.org/ro/crate/1.1/context",
+            f"https://w3id.org/ro/crate/{version}/context",
             {"@vocab": "http://schema.org/"},
             {"@base": None}
         ],
@@ -390,7 +391,7 @@ def test_generic_data_entity(tmpdir):
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "conformsTo": {
-                    "@id": "https://w3id.org/ro/crate/1.1"
+                    "@id": f"https://w3id.org/ro/crate/{version}"
                 },
                 "about": {
                     "@id": "./"
@@ -419,12 +420,19 @@ def test_generic_data_entity(tmpdir):
     def check_rc():
         rc = crate.dereference(rc_id)
         assert rc is not None
-        assert isinstance(rc, DataEntity)
+        if version == "1.2":
+            assert isinstance(rc, ContextEntity)
+        else:
+            assert isinstance(rc, DataEntity)
         assert rc.id == rc_id
         assert rc.type == "RepositoryCollection"
         assert rc._jsonld["name"] == "Test collection"
-        assert crate.data_entities == [rc]
-        assert not crate.contextual_entities
+        if version == "1.2":
+            assert not crate.data_entities
+            assert crate.contextual_entities == [rc]
+        else:
+            assert crate.data_entities == [rc]
+            assert not crate.contextual_entities
 
     check_rc()
 
