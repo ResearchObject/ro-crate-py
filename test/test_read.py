@@ -28,7 +28,7 @@ import zipfile
 from pathlib import Path
 
 from rocrate.rocrate import ROCrate
-from rocrate.model import DataEntity, File, Dataset
+from rocrate.model import DataEntity, ContextEntity, File, Dataset
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
@@ -167,6 +167,7 @@ def test_legacy_crate(test_data_dir, tmpdir, helpers):
     # Remove the metadata file, leaving only the legacy one
     (crate_dir / helpers.METADATA_FILE_NAME).unlink()
     crate = ROCrate(crate_dir)
+    assert crate.version == "1.0"
     md_prop = crate.metadata.properties()
 
     assert crate.dereference(helpers.LEGACY_METADATA_FILE_NAME) is crate.metadata
@@ -377,11 +378,12 @@ def test_missing_file(test_data_dir, tmpdir):
     assert (out_path / name).read_text() == text
 
 
-def test_generic_data_entity(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_generic_data_entity(tmpdir, version):
     rc_id = "#collection"
     metadata = {
         "@context": [
-            "https://w3id.org/ro/crate/1.1/context",
+            f"https://w3id.org/ro/crate/{version}/context",
             {"@vocab": "http://schema.org/"},
             {"@base": None}
         ],
@@ -389,6 +391,9 @@ def test_generic_data_entity(tmpdir):
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
+                "conformsTo": {
+                    "@id": f"https://w3id.org/ro/crate/{version}"
+                },
                 "about": {
                     "@id": "./"
                 },
@@ -416,12 +421,19 @@ def test_generic_data_entity(tmpdir):
     def check_rc():
         rc = crate.dereference(rc_id)
         assert rc is not None
-        assert isinstance(rc, DataEntity)
+        if version == "1.2":
+            assert isinstance(rc, ContextEntity)
+        else:
+            assert isinstance(rc, DataEntity)
         assert rc.id == rc_id
         assert rc.type == "RepositoryCollection"
         assert rc._jsonld["name"] == "Test collection"
-        assert crate.data_entities == [rc]
-        assert not crate.contextual_entities
+        if version == "1.2":
+            assert not crate.data_entities
+            assert crate.contextual_entities == [rc]
+        else:
+            assert crate.data_entities == [rc]
+            assert not crate.contextual_entities
 
     check_rc()
 
@@ -432,14 +444,15 @@ def test_generic_data_entity(tmpdir):
     check_rc()
 
 
-def test_root_conformsto(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_root_conformsto(tmpdir, version):
     # actually not a valid workflow ro-crate, but here it does not matter
     profiles = [
-        "https://w3id.org/ro/crate/1.1",
+        f"https://w3id.org/ro/crate/{version}",
         "https://w3id.org/workflowhub/workflow-ro-crate/1.0",
     ]
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
@@ -461,16 +474,17 @@ def test_root_conformsto(tmpdir):
     assert crate.metadata["conformsTo"] == profiles
 
 
-def test_multi_type_context_entity(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_multi_type_context_entity(tmpdir, version):
     id_, type_ = "#xyz", ["Project", "Organization"]
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "about": {"@id": "./"},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
             },
             {
                 "@id": "./",
@@ -492,15 +506,16 @@ def test_multi_type_context_entity(tmpdir):
     assert set(entity.type) == set(type_)
 
 
-def test_indirect_data_entity(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_indirect_data_entity(tmpdir, version):
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "about": {"@id": "./"},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
             },
             {
                 "@id": "./",
@@ -546,15 +561,16 @@ def test_indirect_data_entity(tmpdir):
 
 
 @pytest.mark.filterwarnings("ignore")
-def test_from_dict(tmpdir):
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_from_dict(tmpdir, version):
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "about": {"@id": "./"},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
             },
             {
                 "@id": "./",
@@ -605,15 +621,16 @@ def test_from_dict(tmpdir):
         ROCrate(metadata, init=True)
 
 
-def test_no_data_entity_link_from_file():
+@pytest.mark.parametrize("version", ["1.1", "1.2"])
+def test_no_data_entity_link_from_file(version):
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "about": {"@id": "./"},
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
             },
             {
                 "@id": "./",
@@ -690,3 +707,80 @@ def test_read_version(test_data_dir):
     assert crate.version == "1.0"
     crate = ROCrate(test_data_dir / "crate-1.1")
     assert crate.version == "1.1"
+
+
+@pytest.mark.filterwarnings("ignore")
+@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
+def test_data_entity_not_linked(version):
+    metadata = {
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": "./"},
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
+            },
+            {
+                "@id": "./",
+                "@type": "Dataset",
+                "hasPart": [
+                    {"@id": "d1"}
+                ]
+            },
+            {
+                "@id": "d1",
+                "@type": "Dataset"
+            },
+            {
+                "@id": "f1.txt",
+                "@type": "File"
+            }
+        ]
+    }
+    if version == "1.2":
+        with pytest.raises(ValueError, match="hasPart"):
+            ROCrate(metadata)
+    else:
+        crate = ROCrate(metadata)
+        f1 = crate.get("f1.txt")
+        assert f1 in crate.contextual_entities
+
+
+@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
+def test_not_data_entity_linked(version):
+    metadata = {
+        "@context": f"https://w3id.org/ro/crate/{version}/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": "./"},
+                "conformsTo": {"@id": f"https://w3id.org/ro/crate/{version}"}
+            },
+            {
+                "@id": "./",
+                "@type": "Dataset",
+                "hasPart": [
+                    {"@id": "d1"},
+                    {"@id": "#f1.txt"}
+                ]
+            },
+            {
+                "@id": "d1",
+                "@type": "Dataset"
+            },
+            {
+                "@id": "#f1.txt",
+                "@type": "File"
+            }
+        ]
+    }
+    crate = ROCrate(metadata)
+    d1 = crate.get("d1")
+    assert d1 in crate.data_entities
+    f1 = crate.get("#f1.txt")
+    if version == "1.2":
+        assert f1 in crate.contextual_entities
+    else:
+        assert f1 in crate.data_entities
