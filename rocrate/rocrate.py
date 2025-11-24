@@ -31,7 +31,7 @@ import warnings
 
 from collections import OrderedDict
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, unquote
 
 from packaging.version import Version
 
@@ -199,7 +199,7 @@ class ROCrate():
                 if is_url(id_):
                     instance = cls(self, id_, properties=entity)
                 else:
-                    instance = cls(self, source / id_, id_, properties=entity)
+                    instance = cls(self, source / unquote(id_), id_, properties=entity)
             self.add(instance)
             if instance.type == "Dataset":
                 self.__add_parts(as_list(entity.get("hasPart", [])), entities, source)

@@ -31,7 +31,7 @@ from io import BytesIO, StringIO
 from urllib.parse import unquote
 
 from .file_or_dir import FileOrDir
-from ..utils import is_url, iso_now, Mode
+from ..utils import is_url, iso_now
 
 
 class File(FileOrDir):
@@ -78,11 +78,7 @@ class File(FileOrDir):
             # Allows to record a File entity whose @id does not exist, see #73
             warnings.warn(f"No source for {self.id}")
         else:
-            if self.crate.mode == Mode.READ:
-                in_file_path = unquote(str(self.source))
-            else:
-                in_file_path = self.source
-            self._copy_file(in_file_path, out_file_path)
+            self._copy_file(self.source, out_file_path)
 
     def _stream_from_stream(self, stream):
         size = 0
@@ -149,8 +145,4 @@ class File(FileOrDir):
             # Allows to record a File entity whose @id does not exist, see #73
             warnings.warn(f"No source for {self.id}")
         else:
-            if self.crate.mode == Mode.READ:
-                path = unquote(str(self.source))
-            else:
-                path = self.source
-            yield from self._stream_from_file(path, chunk_size)
+            yield from self._stream_from_file(self.source, chunk_size)
