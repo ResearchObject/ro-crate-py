@@ -69,10 +69,7 @@ class Dataset(FileOrDir):
         if self.source is None:
             abs_out_path.mkdir(parents=True, exist_ok=True)
         else:
-            if self.crate.mode == Mode.READ:
-                path = unquote(str(self.source))
-            else:
-                path = self.source
+            path = self.source
             if not Path(path).exists():
                 raise FileNotFoundError(
                     errno.ENOENT, os.strerror(errno.ENOENT), path
@@ -97,10 +94,7 @@ class Dataset(FileOrDir):
             yield from self._stream_folder_from_path(chunk_size)
 
     def _stream_folder_from_path(self, chunk_size=8192):
-        if self.crate.mode == Mode.READ:
-            path = unquote(str(self.source))
-        else:
-            path = self.source
+        path = self.source
         if not Path(path).exists():
             raise FileNotFoundError(
                 errno.ENOENT, os.strerror(errno.ENOENT), str(path)

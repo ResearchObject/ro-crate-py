@@ -509,17 +509,31 @@ def test_percent_escape(test_data_dir, tmpdir, helpers):
     f_path = test_data_dir / "read_crate" / "with space.txt"
     f1 = crate.add_file(f_path)
     assert f1.id == "with%20space.txt"
+    assert f1.source.is_file()
+    assert str(f1.source) == str(f_path)
     f2 = crate.add_file(f_path, dest_path="subdir/with space.txt")
     assert f2.id == "subdir/with%20space.txt"
-    f3 = crate.add_file(test_data_dir / "read_crate" / "without%20space.txt")
+    assert f2.source.is_file()
+    assert str(f2.source) == str(f_path)
+    f3_path = test_data_dir / "read_crate" / "without%20space.txt"
+    f3 = crate.add_file(f3_path)
     assert f3.id == "without%2520space.txt"
+    assert f3.source.is_file()
+    assert str(f3.source) == str(f3_path)
     d_path = test_data_dir / "read_crate" / "a b"
     d1 = crate.add_dataset(d_path)
     assert d1.id == "a%20b/"
+    assert d1.source.is_dir()
+    assert str(d1.source) == str(d_path)
     d2 = crate.add_dataset(d_path, dest_path="subdir/a b")
     assert d2.id == "subdir/a%20b/"
-    d3 = crate.add_dataset(test_data_dir / "read_crate" / "j%20k")
+    assert d2.source.is_dir()
+    assert str(d2.source) == str(d_path)
+    d3_path = test_data_dir / "read_crate" / "j%20k"
+    d3 = crate.add_dataset(d3_path)
     assert d3.id == "j%2520k/"
+    assert d3.source.is_dir()
+    assert str(d3.source) == str(d3_path)
     out_path = tmpdir / "ro_crate_out"
     crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
@@ -553,6 +567,19 @@ def test_percent_escape(test_data_dir, tmpdir, helpers):
     assert (unpack_path / "a b" / "c d.txt").is_file()
     assert (unpack_path / "subdir" / "a b" / "c d.txt").is_file()
     assert (unpack_path / "j%20k" / "l%20m.txt").is_file()
+    rcrate = ROCrate(out_path)
+    rf1 = rcrate.get("with%20space.txt")
+    assert str(rf1.source) == str(out_path / "with space.txt")
+    rf2 = rcrate.get("subdir/with%20space.txt")
+    assert str(rf2.source) == str(out_path / "subdir/with space.txt")
+    rf3 = rcrate.get("without%2520space.txt")
+    assert str(rf3.source) == str(out_path / "without%20space.txt")
+    df1 = rcrate.get("a%20b/")
+    assert str(df1.source) == str(out_path / "a b/")
+    df2 = rcrate.get("subdir/a%20b/")
+    assert str(df2.source) == str(out_path / "subdir/a b/")
+    df3 = rcrate.get("j%2520k/")
+    assert str(df3.source) == str(out_path / "j%20k/")
 
 
 def test_stream_empty_file(test_data_dir, tmpdir):
