@@ -105,9 +105,13 @@ class Entity(MutableMapping):
         if key.startswith("@"):
             raise KeyError(f"cannot set '{key}'")
         values = value if isinstance(value, list) else [value]
-        for v in values:
+        for i, v in enumerate(values):
             if isinstance(v, dict) and "@id" not in v:
-                raise ValueError(f"no @id in {v}")
+                # https://www.w3.org/TR/json-ld11/#value-objects
+                if "@value" in v:
+                    values[i] = v["@value"]
+                else:
+                    raise ValueError(f"no @id in {v}")
         ref_values = [{"@id": _.id} if isinstance(_, Entity) else _ for _ in values]
         self._jsonld[key] = ref_values if isinstance(value, list) else ref_values[0]
 

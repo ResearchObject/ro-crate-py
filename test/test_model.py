@@ -553,3 +553,41 @@ def test_entity_in_properties(tmpdir):
     assert out_authors[1] is out_bob
     assert out_alice == alice
     assert out_bob == bob
+
+
+def test_value_objects(tmpdir):
+    description = "A collection of my pictures"
+    date_published = "2024-05-17T01:04:52+01:00"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
+                "about": {"@id": "./"},
+            },
+            {
+                "@id": "./",
+                "@type": "Dataset",
+                "name": "My pictures",
+                "description": {
+                    "@value": description,
+                    "@language": "en"
+                },
+                "datePublished": {
+                    "@value": date_published,
+                    "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+                },
+                "license": "CC0-1.0",
+            },
+        ]
+    }
+    crate = ROCrate(metadata)
+    assert crate.root_dataset.get("description") == description
+    assert crate.root_dataset.get("datePublished") == date_published
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    rcrate = ROCrate(out_path)
+    assert rcrate.root_dataset.get("description") == description
+    assert rcrate.root_dataset.get("datePublished") == date_published
