@@ -95,10 +95,10 @@ def pick_type(json_entity, type_map, fallback=None):
         # Check if the dataset is a Subcrate 
         # i.e it has a conformsTo entry matching a RO-Crate profile
         # TODO find a better way to check the profile
-        if list_profiles := json_entity.get("conformsTo", []):
+        if list_profiles := get_norm_value(json_entity, "conformsTo"):
             
-            for profile_ref in as_list(list_profiles):
-                if profile_ref.get("@id", "").startswith("https://w3id.org/ro/crate/"):
+            for profile_ref in list_profiles:
+                if profile_ref.startswith("https://w3id.org/ro/crate/"):
                     return Subcrate
     
         return Dataset
