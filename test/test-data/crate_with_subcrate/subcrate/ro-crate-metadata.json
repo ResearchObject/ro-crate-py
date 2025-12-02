@@ -1,0 +1,29 @@
+{
+    "@context": "https://w3id.org/ro/crate/1.1/context",
+    "@graph": [
+        {
+            "@id": "./",
+            "@type": "Dataset",
+            "datePublished": "2025-12-02T08:39:54+00:00",
+            "hasPart": [
+                
+                    {"@id": "subfile.txt"}
+                
+            ]
+        },
+        {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {
+                "@id": "./"
+            },
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate/1.1"
+            }
+        },
+        {
+            "@id": "subfile.txt",
+            "@type": "File"
+        }
+    ]
+}

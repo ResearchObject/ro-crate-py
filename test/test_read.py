@@ -27,7 +27,8 @@ import uuid
 import zipfile
 from pathlib import Path
 
-from rocrate.rocrate import ROCrate
+from rocrate import model
+from rocrate.rocrate import ROCrate, Subcrate
 from rocrate.model import DataEntity, ContextEntity, File, Dataset
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
@@ -190,6 +191,32 @@ def test_bad_crate(test_data_dir, tmpdir):
     crate_dir.mkdir()
     with pytest.raises(ValueError):
         ROCrate(crate_dir)
+
+def load_crate_with_subcrate(test_data_dir):
+    return ROCrate(test_data_dir / "crate_with_subcrate")
+
+def test_crate_with_subcrate(test_data_dir):
+    
+    main_crate = load_crate_with_subcrate(test_data_dir)
+    
+    subcrate = main_crate.get("subcrate")
+    assert isinstance(subcrate, Subcrate)
+
+    # check that at this point, we have not yet loaded the subcrate
+    assert subcrate._jsonld == subcrate._empty()
+    assert "hasPart" not in subcrate
+    
+    # check lazy loading by accessing an entity from the subcrate
+    assert isinstance(subcrate.get("subfile.txt"), model.file.File)
+
+    # reload the crate to "reset" the state to unloaded
+    main_crate = load_crate_with_subcrate(test_data_dir)
+    subcrate = main_crate.get("subcrate")
+    
+    # as_jsonld should trigger loading of the subcrate
+    assert subcrate.as_jsonld() != subcrate._empty()
+    assert "hasPart" in subcrate
+    assert len(subcrate["hasPart"]) == 1
 
 
 @pytest.mark.parametrize("override", [False, True])
