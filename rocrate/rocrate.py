@@ -833,8 +833,8 @@ class Subcrate(Dataset):
         """
         Load the nested RO-Crate from the source path or URL.
         
-        Populates the `subcrate` attribute with the loaded ROCrate instance,
-        and updates the JSON-LD representation accordingly.
+        This adds an attribute "hasPart" to the `subcrate` with the entities from the nested RO-Crate, 
+        updating the JSON-LD representation accordingly.
         """
         if self.subcrate is None:
             self.subcrate = ROCrate(self.source)
@@ -842,16 +842,22 @@ class Subcrate(Dataset):
                 self._jsonld["hasPart"] = list_parts
 
     def __getitem__(self, key):
-        
         if self.subcrate is None:
             self.load_subcrate()
+        
+        if key in self._jsonld:
+            # e.g the "original" entity keys such as id or type
+            return super().__getitem__(key)
 
-        return super().__getitem__(key)
-    
+        # look into the subcrate entities
+        return self.subcrate.get(key)
+
     def as_jsonld(self):
         if self.subcrate is None:
             self.load_subcrate()
         return super().as_jsonld()
+    
+
     
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
                           fetch_remote=False, cwl=None, diagram=None):
