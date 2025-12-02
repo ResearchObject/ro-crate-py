@@ -216,8 +216,11 @@ class ROCrate():
             cls = pick_type(entity, type_map, fallback=DataEntity)
             
             if cls is Subcrate:
-                instance = Subcrate(self, source / unquote(id_))
-
+                if is_url(id_):
+                    instance = Subcrate(self, id_)
+                else:
+                    instance = Subcrate(self, source / unquote(id_))
+                
             elif cls is DataEntity:
                 instance = DataEntity(self, identifier=id_, properties=entity)
             
