@@ -49,6 +49,7 @@ from .model import (
     Preview,
     RootDataset,
     SoftwareApplication,
+    Subcrate,
     TestDefinition,
     TestInstance,
     TestService,
@@ -80,10 +81,24 @@ def pick_type(json_entity, type_map, fallback=None):
     except KeyError:
         raise ValueError(f'entity {json_entity["@id"]!r} has no @type')
     types = {_.strip() for _ in set(t if isinstance(t, list) else [t])}
+    
+    entity_class = None
     for name, c in type_map.items():
         if name in types:
-            return c
-    return fallback
+            entity_class = c
+            break
+    
+    if not entity_class:
+        return fallback
+    
+    if entity_class is Dataset:
+        
+        # TODO find a better way to check the profile
+        if json_entity.get("conformsTo", "").startswith("https://w3id.org"):
+            # Subcrate are a specific case of dataset
+            return Subcrate
+    
+        return Dataset
 
 
 def get_version(metadata_properties):
@@ -193,9 +208,15 @@ class ROCrate():
             entity = entities.pop(id_)
             assert id_ == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=DataEntity)
-            if cls is DataEntity:
+            
+            if cls is Subcrate:
+                instance = Subcrate(self, source / unquote(id_))
+
+            elif cls is DataEntity:
                 instance = DataEntity(self, identifier=id_, properties=entity)
+            
             else:
+                # cls is either a File or a Dataset (Directory)
                 if is_url(id_):
                     instance = cls(self, id_, properties=entity)
                 else:
