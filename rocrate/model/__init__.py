@@ -42,7 +42,6 @@ from .metadata import Metadata
 from .person import Person
 from .root_dataset import RootDataset
 from .softwareapplication import SoftwareApplication
-from .subcrate import Subcrate
 from .testdefinition import TestDefinition
 from .testinstance import TestInstance
 from .preview import Preview
@@ -64,7 +63,6 @@ __all__ = [
     "Preview",
     "RootDataset",
     "SoftwareApplication",
-    "Subcrate",
     "TestDefinition",
     "TestInstance",
     "TestService",

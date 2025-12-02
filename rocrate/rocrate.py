@@ -49,7 +49,6 @@ from .model import (
     Preview,
     RootDataset,
     SoftwareApplication,
-    Subcrate,
     TestDefinition,
     TestInstance,
     TestService,
@@ -93,12 +92,19 @@ def pick_type(json_entity, type_map, fallback=None):
     
     if entity_class is Dataset:
         
+        # Check if the dataset is a Subcrate 
+        # i.e it has a conformsTo entry matching a RO-Crate profile
         # TODO find a better way to check the profile
-        if json_entity.get("conformsTo", "").startswith("https://w3id.org"):
-            # Subcrate are a specific case of dataset
-            return Subcrate
+        if list_profiles := json_entity.get("conformsTo", []):
+            
+            for profile_ref in as_list(list_profiles):
+                if profile_ref.get("@id", "").startswith("https://w3id.org/ro/crate/"):
+                    return Subcrate
     
         return Dataset
+    
+    else:
+        return entity_class
 
 
 def get_version(metadata_properties):
@@ -803,6 +809,50 @@ class ROCrate():
         return suite
 
 
+class Subcrate(Dataset):
+
+    def __init__(self, crate, source=None, dest_path=None, fetch_remote=False,
+                 validate_url=False, record_size=False):
+        """
+        This is a data-entity to represent a nested RO-Crate inside another RO-Crate.        
+        
+        :param crate: The parent crate
+        :param source: The relative path to the subcrate, or its URL
+        :param dest_path: Description
+        :param fetch_remote: Description
+        :param validate_url: Description
+        :param properties: Description
+        :param record_size: Description
+        """
+        super().__init__(crate, source, dest_path, fetch_remote,
+                         validate_url, properties=None, record_size=record_size)
+        
+        self.subcrate = None
+    
+    def load_subcrate(self):
+        """
+        Load the nested RO-Crate from the source path or URL.
+        
+        Populates the `subcrate` attribute with the loaded ROCrate instance,
+        and updates the JSON-LD representation accordingly.
+        """
+        if self.subcrate is None:
+            self.subcrate = ROCrate(self.source)
+            if list_parts := self.subcrate.root_dataset.get("hasPart"):
+                self._jsonld["hasPart"] = list_parts
+
+    def __getitem__(self, key):
+        
+        if self.subcrate is None:
+            self.load_subcrate()
+
+        return super().__getitem__(key)
+    
+    def as_jsonld(self):
+        if self.subcrate is None:
+            self.load_subcrate()
+        return super().as_jsonld()
+    
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
                           fetch_remote=False, cwl=None, diagram=None):
     wf_crate = ROCrate()
