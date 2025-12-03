@@ -193,7 +193,7 @@ def test_bad_crate(test_data_dir, tmpdir):
         ROCrate(crate_dir)
 
 def load_crate_with_subcrate(test_data_dir):
-    return ROCrate(test_data_dir / "crate_with_subcrate")
+    return ROCrate(test_data_dir / "crate_with_subcrate", parse_subcrate=True)
 
 def test_crate_with_subcrate(test_data_dir):
     

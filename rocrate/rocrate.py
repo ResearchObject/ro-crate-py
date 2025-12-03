@@ -117,10 +117,16 @@ def get_version(metadata_properties):
 
 class ROCrate():
 
-    def __init__(self, source=None, gen_preview=False, init=False, exclude=None, version=DEFAULT_VERSION, parse_subcrate=False):
+    def __init__(self,
+                 source=None,
+                 gen_preview=False,
+                 init=False, exclude=None,
+                 version=DEFAULT_VERSION,
+                 parse_subcrate=False):
         self.mode = None
         self.source = source
         self.exclude = exclude
+        self.parse_subcrate = parse_subcrate
         self.__entity_map = {}
         # TODO: add this as @base in the context? At least when loading
         # from zip
@@ -142,7 +148,6 @@ class ROCrate():
             source = self.__read(source, gen_preview=gen_preview)
         # in the zip case, self.source is the extracted dir
         self.source = source
-        self.parse_subcrate = parse_subcrate
 
     def __init_from_tree(self, top_dir, gen_preview=False, version=DEFAULT_VERSION):
         top_dir = Path(top_dir)
@@ -818,20 +823,18 @@ class Subcrate(Dataset):
     def __init__(self, crate, source=None, dest_path=None, fetch_remote=False,
                  validate_url=False, record_size=False):
         """
-        This is a data-entity to represent a nested RO-Crate inside another RO-Crate.        
+        Data-entity representing a subcrate inside another RO-Crate.        
         
         :param crate: The parent crate
         :param source: The relative path to the subcrate, or its URL
-        :param dest_path: Description
-        :param fetch_remote: Description
-        :param validate_url: Description
-        :param properties: Description
-        :param record_size: Description
         """
         super().__init__(crate, source, dest_path, fetch_remote,
                          validate_url, properties=None, record_size=record_size)
         
         self.subcrate = None
+        """
+        A ROCrate instance allowing access to the nested RO-Crate.
+        """
     
     def load_subcrate(self):
         """
