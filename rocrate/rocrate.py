@@ -80,29 +80,29 @@ def pick_type(json_entity, type_map, fallback=None, parse_subcrate=False):
     except KeyError:
         raise ValueError(f'entity {json_entity["@id"]!r} has no @type')
     types = {_.strip() for _ in set(t if isinstance(t, list) else [t])}
-    
+
     entity_class = None
     for name, c in type_map.items():
         if name in types:
             entity_class = c
             break
-    
+
     if not entity_class:
         return fallback
-    
+
     if entity_class is Dataset:
-        
-        # Check if the dataset is a Subcrate 
+
+        # Check if the dataset is a Subcrate
         # i.e it has a conformsTo entry matching a RO-Crate profile
-        # TODO find a better way to check the profile
+        # TODO find a better way to check the profiles?
         if parse_subcrate and (list_profiles := get_norm_value(json_entity, "conformsTo")):
-            
+
             for profile_ref in list_profiles:
                 if profile_ref.startswith("https://w3id.org/ro/crate/"):
                     return Subcrate
-    
+
         return Dataset
-    
+
     else:
         return entity_class
 
@@ -220,16 +220,16 @@ class ROCrate():
             entity = entities.pop(id_)
             assert id_ == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=DataEntity, parse_subcrate=self.parse_subcrate)
-            
+
             if cls is Subcrate:
                 if is_url(id_):
                     instance = Subcrate(self, id_)
                 else:
                     instance = Subcrate(self, source / unquote(id_))
-                
+
             elif cls is DataEntity:
                 instance = DataEntity(self, identifier=id_, properties=entity)
-            
+
             else:
                 # cls is either a File or a Dataset (Directory)
                 if is_url(id_):
@@ -238,6 +238,8 @@ class ROCrate():
                     instance = cls(self, source / unquote(id_), id_, properties=entity)
             self.add(instance)
             if instance.type == "Dataset":
+                # for Subcrate, type is currently Dataset too,
+                # but the hasPart is not populated yet only once accssing a subcrate element (lazy loading)
                 self.__add_parts(as_list(entity.get("hasPart", [])), entities, source)
 
     def __read_contextual_entities(self, entities):
@@ -407,7 +409,18 @@ class ROCrate():
 
     def dereference(self, entity_id, default=None):
         canonical_id = self.resolve_id(entity_id)
-        return self.__entity_map.get(canonical_id, default)
+
+        if canonical_id in self.__entity_map:
+            return self.__entity_map[canonical_id]
+
+        for subcrate_entity in self.subcrate_entities:
+            # check if the entity_id might be within a subcrate
+            if entity_id.startswith(subcrate_entity.id):
+                entity_id_in_subcrate = entity_id.replace(subcrate_entity.id, "")
+                return subcrate_entity.get(entity_id_in_subcrate, default=default)
+
+        # fallback
+        return default
 
     get = dereference
 
@@ -828,24 +841,24 @@ class Subcrate(Dataset):
     def __init__(self, crate, source=None, dest_path=None, fetch_remote=False,
                  validate_url=False, record_size=False):
         """
-        Data-entity representing a subcrate inside another RO-Crate.        
-        
+        Data-entity representing a subcrate inside another RO-Crate.
+
         :param crate: The parent crate
         :param source: The relative path to the subcrate, or its URL
         """
         super().__init__(crate, source, dest_path, fetch_remote,
                          validate_url, properties=None, record_size=record_size)
-        
+
         self.subcrate = None
         """
         A ROCrate instance allowing access to the nested RO-Crate.
         """
-    
+
     def load_subcrate(self):
         """
         Load the nested RO-Crate from the source path or URL.
-        
-        This adds an attribute "hasPart" to the `subcrate` with the entities from the nested RO-Crate, 
+
+        This adds an attribute "hasPart" to the `subcrate` with the entities from the nested RO-Crate,
         updating the JSON-LD representation accordingly.
         """
         if self.subcrate is None:
@@ -856,7 +869,7 @@ class Subcrate(Dataset):
     def __getitem__(self, key):
         if self.subcrate is None:
             self.load_subcrate()
-        
+
         if key in self._jsonld:
             # e.g the "original" entity keys such as id or type
             return super().__getitem__(key)
@@ -868,9 +881,8 @@ class Subcrate(Dataset):
         if self.subcrate is None:
             self.load_subcrate()
         return super().as_jsonld()
-    
 
-    
+
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
                           fetch_remote=False, cwl=None, diagram=None):
     wf_crate = ROCrate()

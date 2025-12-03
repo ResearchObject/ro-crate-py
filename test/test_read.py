@@ -192,13 +192,15 @@ def test_bad_crate(test_data_dir, tmpdir):
     with pytest.raises(ValueError):
         ROCrate(crate_dir)
 
+
 def load_crate_with_subcrate(test_data_dir):
     return ROCrate(test_data_dir / "crate_with_subcrate", parse_subcrate=True)
 
+
 def test_crate_with_subcrate(test_data_dir):
-    
+
     main_crate = load_crate_with_subcrate(test_data_dir)
-    
+
     subcrate = main_crate.get("subcrate")
     assert isinstance(subcrate, Subcrate)
     assert main_crate.subcrate_entities == [subcrate]
@@ -206,18 +208,24 @@ def test_crate_with_subcrate(test_data_dir):
     # check that at this point, we have not yet loaded the subcrate
     assert subcrate._jsonld == subcrate._empty()
     assert "hasPart" not in subcrate
-    
+
     # check lazy loading by accessing an entity from the subcrate
-    assert isinstance(subcrate.get("subfile.txt"), model.file.File)
+    subfile_entity = subcrate.get("subfile.txt")
+    assert isinstance(subfile_entity, model.file.File)
+
+    # check access from the top-level crate works too
+    assert main_crate.get("subcrate/subfile.txt") is subfile_entity
+
+    # Check the subfile entity is listed under hasPart of the subcrate
+    assert "hasPart" in subcrate
+    assert subcrate["hasPart"] == [subfile_entity]
 
     # reload the crate to "reset" the state to unloaded
     main_crate = load_crate_with_subcrate(test_data_dir)
     subcrate = main_crate.get("subcrate")
-    
+
     # as_jsonld should trigger loading of the subcrate
     assert subcrate.as_jsonld() != subcrate._empty()
-    assert "hasPart" in subcrate
-    assert len(subcrate["hasPart"]) == 1
 
 
 @pytest.mark.parametrize("override", [False, True])
