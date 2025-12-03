@@ -201,6 +201,7 @@ def test_crate_with_subcrate(test_data_dir):
     
     subcrate = main_crate.get("subcrate")
     assert isinstance(subcrate, Subcrate)
+    assert main_crate.subcrate_entities == [subcrate]
 
     # check that at this point, we have not yet loaded the subcrate
     assert subcrate._jsonld == subcrate._empty()

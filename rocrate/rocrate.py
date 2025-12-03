@@ -271,6 +271,11 @@ class ROCrate():
                 and not hasattr(e, "write")]
 
     @property
+    def subcrate_entities(self):
+        return [e for e in self.__entity_map.values()
+                if isinstance(e, Subcrate)]
+
+    @property
     def name(self):
         return self.root_dataset.get('name')
 
