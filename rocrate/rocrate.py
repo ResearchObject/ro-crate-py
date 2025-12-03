@@ -414,9 +414,16 @@ class ROCrate():
             return self.__entity_map[canonical_id]
 
         for subcrate_entity in self.subcrate_entities:
+
             # check if the entity_id might be within a subcrate
+            # i.e entity_id would start with a subcrate id e.g subcrate/subfile.txt
             if entity_id.startswith(subcrate_entity.id):
-                entity_id_in_subcrate = entity_id.replace(subcrate_entity.id, "")
+
+                # replace id of subcrate to use get in the subcrate
+                # subcrate/subfile.txt --> subfile.txt
+                # dont use replace, as it could replace in the middle of the id
+                entity_id_in_subcrate = entity_id[len(subcrate_entity.id):]
+
                 return subcrate_entity.get(entity_id_in_subcrate, default=default)
 
         # fallback
@@ -862,7 +869,7 @@ class Subcrate(Dataset):
         updating the JSON-LD representation accordingly.
         """
         if self.subcrate is None:
-            self.subcrate = ROCrate(self.source)
+            self.subcrate = ROCrate(self.source, parse_subcrate=True)  # would load further nested RO-Crate
             if list_parts := self.subcrate.root_dataset.get("hasPart"):
                 self._jsonld["hasPart"] = list_parts
 

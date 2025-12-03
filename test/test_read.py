@@ -216,11 +216,14 @@ def test_crate_with_subcrate(test_data_dir):
     # check access from the top-level crate works too
     assert main_crate.get("subcrate/subfile.txt") is subfile_entity
 
-    # Check the subfile entity is listed under hasPart of the subcrate
-    assert "hasPart" in subcrate
-    assert subcrate["hasPart"] == [subfile_entity]
+    # check with another nested rocrate
+    assert isinstance(main_crate.get("subcrate/subsubcrate/deepfile.txt"), model.file.File)
 
-    assert len(subcrate.get_entities()) == 3  # root dataset, metadata.json, subfile
+    # Check the hasPart of the subcrate lists the file and the subsubcrate
+    assert "hasPart" in subcrate
+    assert len(subcrate["hasPart"]) == 2
+
+    assert len(subcrate.get_entities()) == 4  # root dataset, metadata.json, subfile, subsubcrate
 
     # reload the crate to "reset" the state to unloaded
     main_crate = load_crate_with_subcrate(test_data_dir)
