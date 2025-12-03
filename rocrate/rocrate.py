@@ -854,7 +854,7 @@ class Subcrate(Dataset):
         A ROCrate instance allowing access to the nested RO-Crate.
         """
 
-    def load_subcrate(self):
+    def _load_subcrate(self):
         """
         Load the nested RO-Crate from the source path or URL.
 
@@ -868,7 +868,7 @@ class Subcrate(Dataset):
 
     def __getitem__(self, key):
         if self.subcrate is None:
-            self.load_subcrate()
+            self._load_subcrate()
 
         if key in self._jsonld:
             # e.g the "original" entity keys such as id or type
@@ -879,7 +879,7 @@ class Subcrate(Dataset):
 
     def as_jsonld(self):
         if self.subcrate is None:
-            self.load_subcrate()
+            self._load_subcrate()
         return super().as_jsonld()
 
 
