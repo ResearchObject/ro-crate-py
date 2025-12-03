@@ -74,7 +74,7 @@ def is_data_entity(entity):
     return DATA_ENTITY_TYPES.intersection(as_list(entity.get("@type", [])))
 
 
-def pick_type(json_entity, type_map, fallback=None):
+def pick_type(json_entity, type_map, fallback=None, parse_subcrate=False):
     try:
         t = json_entity["@type"]
     except KeyError:
@@ -95,7 +95,7 @@ def pick_type(json_entity, type_map, fallback=None):
         # Check if the dataset is a Subcrate 
         # i.e it has a conformsTo entry matching a RO-Crate profile
         # TODO find a better way to check the profile
-        if list_profiles := get_norm_value(json_entity, "conformsTo"):
+        if parse_subcrate and (list_profiles := get_norm_value(json_entity, "conformsTo")):
             
             for profile_ref in list_profiles:
                 if profile_ref.startswith("https://w3id.org/ro/crate/"):
@@ -117,7 +117,7 @@ def get_version(metadata_properties):
 
 class ROCrate():
 
-    def __init__(self, source=None, gen_preview=False, init=False, exclude=None, version=DEFAULT_VERSION):
+    def __init__(self, source=None, gen_preview=False, init=False, exclude=None, version=DEFAULT_VERSION, parse_subcrate=False):
         self.mode = None
         self.source = source
         self.exclude = exclude
@@ -142,6 +142,7 @@ class ROCrate():
             source = self.__read(source, gen_preview=gen_preview)
         # in the zip case, self.source is the extracted dir
         self.source = source
+        self.parse_subcrate = parse_subcrate
 
     def __init_from_tree(self, top_dir, gen_preview=False, version=DEFAULT_VERSION):
         top_dir = Path(top_dir)
@@ -213,7 +214,7 @@ class ROCrate():
                     continue
             entity = entities.pop(id_)
             assert id_ == entity.pop('@id')
-            cls = pick_type(entity, type_map, fallback=DataEntity)
+            cls = pick_type(entity, type_map, fallback=DataEntity, parse_subcrate=self.parse_subcrate)
             
             if cls is Subcrate:
                 if is_url(id_):
