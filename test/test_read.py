@@ -220,6 +220,8 @@ def test_crate_with_subcrate(test_data_dir):
     assert "hasPart" in subcrate
     assert subcrate["hasPart"] == [subfile_entity]
 
+    assert len(subcrate.get_entities()) == 3  # root dataset, metadata.json, subfile
+
     # reload the crate to "reset" the state to unloaded
     main_crate = load_crate_with_subcrate(test_data_dir)
     subcrate = main_crate.get("subcrate")

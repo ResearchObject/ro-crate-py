@@ -882,6 +882,11 @@ class Subcrate(Dataset):
             self._load_subcrate()
         return super().as_jsonld()
 
+    def get_entities(self):
+        if self.subcrate is None:
+            self._load_subcrate()
+        return self.subcrate.get_entities()
+
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
                           fetch_remote=False, cwl=None, diagram=None):
