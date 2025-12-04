@@ -100,7 +100,7 @@ If some checks failed or could not be fixed automatically, an error message will
 
 While not recommended, you can bypass the hooks by passing the additional flag `--no-verify` to the `git commit` command.
 
-Some IDEs have plugins for precommit (e.g [here](https://marketplace.visualstudio.com/items?itemName=elagil.pre-commit-helper) for VSCode), which would for instance run the hooks for the currently opened file each time it is saved. The plugins typically picks up the configuration file automatically.
+Some IDEs have plugins for precommit (e.g [here](https://marketplace.visualstudio.com/items?itemName=elagil.pre-commit-helper) for VSCode), which would for instance run the hooks for the currently opened file each time it is saved. The plugins typically pick up the configuration file automatically.
 
 ### Testing
 
