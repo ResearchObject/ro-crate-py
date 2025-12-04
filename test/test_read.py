@@ -217,11 +217,13 @@ def test_crate_with_subcrate(test_data_dir):
     assert "hasPart" not in subcrate
 
     # check lazy loading by accessing an entity from the subcrate
-    subfile_entity = subcrate.get("subfile.txt")
-    assert isinstance(subfile_entity, model.file.File)
+    list_subcrate_parts = subcrate.get("hasPart", [])
+    assert len(list_subcrate_parts) == 2  # subfile.txt and subsubcrate/
+    assert isinstance(list_subcrate_parts[0], DataEntity)
+    assert "subfile.txt" in [e.id for e in list_subcrate_parts]
 
     # check access from the top-level crate works too
-    assert main_crate.get("subcrate/subfile.txt") is subfile_entity
+    assert main_crate.get("subcrate/subfile.txt") in list_subcrate_parts
 
     # check with another nested rocrate
     assert isinstance(main_crate.get("subcrate/subsubcrate/deepfile.txt"), model.file.File)
