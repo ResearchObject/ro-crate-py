@@ -205,8 +205,15 @@ def test_crate_with_subcrate(test_data_dir):
     assert isinstance(subcrate, Subcrate)
     assert main_crate.subcrate_entities == [subcrate]
 
+    # Check the subcrate kept the conformsTo attribute from the original Dataset entity
+    assert "conformsTo" in subcrate
+
     # check that at this point, we have not yet loaded the subcrate
-    assert subcrate._jsonld == subcrate._empty()
+    # e.g the json ld should just have id, type and conformsTo
+    jsonld = subcrate._jsonld
+    jsonld.pop("conformsTo")
+
+    assert jsonld == subcrate._empty()
     assert "hasPart" not in subcrate
 
     # check lazy loading by accessing an entity from the subcrate
