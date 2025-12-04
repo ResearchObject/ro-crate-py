@@ -85,6 +85,23 @@ pip install flake8
 flake8 --exclude venv ./
 ```
 
+### Pre-commit hooks
+ro-crate-py comes with a configuration file for [pre-commit](https://github.com/pre-commit/pre-commit) `.pre-commit-config.yaml`.
+This configuration file defines so-called "hooks" which are executed upon each commit, to automatically format the code in the commited files according to the requirements defined for instance in the flake8 configuration file (e.g removing spaces from blank lines...).
+
+To benefit from these automated hooks, you need first to install the pre-commit package.
+`pip install pre-commit`
+
+The hooks should then be installed once for your local copy of the repository by running the following command in the root of the repo.
+`pre-commit install`
+
+Once installed the hooks will be executed each time a new commit is made, for the files being commited.
+If some checks failed or could not be fixed automatically, an error message will be shown and the commit will be aborted.
+
+While not recommended, you can bypass the hooks by passing the additional flag `--no-verify` to the `git commit` command.
+
+Some IDEs have plugins for precommit (e.g [here](https://marketplace.visualstudio.com/items?itemName=elagil.pre-commit-helper) for VSCode), which would for instance run the hooks for the currently opened file each time it is saved. The plugins typically picks up the configuration file automatically.
+
 ### Testing
 
 Testing is done with [pytest](https://pytest.org):
