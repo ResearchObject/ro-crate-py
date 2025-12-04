@@ -5,14 +5,14 @@ name: Python package
 
 on:
   push:
-    branches: 
+    branches:
       - master
-      - dev 
+      - dev
       - windows
   pull_request:
-    branches: 
+    branches:
       - master
-      - dev 
+      - dev
 
 jobs:
   build:
