@@ -21,6 +21,7 @@
 # limitations under the License.
 
 import errno
+from typing import cast
 import uuid
 import zipfile
 import atexit
@@ -873,14 +874,14 @@ class Subcrate(Dataset):
         Caller should rather use the get_crate() method to access the nested RO-Crate.
         """
 
-    def get_crate(self):
+    def get_crate(self) -> ROCrate:
         """
         Return the RO-Crate object referenced by this subcrate.
         """
         if self._crate is None:
             self._load_subcrate()
 
-        return self._crate
+        return cast(ROCrate, self._crate)
 
     def _load_subcrate(self):
         """
@@ -923,6 +924,10 @@ class Subcrate(Dataset):
         if self._crate is None:
             self._load_subcrate()
         return super().as_jsonld()
+
+    def write(self, base_path):
+        self.get_crate().write(base_path / self.id)
+        # TODO check with URL
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
