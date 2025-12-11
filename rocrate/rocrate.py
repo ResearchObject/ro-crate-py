@@ -886,44 +886,10 @@ class Subcrate(Dataset):
     def _load_subcrate(self):
         """
         Load the nested RO-Crate from the source path or URL.
-
-        This populates the attribute `hasPart` of the `Subcrate` entity,
-        with the data entities listed under the `root_dataset["hasPart"]` of the nested RO-Crate.
-        If the nested RO-crate does not list any part und `hasPart`,
-        then the `hasPart` attribute of the `Subcrate` entity will be an empty list.
         """
         if self._crate is None:
             # parse_subcrate=True to load further nested RO-Crate (on-demand / lazily too)
             self._crate = ROCrate(self.source, parse_subcrate=True)
-
-            # Note : assigning to hasPart keeps only the dict with id:entity not the actual entities
-            # such that when retrieving something from hasPart one was getting a string not an entity
-            self["hasPart"] = self._crate.root_dataset.get("hasPart", [])
-
-    def _get_parts_subcrate_root(self):
-        """
-        Get the list of data entities listed under the `root_dataset["hasPart"]` of the nested RO-Crate.
-
-        This will load the nested RO-Crate if not already loaded.
-
-        :return: A list of data entities of the nested RO-Crate,
-        or an empty list if the nested RO-Crate does not list any part.
-        """
-
-        return self.get_crate().root_dataset.get("hasPart", [])
-
-    def __getitem__(self, key):
-
-        if key == "hasPart":
-            return self._get_parts_subcrate_root()
-
-        else:
-            return super().__getitem__(key)
-
-    def as_jsonld(self):
-        if self._crate is None:
-            self._load_subcrate()
-        return super().as_jsonld()
 
     def write(self, base_path):
         self.get_crate().write(base_path / self.id)

@@ -27,7 +27,6 @@ import uuid
 import zipfile
 from pathlib import Path
 
-from rocrate import model
 from rocrate.rocrate import ROCrate, Subcrate
 from rocrate.model import DataEntity, ContextEntity, File, Dataset
 
@@ -206,38 +205,33 @@ def test_crate_with_subcrate(test_data_dir):
     assert main_crate.subcrate_entities == [subcrate]
 
     # Check the subcrate kept the conformsTo attribute from the original Dataset entity
-    assert "conformsTo" in subcrate
+    assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate/"
 
     # check that at this point, we have not yet loaded the subcrate
-    # e.g the json ld should just have id, type and conformsTo
-    jsonld = subcrate._jsonld
-    jsonld.pop("conformsTo")
+    assert subcrate._crate is None
 
-    assert jsonld == subcrate._empty()
-    assert "hasPart" not in subcrate
+    # check access from the top-level crate
+    subfile = main_crate.get("subcrate/subfile.txt")
+    assert isinstance(subfile, File)
 
-    # check lazy loading by accessing an entity from the subcrate
-    list_subcrate_parts = subcrate.get("hasPart", [])
-    assert len(list_subcrate_parts) == 2  # subfile.txt and subsubcrate/
-    assert isinstance(list_subcrate_parts[0], DataEntity)
-    assert "subfile.txt" in [e.id for e in list_subcrate_parts]
-
-    # check access from the top-level crate works too
-    assert main_crate.get("subcrate/subfile.txt") in list_subcrate_parts
+    # check that the above dereferencing triggered lazy loading
+    assert isinstance(subcrate._crate, ROCrate)
+    assert subfile.id == "subfile.txt"
+    assert subfile.crate is not main_crate
+    assert subfile.crate is subcrate._crate
 
     # check with another nested rocrate
-    assert isinstance(main_crate.get("subcrate/subsubcrate/deepfile.txt"), model.file.File)
-
-    # Check the hasPart of the subcrate lists the file and the subsubcrate
-    assert "hasPart" in subcrate
-    assert len(subcrate["hasPart"]) == 2
+    assert isinstance(main_crate.get("subcrate/subsubcrate/deepfile.txt"), File)
 
     # reload the crate to "reset" the state to unloaded
     main_crate = load_crate_with_subcrate(test_data_dir)
     subcrate = main_crate.get("subcrate")
+    assert subcrate._crate is None
 
-    # as_jsonld should trigger loading of the subcrate
-    assert subcrate.as_jsonld() != subcrate._empty()
+    # get_crate() should trigger loading of the subcrate
+    nested_crate = subcrate.get_crate()
+    assert isinstance(nested_crate, ROCrate)
+    assert subcrate._crate is nested_crate
 
 
 @pytest.mark.parametrize("override", [False, True])
