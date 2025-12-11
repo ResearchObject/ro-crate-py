@@ -630,13 +630,17 @@ def test_write_zip_nested_dest(tmpdir, helpers):
 def test_write_subcrate(test_data_dir, tmpdir):
     """Read the test crate with subcrate and write it to a new location.
     Check that the subcrate contents are correctly written."""
-    crate = ROCrate(test_data_dir / "crate_with_subcrate")
+    crate = ROCrate(test_data_dir / "crate_with_subcrate", parse_subcrate=True)
     crate.write(tmpdir / "ro_crate_out")
+
+    assert (tmpdir / "ro_crate_out" / "file.txt").is_file()
+    assert (tmpdir / "ro_crate_out" / "ro-crate-metadata.json").is_file()
 
     assert (tmpdir / "ro_crate_out" / "subcrate" / "ro-crate-metadata.json").is_file()
     assert (tmpdir / "ro_crate_out" / "subcrate" / "subfile.txt").is_file()
 
     assert (tmpdir / "ro_crate_out" / "subcrate" / "subsubcrate" / "deepfile.txt").is_file()
+    assert (tmpdir / "ro_crate_out" / "subcrate" / "subsubcrate" / "ro-crate-metadata.json").is_file()
 
 
 @pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
