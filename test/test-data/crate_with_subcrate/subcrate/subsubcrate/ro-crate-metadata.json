@@ -6,7 +6,9 @@
             "@type": "Dataset",
             "datePublished": "2025-12-02T08:39:54+00:00",
             "hasPart": [
-                    {"@id": "deepfile.txt"}
+                {
+                    "@id": "deepfile.txt"
+                }
             ]
         },
         {
