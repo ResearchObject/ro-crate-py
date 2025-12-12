@@ -627,20 +627,28 @@ def test_write_zip_nested_dest(tmpdir, helpers):
     assert (unpack_path / "subdir" / "a b" / "j k" / "l m.txt").is_file()
 
 
-def test_write_subcrate(test_data_dir, tmpdir):
+@pytest.mark.parametrize("to_zip", [False, True])
+def test_write_subcrate(test_data_dir, tmpdir, to_zip):
     """Read the test crate with subcrate and write it to a new location.
     Check that the subcrate contents are correctly written."""
     crate = ROCrate(test_data_dir / "crate_with_subcrate", parse_subcrate=True)
-    crate.write(tmpdir / "ro_crate_out")
+    out_path = tmpdir / "ro_crate_out"
+    if to_zip:
+        zip_path = tmpdir / 'ro_crate_out.crate.zip'
+        crate.write_zip(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(out_path)
+    else:
+        crate.write(out_path)
 
-    assert (tmpdir / "ro_crate_out" / "file.txt").is_file()
-    assert (tmpdir / "ro_crate_out" / "ro-crate-metadata.json").is_file()
+    assert (out_path / "file.txt").is_file()
+    assert (out_path / "ro-crate-metadata.json").is_file()
 
-    assert (tmpdir / "ro_crate_out" / "subcrate" / "ro-crate-metadata.json").is_file()
-    assert (tmpdir / "ro_crate_out" / "subcrate" / "subfile.txt").is_file()
+    assert (out_path / "subcrate" / "ro-crate-metadata.json").is_file()
+    assert (out_path / "subcrate" / "subfile.txt").is_file()
 
-    assert (tmpdir / "ro_crate_out" / "subcrate" / "subsubcrate" / "deepfile.txt").is_file()
-    assert (tmpdir / "ro_crate_out" / "subcrate" / "subsubcrate" / "ro-crate-metadata.json").is_file()
+    assert (out_path / "subcrate" / "subsubcrate" / "deepfile.txt").is_file()
+    assert (out_path / "subcrate" / "subsubcrate" / "ro-crate-metadata.json").is_file()
 
 
 @pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])

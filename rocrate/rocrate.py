@@ -417,6 +417,10 @@ class ROCrate():
     def _get_root_jsonld(self):
         self.root_dataset.properties()
 
+    def __contains__(self, entity_id):
+        canonical_id = self.resolve_id(entity_id)
+        return canonical_id in self.__entity_map
+
     def dereference(self, entity_id, default=None):
         canonical_id = self.resolve_id(entity_id)
 
@@ -563,7 +567,7 @@ class ROCrate():
             for name in files:
                 source = root / name
                 rel = source.relative_to(top)
-                if not self.dereference(str(rel)):
+                if str(rel) not in self:
                     dest = base_path / rel
                     if not dest.exists() or not dest.samefile(source):
                         shutil.copyfile(source, dest)
@@ -621,7 +625,7 @@ class ROCrate():
                             continue
 
                         rel = source.relative_to(self.source)
-                        if not self.dereference(str(rel)) and not str(rel) in listed_files:
+                        if str(rel) not in self and not str(rel) in listed_files:
                             with archive.open(str(rel), mode='w') as out_file, open(source, 'rb') as in_file:
                                 while chunk := in_file.read(chunk_size):
                                     out_file.write(chunk)
@@ -890,10 +894,6 @@ class Subcrate(Dataset):
         if self._crate is None:
             # parse_subcrate=True to load further nested RO-Crate (on-demand / lazily too)
             self._crate = ROCrate(self.source, parse_subcrate=True)
-
-    def write(self, base_path):
-        self.get_crate().write(base_path / self.id)
-        # TODO check with URL
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
