@@ -99,7 +99,7 @@ def pick_type(json_entity, type_map, fallback=None, parse_subcrate=False):
         if parse_subcrate and (list_profiles := get_norm_value(json_entity, "conformsTo")):
 
             for profile_ref in list_profiles:
-                if profile_ref.startswith("https://w3id.org/ro/crate/"):
+                if profile_ref.startswith("https://w3id.org/ro/crate"):
                     return Subcrate
 
         return Dataset

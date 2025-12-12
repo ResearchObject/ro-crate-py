@@ -31,7 +31,7 @@
             "@id": "subcrate/",
             "@type": "Dataset",
             "conformsTo": {
-                "@id": "https://w3id.org/ro/crate/"
+                "@id": "https://w3id.org/ro/crate"
             }
         }
     ]

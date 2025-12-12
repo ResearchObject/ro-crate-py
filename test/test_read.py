@@ -205,7 +205,7 @@ def test_crate_with_subcrate(test_data_dir):
     assert main_crate.subcrate_entities == [subcrate]
 
     # Check the subcrate kept the conformsTo attribute from the original Dataset entity
-    assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate/"
+    assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
 
     # check that at this point, we have not yet loaded the subcrate
     assert subcrate._crate is None
