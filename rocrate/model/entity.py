@@ -43,6 +43,7 @@ class Entity(MutableMapping):
                 if name.startswith("@"):
                     self._jsonld[name] = value
                 else:
+                    # this will call the __setitem__ method defined below
                     self[name] = value
 
     @property
