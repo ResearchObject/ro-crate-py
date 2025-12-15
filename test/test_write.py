@@ -631,7 +631,7 @@ def test_write_zip_nested_dest(tmpdir, helpers):
 def test_write_subcrate(test_data_dir, tmpdir, to_zip):
     """Read the test crate with subcrate and write it to a new location.
     Check that the subcrate contents are correctly written."""
-    crate = ROCrate(test_data_dir / "crate_with_subcrate", parse_subcrate=True)
+    crate = ROCrate(test_data_dir / "crate_with_subcrates", load_subcrates=True)
     out_path = tmpdir / "ro_crate_out"
     if to_zip:
         zip_path = tmpdir / 'ro_crate_out.crate.zip'

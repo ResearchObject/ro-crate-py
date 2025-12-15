@@ -75,7 +75,7 @@ def is_data_entity(entity):
     return DATA_ENTITY_TYPES.intersection(as_list(entity.get("@type", [])))
 
 
-def pick_type(json_entity, type_map, fallback=None, parse_subcrate=False):
+def pick_type(json_entity, type_map, fallback=None, load_subcrates=False):
     try:
         t = json_entity["@type"]
     except KeyError:
@@ -96,7 +96,7 @@ def pick_type(json_entity, type_map, fallback=None, parse_subcrate=False):
         # Check if the dataset is a Subcrate
         # i.e it has a conformsTo entry matching a RO-Crate profile
         # TODO find a better way to check the profiles?
-        if parse_subcrate and (list_profiles := get_norm_value(json_entity, "conformsTo")):
+        if load_subcrates and (list_profiles := get_norm_value(json_entity, "conformsTo")):
 
             for profile_ref in list_profiles:
                 if profile_ref.startswith("https://w3id.org/ro/crate"):
@@ -123,11 +123,11 @@ class ROCrate():
                  gen_preview=False,
                  init=False, exclude=None,
                  version=DEFAULT_VERSION,
-                 parse_subcrate=False):
+                 load_subcrates=False):
         self.mode = None
         self.source = source
         self.exclude = exclude
-        self.parse_subcrate = parse_subcrate
+        self.load_subcrates = load_subcrates
         self.__entity_map = {}
         # TODO: add this as @base in the context? At least when loading
         # from zip
@@ -228,7 +228,7 @@ class ROCrate():
                     continue
             entity = entities.pop(id_)
             assert id_ == entity.pop('@id')
-            cls = pick_type(entity, type_map, fallback=DataEntity, parse_subcrate=self.parse_subcrate)
+            cls = pick_type(entity, type_map, fallback=DataEntity, load_subcrates=self.load_subcrates)
 
             if cls is Subcrate:
 
@@ -892,8 +892,8 @@ class Subcrate(Dataset):
         Load the nested RO-Crate from the source path or URL.
         """
         if self._crate is None:
-            # parse_subcrate=True to load further nested RO-Crate (on-demand / lazily too)
-            self._crate = ROCrate(self.source, parse_subcrate=True)
+            # load_subcrates=True to load further nested RO-Crate (on-demand / lazily too)
+            self._crate = ROCrate(self.source, load_subcrates=True)
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],

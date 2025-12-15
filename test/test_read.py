@@ -192,13 +192,13 @@ def test_bad_crate(test_data_dir, tmpdir):
         ROCrate(crate_dir)
 
 
-def load_crate_with_subcrate(test_data_dir):
-    return ROCrate(test_data_dir / "crate_with_subcrate", parse_subcrate=True)
+def load_crate_with_subcrates(test_data_dir):
+    return ROCrate(test_data_dir / "crate_with_subcrates", load_subcrates=True)
 
 
-def test_crate_with_subcrate(test_data_dir):
+def test_crate_with_subcrates(test_data_dir):
 
-    main_crate = load_crate_with_subcrate(test_data_dir)
+    main_crate = load_crate_with_subcrates(test_data_dir)
 
     subcrate = main_crate.get("subcrate")
     subcrate2 = main_crate.get("subcrate2")
@@ -229,7 +229,7 @@ def test_crate_with_subcrate(test_data_dir):
     assert isinstance(main_crate.get("subcrate/subsubcrate/deepfile.txt"), File)
 
     # reload the crate to "reset" the state to unloaded
-    main_crate = load_crate_with_subcrate(test_data_dir)
+    main_crate = load_crate_with_subcrates(test_data_dir)
     subcrate = main_crate.get("subcrate")
     assert subcrate._crate is None
 
