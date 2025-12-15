@@ -4,8 +4,8 @@
         {
             "@id": "./",
             "@type": "Dataset",
-            "name": "Top-level crate with subcrate",
-            "description": "A RO-Crate containing a subcrate",
+            "name": "Top-level crate with subcrates",
+            "description": "An RO-Crate containing subcrates",
             "license": "https://spdx.org/licenses/MIT.html",
             "datePublished": "2025-12-02T08:39:54+00:00",
             "hasPart": [
@@ -14,6 +14,9 @@
                 },
                 {
                     "@id": "subcrate/"
+                },
+                {
+                    "@id": "subcrate2/"
                 }
             ]
         },
@@ -33,6 +36,13 @@
         },
         {
             "@id": "subcrate/",
+            "@type": "Dataset",
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate"
+            }
+        },
+        {
+            "@id": "subcrate2/",
             "@type": "Dataset",
             "conformsTo": {
                 "@id": "https://w3id.org/ro/crate"

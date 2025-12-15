@@ -201,8 +201,10 @@ def test_crate_with_subcrate(test_data_dir):
     main_crate = load_crate_with_subcrate(test_data_dir)
 
     subcrate = main_crate.get("subcrate")
-    assert isinstance(subcrate, Subcrate)
-    assert main_crate.subcrate_entities == [subcrate]
+    subcrate2 = main_crate.get("subcrate2")
+    for sc in subcrate, subcrate2:
+        assert isinstance(sc, Subcrate)
+    assert set(main_crate.subcrate_entities) == {subcrate, subcrate2}
 
     # Check the subcrate kept the conformsTo attribute from the original Dataset entity
     assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
@@ -213,6 +215,9 @@ def test_crate_with_subcrate(test_data_dir):
     # check access from the top-level crate
     subfile = main_crate.get("subcrate/subfile.txt")
     assert isinstance(subfile, File)
+    subfile2 = main_crate.get("subcrate2/subfile.txt")
+    assert isinstance(subfile2, File)
+    assert subfile2 is not subfile
 
     # check that the above dereferencing triggered lazy loading
     assert isinstance(subcrate._crate, ROCrate)
