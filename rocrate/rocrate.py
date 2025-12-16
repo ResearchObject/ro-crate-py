@@ -488,6 +488,23 @@ class ROCrate():
             properties=properties
         ))
 
+    def add_subcrate(
+            self,
+            source=None,
+            dest_path=None,
+            fetch_remote=False,
+            validate_url=False,
+            properties=None
+    ):
+        return self.add(Subcrate(
+            self,
+            source=source,
+            dest_path=dest_path,
+            fetch_remote=fetch_remote,
+            validate_url=validate_url,
+            properties=properties
+        ))
+
     add_directory = add_dataset
 
     def add_tree(self, source, dest_path=None, properties=None):
@@ -878,6 +895,13 @@ class Subcrate(Dataset):
         Caller should rather use the get_crate() method to access the nested RO-Crate.
         """
 
+    def _empty(self):
+        return {
+            "@id": self.id,
+            "@type": "Dataset",
+            "conformsTo": "https://w3id.org/ro/crate",
+        }
+
     def get_crate(self) -> ROCrate:
         """
         Return the RO-Crate object referenced by this subcrate.
@@ -894,6 +918,11 @@ class Subcrate(Dataset):
         if self._crate is None:
             # load_subcrates=True to load further nested RO-Crate (on-demand / lazily too)
             self._crate = ROCrate(self.source, load_subcrates=True)
+
+    def write(self, base_path):
+        super().write(base_path)
+        if self.crate.mode == Mode.CREATE:
+            self.get_crate().write(base_path / unquote(self.id))
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],

@@ -651,6 +651,46 @@ def test_write_subcrate(test_data_dir, tmpdir, to_zip):
     assert (out_path / "subcrate" / "subsubcrate" / "ro-crate-metadata.json").is_file()
 
 
+def test_subcrates_creation(test_data_dir, tmpdir):
+    crate = ROCrate()
+    crate.add_file(test_data_dir / "sample_file.txt")
+    subcrate = crate.add_subcrate(dest_path="subcrate/")
+    assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
+    assert crate.subcrate_entities == [subcrate]
+    assert not subcrate._crate
+    subcrate_crate = subcrate.get_crate()
+    assert subcrate._crate is subcrate_crate
+    assert subcrate_crate.source is None
+    subf = subcrate_crate.add_file(test_data_dir / "test_file_galaxy.txt")
+    subsubcrate = subcrate_crate.add_subcrate(dest_path="subsubcrate/")
+    assert subcrate_crate.subcrate_entities == [subsubcrate]
+    subsubcrate_crate = subsubcrate.get_crate()
+    subsubf = subsubcrate_crate.add_file("setup.cfg")
+    assert crate.get("subcrate/test_file_galaxy.txt") is subf
+    assert crate.get("subcrate/subsubcrate/setup.cfg") is subsubf
+    assert subcrate_crate.get("subsubcrate/setup.cfg") is subsubf
+
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert (out_path / "sample_file.txt").is_file()
+    assert (out_path / "subcrate" / "ro-crate-metadata.json").is_file()
+    assert (out_path / "subcrate" / "test_file_galaxy.txt").is_file()
+    assert (out_path / "subcrate" / "subsubcrate" / "ro-crate-metadata.json").is_file()
+    assert (out_path / "subcrate" / "subsubcrate" / "setup.cfg").is_file()
+    out_crate = ROCrate(out_path, load_subcrates=True)
+    assert out_crate.get("sample_file.txt")
+    out_subcrate = out_crate.get("subcrate/")
+    assert out_subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
+    assert out_crate.subcrate_entities == [out_subcrate]
+    out_subf = out_crate.get("subcrate/test_file_galaxy.txt")
+    assert out_subf
+    out_subsubf = out_crate.get("subcrate/subsubcrate/setup.cfg")
+    assert out_subsubf
+    out_subcrate_crate = out_subcrate.get_crate()
+    assert out_subcrate_crate.get("subsubcrate/setup.cfg") is out_subsubf
+
+
 @pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
 def test_write_version(tmpdir, helpers, version):
     basename = helpers.LEGACY_METADATA_FILE_NAME if version == "1.0" else helpers.METADATA_FILE_NAME
