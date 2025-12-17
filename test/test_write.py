@@ -634,7 +634,7 @@ def test_write_subcrate(test_data_dir, tmpdir, to_zip):
     crate = ROCrate(test_data_dir / "crate_with_subcrates", load_subcrates=True)
     out_path = tmpdir / "ro_crate_out"
     if to_zip:
-        zip_path = tmpdir / 'ro_crate_out.crate.zip'
+        zip_path = tmpdir / 'ro_crate_out.zip'
         crate.write_zip(zip_path)
         with zipfile.ZipFile(zip_path, "r") as zf:
             zf.extractall(out_path)
@@ -651,7 +651,8 @@ def test_write_subcrate(test_data_dir, tmpdir, to_zip):
     assert (out_path / "subcrate" / "subsubcrate" / "ro-crate-metadata.json").is_file()
 
 
-def test_subcrates_creation(test_data_dir, tmpdir):
+@pytest.mark.parametrize("to_zip", [False, True])
+def test_subcrates_creation(test_data_dir, tmpdir, to_zip):
     crate = ROCrate()
     crate.add_file(test_data_dir / "sample_file.txt")
     subcrate = crate.add_subcrate(dest_path="subcrate/")
@@ -671,7 +672,14 @@ def test_subcrates_creation(test_data_dir, tmpdir):
     assert subcrate_crate.get("subsubcrate/setup.cfg") is subsubf
 
     out_path = tmpdir / "ro_crate_out"
-    crate.write(out_path)
+    if to_zip:
+        zip_path = tmpdir / 'ro_crate_out.zip'
+        crate.write_zip(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(out_path)
+    else:
+        crate.write(out_path)
+
     assert (out_path / "ro-crate-metadata.json").is_file()
     assert (out_path / "sample_file.txt").is_file()
     assert (out_path / "subcrate" / "ro-crate-metadata.json").is_file()

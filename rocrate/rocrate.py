@@ -652,6 +652,10 @@ class ROCrate():
             while chunk := buffer.read(chunk_size):
                 yield chunk
 
+    def _all_streams(self, chunk_size=8192):
+        for writeable_entity in self.data_entities + self.default_entities:
+            yield from writeable_entity.stream(chunk_size=chunk_size)
+
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
             main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow,
@@ -923,6 +927,12 @@ class Subcrate(Dataset):
         super().write(base_path)
         if self.crate.mode == Mode.CREATE:
             self.get_crate().write(base_path / unquote(self.id))
+
+    def stream(self, chunk_size=8192):
+        yield from super().stream(chunk_size=chunk_size)
+        if self.crate.mode == Mode.CREATE:
+            for path, chunk in self.get_crate()._all_streams(chunk_size=chunk_size):
+                yield os.path.join(unquote(self.id), path), chunk
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
