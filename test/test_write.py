@@ -468,7 +468,7 @@ def test_add_tree(test_data_dir, tmpdir):
 
 def test_http_header(tmpdir):
     crate = ROCrate()
-    url = "https://zenodo.org/records/10782431/files/lysozyme_datasets.zip"
+    url = "https://ftp.mozilla.org/pub/js/js-1.60.tar.gz"
     file_ = crate.add_file(url, validate_url=True)
     assert file_.id == url
     out_path = tmpdir / 'ro_crate_out'
@@ -476,7 +476,7 @@ def test_http_header(tmpdir):
     out_crate = ROCrate(out_path)
     out_file = out_crate.dereference(url)
     props = out_file.properties()
-    assert props.get("encodingFormat") == "application/octet-stream"
+    assert props.get("encodingFormat") == "application/x-tar"
     assert "sdDatePublished" in props
     with requests.head(url) as response:
         assert props["sdDatePublished"] == response.headers.get("last-modified")
@@ -625,6 +625,81 @@ def test_write_zip_nested_dest(tmpdir, helpers):
     assert "subdir/a%20b/" in json_entities
     assert (unpack_path / "subdir" / "a b" / "c d.txt").is_file()
     assert (unpack_path / "subdir" / "a b" / "j k" / "l m.txt").is_file()
+
+
+@pytest.mark.parametrize("to_zip", [False, True])
+def test_write_subcrate(test_data_dir, tmpdir, to_zip):
+    """Read the test crate with subcrate and write it to a new location.
+    Check that the subcrate contents are correctly written."""
+    crate = ROCrate(test_data_dir / "crate_with_subcrates", load_subcrates=True)
+    out_path = tmpdir / "ro_crate_out"
+    if to_zip:
+        zip_path = tmpdir / 'ro_crate_out.zip'
+        crate.write_zip(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(out_path)
+    else:
+        crate.write(out_path)
+
+    assert (out_path / "file.txt").is_file()
+    assert (out_path / "ro-crate-metadata.json").is_file()
+
+    assert (out_path / "subcrate" / "ro-crate-metadata.json").is_file()
+    assert (out_path / "subcrate" / "subfile.txt").is_file()
+
+    assert (out_path / "subcrate" / "subsubcrate" / "deepfile.txt").is_file()
+    assert (out_path / "subcrate" / "subsubcrate" / "ro-crate-metadata.json").is_file()
+
+
+@pytest.mark.parametrize("to_zip", [False, True])
+def test_subcrates_creation(test_data_dir, tmpdir, to_zip):
+    crate = ROCrate()
+    crate.add_file(test_data_dir / "read_crate" / "with space.txt")
+    subcrate = crate.add_subcrate(dest_path="subcrate/")
+    assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
+    assert crate.subcrate_entities == [subcrate]
+    assert not subcrate._crate
+    subcrate_crate = subcrate.get_crate()
+    assert subcrate._crate is subcrate_crate
+    assert subcrate_crate.source is None
+    test_file_galaxy_path = (test_data_dir / "test_file_galaxy.txt").rename(
+        test_data_dir / "test file galaxy.txt"
+    )
+    subf = subcrate_crate.add_file(test_file_galaxy_path)
+    subsubcrate = subcrate_crate.add_subcrate(dest_path="subsubcrate/")
+    assert subcrate_crate.subcrate_entities == [subsubcrate]
+    subsubcrate_crate = subsubcrate.get_crate()
+    subsubf = subsubcrate_crate.add_file("setup.cfg")
+    assert crate.get("subcrate/test%20file%20galaxy.txt") is subf
+    assert crate.get("subcrate/subsubcrate/setup.cfg") is subsubf
+    assert subcrate_crate.get("subsubcrate/setup.cfg") is subsubf
+
+    out_path = tmpdir / "ro_crate_out"
+    if to_zip:
+        zip_path = tmpdir / 'ro_crate_out.zip'
+        crate.write_zip(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(out_path)
+    else:
+        crate.write(out_path)
+
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert (out_path / "with space.txt").is_file()
+    assert (out_path / "subcrate" / "ro-crate-metadata.json").is_file()
+    assert (out_path / "subcrate" / "test file galaxy.txt").is_file()
+    assert (out_path / "subcrate" / "subsubcrate" / "ro-crate-metadata.json").is_file()
+    assert (out_path / "subcrate" / "subsubcrate" / "setup.cfg").is_file()
+    out_crate = ROCrate(out_path, load_subcrates=True)
+    assert out_crate.get("with%20space.txt")
+    out_subcrate = out_crate.get("subcrate/")
+    assert out_subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
+    assert out_crate.subcrate_entities == [out_subcrate]
+    out_subf = out_crate.get("subcrate/test%20file%20galaxy.txt")
+    assert out_subf
+    out_subsubf = out_crate.get("subcrate/subsubcrate/setup.cfg")
+    assert out_subsubf
+    out_subcrate_crate = out_subcrate.get_crate()
+    assert out_subcrate_crate.get("subsubcrate/setup.cfg") is out_subsubf
 
 
 @pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])

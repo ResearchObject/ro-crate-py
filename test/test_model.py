@@ -29,7 +29,7 @@ import uuid
 from pathlib import Path
 
 import pytest
-from rocrate.rocrate import ROCrate
+from rocrate.rocrate import ROCrate, Subcrate
 from rocrate.model import (
     DataEntity,
     File,
@@ -103,10 +103,11 @@ def test_data_entities(test_data_dir):
     crate = ROCrate()
     file_ = crate.add(File(crate, test_data_dir / 'sample_file.txt'))
     dataset = crate.add(Dataset(crate, test_data_dir / 'test_add_dir'))
+    subcrate = crate.add(Subcrate(crate, test_data_dir / 'crate-1.0'))
     data_entity = crate.add(DataEntity(crate, '#mysterious'))
-    assert set(crate.data_entities) == {file_, dataset, data_entity}
+    assert set(crate.data_entities) == {file_, dataset, subcrate, data_entity}
     part_ids = set(_["@id"] for _ in crate.root_dataset._jsonld["hasPart"])
-    assert set(_.id for _ in (file_, dataset, data_entity)) <= part_ids
+    assert set(_.id for _ in (file_, dataset, subcrate, data_entity)) <= part_ids
 
 
 @pytest.mark.skipif(sys.platform == "darwin", reason="CI sometimes fails on macOS")

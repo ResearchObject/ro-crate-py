@@ -27,7 +27,7 @@ import uuid
 import zipfile
 from pathlib import Path
 
-from rocrate.rocrate import ROCrate
+from rocrate.rocrate import ROCrate, Subcrate
 from rocrate.model import DataEntity, ContextEntity, File, Dataset
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
@@ -190,6 +190,53 @@ def test_bad_crate(test_data_dir, tmpdir):
     crate_dir.mkdir()
     with pytest.raises(ValueError):
         ROCrate(crate_dir)
+
+
+def load_crate_with_subcrates(test_data_dir):
+    return ROCrate(test_data_dir / "crate_with_subcrates", load_subcrates=True)
+
+
+def test_crate_with_subcrates(test_data_dir):
+
+    main_crate = load_crate_with_subcrates(test_data_dir)
+
+    subcrate = main_crate.get("subcrate")
+    subcrate2 = main_crate.get("subcrate2")
+    for sc in subcrate, subcrate2:
+        assert isinstance(sc, Subcrate)
+    assert set(main_crate.subcrate_entities) == {subcrate, subcrate2}
+
+    # Check the subcrate kept the conformsTo attribute from the original Dataset entity
+    assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
+
+    # check that at this point, we have not yet loaded the subcrate
+    assert subcrate._crate is None
+
+    # check access from the top-level crate
+    subfile = main_crate.get("subcrate/subfile.txt")
+    assert isinstance(subfile, File)
+    subfile2 = main_crate.get("subcrate2/subfile.txt")
+    assert isinstance(subfile2, File)
+    assert subfile2 is not subfile
+
+    # check that the above dereferencing triggered lazy loading
+    assert isinstance(subcrate._crate, ROCrate)
+    assert subfile.id == "subfile.txt"
+    assert subfile.crate is not main_crate
+    assert subfile.crate is subcrate._crate
+
+    # check with another nested rocrate
+    assert isinstance(main_crate.get("subcrate/subsubcrate/deepfile.txt"), File)
+
+    # reload the crate to "reset" the state to unloaded
+    main_crate = load_crate_with_subcrates(test_data_dir)
+    subcrate = main_crate.get("subcrate")
+    assert subcrate._crate is None
+
+    # get_crate() should trigger loading of the subcrate
+    nested_crate = subcrate.get_crate()
+    assert isinstance(nested_crate, ROCrate)
+    assert subcrate._crate is nested_crate
 
 
 @pytest.mark.parametrize("override", [False, True])
