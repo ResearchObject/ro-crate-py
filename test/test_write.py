@@ -468,7 +468,7 @@ def test_add_tree(test_data_dir, tmpdir):
 
 def test_http_header(tmpdir):
     crate = ROCrate()
-    url = "https://zenodo.org/records/10782431/files/lysozyme_datasets.zip"
+    url = "https://ftp.mozilla.org/pub/js/js-1.60.tar.gz"
     file_ = crate.add_file(url, validate_url=True)
     assert file_.id == url
     out_path = tmpdir / 'ro_crate_out'
@@ -476,7 +476,7 @@ def test_http_header(tmpdir):
     out_crate = ROCrate(out_path)
     out_file = out_crate.dereference(url)
     props = out_file.properties()
-    assert props.get("encodingFormat") == "application/octet-stream"
+    assert props.get("encodingFormat") == "application/x-tar"
     assert "sdDatePublished" in props
     with requests.head(url) as response:
         assert props["sdDatePublished"] == response.headers.get("last-modified")
