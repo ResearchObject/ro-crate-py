@@ -293,6 +293,83 @@ article = crate.dereference("paper.pdf")
 
 ## Advanced features
 
+### Subcrates
+
+An RO-Crate can contain one or more nested RO-Crates. For instance, consider the following layout:
+
+```
+crate_with_subcrates/
+|-- file.txt
+|-- ro-crate-metadata.json
+|-- subcrate
+|   |-- ro-crate-metadata.json
+|   |-- subfile.txt
+|   `-- subsubcrate
+|       |-- deepfile.txt
+|       `-- ro-crate-metadata.json
+`-- subcrate2
+    |-- ro-crate-metadata.json
+    `-- subfile.txt
+```
+
+In the JSON-LD metadata, the presence of a nested crate rooted at a given directory is indicated by a `conformsTo` pointing to the generic RO-Crate profile `https://w3id.org/ro/crate` (see [Referencing other RO-Crates](https://www.researchobject.org/ro-crate/specification/1.2/data-entities.html#referencing-other-ro-crates):
+
+```json
+{
+    "@id": "subcrate/",
+    "@type": "Dataset",
+    "conformsTo": "https://w3id.org/ro/crate"
+}
+```
+
+Since nested crates can potentially contain many and / or large files, they are not loaded by default: to enable their loading, pass `load_subcrates=True` to the `RO-Crate` initializer:
+
+```pycon
+>>> from rocrate.rocrate import ROCrate
+>>> crate = ROCrate("test/test-data/crate_with_subcrates", load_subcrates=True)
+>>> crate.subcrate_entities
+[<subcrate/ Dataset>, <subcrate2/ Dataset>]
+```
+
+At this point, the nested crates have not been loaded yet. You can load a nested crate explicitly:
+
+```pycon
+>>> nested_crate = subcrate.get_crate()
+>>> nested_crate.data_entities
+[<subfile.txt File>, <subsubcrate/ Dataset>]
+>>> nested_crate.subcrate_entities
+[<subsubcrate/ Dataset>]
+```
+
+Alternatively, you can dereference an item from the higher level crate:
+
+```pycon
+>>> crate.dereference("subcrate2/subfile.txt")
+<subfile.txt File>
+```
+
+Up to this point, we have seen how to consume an existing RO-Crate. The following example shows how to create a new one:
+
+```pycon
+>>> crate = ROCrate()
+>>> crate.add_file("test/test-data/test_file_galaxy.txt")
+<test_file_galaxy.txt File>
+>>> subcrate = crate.add_subcrate(dest_path="subcrate/")
+>>> subcrate
+<subcrate/ Dataset>
+>>> assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
+>>> assert crate.subcrate_entities == [subcrate]
+>>> subcrate_crate = subcrate.get_crate()
+>>> subcrate_crate
+<rocrate.rocrate.ROCrate object at 0x7e4b79adfad0>
+>>> subsubcrate = subcrate_crate.add_subcrate(dest_path="subsubcrate/")
+>>> assert subcrate_crate.subcrate_entities == [subsubcrate]
+>>> subsubcrate_crate = subsubcrate.get_crate()
+>>> subsubf = subsubcrate_crate.add_file("setup.cfg")
+>>> assert crate.dereference("subcrate/subsubcrate/setup.cfg") is subsubf
+>>> crate.write("/tmp/crate_with_subcrates")
+```
+
 ### Modifying the crate from JSON-LD dictionaries
 
 The `add_jsonld` method allows to add a contextual entity directly from a
