@@ -312,7 +312,7 @@ crate_with_subcrates/
     `-- subfile.txt
 ```
 
-In the JSON-LD metadata, the presence of a nested crate rooted at a given directory is indicated by a `conformsTo` pointing to the generic RO-Crate profile `https://w3id.org/ro/crate` (see [Referencing other RO-Crates](https://www.researchobject.org/ro-crate/specification/1.2/data-entities.html#referencing-other-ro-crates):
+In the JSON-LD metadata, the presence of a nested crate rooted at a given directory is indicated by a `conformsTo` pointing to the generic RO-Crate profile `https://w3id.org/ro/crate` (see [Referencing other RO-Crates](https://www.researchobject.org/ro-crate/specification/1.2/data-entities.html#referencing-other-ro-crates)):
 
 ```json
 {
