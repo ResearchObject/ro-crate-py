@@ -754,6 +754,8 @@ def test_read_version(test_data_dir):
     assert crate.version == "1.0"
     crate = ROCrate(test_data_dir / "crate-1.1")
     assert crate.version == "1.1"
+    crate = ROCrate(test_data_dir / "crate-1.2-DRAFT")
+    assert crate.version == "1.2-DRAFT"
 
 
 @pytest.mark.filterwarnings("ignore")

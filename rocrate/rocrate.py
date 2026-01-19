@@ -26,6 +26,7 @@ import uuid
 import zipfile
 import atexit
 import os
+import re
 import shutil
 import tempfile
 import warnings
@@ -33,8 +34,6 @@ import warnings
 from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urljoin, unquote
-
-from packaging.version import Version
 
 from .memory_buffer import MemoryBuffer
 from .model import (
@@ -67,6 +66,7 @@ from .metadata import read_metadata, find_root_entity_id
 
 
 DATA_ENTITY_TYPES = {"File", "Dataset"}
+PRE_1_2 = re.compile(r"1\.[01].*")
 
 
 def is_data_entity(entity):
@@ -223,7 +223,7 @@ class ROCrate():
             id_ = ref['@id']
             if id_ not in entities:
                 continue
-            if self.version_obj >= Version("1.2"):
+            if not PRE_1_2.match(self.version):
                 if not is_data_entity(entities[id_]):
                     continue
             entity = entities.pop(id_)
@@ -257,7 +257,7 @@ class ROCrate():
         for identifier, entity in entities.items():
             if is_data_entity(entity):
                 id_ = entity['@id']
-                if self.version_obj >= Version("1.2"):
+                if not PRE_1_2.match(self.version):
                     raise ValueError(f"'{id_}' is a data entity but it's not linked to from the root dataset's hasPart")
                 else:
                     warnings.warn(f"'{id_}' looks like a data entity but it's not listed in the root dataset's hasPart")
@@ -378,10 +378,6 @@ class ROCrate():
     @property
     def version(self):
         return self.metadata.version
-
-    @property
-    def version_obj(self):
-        return self.metadata.version_obj
 
     @property
     def test_dir(self):

@@ -1,0 +1,30 @@
+{
+    "@context": "https://w3id.org/ro/crate/1.2-DRAFT/context",
+    "@graph": [
+        {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {"@id": "./"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2-DRAFT"}
+        },
+        {
+            "@id": "./",
+            "@type": "Dataset",
+            "name": "Example crate",
+            "description": "An example RO-Crate",
+            "datePublished": "2025-10-17",
+            "license": {"@id": "http://spdx.org/licenses/CC0-1.0"},
+            "hasPart": [{"@id": "data.csv"}]
+        },
+        {
+            "@id": "data.csv",
+            "@type": "File",
+            "name": "CSV data"
+        },
+        {
+            "@id": "http://spdx.org/licenses/CC0-1.0",
+            "@type": "CreativeWork",
+            "name": "CC0-1.0"
+        }
+    ]
+}

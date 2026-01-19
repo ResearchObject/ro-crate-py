@@ -3,4 +3,3 @@ arcp==0.2.1
 jinja2
 python-dateutil
 click
-packaging
