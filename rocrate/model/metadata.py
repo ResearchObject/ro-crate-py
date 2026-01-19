@@ -25,13 +25,15 @@
 import json
 from pathlib import Path
 
-from packaging.version import Version
-
 from .file import File
 from .dataset import Dataset
 
 
-SUPPORTED_VERSIONS = {"1.0", "1.1", "1.2"}
+SUPPORTED_VERSIONS = {
+    "1.0", "1.0-DRAFT",
+    "1.1", "1.1-DRAFT",
+    "1.2", "1.2-DRAFT"
+}
 DEFAULT_VERSION = "1.2"
 BASENAME = "ro-crate-metadata.json"
 LEGACY_BASENAME = "ro-crate-metadata.jsonld"
@@ -47,7 +49,6 @@ class Metadata(File):
         if version not in SUPPORTED_VERSIONS:
             raise ValueError(f"version {version!r} not supported")
         self.version = version
-        self.version_obj = Version(version)
         self.profile = f"https://w3id.org/ro/crate/{self.version}"
         if source is None and dest_path is None:
             dest_path = LEGACY_BASENAME if version == "1.0" else BASENAME
