@@ -668,6 +668,71 @@ def test_from_dict(tmpdir, version):
         ROCrate(metadata, init=True)
 
 
+def test_detached(tmpdir):
+    base_uri = "http://example.com/"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": [
+            {
+                "@id": f"{base_uri}ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": base_uri},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}
+            },
+            {
+                "@id": base_uri,
+                "@type": "Dataset",
+                "creator": {"@id": "#josiah"},
+                "hasPart": {"@id": f"{base_uri}d1"}
+            },
+            {
+                "@id": f"{base_uri}d1",
+                "@type": "Dataset",
+                "hasPart": {"@id": f"{base_uri}d1/d2"}
+            },
+            {
+                "@id": f"{base_uri}d1/d2",
+                "@type": "Dataset",
+                "hasPart": {"@id": f"{base_uri}d1/d2/f1"}
+            },
+            {
+                "@id": f"{base_uri}d1/d2/f1",
+                "@type": "File"
+            },
+            {
+                "@id": "#josiah",
+                "@type": "Person",
+                'name': 'Josiah Carberry'
+            },
+        ]
+    }
+    crate = ROCrate(metadata)
+    d1 = crate.dereference(f"{base_uri}d1")
+    assert d1
+    d2 = crate.dereference(f"{base_uri}d1/d2")
+    assert d2
+    f1 = crate.dereference(f"{base_uri}d1/d2/f1")
+    assert f1
+    p = crate.dereference("#josiah")
+    assert p
+    assert set(crate.data_entities) == {d1, d2, f1}
+    assert set(crate.contextual_entities) == {p}
+    out_path = tmpdir / 'out_crate'
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    crate = ROCrate(out_path)
+    d1 = crate.dereference(f"{base_uri}d1")
+    assert d1
+    d2 = crate.dereference(f"{base_uri}d1/d2")
+    assert d2
+    f1 = crate.dereference(f"{base_uri}d1/d2/f1")
+    assert f1
+    p = crate.dereference("#josiah")
+    assert p
+    assert set(crate.data_entities) == {d1, d2, f1}
+    assert set(crate.contextual_entities) == {p}
+
+
 @pytest.mark.parametrize("version", ["1.1", "1.2"])
 def test_no_data_entity_link_from_file(version):
     metadata = {

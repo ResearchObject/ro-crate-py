@@ -94,7 +94,7 @@ class Metadata(File):
         return True
 
     def write(self, dest_base):
-        write_path = Path(dest_base) / self.id
+        write_path = Path(dest_base) / self.id.rsplit("/", 1)[-1]
         super()._write_from_stream(write_path)
 
     @property
