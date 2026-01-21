@@ -674,7 +674,7 @@ def test_detached(tmpdir):
         "@context": "https://w3id.org/ro/crate/1.2/context",
         "@graph": [
             {
-                "@id": f"{base_uri}ro-crate-metadata.json",
+                "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
                 "about": {"@id": base_uri},
                 "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}
@@ -709,7 +709,7 @@ def test_detached(tmpdir):
 
     crate = ROCrate(metadata)
     assert crate.root_dataset.id == base_uri
-    assert crate.metadata.id == f"{base_uri}ro-crate-metadata.json"
+    assert crate.metadata.id == "ro-crate-metadata.json"
     d1 = crate.dereference(f"{base_uri}d1")
     assert d1
     d2 = crate.dereference(f"{base_uri}d1/d2")
@@ -720,13 +720,14 @@ def test_detached(tmpdir):
     assert p
     assert set(crate.data_entities) == {d1, d2, f1}
     assert set(crate.contextual_entities) == {p}
+
     out_path = tmpdir / 'out_crate'
     crate.write(out_path)
     assert (out_path / "ro-crate-metadata.json").is_file()
 
     crate = ROCrate(out_path)
     assert crate.root_dataset.id == base_uri
-    assert crate.metadata.id == f"{base_uri}ro-crate-metadata.json"
+    assert crate.metadata.id == "ro-crate-metadata.json"
     d1 = crate.dereference(f"{base_uri}d1")
     assert d1
     d2 = crate.dereference(f"{base_uri}d1/d2")
