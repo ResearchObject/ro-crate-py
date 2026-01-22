@@ -123,7 +123,8 @@ class ROCrate():
                  gen_preview=False,
                  init=False, exclude=None,
                  version=DEFAULT_VERSION,
-                 load_subcrates=False):
+                 load_subcrates=False,
+                 root_dataset_id=None):
         self.mode = None
         self.source = source
         self.exclude = exclude
@@ -138,7 +139,12 @@ class ROCrate():
             self.add(Preview(self))
         if not source:
             self.mode = Mode.CREATE
-            self.add(RootDataset(self), Metadata(self, version=version))
+            if root_dataset_id is not None:
+                if root_dataset_id != "./" and not is_url(root_dataset_id):
+                    raise ValueError("the root dataset id must be either ./ or an absolute URI")
+            rde = RootDataset(self, root_dataset_id)
+            md = Metadata(self, properties={"about": rde}, version=version)
+            self.add(rde, md)
         elif init:
             self.mode = Mode.INIT
             if isinstance(source, dict):

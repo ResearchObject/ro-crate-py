@@ -716,3 +716,27 @@ def test_write_version(tmpdir, helpers, version):
     with open(out_path / basename, "rt") as f:
         data = json.load(f)
     assert data["@context"] == f"https://w3id.org/ro/crate/{version}/context"
+
+
+@pytest.mark.parametrize("to_zip", [False, True])
+def test_detached_creation(tmpdir, to_zip):
+    base_uri = "http://example.com/crate/"
+    crate = ROCrate(root_dataset_id=base_uri)
+    assert crate.root_dataset.id == base_uri
+    assert crate.metadata.id == "ro-crate-metadata.json"
+    assert crate.metadata["about"] is crate.root_dataset
+
+    out_path = tmpdir / "ro_crate_out"
+    if to_zip:
+        zip_path = tmpdir / 'ro_crate_out.zip'
+        crate.write_zip(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(out_path)
+    else:
+        crate.write(out_path)
+
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    rcrate = ROCrate(out_path)
+    assert rcrate.root_dataset.id == base_uri
+    assert rcrate.metadata.id == "ro-crate-metadata.json"
+    assert rcrate.metadata["about"] is rcrate.root_dataset
