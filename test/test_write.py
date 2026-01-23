@@ -721,10 +721,18 @@ def test_write_version(tmpdir, helpers, version):
 @pytest.mark.parametrize("to_zip", [False, True])
 def test_detached_creation(tmpdir, to_zip):
     base_uri = "http://example.com/crate/"
+    orcid = "https://orcid.org/0000-0002-1825-0097"
+    name = "Josiah Carberry"
     crate = ROCrate(root_dataset_id=base_uri)
+    assert crate.source is None
+    assert crate.metadata.source is None
     assert crate.root_dataset.id == base_uri
     assert crate.metadata.id == "ro-crate-metadata.json"
     assert crate.metadata["about"] is crate.root_dataset
+    crate.add_dataset(f"{base_uri}d1")
+    crate.add_file(f"{base_uri}f1")
+    p = crate.add(Person(crate, orcid, properties={"name": name}))
+    crate.root_dataset["creator"] = p
 
     out_path = tmpdir / "ro_crate_out"
     if to_zip:
@@ -737,6 +745,20 @@ def test_detached_creation(tmpdir, to_zip):
 
     assert (out_path / "ro-crate-metadata.json").is_file()
     rcrate = ROCrate(out_path)
+    # this crate is attached, even though all its data entities are web-based
+    assert rcrate.source == out_path
+    assert rcrate.metadata.source == "ro-crate-metadata.json"
     assert rcrate.root_dataset.id == base_uri
     assert rcrate.metadata.id == "ro-crate-metadata.json"
     assert rcrate.metadata["about"] is rcrate.root_dataset
+    rd1 = rcrate.get(f"{base_uri}d1")
+    assert rd1
+    rf1 = rcrate.get(f"{base_uri}f1")
+    assert rf1
+    rp = crate.get(orcid)
+    assert rp["name"] == name
+
+    with pytest.raises(ValueError):
+        ROCrate(root_dataset_id="foo/bar")
+    with pytest.raises(ValueError):
+        ROCrate(root_dataset_id="/foo/bar")
