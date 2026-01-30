@@ -5,14 +5,14 @@
             "@id": "ro-crate-metadata.json",
             "@type": "CreativeWork",
             "about": {
-                "@id": "https://raw.githubusercontent.com/simleo/ro-crate-py/detached_test_data/test/test-data/"
+                "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/detached_test_data/test/test-data/"
             },
             "conformsTo": {
                 "@id": "https://w3id.org/ro/crate/1.2"
             }
         },
         {
-            "@id": "https://raw.githubusercontent.com/simleo/ro-crate-py/detached_test_data/test/test-data/",
+            "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/detached_test_data/test/test-data/",
             "@type": "Dataset",
             "name": "Example crate",
             "description": "An example RO-Crate",
@@ -22,20 +22,20 @@
             },
             "hasPart": [
                 {
-                    "@id": "https://raw.githubusercontent.com/simleo/ro-crate-py/detached_test_data/test/test-data/sample_file.txt"
+                    "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/detached_test_data/test/test-data/sample_file.txt"
                 },
                 {
-                    "@id": "https://raw.githubusercontent.com/simleo/ro-crate-py/detached_test_data/test/test-data/test_file_galaxy.txt"
+                    "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/detached_test_data/test/test-data/test_file_galaxy.txt"
                 }
             ]
         },
         {
-            "@id": "https://raw.githubusercontent.com/simleo/ro-crate-py/detached_test_data/test/test-data/sample_file.txt",
+            "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/detached_test_data/test/test-data/sample_file.txt",
             "@type": "File",
             "name": "CSV data"
         },
         {
-            "@id": "https://raw.githubusercontent.com/simleo/ro-crate-py/detached_test_data/test/test-data/test_file_galaxy.txt",
+            "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/detached_test_data/test/test-data/test_file_galaxy.txt",
             "@type": "File",
             "name": "Test data",
             "localPath": "test-data/test_file_galaxy.txt"
