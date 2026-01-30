@@ -176,7 +176,7 @@ class ROCrate():
                     self.add(Preview(self, source))
 
     def __read(self, source, gen_preview=False):
-        if isinstance(source, dict):
+        if isinstance(source, dict) or is_url(str(source)):
             metadata_path = source
         else:
             source = Path(source)
@@ -201,6 +201,8 @@ class ROCrate():
     def __read_data_entities(self, entities, source, gen_preview):
         if isinstance(source, dict):
             source = Path("")
+        elif is_url(str(source)):
+            source = source.rsplit("/", 1)[0] + "/"
         metadata_id, root_id = find_root_entity_id(entities)
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
@@ -212,7 +214,8 @@ class ROCrate():
 
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
-            self.add(Preview(self, source / Preview.BASENAME, properties=preview_entity))
+            preview_source = source + Preview.BASENAME if is_url(str(source)) else source / Preview.BASENAME
+            self.add(Preview(self, preview_source, properties=preview_entity))
         self.__add_parts(parts, entities, source)
 
     def __add_parts(self, parts, entities, source):
@@ -240,6 +243,8 @@ class ROCrate():
 
                 if is_url(id_):
                     instance = Subcrate(self, source=id_, properties=entity)
+                elif is_url(str(source)):
+                    instance = Subcrate(self, source + id_, id_, properties=entity)
                 else:
                     instance = Subcrate(self, source=source / unquote(id_), properties=entity)
 
@@ -250,6 +255,8 @@ class ROCrate():
                 # cls is either a File or a Dataset (Directory)
                 if is_url(id_):
                     instance = cls(self, id_, properties=entity)
+                elif is_url(str(source)):
+                    instance = cls(self, source + id_, id_, properties=entity)
                 else:
                     instance = cls(self, source / unquote(id_), id_, properties=entity)
             self.add(instance)

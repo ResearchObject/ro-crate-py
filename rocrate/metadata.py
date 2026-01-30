@@ -21,8 +21,19 @@
 # limitations under the License.
 
 import json
+import re
+import warnings
+
+import requests
 
 from .model.metadata import BASENAME, LEGACY_BASENAME
+from .utils import is_url
+
+# https://www.researchobject.org/ro-crate/specification/1.2/structure
+#   "If stored in a file... the filename SHOULD be..."
+# https://www.researchobject.org/ro-crate/specification/1.2/data-entities
+#   "It is NOT RECOMMENDED to resolve a relative root identifier..."
+MD_PATTERN = re.compile(r".*[/-]ro-crate-metadata.json(ld)?$")
 
 
 def read_metadata(metadata_path):
@@ -34,6 +45,15 @@ def read_metadata(metadata_path):
     """
     if isinstance(metadata_path, dict):
         metadata = metadata_path
+    elif is_url(str(metadata_path)):
+        if not MD_PATTERN.match(metadata_path):
+            warnings.warn(f"URI {metadata_path} should follow the pattern {MD_PATTERN.pattern!r}")
+        resp = requests.get(metadata_path)
+        resp.raise_for_status()
+        content_type = resp.headers.get("Content-Type", "")
+        if "application/json" not in content_type.lower():
+            warnings.warn(f"URI {metadata_path} does not have a JSON content type")
+        metadata = resp.json()
     else:
         with open(metadata_path, 'r', encoding='utf-8') as f:
             metadata = json.load(f)

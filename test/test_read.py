@@ -905,3 +905,43 @@ def test_not_data_entity_linked(version):
         assert f1 in crate.contextual_entities
     else:
         assert f1 in crate.data_entities
+
+
+@pytest.mark.filterwarnings("ignore")
+def test_from_uri(tmpdir):
+    source = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+              "master/test/test-data/read_crate/ro-crate-metadata.json")
+    base_uri = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+                "master/test/test-data/read_crate/")
+    remote_f_uri = ("https://raw.githubusercontent.com/ResearchObject/"
+                    "ro-crate-py/master/test/test-data/sample_file.txt")
+    test_fn = "test_file_galaxy.txt"
+    crate = ROCrate(source)
+    assert crate.source == source
+    assert crate.preview.source == base_uri + "ro-crate-preview.html"
+    assert crate.preview.id == "ro-crate-preview.html"
+    assert test_fn in crate
+    test_f = crate.get(test_fn)
+    assert test_f.source == base_uri + test_fn
+    remote_f = crate.get(remote_f_uri)
+    assert remote_f.source == remote_f_uri
+    assert remote_f.id == remote_f_uri
+    out_path = tmpdir / "out_crate"
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert not (out_path / "ro-crate-preview.html").exists()
+    assert not (out_path / test_fn).exists()
+    assert not (out_path / remote_f_uri.rsplit("/", 1)[1]).exists()
+    crate.preview.fetch_remote = True
+    test_f.fetch_remote = True
+    remote_f.fetch_remote = True
+    # remote_f.id is the full URI, which by default is interpreted as a local
+    # path (with a top-level "https:" directory etc.). The id cannot be
+    # changed, so if we want the file stored in the output crate with its
+    # basename we have to set localPath, which overrides the id as destination
+    remote_f["localPath"] = "sample_file.txt"
+    shutil.rmtree(out_path)
+    crate.write(out_path)
+    assert (out_path / "ro-crate-preview.html").is_file()
+    assert (out_path / test_fn).is_file()
+    assert (out_path / "sample_file.txt").is_file()
