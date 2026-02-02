@@ -23,6 +23,7 @@
 import json
 import re
 import warnings
+import urllib.request
 
 import requests
 
@@ -48,12 +49,16 @@ def read_metadata(metadata_path):
     elif is_url(str(metadata_path)):
         if not MD_PATTERN.match(metadata_path):
             warnings.warn(f"URI {metadata_path} should follow the pattern {MD_PATTERN.pattern!r}")
-        resp = requests.get(metadata_path)
-        resp.raise_for_status()
-        content_type = resp.headers.get("Content-Type", "")
-        if "application/json" not in content_type.lower():
-            warnings.warn(f"URI {metadata_path} does not have a JSON content type")
-        metadata = resp.json()
+        if metadata_path.startswith("file:"):
+            with urllib.request.urlopen(metadata_path) as resp:
+                metadata = json.load(resp)
+        else:
+            with requests.get(metadata_path) as resp:
+                resp.raise_for_status()
+                content_type = resp.headers.get("Content-Type", "")
+                if "application/json" not in content_type.lower():
+                    warnings.warn(f"URI {metadata_path} does not have a JSON content type")
+                metadata = resp.json()
     else:
         with open(metadata_path, 'r', encoding='utf-8') as f:
             metadata = json.load(f)
