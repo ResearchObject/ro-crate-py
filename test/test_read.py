@@ -668,7 +668,7 @@ def test_from_dict(tmpdir, version):
         ROCrate(metadata, init=True)
 
 
-def test_detached(tmpdir):
+def test_from_dict_remote_uris(tmpdir):
     base_uri = "http://example.com/"
     metadata = {
         "@context": "https://w3id.org/ro/crate/1.2/context",
@@ -913,6 +913,7 @@ def test_from_uri(tmpdir):
               "master/test/test-data/read_crate/ro-crate-metadata.json")
     base_uri = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
                 "master/test/test-data/read_crate/")
+    # this is an absolute URI in the metadata, note it's outside the crate
     remote_f_uri = ("https://raw.githubusercontent.com/ResearchObject/"
                     "ro-crate-py/master/test/test-data/sample_file.txt")
     test_fn = "test_file_galaxy.txt"
@@ -923,15 +924,22 @@ def test_from_uri(tmpdir):
     assert test_fn in crate
     test_f = crate.get(test_fn)
     assert test_f.source == base_uri + test_fn
+    assert test_f.id == test_fn
     remote_f = crate.get(remote_f_uri)
     assert remote_f.source == remote_f_uri
     assert remote_f.id == remote_f_uri
     out_path = tmpdir / "out_crate"
     crate.write(out_path)
     assert (out_path / "ro-crate-metadata.json").is_file()
+    # fetch_remote is False by default, so nothing is fetched
     assert not (out_path / "ro-crate-preview.html").exists()
     assert not (out_path / test_fn).exists()
     assert not (out_path / remote_f_uri.rsplit("/", 1)[1]).exists()
+    rcrate = ROCrate(out_path)
+    assert rcrate.preview.id == "ro-crate-preview.html"
+    assert rcrate.get(test_fn)
+    assert rcrate.get(remote_f_uri)
+    # now set some fetch_remote to True
     crate.preview.fetch_remote = True
     test_f.fetch_remote = True
     remote_f.fetch_remote = True
@@ -945,6 +953,14 @@ def test_from_uri(tmpdir):
     assert (out_path / "ro-crate-preview.html").is_file()
     assert (out_path / test_fn).is_file()
     assert (out_path / "sample_file.txt").is_file()
+    rcrate = ROCrate(out_path)
+    assert rcrate.preview.id == "ro-crate-preview.html"
+    rtest_f = rcrate.get(test_fn)
+    assert rtest_f
+    assert rtest_f.get("contentUrl") == base_uri + test_fn
+    rremote_f_uri = rcrate.get(remote_f_uri)
+    assert rremote_f_uri
+    assert rremote_f_uri.get("localPath") == "sample_file.txt"
 
 
 @pytest.mark.filterwarnings("ignore")
@@ -966,8 +982,22 @@ def test_from_uri_detached(tmpdir):
     assert (out_path / "ro-crate-metadata.json").is_file()
     assert not (out_path / "sample_file.txt").exists()
     assert not (out_path / "test_file_galaxy.txt").exists()
+    # fetch_remote is False, so file is not fetched even if localPath is set
     assert not (out_path / "test-data" / "test_file_galaxy.txt").exists()
+    rcrate = ROCrate(out_path)
+    assert rcrate.get(f"{base_uri}sample_file.txt")
+    assert rcrate.get(f"{base_uri}test_file_galaxy.txt")
+    # now set fetch_remote to True
     test_file_galaxy.fetch_remote = True
     shutil.rmtree(out_path)
     crate.write(out_path)
-    assert (out_path / "test-data" / "test_file_galaxy.txt").exists()
+    assert (out_path / "test-data" / "test_file_galaxy.txt").is_file()
+    rcrate = ROCrate(out_path)
+    rsample_file = rcrate.get(f"{base_uri}sample_file.txt")
+    rtest_file_galaxy = rcrate.get(f"{base_uri}test_file_galaxy.txt")
+    assert rtest_file_galaxy
+    assert rtest_file_galaxy.get("contentUrl") == f"{base_uri}test_file_galaxy.txt"
+    assert rtest_file_galaxy.get("localPath") == "test-data/test_file_galaxy.txt"
+    assert set(rcrate.data_entities) == {rsample_file, rtest_file_galaxy}
+    license = rcrate.get("http://spdx.org/licenses/CC0-1.0")
+    assert set(rcrate.contextual_entities) == {license}
