@@ -966,9 +966,9 @@ def test_from_uri(tmpdir):
 @pytest.mark.filterwarnings("ignore")
 def test_from_uri_detached(tmpdir):
     source = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
-              "detached_test_data/test/test-data/detached-ro-crate-metadata.json")
+              "master/test/test-data/detached-ro-crate-metadata.json")
     base_uri = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
-                "detached_test_data/test/test-data/")
+                "master/test/test-data/")
     crate = ROCrate(source)
     assert crate.source == source
     assert crate.root_dataset.id == base_uri
