@@ -1007,3 +1007,53 @@ def test_from_uri_detached(tmpdir, source_base):
     assert set(rcrate.data_entities) == {rsample_file, rtest_file_galaxy}
     license = rcrate.get("http://spdx.org/licenses/CC0-1.0")
     assert set(rcrate.contextual_entities) == {license}
+
+
+def test_from_file(test_data_dir, tmpdir):
+    source = test_data_dir / "read_crate" / "ro-crate-metadata.json"
+    base_path = test_data_dir / "read_crate"
+    remote_f_uri = ("https://raw.githubusercontent.com/ResearchObject/"
+                    "ro-crate-py/master/test/test-data/sample_file.txt")
+    test_fn = "test_file_galaxy.txt"
+    crate = ROCrate(source)
+    assert crate.source == source
+    assert crate.preview.source == base_path / "ro-crate-preview.html"
+    assert crate.preview.id == "ro-crate-preview.html"
+    assert test_fn in crate
+    test_f = crate.get(test_fn)
+    assert test_f.source == base_path / test_fn
+    assert test_f.id == test_fn
+    remote_f = crate.get(remote_f_uri)
+    assert remote_f.source == remote_f_uri
+    assert remote_f.id == remote_f_uri
+    out_path = tmpdir / "out_crate"
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert (out_path / "ro-crate-preview.html").exists()
+    assert (out_path / test_fn).exists()
+    assert not (out_path / remote_f_uri.rsplit("/", 1)[1]).exists()
+    rcrate = ROCrate(out_path)
+    assert rcrate.preview.id == "ro-crate-preview.html"
+    assert rcrate.get(test_fn)
+    assert rcrate.get(remote_f_uri)
+    assert rcrate.get("test/")
+    assert not rcrate.get("test/test-metadata.json")
+
+
+def test_from_file_detached(test_data_dir, tmpdir):
+    source = test_data_dir / "detached-ro-crate-metadata.json"
+    base_uri = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+                "master/test/test-data/")
+    crate = ROCrate(source)
+    assert crate.source == source
+    assert crate.root_dataset.id == base_uri
+    sample_file = crate.get(f"{base_uri}sample_file.txt")
+    assert sample_file.source == f"{base_uri}sample_file.txt"
+    test_file_galaxy = crate.get(f"{base_uri}test_file_galaxy.txt")
+    assert test_file_galaxy.source == f"{base_uri}test_file_galaxy.txt"
+    out_path = tmpdir / "out_crate"
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    rcrate = ROCrate(out_path)
+    assert rcrate.get(f"{base_uri}sample_file.txt")
+    assert rcrate.get(f"{base_uri}test_file_galaxy.txt")

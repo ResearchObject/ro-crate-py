@@ -188,11 +188,14 @@ class ROCrate():
                 with zipfile.ZipFile(source, "r") as zf:
                     zf.extractall(zip_path)
                 source = Path(zip_path)
-            metadata_path = source / BASENAME
-            if not metadata_path.is_file():
-                metadata_path = source / LEGACY_BASENAME
-            if not metadata_path.is_file():
-                raise ValueError(f"Not a valid RO-Crate: missing {BASENAME}")
+            if source.is_file():
+                metadata_path = source
+            else:
+                metadata_path = source / BASENAME
+                if not metadata_path.is_file():
+                    metadata_path = source / LEGACY_BASENAME
+                if not metadata_path.is_file():
+                    raise ValueError(f"Not a valid RO-Crate: missing {BASENAME}")
         _, entities = read_metadata(metadata_path)
         self.__read_data_entities(entities, source, gen_preview)
         self.__read_contextual_entities(entities)
@@ -214,7 +217,12 @@ class ROCrate():
 
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
-            preview_source = source + Preview.BASENAME if is_url(str(source)) else source / Preview.BASENAME
+            if is_url(str(source)):
+                preview_source = source + Preview.BASENAME
+            elif source.is_file():
+                preview_source = source.parent / Preview.BASENAME
+            else:
+                preview_source = source / Preview.BASENAME
             self.add(Preview(self, preview_source, properties=preview_entity))
         self.__add_parts(parts, entities, source)
 
@@ -245,6 +253,8 @@ class ROCrate():
                     instance = Subcrate(self, source=id_, properties=entity)
                 elif is_url(str(source)):
                     instance = Subcrate(self, source + id_, id_, properties=entity)
+                elif source.is_file():
+                    instance = Subcrate(self, source.parent / unquote(id_), id_, properties=entity)
                 else:
                     instance = Subcrate(self, source=source / unquote(id_), properties=entity)
 
@@ -257,6 +267,8 @@ class ROCrate():
                     instance = cls(self, id_, properties=entity)
                 elif is_url(str(source)):
                     instance = cls(self, source + id_, id_, properties=entity)
+                elif source.is_file():
+                    instance = cls(self, source.parent / unquote(id_), id_, properties=entity)
                 else:
                     instance = cls(self, source / unquote(id_), id_, properties=entity)
             self.add(instance)
@@ -601,7 +613,7 @@ class ROCrate():
     def write(self, base_path):
         base_path = Path(base_path)
         base_path.mkdir(parents=True, exist_ok=True)
-        if self.source and not isinstance(self.source, dict):
+        if self.source and not isinstance(self.source, dict) and Path(self.source).is_dir():
             self._copy_unlisted(self.source, base_path)
         for writable_entity in self.data_entities + self.default_entities:
             writable_entity.write(base_path)
