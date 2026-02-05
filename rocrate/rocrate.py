@@ -627,6 +627,9 @@ class ROCrate():
                 f.write(chunk)
         return out_path
 
+    def write_detached(self, metadata_path):
+        self.metadata.write_detached(metadata_path)
+
     def stream_zip(self, chunk_size=8192):
         """ Create a stream of bytes representing the RO-Crate as a ZIP file. """
         yield from self._stream_zip(chunk_size=chunk_size)

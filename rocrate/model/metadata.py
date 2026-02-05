@@ -24,6 +24,8 @@
 
 import json
 from pathlib import Path
+import re
+import warnings
 
 from .file import File
 from .dataset import Dataset
@@ -37,6 +39,7 @@ SUPPORTED_VERSIONS = {
 DEFAULT_VERSION = "1.2"
 BASENAME = "ro-crate-metadata.json"
 LEGACY_BASENAME = "ro-crate-metadata.jsonld"
+DETACHED_MD_NAME = re.compile(r".*-ro-crate-metadata.json$")
 
 WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
 
@@ -96,6 +99,12 @@ class Metadata(File):
     def write(self, dest_base):
         write_path = Path(dest_base) / self.id.rsplit("/", 1)[-1]
         super()._write_from_stream(write_path)
+
+    def write_detached(self, path):
+        if not DETACHED_MD_NAME.match(str(path)):
+            warnings.warn(f"{path} should follow the pattern {DETACHED_MD_NAME.pattern!r}")
+        path = Path(path)
+        super()._write_from_stream(path)
 
     @property
     def root(self) -> Dataset:

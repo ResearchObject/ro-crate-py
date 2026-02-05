@@ -758,6 +758,22 @@ def test_detached_creation(tmpdir, to_zip):
     rp = crate.get(orcid)
     assert rp["name"] == name
 
+    detached_md_path = tmpdir / "example-ro-crate-metadata.json"
+    crate.write_detached(detached_md_path)
+    assert detached_md_path.is_file()
+    rcrate = ROCrate(detached_md_path)
+    assert rcrate.source == detached_md_path
+    assert rcrate.metadata.source == "ro-crate-metadata.json"
+    assert rcrate.root_dataset.id == base_uri
+    assert rcrate.metadata.id == "ro-crate-metadata.json"
+    assert rcrate.metadata["about"] is rcrate.root_dataset
+    rd1 = rcrate.get(f"{base_uri}d1")
+    assert rd1
+    rf1 = rcrate.get(f"{base_uri}f1")
+    assert rf1
+    rp = crate.get(orcid)
+    assert rp["name"] == name
+
     with pytest.raises(ValueError):
         ROCrate(root_dataset_id="foo/bar")
     with pytest.raises(ValueError):
