@@ -32,7 +32,7 @@ from rocrate.model import DataEntity, ContextEntity, File, Dataset
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
-THIS_DIR = Path(__file__).absolute().parent
+THIS_DIR = Path(__file__).resolve().parent
 
 
 @pytest.mark.parametrize("gen_preview,from_zip", [(False, False), (True, False), (True, True)])
@@ -911,7 +911,7 @@ def test_not_data_entity_linked(version):
 @pytest.mark.filterwarnings("ignore")
 @pytest.mark.parametrize("source_base", [
     "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
-    f"file://{THIS_DIR}/"
+    f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems
 ])
 def test_from_uri(tmpdir, source_base):
     source = f"{source_base}test-data/read_crate/ro-crate-metadata.json"
@@ -969,7 +969,7 @@ def test_from_uri(tmpdir, source_base):
 @pytest.mark.filterwarnings("ignore")
 @pytest.mark.parametrize("source_base", [
     "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
-    f"file://{THIS_DIR}/"
+    f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems
 ])
 def test_from_uri_detached(tmpdir, source_base):
     source = f"{source_base}test-data/detached-ro-crate-metadata.json"
