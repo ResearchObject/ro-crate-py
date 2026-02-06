@@ -240,6 +240,25 @@ def test_crate_with_subcrates(test_data_dir):
     assert subcrate._crate is nested_crate
 
 
+@pytest.mark.filterwarnings("ignore")
+def test_detached_crate_with_subcrates(test_data_dir):
+    main_crate = ROCrate(
+        test_data_dir / "detached_crate_with_subcrates/subcrates-ro-crate-metadata.json",
+        load_subcrates=True
+    )
+    subcrate = main_crate.get("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/")
+    assert isinstance(subcrate, Subcrate)
+    assert set(main_crate.subcrate_entities) == {subcrate}
+    assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
+    assert subcrate._crate is None
+    other_crate = subcrate.get_crate()
+    assert isinstance(other_crate, ROCrate)
+    assert subcrate._crate is other_crate
+    assert other_crate.get(
+        "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/test_file_galaxy.txt"
+    )
+
+
 @pytest.mark.parametrize("override", [False, True])
 def test_init(test_data_dir, tmpdir, helpers, override):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"

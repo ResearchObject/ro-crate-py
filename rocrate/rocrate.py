@@ -945,7 +945,11 @@ class Subcrate(Dataset):
         """
         if self._crate is None:
             # load_subcrates=True to load further nested RO-Crate (on-demand / lazily too)
-            self._crate = ROCrate(self.source, load_subcrates=True)
+            if subject_of := self.get("subjectOf"):
+                subcrate_uri = subject_of.id if isinstance(subject_of, Entity) else subject_of
+                self._crate = ROCrate(subcrate_uri, load_subcrates=True)
+            else:
+                self._crate = ROCrate(self.source, load_subcrates=True)
 
     def write(self, base_path):
         super().write(base_path)
