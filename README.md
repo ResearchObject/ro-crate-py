@@ -308,19 +308,19 @@ crate = ROCrate(root_dataset_id=url)
 
 In detached crates, _all_ data entities must be web-based, i.e., have an absolute URI as `@id`:
 
-```
+```python
 f1 = crate.add_file(f"{url}f1")
 ```
 
 The [recommended way](https://www.researchobject.org/ro-crate/specification/1.2/structure.html#types-of-ro-crate) to store a detached crate on disk is to write a single metadata file called `${prefix}-ro-crate-metadata.json`:
 
-```
+```python
 crate.write_detached("/tmp/example-ro-crate-metadata.json")
 ```
 
 One of the ways to consume a detached crate is to read the metadata from a local file:
 
-```
+```python
 rcrate = ROCrate("/tmp/example-ro-crate-metadata.json")
 rf1 = rcrate.dereference(f"{url}f1")
 ```
@@ -358,7 +358,7 @@ rcrate.write("/tmp/crate")
 
 This leads to the following structure on the file system:
 
-```python
+```
 /tmp/crate/
 |-- ro-crate-metadata.json
 |-- sample_file.txt
