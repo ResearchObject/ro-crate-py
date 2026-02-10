@@ -240,7 +240,6 @@ def test_crate_with_subcrates(test_data_dir):
     assert subcrate._crate is nested_crate
 
 
-@pytest.mark.filterwarnings("ignore")
 def test_detached_crate_with_subcrates(test_data_dir):
     main_crate = ROCrate(
         test_data_dir / "detached_crate_with_subcrates/subcrates-ro-crate-metadata.json",
@@ -927,7 +926,6 @@ def test_not_data_entity_linked(version):
         assert f1 in crate.data_entities
 
 
-@pytest.mark.filterwarnings("ignore")
 @pytest.mark.parametrize("source_base", [
     "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
     f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems
@@ -985,7 +983,6 @@ def test_from_uri(tmpdir, source_base):
     assert rremote_f_uri.get("localPath") == "sample_file.txt"
 
 
-@pytest.mark.filterwarnings("ignore")
 @pytest.mark.parametrize("source_base", [
     "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
     f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems

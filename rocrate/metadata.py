@@ -55,9 +55,6 @@ def read_metadata(metadata_path):
         else:
             with requests.get(metadata_path) as resp:
                 resp.raise_for_status()
-                content_type = resp.headers.get("Content-Type", "")
-                if "application/json" not in content_type.lower():
-                    warnings.warn(f"URI {metadata_path} does not have a JSON content type")
                 metadata = resp.json()
     else:
         with open(metadata_path, 'r', encoding='utf-8') as f:
