@@ -71,8 +71,10 @@ class File(FileOrDir):
             self._jsonld['contentSize'] = str(out_file_path.stat().st_size)
 
     def write(self, base_path):
-        local_path = self.get("localPath")
-        out_file_path = Path(base_path) / unquote(local_path or self.id)
+        relative_dest_uri = self.get("localPath") or self.id
+        if self.fetch_remote and is_url(relative_dest_uri):
+            relative_dest_uri = relative_dest_uri.rsplit("/", 1)[-1]
+        out_file_path = Path(base_path) / unquote(relative_dest_uri)
         if isinstance(self.source, (BytesIO, StringIO)) or is_url(str(self.source)):
             self._write_from_stream(out_file_path)
         elif self.source is None:

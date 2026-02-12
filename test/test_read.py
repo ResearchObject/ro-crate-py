@@ -963,16 +963,21 @@ def test_from_uri(tmpdir, source_base):
     crate.preview.fetch_remote = True
     test_f.fetch_remote = True
     remote_f.fetch_remote = True
-    # remote_f.id is the full URI, which by default is interpreted as a local
-    # path (with a top-level "https:" directory etc.). The id cannot be
-    # changed, so if we want the file stored in the output crate with its
-    # basename we have to set localPath, which overrides the id as destination
-    remote_f["localPath"] = "sample_file.txt"
+    assert remote_f.id == remote_f_uri
+    # remote_f.id is the full URI. Check that the destination path is
+    # automatically set to the output dir / basename upon writing.
     shutil.rmtree(out_path)
     crate.write(out_path)
+    assert (out_path / "sample_file.txt").is_file()
+    # check that localPath overrides the default destination
+    remote_f["localPath"] = "other/sample_file.txt"
+    shutil.rmtree(out_path)
+    crate.write(out_path)
+    assert (out_path / "other" / "sample_file.txt").is_file()
+    # check more paths
     assert (out_path / "ro-crate-preview.html").is_file()
     assert (out_path / test_fn).is_file()
-    assert (out_path / "sample_file.txt").is_file()
+    # read back the crate
     rcrate = ROCrate(out_path)
     assert rcrate.preview.id == "ro-crate-preview.html"
     rtest_f = rcrate.get(test_fn)
@@ -980,7 +985,7 @@ def test_from_uri(tmpdir, source_base):
     assert rtest_f.get("contentUrl") == base_uri + test_fn
     rremote_f_uri = rcrate.get(remote_f_uri)
     assert rremote_f_uri
-    assert rremote_f_uri.get("localPath") == "sample_file.txt"
+    assert rremote_f_uri.get("localPath") == "other/sample_file.txt"
 
 
 @pytest.mark.parametrize("source_base", [
