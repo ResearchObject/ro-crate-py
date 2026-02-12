@@ -309,42 +309,42 @@ crate = ROCrate(root_dataset_id=url)
 In detached crates, _all_ data entities must be web-based, i.e., have an absolute URI as `@id`:
 
 ```python
-f1 = crate.add_file(f"{url}f1")
+file_1 = crate.add_file(f"{url}file_1")  # http://example.com/crate/file_1
 ```
 
-The [recommended way](https://www.researchobject.org/ro-crate/specification/1.2/structure.html#types-of-ro-crate) to store a detached crate on disk is to write a single metadata file called `${prefix}-ro-crate-metadata.json`:
+The [recommended way](https://www.researchobject.org/ro-crate/specification/1.2/structure.html#types-of-ro-crate) to store a detached crate on disk is to write a single metadata file called `${prefix}-ro-crate-metadata.json`, where `${prefix}` is a variable. The library supports this through the `write_detached` method, which takes as argument an arbitrary path (a warning will be issued if the path does not follow the above pattern):
 
 ```python
 crate.write_detached("/tmp/example-ro-crate-metadata.json")
 ```
 
-One of the ways to consume a detached crate is to read the metadata from a local file:
+One of the ways to consume a detached crate is to read the metadata from a local file. For instance, to read the crate that we just wrote:
 
 ```python
-rcrate = ROCrate("/tmp/example-ro-crate-metadata.json")
-rf1 = rcrate.dereference(f"{url}f1")
+read_crate = ROCrate("/tmp/example-ro-crate-metadata.json")
+read_file_1 = read_crate.dereference(f"{url}file_1")
 ```
 
 This also works with a local `file://` URI:
 
 ```python
-rcrate = ROCrate("file:///tmp/example-ro-crate-metadata.json")
+read_crate = ROCrate("file:///tmp/example-ro-crate-metadata.json")
 ```
 
 and with a remote URI:
 
 ```python
 base = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/"
-rcrate = ROCrate(f"{base}detached-ro-crate-metadata.json")
-assert rcrate.root_dataset.id == base
-sample_file = rcrate.dereference(f"{base}sample_file.txt")
-test_file_galaxy = rcrate.dereference(f"{base}test_file_galaxy.txt")
+read_crate = ROCrate(f"{base}detached-ro-crate-metadata.json")
+assert read_crate.root_dataset.id == base
+sample_file = read_crate.dereference(f"{base}sample_file.txt")
+test_file_galaxy = read_crate.dereference(f"{base}test_file_galaxy.txt")
 ```
 
 Suppose you now want to save the crate to the local file system. You could use `write_detached` as shown above:
 
 ```python
-rcrate.write_detached("/tmp/detached-ro-crate-metadata.json")
+read_crate.write_detached("/tmp/detached-ro-crate-metadata.json")
 ```
 
 but you could also write the crate as attached, after tweaking the data entities a bit:
@@ -353,7 +353,7 @@ but you could also write the crate as attached, after tweaking the data entities
 sample_file.fetch_remote = True
 sample_file["localPath"] = "sample_file.txt"
 test_file_galaxy.fetch_remote = True
-rcrate.write("/tmp/crate")
+read_crate.write("/tmp/crate")
 ```
 
 This leads to the following structure on the file system:
