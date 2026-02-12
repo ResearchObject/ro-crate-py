@@ -755,7 +755,7 @@ def test_detached_creation(tmpdir, to_zip):
     assert rd1
     rf1 = rcrate.get(f"{base_uri}f1")
     assert rf1
-    rp = crate.get(orcid)
+    rp = rcrate.get(orcid)
     assert rp["name"] == name
 
     detached_md_path = tmpdir / "example-ro-crate-metadata.json"
@@ -771,7 +771,7 @@ def test_detached_creation(tmpdir, to_zip):
     assert rd1
     rf1 = rcrate.get(f"{base_uri}f1")
     assert rf1
-    rp = crate.get(orcid)
+    rp = rcrate.get(orcid)
     assert rp["name"] == name
 
     with pytest.raises(ValueError):
