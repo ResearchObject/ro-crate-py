@@ -351,7 +351,6 @@ but you could also write the crate as attached, after tweaking the data entities
 
 ```python
 sample_file.fetch_remote = True
-sample_file["localPath"] = "sample_file.txt"
 test_file_galaxy.fetch_remote = True
 read_crate.write("/tmp/crate")
 ```
@@ -366,7 +365,22 @@ This leads to the following structure on the file system:
     `-- test_file_galaxy.txt
 ```
 
-Note that we did not have to set `localPath` for `test_file_galaxy` because it was already set in the original crate that we read from the remote url.
+Note that `test_file_galaxy` was written as `test-data/test-file-galaxy.txt` relative to the crate root: this is due to the fact that the original crate specifies `"localPath": "test-data/test-file-galaxy.txt"`. In contrast, `localPath` is not specified for the other file, so the library applies the default behavior of using the basename as the relative path. This can be changed by setting `localPath` on the file entity:
+
+```python
+sample_file["localPath"] = "test-data/sample_file.txt"
+read_crate.write("/tmp/crate2")
+```
+
+Which leads to:
+
+```
+/tmp/crate2/
+|-- ro-crate-metadata.json
+`-- test-data
+    |-- sample_file.txt
+    `-- test_file_galaxy.txt
+```
 
 Another way to read a detached crate is to pass a JSON dictionary with the RO-Crate metadata directly to `ROCrate`. For instance:
 
