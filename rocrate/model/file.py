@@ -73,7 +73,10 @@ class File(FileOrDir):
     def write(self, base_path):
         relative_dest_uri = self.get("localPath") or self.id
         if self.fetch_remote and is_url(relative_dest_uri):
-            relative_dest_uri = relative_dest_uri.rsplit("/", 1)[-1]
+            if relative_dest_uri.startswith(self.crate.root_dataset.id):
+                relative_dest_uri = relative_dest_uri[len(self.crate.root_dataset.id):]
+            else:
+                relative_dest_uri = relative_dest_uri.rsplit("/", 1)[-1]
             self["localPath"] = relative_dest_uri
         out_file_path = Path(base_path) / unquote(relative_dest_uri)
         if isinstance(self.source, (BytesIO, StringIO)) or is_url(str(self.source)):

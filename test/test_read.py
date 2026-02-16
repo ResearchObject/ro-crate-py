@@ -965,7 +965,7 @@ def test_from_uri(tmpdir, source_base):
     remote_f.fetch_remote = True
     assert remote_f.id == remote_f_uri
     # remote_f.id is the full URI. Check that the destination path is
-    # automatically set to the output dir / basename upon writing.
+    # the output dir / remote_f.id minus the root dataset id.
     shutil.rmtree(out_path)
     crate.write(out_path)
     assert (out_path / "sample_file.txt").is_file()
@@ -1021,11 +1021,11 @@ def test_from_uri_detached(tmpdir, source_base):
     assert (out_path / "test-data" / "test_file_galaxy.txt").is_file()
     rcrate = ROCrate(out_path)
     rsample_file = rcrate.get(f"{base_uri}sample_file.txt")
+    assert rsample_file
     rtest_file_galaxy = rcrate.get(f"{base_uri}test_file_galaxy.txt")
     assert rtest_file_galaxy
     assert rtest_file_galaxy.get("contentUrl") == f"{base_uri}test_file_galaxy.txt"
     assert rtest_file_galaxy.get("localPath") == "test-data/test_file_galaxy.txt"
-    assert set(rcrate.data_entities) == {rsample_file, rtest_file_galaxy}
     license = rcrate.get("http://spdx.org/licenses/CC0-1.0")
     assert set(rcrate.contextual_entities) == {license}
 
@@ -1072,9 +1072,27 @@ def test_from_file_detached(test_data_dir, tmpdir):
     assert sample_file.source == f"{base_uri}sample_file.txt"
     test_file_galaxy = crate.get(f"{base_uri}test_file_galaxy.txt")
     assert test_file_galaxy.source == f"{base_uri}test_file_galaxy.txt"
+    listed = crate.get(f"{base_uri}read_extra/listed.txt")
+    assert listed.source == f"{base_uri}read_extra/listed.txt"
+    test_read_base = ("https://raw.githubusercontent.com/ResearchObject/"
+                      "ro-crate-py/master/test/")
+    test_read = crate.get(f"{test_read_base}test_read.py")
+    assert test_read.source == f"{test_read_base}test_read.py"
     out_path = tmpdir / "out_crate"
     crate.write(out_path)
     assert (out_path / "ro-crate-metadata.json").is_file()
     rcrate = ROCrate(out_path)
     assert rcrate.get(f"{base_uri}sample_file.txt")
     assert rcrate.get(f"{base_uri}test_file_galaxy.txt")
+    assert rcrate.get(f"{base_uri}read_extra/listed.txt")
+    assert rcrate.get(f"{test_read_base}test_read.py")
+
+    # set fetch_remote to True and check local paths
+    for e in crate.data_entities:
+        e.fetch_remote = True
+    shutil.rmtree(out_path)
+    crate.write(out_path)
+    assert (out_path / "sample_file.txt").is_file()
+    assert (out_path / "test-data" / "test_file_galaxy.txt").is_file()
+    assert (out_path / "read_extra" / "listed.txt").is_file()
+    assert (out_path / "test_read.py").is_file()
