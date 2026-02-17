@@ -177,6 +177,25 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
             assert "sdDatePublished" in props
 
 
+def test_local_path(test_data_dir, tmpdir):
+    crate = ROCrate()
+    url = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+           "master/test/test-data/sample_file.txt")
+    sample_file = crate.add_file(url)
+    assert sample_file.id == url
+    sample_file["localPath"] = "test-data/sample_file.txt"
+    sample_file.fetch_remote = True
+    test_file_galaxy = crate.add_file(test_data_dir / "test_file_galaxy.txt")
+    assert test_file_galaxy.id == "test_file_galaxy.txt"
+    test_file_galaxy["localPath"] = "foo/bar.txt"
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    assert (out_path / "test-data" / "sample_file.txt").is_file()
+    assert not (out_path / "sample_file.txt").exists()
+    assert not (out_path / "foo" / "bar.txt").exists()
+    assert (out_path / "test_file_galaxy.txt").is_file()
+
+
 def test_file_uri(tmpdir):
     f_name = uuid.uuid4().hex
     f_path = (tmpdir / f_name).resolve()
