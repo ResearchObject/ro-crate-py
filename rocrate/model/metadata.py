@@ -88,7 +88,7 @@ class Metadata(File):
 
     def stream(self, chunk_size=8192):
         content = self.generate()
-        yield self.id, str.encode(json.dumps(content, indent=4, sort_keys=True), encoding='utf-8')
+        yield self.id, str.encode(json.dumps(content, indent=4, sort_keys=True, ensure_ascii=False), encoding='utf-8')
 
     def _has_writeable_stream(self):
         return True
