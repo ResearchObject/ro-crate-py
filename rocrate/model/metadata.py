@@ -9,6 +9,7 @@
 # Copyright 2024-2026 National Institute of Informatics (NII), JP
 # Copyright 2025-2026 Senckenberg Society for Nature Research (SGN), DE
 # Copyright 2025-2026 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
+# Copyright 2026 Spanish National Research Council (CSIC), ES
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -88,7 +89,7 @@ class Metadata(File):
 
     def stream(self, chunk_size=8192):
         content = self.generate()
-        yield self.id, str.encode(json.dumps(content, indent=4, sort_keys=True), encoding='utf-8')
+        yield self.id, str.encode(json.dumps(content, indent=4, sort_keys=True, ensure_ascii=False), encoding='utf-8')
 
     def _has_writeable_stream(self):
         return True

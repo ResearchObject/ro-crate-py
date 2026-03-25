@@ -7,6 +7,7 @@
 # Copyright 2024-2026 National Institute of Informatics (NII), JP
 # Copyright 2025-2026 Senckenberg Society for Nature Research (SGN), DE
 # Copyright 2025-2026 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
+# Copyright 2026 Spanish National Research Council (CSIC), ES
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -716,3 +717,45 @@ def test_write_version(tmpdir, helpers, version):
     with open(out_path / basename, "rt") as f:
         data = json.load(f)
     assert data["@context"] == f"https://w3id.org/ro/crate/{version}/context"
+
+
+def test_metadata_utf8_encoding(tmpdir, helpers):
+    crate = ROCrate()
+    crate_name = 'Test crate with non-ASCII characters'
+    crate.name = crate_name
+    creator_name = 'Orviz Fernández'
+    creator_affiliation = 'Consejo Superior de Investigaciones Científicas (CSIC)'
+    non_ascii_person_name = Person(
+        crate,
+        "https://orcid.org/0000-0000-0000-0000",
+        {
+            'name': creator_name,
+            'affiliation': creator_affiliation
+        }
+    )
+    crate.add(non_ascii_person_name)
+
+    out_path = tmpdir / 'ro_crate_out'
+    out_path.mkdir()
+    crate.write(out_path)
+
+    metadata_path = out_path / helpers.METADATA_FILE_NAME
+    assert metadata_path.exists()
+
+    with open(metadata_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    assert creator_name in content, (
+        f"Creator name '{creator_name}' as found in {helpers.METADATA_FILE_NAME} does not match with the real name: "
+        "not found as raw UTF-8 text or incorrectly encoded"
+    )
+    assert creator_affiliation in content, (
+        f"Creator affiliation '{creator_affiliation}' as found in {helpers.METADATA_FILE_NAME} "
+        "does not match with the real organization name: not found as raw UTF-8 text or incorrectly encoded"
+    )
+    import re
+    unicode_escape_pattern = r"\\u[0-9a-fA-F]{4}"
+    escape_sequences_match = re.findall(unicode_escape_pattern, content)
+    assert not escape_sequences_match, (
+        f"Found Unicode escape sequences: {escape_sequences_match}: expected raw UTF-8 characters."
+    )
