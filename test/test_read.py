@@ -7,6 +7,7 @@
 # Copyright 2024-2026 National Institute of Informatics (NII), JP
 # Copyright 2025-2026 Senckenberg Society for Nature Research (SGN), DE
 # Copyright 2025-2026 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
+# Copyright 2026 Spanish National Research Council (CSIC), ES
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
