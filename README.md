@@ -341,47 +341,6 @@ sample_file = read_crate.dereference(f"{base}sample_file.txt")
 test_file_galaxy = read_crate.dereference(f"{base}test_file_galaxy.txt")
 ```
 
-Suppose you now want to save the crate to the local file system. You could use `write_detached` as shown above:
-
-```python
-read_crate.write_detached("/tmp/detached-ro-crate-metadata.json")
-```
-
-but you could also write the crate as attached, after tweaking the data entities a bit:
-
-```python
-sample_file.fetch_remote = True
-test_file_galaxy.fetch_remote = True
-read_crate.write("/tmp/crate")
-```
-
-This leads to the following structure on the file system:
-
-```
-/tmp/crate/
-|-- ro-crate-metadata.json
-|-- sample_file.txt
-`-- test-data
-    `-- test_file_galaxy.txt
-```
-
-Note that `test_file_galaxy` was written as `test-data/test-file-galaxy.txt` relative to the crate root: this is due to the fact that the original crate specifies `"localPath": "test-data/test-file-galaxy.txt"`. In contrast, `localPath` is not specified for the other file, so the library applies the default behavior of using the basename as the relative path. This can be changed by setting `localPath` on the file entity:
-
-```python
-sample_file["localPath"] = "test-data/sample_file.txt"
-read_crate.write("/tmp/crate2")
-```
-
-Which leads to:
-
-```
-/tmp/crate2/
-|-- ro-crate-metadata.json
-`-- test-data
-    |-- sample_file.txt
-    `-- test_file_galaxy.txt
-```
-
 Another way to read a detached crate is to pass a JSON dictionary with the RO-Crate metadata directly to `ROCrate`. For instance:
 
 ```python
