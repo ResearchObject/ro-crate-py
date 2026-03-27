@@ -121,17 +121,23 @@ class Dataset(FileOrDir):
                 with urlopen(self.source) as _:
                     self._jsonld['sdDatePublished'] = iso_now()
         else:
-            base = self.source.rstrip("/")
+            relative_dest_uri = self.get("localPath") or self.id
+            if is_url(relative_dest_uri):
+                if relative_dest_uri.startswith(self.crate.root_dataset.id):
+                    relative_dest_uri = relative_dest_uri[len(self.crate.root_dataset.id):]
+                else:
+                    relative_dest_uri = relative_dest_uri.rsplit("/", 1)[-1]
+                self["localPath"] = relative_dest_uri
+            out_dir_path = Path(unquote(relative_dest_uri))
+
             for entry in self._jsonld.get("hasPart", []):
                 try:
                     part = entry["@id"]
-                    if is_url(part) or part.startswith("/"):
-                        raise RuntimeError(f"'{self.source}': part '{part}' is not a relative path")
-                    part_uri = f"{base}/{part}"
-                    rel_out_path = Path(self.id) / part
-
+                    if not is_url(part):
+                        raise RuntimeError(f"'{self.source}' is a URL, but part '{part}' is not a URL")
+                    rel_out_path = out_dir_path / part.rsplit("/", 1)[-1]
                     is_empty = True
-                    with urlopen(part_uri) as response:
+                    with urlopen(part) as response:
                         while chunk := response.read(chunk_size):
                             is_empty = False
                             yield str(rel_out_path), chunk

@@ -281,8 +281,8 @@ def test_remote_dir(tmpdir, helpers, fetch_remote, validate_url):
     relpath = "pub/misc/errorpages/"
     properties = {
         "hasPart": [
-            {"@id": "404.html"},
-            {"@id": "500.html"},
+            {"@id": "https://ftp.mozilla.org/pub/misc/errorpages/404.html"},
+            {"@id": "https://ftp.mozilla.org/pub/misc/errorpages/500.html"},
         ],
     }
     kw = {
@@ -305,7 +305,8 @@ def test_remote_dir(tmpdir, helpers, fetch_remote, validate_url):
         out_dataset = out_crate.dereference(relpath)
         assert (out_path / relpath).is_dir()
         for entry in properties["hasPart"]:
-            assert (out_path / relpath / entry["@id"]).is_file()
+            basename = entry["@id"].rsplit("/", 1)[-1]
+            assert (out_path / relpath / basename).is_file()
     else:
         out_dataset = out_crate.dereference(url)
         assert not (out_path / relpath).exists()

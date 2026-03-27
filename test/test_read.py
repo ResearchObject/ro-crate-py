@@ -1096,3 +1096,48 @@ def test_from_file_detached(test_data_dir, tmpdir):
     assert (out_path / "test-data" / "test_file_galaxy.txt").is_file()
     assert (out_path / "read_extra" / "listed.txt").is_file()
     assert (out_path / "test_read.py").is_file()
+
+
+def test_read_remote_dir(tmpdir):
+    base_uri = "https://ftp.mozilla.org/pub/"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": base_uri},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}
+            },
+            {
+                "@id": base_uri,
+                "@type": "Dataset",
+                "datePublished": "2026-02-19",
+                "hasPart": [{"@id": f"{base_uri}misc/errorpages/"}]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/",
+                "@type": "Dataset",
+                "hasPart": [
+                    {"@id": f"{base_uri}misc/errorpages/404.html"},
+                    {"@id": f"{base_uri}misc/errorpages/500.html"}
+                ]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/404.html",
+                "@type": "File"
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/500.html",
+                "@type": "File"
+            }
+        ]
+    }
+    crate = ROCrate(metadata)
+    errorpages = crate.get(f"{base_uri}misc/errorpages/")
+    errorpages.fetch_remote = True
+    out_path = tmpdir / 'out_crate'
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert (out_path / "misc" / "errorpages" / "404.html").is_file()
+    assert (out_path / "misc" / "errorpages" / "500.html").is_file()
