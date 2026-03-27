@@ -150,7 +150,7 @@ class ROCrate():
             self.mode = Mode.INIT
             if isinstance(source, dict):
                 raise ValueError("parameter 'init' is not compatible with a dict source")
-            self.__init_from_tree(source, gen_preview=gen_preview)
+            self.__init_from_tree(source, gen_preview=gen_preview, version=version)
         else:
             self.mode = Mode.READ
             source = self.__read(source, gen_preview=gen_preview)

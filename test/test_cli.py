@@ -121,6 +121,23 @@ def test_cli_init(test_data_dir, helpers, monkeypatch, cwd, gen_preview):
     assert json_entities["sort-and-change-case.ga"]["@type"] == "File"
 
 
+@pytest.mark.parametrize("version", ["1.0", "1.1"])
+def test_cli_init_version(test_data_dir, helpers, version):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    metadata_path = crate_dir / helpers.METADATA_FILE_NAME
+    metadata_path.unlink()
+    args = ["init", "-c", str(crate_dir), "--crate-version", version]
+
+    CliRunner().invoke(cli, args)
+
+    # The metadata filename changed from `*.jsonld` to `*.json`.
+    # Handling earlier versions, we must be flexible here.
+    # The `next(...)` call might fail with `StopIteration` if the file is missing.
+    # But if so, this is just another test failure.
+    with next(metadata_path.parent.glob(f"{str(metadata_path.name)}*")).open("r") as file:
+        assert json.load(file)["@context"] == f"https://w3id.org/ro/crate/{version}/context"
+
+
 def test_cli_init_exclude(test_data_dir, helpers):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     (crate_dir / helpers.METADATA_FILE_NAME).unlink()
