@@ -73,7 +73,10 @@ class File(FileOrDir):
 
     def write(self, base_path):
         if self.fetch_remote and is_url(str(self.source)):
-            relative_dest_uri = self.get("localPath") or self.id
+            if is_url(self.id):
+                relative_dest_uri = self.get("localPath") or self.id
+            else:
+                relative_dest_uri = self.id
             if is_url(relative_dest_uri):
                 if relative_dest_uri.startswith(self.crate.root_dataset.id):
                     relative_dest_uri = relative_dest_uri[len(self.crate.root_dataset.id):]

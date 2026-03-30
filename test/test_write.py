@@ -197,6 +197,40 @@ def test_local_path(test_data_dir, tmpdir):
     assert (out_path / "test_file_galaxy.txt").is_file()
 
 
+def test_local_path_vs_relative_id(test_data_dir, tmpdir):
+    crate = ROCrate()
+    url = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+           "master/test/test-data/sample_file.txt")
+    sample_file = crate.add_file(url, dest_path="examples/sample_file.txt")
+    assert sample_file.id == "examples/sample_file.txt"
+    sample_file["localPath"] = "test-data/sample_file.txt"
+    sample_file.fetch_remote = True
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    assert (out_path / "examples" / "sample_file.txt").is_file()
+    assert not (out_path / "test-data" / "sample_file.txt").exists()
+
+
+def test_local_path_vs_relative_id_dataset(test_data_dir, tmpdir):
+    crate = ROCrate()
+    f1 = crate.add_file("https://ftp.mozilla.org/pub/misc/errorpages/404.html")
+    f2 = crate.add_file("https://ftp.mozilla.org/pub/misc/errorpages/500.html")
+    dataset = crate.add_dataset(
+        "https://ftp.mozilla.org/pub/misc/errorpages/",
+        dest_path="errorpages/",
+        fetch_remote=True,
+    )
+    assert dataset.id == "errorpages/"
+    dataset["hasPart"] = [f1, f2]
+    dataset["localPath"] = "mozilla_error_pages"
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    assert (out_path / "errorpages").is_dir()
+    assert (out_path / "errorpages" / "404.html").is_file()
+    assert (out_path / "errorpages" / "500.html").is_file()
+    assert not (out_path / "mozilla_error_pages").exists()
+
+
 def test_file_uri(tmpdir):
     f_name = uuid.uuid4().hex
     f_path = (tmpdir / f_name).resolve()
