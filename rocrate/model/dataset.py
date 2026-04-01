@@ -31,7 +31,7 @@ from urllib.request import urlopen
 from urllib.parse import unquote
 
 from .file_or_dir import FileOrDir
-from ..utils import is_url, iso_now, Mode
+from ..utils import as_list, is_url, iso_now, Mode
 
 
 class Dataset(FileOrDir):
@@ -140,6 +140,11 @@ class Dataset(FileOrDir):
                     if not is_url(part):
                         raise RuntimeError(f"'{self.source}' is a URL, but part '{part}' is not a URL")
                     rel_out_path = out_dir_path / part.rsplit("/", 1)[-1]
+                    # override with file localPath if set
+                    if part_file := self.crate.get(part):
+                        if "File" in as_list(part_file.type):
+                            if file_local_path := part_file.get("localPath"):
+                                rel_out_path = file_local_path
                     is_empty = True
                     with urlopen(part) as response:
                         while chunk := response.read(chunk_size):

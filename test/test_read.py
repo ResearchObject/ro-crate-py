@@ -1142,3 +1142,52 @@ def test_read_remote_dir(tmpdir):
     assert (out_path / "ro-crate-metadata.json").is_file()
     assert (out_path / "misc" / "errorpages" / "404.html").is_file()
     assert (out_path / "misc" / "errorpages" / "500.html").is_file()
+
+
+def test_read_remote_dir_local_path(tmpdir):
+    base_uri = "https://ftp.mozilla.org/pub/"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": base_uri},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}
+            },
+            {
+                "@id": base_uri,
+                "@type": "Dataset",
+                "datePublished": "2026-02-19",
+                "hasPart": [{"@id": f"{base_uri}misc/errorpages/"}]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/",
+                "@type": "Dataset",
+                "localPath": "errorpages/",
+                "hasPart": [
+                    {"@id": f"{base_uri}misc/errorpages/404.html"},
+                    {"@id": f"{base_uri}misc/errorpages/500.html"}
+                ]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/404.html",
+                "@type": "File"
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/500.html",
+                "@type": "File",
+                "localPath": "errorpages/500/500.html"
+            }
+        ]
+    }
+    crate = ROCrate(metadata)
+    errorpages = crate.get(f"{base_uri}misc/errorpages/")
+    errorpages.fetch_remote = True
+    out_path = tmpdir / 'out_crate'
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert not (out_path / "misc").exists()
+    assert (out_path / "errorpages" / "404.html").is_file()
+    assert not (out_path / "errorpages" / "500.html").exists()
+    assert (out_path / "errorpages" / "500" / "500.html").is_file()
