@@ -140,10 +140,12 @@ class Dataset(FileOrDir):
                     if not is_url(part):
                         raise RuntimeError(f"'{self.source}' is a URL, but part '{part}' is not a URL")
                     rel_out_path = out_dir_path / part.rsplit("/", 1)[-1]
-                    # override with file localPath if set
-                    if part_file := self.crate.get(part):
-                        if "File" in as_list(part_file.type):
-                            if file_local_path := part_file.get("localPath"):
+                    if part_entity := self.crate.get(part):
+                        if "Dataset" in as_list(part_entity.type):
+                            continue
+                        # override with file localPath if set
+                        if "File" in as_list(part_entity.type):
+                            if file_local_path := part_entity.get("localPath"):
                                 rel_out_path = file_local_path
                     is_empty = True
                     with urlopen(part) as response:
