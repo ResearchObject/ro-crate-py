@@ -960,6 +960,22 @@ def test_from_uri(tmpdir, source_base):
     assert rcrate.preview.id == "ro-crate-preview.html"
     assert rcrate.get(test_fn)
     assert rcrate.get(remote_f_uri)
+
+
+@pytest.mark.parametrize("source_base", [
+    "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
+    f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems
+])
+def test_from_uri_fetch_remote(tmpdir, source_base):
+    source = f"{source_base}test-data/read_crate/ro-crate-metadata.json"
+    base_uri = f"{source_base}test-data/read_crate/"
+    # this is an absolute URI in the metadata, note it's outside the crate
+    remote_f_uri = ("https://raw.githubusercontent.com/ResearchObject/"
+                    "ro-crate-py/master/test/test-data/sample_file.txt")
+    test_fn = "test_file_galaxy.txt"
+    crate = ROCrate(source)
+    remote_f = crate.get(remote_f_uri)
+    test_f = crate.get(test_fn)
     # now set some fetch_remote to True
     crate.preview.fetch_remote = True
     test_f.fetch_remote = True
@@ -967,7 +983,7 @@ def test_from_uri(tmpdir, source_base):
     assert remote_f.id == remote_f_uri
     # remote_f.id is the full URI. Check that the destination path is
     # the output dir / remote_f.id minus the root dataset id.
-    shutil.rmtree(out_path)
+    out_path = tmpdir / "out_crate"
     crate.write(out_path)
     assert (out_path / "sample_file.txt").is_file()
     # check that localPath overrides the default destination
@@ -1015,20 +1031,31 @@ def test_from_uri_detached(tmpdir, source_base):
     rcrate = ROCrate(out_path)
     assert rcrate.get(f"{base_uri}sample_file.txt")
     assert rcrate.get(f"{base_uri}test_file_galaxy.txt")
+    license = rcrate.get("http://spdx.org/licenses/CC0-1.0")
+    assert set(rcrate.contextual_entities) == {license}
+
+
+@pytest.mark.parametrize("source_base", [
+    "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
+    f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems
+])
+def test_from_uri_detached_fetch_remote(tmpdir, source_base):
+    source = f"{source_base}test-data/detached-ro-crate-metadata.json"
+    base_uri = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+                "master/test/test-data/")
+    crate = ROCrate(source)
+    test_file_galaxy = crate.get(f"{base_uri}test_file_galaxy.txt")
     # now set fetch_remote to True
     test_file_galaxy.fetch_remote = True
-    shutil.rmtree(out_path)
+    assert test_file_galaxy.get("localPath") == "test-data/test_file_galaxy.txt"
+    out_path = tmpdir / "out_crate"
     crate.write(out_path)
     assert (out_path / "test-data" / "test_file_galaxy.txt").is_file()
     rcrate = ROCrate(out_path)
-    rsample_file = rcrate.get(f"{base_uri}sample_file.txt")
-    assert rsample_file
     rtest_file_galaxy = rcrate.get(f"{base_uri}test_file_galaxy.txt")
     assert rtest_file_galaxy
     assert rtest_file_galaxy.get("contentUrl") == f"{base_uri}test_file_galaxy.txt"
     assert rtest_file_galaxy.get("localPath") == "test-data/test_file_galaxy.txt"
-    license = rcrate.get("http://spdx.org/licenses/CC0-1.0")
-    assert set(rcrate.contextual_entities) == {license}
 
 
 def test_from_file(test_data_dir, tmpdir):
