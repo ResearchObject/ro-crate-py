@@ -82,7 +82,6 @@ class File(FileOrDir):
                     relative_dest_uri = relative_dest_uri[len(self.crate.root_dataset.id):]
                 else:
                     relative_dest_uri = relative_dest_uri.rsplit("/", 1)[-1]
-                self["localPath"] = relative_dest_uri
         else:
             relative_dest_uri = self.id
         out_file_path = Path(base_path) / unquote(relative_dest_uri)

@@ -131,7 +131,6 @@ class Dataset(FileOrDir):
                     relative_dest_uri = relative_dest_uri[len(self.crate.root_dataset.id):]
                 else:
                     relative_dest_uri = relative_dest_uri.rsplit("/", 1)[-1]
-                self["localPath"] = relative_dest_uri
             out_dir_path = Path(unquote(relative_dest_uri))
 
             for entry in self._jsonld.get("hasPart", []):
