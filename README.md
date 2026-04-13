@@ -293,6 +293,68 @@ article = crate.dereference("paper.pdf")
 
 ## Advanced features
 
+### Detached crates
+
+[RO-Crate 1.2](https://www.researchobject.org/ro-crate/whats-changed-in-1-2) introduces the concept of _detached_ RO-Crates, which have no defined root directory: in detached crates, the metadata is accessed independently, for instance via an API or from a standalone metadata file. By contrast, "traditional" crates that describe a payload of files and directories contained in a root directory are called _attached_.
+
+Both detached and attached crates can have a root data entity with an absolute URI as `@id`. To create an RO-Crate whose root data entity `@id` is different from the default `./`, use the `root_dataset_id` argument in the constructor:
+
+```python
+from rocrate.rocrate import ROCrate
+
+url = "http://example.com/crate/"
+crate = ROCrate(root_dataset_id=url)
+```
+
+In detached crates, _all_ data entities must be web-based, i.e., have an absolute URI as `@id`:
+
+```python
+file_1 = crate.add_file(f"{url}file_1")  # http://example.com/crate/file_1
+```
+
+The [recommended way](https://www.researchobject.org/ro-crate/specification/1.2/structure.html#types-of-ro-crate) to store a detached crate on disk is to write a single metadata file called `${prefix}-ro-crate-metadata.json`, where `${prefix}` is a variable. The library supports this through the `write_detached` method, which takes as argument an arbitrary path (a warning will be issued if the path does not follow the above pattern):
+
+```python
+crate.write_detached("/tmp/example-ro-crate-metadata.json")
+```
+
+One of the ways to consume a detached crate is to read the metadata from a local file. For instance, to read the crate that we just wrote:
+
+```python
+read_crate = ROCrate("/tmp/example-ro-crate-metadata.json")
+read_file_1 = read_crate.dereference(f"{url}file_1")
+```
+
+This also works with a local `file://` URI:
+
+```python
+read_crate = ROCrate("file:///tmp/example-ro-crate-metadata.json")
+```
+
+and with a remote URI:
+
+```python
+base = "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/"
+read_crate = ROCrate(f"{base}detached-ro-crate-metadata.json")
+assert read_crate.root_dataset.id == base
+sample_file = read_crate.dereference(f"{base}sample_file.txt")
+test_file_galaxy = read_crate.dereference(f"{base}test_file_galaxy.txt")
+```
+
+Another way to read a detached crate is to pass a JSON dictionary with the RO-Crate metadata directly to `ROCrate`. For instance:
+
+```python
+import json
+from rocrate.rocrate import ROCrate
+
+with open("/tmp/example-ro-crate-metadata.json") as f:
+    metadata = json.load(f)
+crate = ROCrate(metadata)
+```
+
+In the above example we read the metadata from a local file, but you could get it from an API endpoint or any other source.
+
+
 ### Subcrates
 
 An RO-Crate can contain one or more nested RO-Crates. For instance, consider the following layout:

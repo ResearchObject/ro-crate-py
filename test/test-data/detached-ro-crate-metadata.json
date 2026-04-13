@@ -26,6 +26,12 @@
                 },
                 {
                     "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/test_file_galaxy.txt"
+                },
+                {
+                    "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/read_extra/listed.txt"
+                },
+                {
+                    "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test_read.py"
                 }
             ]
         },
@@ -39,6 +45,14 @@
             "@type": "File",
             "name": "Test data",
             "localPath": "test-data/test_file_galaxy.txt"
+        },
+        {
+            "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/read_extra/listed.txt",
+            "@type": "File"
+        },
+        {
+            "@id": "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test_read.py",
+            "@type": "File"
         },
         {
             "@id": "http://spdx.org/licenses/CC0-1.0",

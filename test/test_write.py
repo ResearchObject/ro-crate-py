@@ -178,6 +178,59 @@ def test_remote_uri(tmpdir, helpers, fetch_remote, validate_url, to_zip):
             assert "sdDatePublished" in props
 
 
+def test_local_path(test_data_dir, tmpdir):
+    crate = ROCrate()
+    url = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+           "master/test/test-data/sample_file.txt")
+    sample_file = crate.add_file(url)
+    assert sample_file.id == url
+    sample_file["localPath"] = "test-data/sample_file.txt"
+    sample_file.fetch_remote = True
+    test_file_galaxy = crate.add_file(test_data_dir / "test_file_galaxy.txt")
+    assert test_file_galaxy.id == "test_file_galaxy.txt"
+    test_file_galaxy["localPath"] = "foo/bar.txt"
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    assert (out_path / "test-data" / "sample_file.txt").is_file()
+    assert not (out_path / "sample_file.txt").exists()
+    assert not (out_path / "foo" / "bar.txt").exists()
+    assert (out_path / "test_file_galaxy.txt").is_file()
+
+
+def test_local_path_vs_relative_id(test_data_dir, tmpdir):
+    crate = ROCrate()
+    url = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+           "master/test/test-data/sample_file.txt")
+    sample_file = crate.add_file(url, dest_path="examples/sample_file.txt")
+    assert sample_file.id == "examples/sample_file.txt"
+    sample_file["localPath"] = "test-data/sample_file.txt"
+    sample_file.fetch_remote = True
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    assert (out_path / "examples" / "sample_file.txt").is_file()
+    assert not (out_path / "test-data" / "sample_file.txt").exists()
+
+
+def test_local_path_vs_relative_id_dataset(test_data_dir, tmpdir):
+    crate = ROCrate()
+    f1 = crate.add_file("https://ftp.mozilla.org/pub/misc/errorpages/404.html")
+    f2 = crate.add_file("https://ftp.mozilla.org/pub/misc/errorpages/500.html")
+    dataset = crate.add_dataset(
+        "https://ftp.mozilla.org/pub/misc/errorpages/",
+        dest_path="errorpages/",
+        fetch_remote=True,
+    )
+    assert dataset.id == "errorpages/"
+    dataset["hasPart"] = [f1, f2]
+    dataset["localPath"] = "mozilla_error_pages"
+    out_path = tmpdir / "ro_crate_out"
+    crate.write(out_path)
+    assert (out_path / "errorpages").is_dir()
+    assert (out_path / "errorpages" / "404.html").is_file()
+    assert (out_path / "errorpages" / "500.html").is_file()
+    assert not (out_path / "mozilla_error_pages").exists()
+
+
 def test_file_uri(tmpdir):
     f_name = uuid.uuid4().hex
     f_path = (tmpdir / f_name).resolve()
@@ -263,8 +316,8 @@ def test_remote_dir(tmpdir, helpers, fetch_remote, validate_url):
     relpath = "pub/misc/errorpages/"
     properties = {
         "hasPart": [
-            {"@id": "404.html"},
-            {"@id": "500.html"},
+            {"@id": "https://ftp.mozilla.org/pub/misc/errorpages/404.html"},
+            {"@id": "https://ftp.mozilla.org/pub/misc/errorpages/500.html"},
         ],
     }
     kw = {
@@ -287,7 +340,8 @@ def test_remote_dir(tmpdir, helpers, fetch_remote, validate_url):
         out_dataset = out_crate.dereference(relpath)
         assert (out_path / relpath).is_dir()
         for entry in properties["hasPart"]:
-            assert (out_path / relpath / entry["@id"]).is_file()
+            basename = entry["@id"].rsplit("/", 1)[-1]
+            assert (out_path / relpath / basename).is_file()
     else:
         out_dataset = out_crate.dereference(url)
         assert not (out_path / relpath).exists()
@@ -717,6 +771,75 @@ def test_write_version(tmpdir, helpers, version):
     with open(out_path / basename, "rt") as f:
         data = json.load(f)
     assert data["@context"] == f"https://w3id.org/ro/crate/{version}/context"
+
+
+@pytest.mark.parametrize("to_zip", [False, True])
+def test_detached_creation(tmpdir, to_zip):
+    base_uri = "http://example.com/crate/"
+    orcid = "https://orcid.org/0000-0002-1825-0097"
+    name = "Josiah Carberry"
+    crate = ROCrate(root_dataset_id=base_uri)
+    assert crate.source is None
+    assert crate.metadata.source is None
+    assert crate.root_dataset.id == base_uri
+    assert crate.metadata.id == "ro-crate-metadata.json"
+    assert crate.metadata["about"] is crate.root_dataset
+    crate.add_dataset(f"{base_uri}d1")
+    crate.add_file(f"{base_uri}f1")
+    p = crate.add(Person(crate, orcid, properties={"name": name}))
+    crate.root_dataset["creator"] = p
+
+    out_path = tmpdir / "ro_crate_out"
+    if to_zip:
+        zip_path = tmpdir / 'ro_crate_out.zip'
+        crate.write_zip(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(out_path)
+    else:
+        crate.write(out_path)
+
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    rcrate = ROCrate(out_path)
+    # this crate is attached, even though all its data entities are web-based
+    assert rcrate.source == out_path
+    assert rcrate.metadata.source == "ro-crate-metadata.json"
+    assert rcrate.root_dataset.id == base_uri
+    assert rcrate.metadata.id == "ro-crate-metadata.json"
+    assert rcrate.metadata["about"] is rcrate.root_dataset
+    assert rcrate.get(f"{base_uri}d1")
+    assert rcrate.get(f"{base_uri}f1")
+    rp = rcrate.get(orcid)
+    assert rp["name"] == name
+
+
+def test_detached_creation_write_detached(tmpdir):
+    base_uri = "http://example.com/crate/"
+    orcid = "https://orcid.org/0000-0002-1825-0097"
+    name = "Josiah Carberry"
+    crate = ROCrate(root_dataset_id=base_uri)
+    crate.add_dataset(f"{base_uri}d1")
+    crate.add_file(f"{base_uri}f1")
+    crate.add(Person(crate, orcid, properties={"name": name}))
+    detached_md_path = tmpdir / "example-ro-crate-metadata.json"
+    crate.write_detached(detached_md_path)
+    assert detached_md_path.is_file()
+    rcrate = ROCrate(detached_md_path)
+    assert rcrate.source == detached_md_path
+    assert rcrate.metadata.source == "ro-crate-metadata.json"
+    assert rcrate.root_dataset.id == base_uri
+    assert rcrate.metadata.id == "ro-crate-metadata.json"
+    assert rcrate.metadata["about"] is rcrate.root_dataset
+    assert rcrate.get(f"{base_uri}d1")
+    assert rcrate.get(f"{base_uri}f1")
+    rp = rcrate.get(orcid)
+    assert rp["name"] == name
+
+
+def test_detached_creation_exceptions():
+    with pytest.raises(ValueError):
+        ROCrate(root_dataset_id="foo/bar")
+    with pytest.raises(ValueError):
+        ROCrate(root_dataset_id="/foo/bar")
 
 
 def test_metadata_utf8_encoding(tmpdir, helpers):

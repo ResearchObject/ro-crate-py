@@ -28,6 +28,7 @@ from pathlib import Path
 
 from jinja2 import Template
 from .file import File
+from ..utils import is_url
 
 
 class Preview(File):
@@ -99,6 +100,8 @@ class Preview(File):
             yield self.id, str.encode(self.generate_html(), encoding='utf-8')
 
     def _has_writeable_stream(self):
+        if is_url(str(self.source)):
+            return self.fetch_remote
         return True
 
     def write(self, dest_base):

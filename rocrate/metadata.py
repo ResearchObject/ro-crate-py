@@ -22,9 +22,20 @@
 # limitations under the License.
 
 import json
+import re
 import warnings
+import urllib.request
+
+import requests
 
 from .model.metadata import BASENAME, LEGACY_BASENAME
+from .utils import is_url
+
+# https://www.researchobject.org/ro-crate/specification/1.2/structure
+#   "If stored in a file... the filename SHOULD be..."
+# https://www.researchobject.org/ro-crate/specification/1.2/data-entities
+#   "It is NOT RECOMMENDED to resolve a relative root identifier..."
+MD_PATTERN = re.compile(r".*[/-]ro-crate-metadata.json(ld)?$")
 
 
 def read_metadata(metadata_path):
@@ -36,6 +47,16 @@ def read_metadata(metadata_path):
     """
     if isinstance(metadata_path, dict):
         metadata = metadata_path
+    elif is_url(str(metadata_path)):
+        if not MD_PATTERN.match(metadata_path):
+            warnings.warn(f"URI {metadata_path} should follow the pattern {MD_PATTERN.pattern!r}")
+        if metadata_path.startswith("file:"):
+            with urllib.request.urlopen(metadata_path) as resp:
+                metadata = json.load(resp)
+        else:
+            with requests.get(metadata_path) as resp:
+                resp.raise_for_status()
+                metadata = resp.json()
     else:
         with open(metadata_path, 'r', encoding='utf-8') as f:
             metadata = json.load(f)
@@ -69,48 +90,8 @@ def find_root_entity_id(entities):
     Return a tuple of the corresponding identifiers (descriptor, root).
     If the entities are not found, raise KeyError. If they are found,
     but they don't satisfy the required constraints, raise ValueError.
-
-    In the general case, the metadata file descriptor id can be an
-    absolute URI whose last path segment is "ro-crate-metadata.json[ld]".
-    Since there can be more than one such id in the crate, we need to
-    choose among the corresponding (descriptor, root) entity pairs. First, we
-    exclude those that don't satisfy other constraints, such as the
-    descriptor entity being of type CreativeWork, etc.; if this doesn't
-    leave us with a single pair, we try to pick one with a
-    heuristic. Suppose we are left with the (m1, r1) and (m2, r2) pairs:
-    if r1 is the actual root of this crate, then m2 and r2 are regular
-    files in it, and as such they must appear in r1's hasPart; r2,
-    however, is not required to have a hasPart property listing other
-    files. Thus, we look for a pair whose root entity "contains" all
-    descriptor entities from other pairs. If there is no such pair, or there
-    is more than one, we just return an arbitrary pair.
-
     """
     descriptor = entities.get(BASENAME, entities.get(LEGACY_BASENAME))
-    if descriptor:
-        return _check_descriptor(descriptor, entities)
-    candidates = []
-    for id_, e in entities.items():
-        basename = id_.rsplit("/", 1)[-1]
-        if basename == BASENAME or basename == LEGACY_BASENAME:
-            try:
-                candidates.append(_check_descriptor(e, entities))
-            except ValueError:
-                pass
-    if not candidates:
+    if not descriptor:
         raise KeyError("Metadata file descriptor not found")
-    elif len(candidates) == 1:
-        return candidates[0]
-    else:
-        warnings.warn("Multiple metadata file descriptors, will pick one with a heuristic")
-        descriptor_ids = set(_[0] for _ in candidates)
-        for m_id, r_id in candidates:
-            try:
-                root = entities[r_id]
-                part_ids = set(_["@id"] for _ in root["hasPart"])
-            except KeyError:
-                continue
-            if part_ids >= descriptor_ids - {m_id}:
-                # if True for more than one candidate, this pick is arbitrary
-                return m_id, r_id
-        return candidates[0]  # fall back to arbitrary pick
+    return _check_descriptor(descriptor, entities)

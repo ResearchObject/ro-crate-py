@@ -124,7 +124,8 @@ class ROCrate():
                  gen_preview=False,
                  init=False, exclude=None,
                  version=DEFAULT_VERSION,
-                 load_subcrates=False):
+                 load_subcrates=False,
+                 root_dataset_id=None):
         self.mode = None
         self.source = source
         self.exclude = exclude
@@ -139,7 +140,12 @@ class ROCrate():
             self.add(Preview(self))
         if not source:
             self.mode = Mode.CREATE
-            self.add(RootDataset(self), Metadata(self, version=version))
+            if root_dataset_id is not None:
+                if root_dataset_id != "./" and not is_url(root_dataset_id):
+                    raise ValueError("the root dataset id must be either ./ or an absolute URI")
+            rde = RootDataset(self, root_dataset_id)
+            md = Metadata(self, properties={"about": rde}, version=version)
+            self.add(rde, md)
         elif init:
             self.mode = Mode.INIT
             if isinstance(source, dict):
@@ -171,7 +177,7 @@ class ROCrate():
                     self.add(Preview(self, source))
 
     def __read(self, source, gen_preview=False):
-        if isinstance(source, dict):
+        if isinstance(source, dict) or is_url(str(source)):
             metadata_path = source
         else:
             source = Path(source)
@@ -183,11 +189,14 @@ class ROCrate():
                 with zipfile.ZipFile(source, "r") as zf:
                     zf.extractall(zip_path)
                 source = Path(zip_path)
-            metadata_path = source / BASENAME
-            if not metadata_path.is_file():
-                metadata_path = source / LEGACY_BASENAME
-            if not metadata_path.is_file():
-                raise ValueError(f"Not a valid RO-Crate: missing {BASENAME}")
+            if source.is_file():
+                metadata_path = source
+            else:
+                metadata_path = source / BASENAME
+                if not metadata_path.is_file():
+                    metadata_path = source / LEGACY_BASENAME
+                if not metadata_path.is_file():
+                    raise ValueError(f"Not a valid RO-Crate: missing {BASENAME}")
         _, entities = read_metadata(metadata_path)
         self.__read_data_entities(entities, source, gen_preview)
         self.__read_contextual_entities(entities)
@@ -196,6 +205,8 @@ class ROCrate():
     def __read_data_entities(self, entities, source, gen_preview):
         if isinstance(source, dict):
             source = Path("")
+        elif is_url(str(source)):
+            source = source.rsplit("/", 1)[0] + "/"
         metadata_id, root_id = find_root_entity_id(entities)
         root_entity = entities.pop(root_id)
         assert root_id == root_entity.pop('@id')
@@ -207,7 +218,13 @@ class ROCrate():
 
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
-            self.add(Preview(self, source / Preview.BASENAME, properties=preview_entity))
+            if is_url(str(source)):
+                preview_source = source + Preview.BASENAME
+            elif source.is_file():
+                preview_source = source.parent / Preview.BASENAME
+            else:
+                preview_source = source / Preview.BASENAME
+            self.add(Preview(self, preview_source, properties=preview_entity))
         self.__add_parts(parts, entities, source)
 
     def __add_parts(self, parts, entities, source):
@@ -235,6 +252,10 @@ class ROCrate():
 
                 if is_url(id_):
                     instance = Subcrate(self, source=id_, properties=entity)
+                elif is_url(str(source)):
+                    instance = Subcrate(self, source + id_, id_, properties=entity)
+                elif source.is_file():
+                    instance = Subcrate(self, source.parent / unquote(id_), id_, properties=entity)
                 else:
                     instance = Subcrate(self, source=source / unquote(id_), properties=entity)
 
@@ -245,6 +266,10 @@ class ROCrate():
                 # cls is either a File or a Dataset (Directory)
                 if is_url(id_):
                     instance = cls(self, id_, properties=entity)
+                elif is_url(str(source)):
+                    instance = cls(self, source + id_, id_, properties=entity)
+                elif source.is_file():
+                    instance = cls(self, source.parent / unquote(id_), id_, properties=entity)
                 else:
                     instance = cls(self, source / unquote(id_), id_, properties=entity)
             self.add(instance)
@@ -589,7 +614,7 @@ class ROCrate():
     def write(self, base_path):
         base_path = Path(base_path)
         base_path.mkdir(parents=True, exist_ok=True)
-        if self.source and not isinstance(self.source, dict):
+        if self.source and not isinstance(self.source, dict) and Path(self.source).is_dir():
             self._copy_unlisted(self.source, base_path)
         for writable_entity in self.data_entities + self.default_entities:
             writable_entity.write(base_path)
@@ -602,6 +627,9 @@ class ROCrate():
             for chunk in self._stream_zip(out_path=out_path):
                 f.write(chunk)
         return out_path
+
+    def write_detached(self, metadata_path):
+        self.metadata.write_detached(metadata_path)
 
     def stream_zip(self, chunk_size=8192):
         """ Create a stream of bytes representing the RO-Crate as a ZIP file. """
@@ -918,7 +946,11 @@ class Subcrate(Dataset):
         """
         if self._crate is None:
             # load_subcrates=True to load further nested RO-Crate (on-demand / lazily too)
-            self._crate = ROCrate(self.source, load_subcrates=True)
+            if subject_of := self.get("subjectOf"):
+                subcrate_uri = subject_of.id if isinstance(subject_of, Entity) else subject_of
+                self._crate = ROCrate(subcrate_uri, load_subcrates=True)
+            else:
+                self._crate = ROCrate(self.source, load_subcrates=True)
 
     def write(self, base_path):
         super().write(base_path)

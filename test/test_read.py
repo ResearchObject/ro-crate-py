@@ -33,6 +33,7 @@ from rocrate.model import DataEntity, ContextEntity, File, Dataset
 
 _URL = ('https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/'
         'test/test-data/sample_file.txt')
+THIS_DIR = Path(__file__).resolve().parent
 
 
 @pytest.mark.parametrize("gen_preview,from_zip", [(False, False), (True, False), (True, True)])
@@ -238,6 +239,24 @@ def test_crate_with_subcrates(test_data_dir):
     nested_crate = subcrate.get_crate()
     assert isinstance(nested_crate, ROCrate)
     assert subcrate._crate is nested_crate
+
+
+def test_detached_crate_with_subcrates(test_data_dir):
+    main_crate = ROCrate(
+        test_data_dir / "detached_crate_with_subcrates/subcrates-ro-crate-metadata.json",
+        load_subcrates=True
+    )
+    subcrate = main_crate.get("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/")
+    assert isinstance(subcrate, Subcrate)
+    assert set(main_crate.subcrate_entities) == {subcrate}
+    assert subcrate.get("conformsTo") == "https://w3id.org/ro/crate"
+    assert subcrate._crate is None
+    other_crate = subcrate.get_crate()
+    assert isinstance(other_crate, ROCrate)
+    assert subcrate._crate is other_crate
+    assert other_crate.get(
+        "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/test-data/test_file_galaxy.txt"
+    )
 
 
 @pytest.mark.parametrize("override", [False, True])
@@ -669,6 +688,78 @@ def test_from_dict(tmpdir, version):
         ROCrate(metadata, init=True)
 
 
+def test_from_dict_remote_uris(tmpdir):
+    base_uri = "http://example.com/"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": base_uri},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}
+            },
+            {
+                "@id": base_uri,
+                "@type": "Dataset",
+                "creator": {"@id": "#josiah"},
+                "hasPart": {"@id": f"{base_uri}d1"}
+            },
+            {
+                "@id": f"{base_uri}d1",
+                "@type": "Dataset",
+                "hasPart": {"@id": f"{base_uri}d1/d2"}
+            },
+            {
+                "@id": f"{base_uri}d1/d2",
+                "@type": "Dataset",
+                "hasPart": {"@id": f"{base_uri}d1/d2/f1"}
+            },
+            {
+                "@id": f"{base_uri}d1/d2/f1",
+                "@type": "File"
+            },
+            {
+                "@id": "#josiah",
+                "@type": "Person",
+                'name': 'Josiah Carberry'
+            },
+        ]
+    }
+
+    crate = ROCrate(metadata)
+    assert crate.root_dataset.id == base_uri
+    assert crate.metadata.id == "ro-crate-metadata.json"
+    d1 = crate.dereference(f"{base_uri}d1")
+    assert d1
+    d2 = crate.dereference(f"{base_uri}d1/d2")
+    assert d2
+    f1 = crate.dereference(f"{base_uri}d1/d2/f1")
+    assert f1
+    p = crate.dereference("#josiah")
+    assert p
+    assert set(crate.data_entities) == {d1, d2, f1}
+    assert set(crate.contextual_entities) == {p}
+
+    out_path = tmpdir / 'out_crate'
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+
+    crate = ROCrate(out_path)
+    assert crate.root_dataset.id == base_uri
+    assert crate.metadata.id == "ro-crate-metadata.json"
+    d1 = crate.dereference(f"{base_uri}d1")
+    assert d1
+    d2 = crate.dereference(f"{base_uri}d1/d2")
+    assert d2
+    f1 = crate.dereference(f"{base_uri}d1/d2/f1")
+    assert f1
+    p = crate.dereference("#josiah")
+    assert p
+    assert set(crate.data_entities) == {d1, d2, f1}
+    assert set(crate.contextual_entities) == {p}
+
+
 @pytest.mark.parametrize("version", ["1.1", "1.2"])
 def test_no_data_entity_link_from_file(version):
     metadata = {
@@ -834,3 +925,354 @@ def test_not_data_entity_linked(version):
         assert f1 in crate.contextual_entities
     else:
         assert f1 in crate.data_entities
+
+
+@pytest.mark.parametrize("source_base", [
+    "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
+    f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems
+])
+def test_from_uri(tmpdir, source_base):
+    source = f"{source_base}test-data/read_crate/ro-crate-metadata.json"
+    base_uri = f"{source_base}test-data/read_crate/"
+    # this is an absolute URI in the metadata, note it's outside the crate
+    remote_f_uri = ("https://raw.githubusercontent.com/ResearchObject/"
+                    "ro-crate-py/master/test/test-data/sample_file.txt")
+    test_fn = "test_file_galaxy.txt"
+    crate = ROCrate(source)
+    assert crate.source == source
+    assert crate.preview.source == base_uri + "ro-crate-preview.html"
+    assert crate.preview.id == "ro-crate-preview.html"
+    assert test_fn in crate
+    test_f = crate.get(test_fn)
+    assert test_f.source == base_uri + test_fn
+    assert test_f.id == test_fn
+    remote_f = crate.get(remote_f_uri)
+    assert remote_f.source == remote_f_uri
+    assert remote_f.id == remote_f_uri
+    out_path = tmpdir / "out_crate"
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    # fetch_remote is False by default, so nothing is fetched
+    assert not (out_path / "ro-crate-preview.html").exists()
+    assert not (out_path / test_fn).exists()
+    assert not (out_path / remote_f_uri.rsplit("/", 1)[1]).exists()
+    rcrate = ROCrate(out_path)
+    assert rcrate.preview.id == "ro-crate-preview.html"
+    assert rcrate.get(test_fn)
+    assert rcrate.get(remote_f_uri)
+
+
+@pytest.mark.parametrize("source_base", [
+    "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
+    f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems
+])
+def test_from_uri_fetch_remote(tmpdir, source_base):
+    source = f"{source_base}test-data/read_crate/ro-crate-metadata.json"
+    base_uri = f"{source_base}test-data/read_crate/"
+    # this is an absolute URI in the metadata, note it's outside the crate
+    remote_f_uri = ("https://raw.githubusercontent.com/ResearchObject/"
+                    "ro-crate-py/master/test/test-data/sample_file.txt")
+    test_fn = "test_file_galaxy.txt"
+    crate = ROCrate(source)
+    remote_f = crate.get(remote_f_uri)
+    test_f = crate.get(test_fn)
+    # now set some fetch_remote to True
+    crate.preview.fetch_remote = True
+    test_f.fetch_remote = True
+    remote_f.fetch_remote = True
+    assert remote_f.id == remote_f_uri
+    # remote_f.id is the full URI. Check that the destination path is
+    # the output dir / remote_f.id minus the root dataset id.
+    out_path = tmpdir / "out_crate"
+    crate.write(out_path)
+    assert (out_path / "sample_file.txt").is_file()
+    # check that localPath overrides the default destination
+    remote_f["localPath"] = "other/sample_file.txt"
+    shutil.rmtree(out_path)
+    crate.write(out_path)
+    assert (out_path / "other" / "sample_file.txt").is_file()
+    # check more paths
+    assert (out_path / "ro-crate-preview.html").is_file()
+    assert (out_path / test_fn).is_file()
+    # read back the crate
+    rcrate = ROCrate(out_path)
+    assert rcrate.preview.id == "ro-crate-preview.html"
+    rtest_f = rcrate.get(test_fn)
+    assert rtest_f
+    assert rtest_f.get("contentUrl") == base_uri + test_fn
+    rremote_f_uri = rcrate.get(remote_f_uri)
+    assert rremote_f_uri
+    assert rremote_f_uri.get("localPath") == "other/sample_file.txt"
+
+
+@pytest.mark.parametrize("source_base", [
+    "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
+    f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems
+])
+def test_from_uri_detached(tmpdir, source_base):
+    source = f"{source_base}test-data/detached-ro-crate-metadata.json"
+    base_uri = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+                "master/test/test-data/")
+    crate = ROCrate(source)
+    assert crate.source == source
+    assert crate.root_dataset.id == base_uri
+    sample_file = crate.get(f"{base_uri}sample_file.txt")
+    assert sample_file.source == f"{base_uri}sample_file.txt"
+    test_file_galaxy = crate.get(f"{base_uri}test_file_galaxy.txt")
+    assert test_file_galaxy.source == f"{base_uri}test_file_galaxy.txt"
+    assert test_file_galaxy.get("localPath") == "test-data/test_file_galaxy.txt"
+    out_path = tmpdir / "out_crate"
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert not (out_path / "sample_file.txt").exists()
+    assert not (out_path / "test_file_galaxy.txt").exists()
+    # fetch_remote is False, so file is not fetched even if localPath is set
+    assert not (out_path / "test-data" / "test_file_galaxy.txt").exists()
+    rcrate = ROCrate(out_path)
+    assert rcrate.get(f"{base_uri}sample_file.txt")
+    assert rcrate.get(f"{base_uri}test_file_galaxy.txt")
+    license = rcrate.get("http://spdx.org/licenses/CC0-1.0")
+    assert set(rcrate.contextual_entities) == {license}
+
+
+@pytest.mark.parametrize("source_base", [
+    "https://raw.githubusercontent.com/ResearchObject/ro-crate-py/master/test/",
+    f"file:///{THIS_DIR}/"  # extra slash needed on some windows systems
+])
+def test_from_uri_detached_fetch_remote(tmpdir, source_base):
+    source = f"{source_base}test-data/detached-ro-crate-metadata.json"
+    base_uri = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+                "master/test/test-data/")
+    crate = ROCrate(source)
+    test_file_galaxy = crate.get(f"{base_uri}test_file_galaxy.txt")
+    # now set fetch_remote to True
+    test_file_galaxy.fetch_remote = True
+    assert test_file_galaxy.get("localPath") == "test-data/test_file_galaxy.txt"
+    out_path = tmpdir / "out_crate"
+    crate.write(out_path)
+    assert (out_path / "test-data" / "test_file_galaxy.txt").is_file()
+    rcrate = ROCrate(out_path)
+    rtest_file_galaxy = rcrate.get(f"{base_uri}test_file_galaxy.txt")
+    assert rtest_file_galaxy
+    assert rtest_file_galaxy.get("contentUrl") == f"{base_uri}test_file_galaxy.txt"
+    assert rtest_file_galaxy.get("localPath") == "test-data/test_file_galaxy.txt"
+
+
+def test_from_file(test_data_dir, tmpdir):
+    source = test_data_dir / "read_crate" / "ro-crate-metadata.json"
+    base_path = test_data_dir / "read_crate"
+    remote_f_uri = ("https://raw.githubusercontent.com/ResearchObject/"
+                    "ro-crate-py/master/test/test-data/sample_file.txt")
+    test_fn = "test_file_galaxy.txt"
+    crate = ROCrate(source)
+    assert crate.source == source
+    assert crate.preview.source == base_path / "ro-crate-preview.html"
+    assert crate.preview.id == "ro-crate-preview.html"
+    assert test_fn in crate
+    test_f = crate.get(test_fn)
+    assert test_f.source == base_path / test_fn
+    assert test_f.id == test_fn
+    remote_f = crate.get(remote_f_uri)
+    assert remote_f.source == remote_f_uri
+    assert remote_f.id == remote_f_uri
+    out_path = tmpdir / "out_crate"
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert (out_path / "ro-crate-preview.html").exists()
+    assert (out_path / test_fn).exists()
+    assert not (out_path / remote_f_uri.rsplit("/", 1)[1]).exists()
+    rcrate = ROCrate(out_path)
+    assert rcrate.preview.id == "ro-crate-preview.html"
+    assert rcrate.get(test_fn)
+    assert rcrate.get(remote_f_uri)
+    assert rcrate.get("test/")
+    assert not rcrate.get("test/test-metadata.json")
+
+
+def test_from_file_detached(test_data_dir, tmpdir):
+    source = test_data_dir / "detached-ro-crate-metadata.json"
+    base_uri = ("https://raw.githubusercontent.com/ResearchObject/ro-crate-py/"
+                "master/test/test-data/")
+    crate = ROCrate(source)
+    assert crate.source == source
+    assert crate.root_dataset.id == base_uri
+    sample_file = crate.get(f"{base_uri}sample_file.txt")
+    assert sample_file.source == f"{base_uri}sample_file.txt"
+    test_file_galaxy = crate.get(f"{base_uri}test_file_galaxy.txt")
+    assert test_file_galaxy.source == f"{base_uri}test_file_galaxy.txt"
+    listed = crate.get(f"{base_uri}read_extra/listed.txt")
+    assert listed.source == f"{base_uri}read_extra/listed.txt"
+    test_read_base = ("https://raw.githubusercontent.com/ResearchObject/"
+                      "ro-crate-py/master/test/")
+    test_read = crate.get(f"{test_read_base}test_read.py")
+    assert test_read.source == f"{test_read_base}test_read.py"
+    out_path = tmpdir / "out_crate"
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    rcrate = ROCrate(out_path)
+    assert rcrate.get(f"{base_uri}sample_file.txt")
+    assert rcrate.get(f"{base_uri}test_file_galaxy.txt")
+    assert rcrate.get(f"{base_uri}read_extra/listed.txt")
+    assert rcrate.get(f"{test_read_base}test_read.py")
+
+    # set fetch_remote to True and check local paths
+    for e in crate.data_entities:
+        e.fetch_remote = True
+    shutil.rmtree(out_path)
+    crate.write(out_path)
+    assert (out_path / "sample_file.txt").is_file()
+    assert (out_path / "test-data" / "test_file_galaxy.txt").is_file()
+    assert (out_path / "read_extra" / "listed.txt").is_file()
+    assert (out_path / "test_read.py").is_file()
+
+
+def test_read_remote_dir(tmpdir):
+    base_uri = "https://ftp.mozilla.org/pub/"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": base_uri},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}
+            },
+            {
+                "@id": base_uri,
+                "@type": "Dataset",
+                "datePublished": "2026-02-19",
+                "hasPart": [{"@id": f"{base_uri}misc/errorpages/"}]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/",
+                "@type": "Dataset",
+                "hasPart": [
+                    {"@id": f"{base_uri}misc/errorpages/404.html"},
+                    {"@id": f"{base_uri}misc/errorpages/500.html"}
+                ]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/404.html",
+                "@type": "File"
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/500.html",
+                "@type": "File"
+            }
+        ]
+    }
+    crate = ROCrate(metadata)
+    errorpages = crate.get(f"{base_uri}misc/errorpages/")
+    errorpages.fetch_remote = True
+    out_path = tmpdir / 'out_crate'
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert (out_path / "misc" / "errorpages" / "404.html").is_file()
+    assert (out_path / "misc" / "errorpages" / "500.html").is_file()
+
+
+def test_read_remote_dir_local_path(tmpdir):
+    base_uri = "https://ftp.mozilla.org/pub/"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": base_uri},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}
+            },
+            {
+                "@id": base_uri,
+                "@type": "Dataset",
+                "datePublished": "2026-02-19",
+                "hasPart": [{"@id": f"{base_uri}misc/errorpages/"}]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/",
+                "@type": "Dataset",
+                "localPath": "errorpages/",
+                "hasPart": [
+                    {"@id": f"{base_uri}misc/errorpages/404.html"},
+                    {"@id": f"{base_uri}misc/errorpages/500.html"}
+                ]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/404.html",
+                "@type": "File"
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/500.html",
+                "@type": "File",
+                "localPath": "errorpages/500/500.html"
+            }
+        ]
+    }
+    crate = ROCrate(metadata)
+    errorpages = crate.get(f"{base_uri}misc/errorpages/")
+    errorpages.fetch_remote = True
+    out_path = tmpdir / 'out_crate'
+    crate.write(out_path)
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert not (out_path / "misc").exists()
+    assert (out_path / "errorpages" / "404.html").is_file()
+    assert not (out_path / "errorpages" / "500.html").exists()
+    assert (out_path / "errorpages" / "500" / "500.html").is_file()
+
+
+def test_read_remote_dir_skip_dir_part(tmpdir):
+    base_uri = "https://ftp.mozilla.org/pub/"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": base_uri},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}
+            },
+            {
+                "@id": base_uri,
+                "@type": "Dataset",
+                "datePublished": "2026-02-19",
+                "hasPart": [{"@id": f"{base_uri}misc/"}]
+            },
+            {
+                "@id": f"{base_uri}misc/",
+                "@type": "Dataset",
+                "hasPart": [
+                    # part is dir, should not try to download anything
+                    {"@id": f"{base_uri}misc/errorpages/"},
+                ]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/",
+                "@type": "Dataset",
+                "hasPart": [
+                    {"@id": f"{base_uri}misc/errorpages/404.html"},
+                    {"@id": f"{base_uri}misc/errorpages/500.html"}
+                ]
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/404.html",
+                "@type": "File"
+            },
+            {
+                "@id": f"{base_uri}misc/errorpages/500.html",
+                "@type": "File"
+            }
+        ]
+    }
+    crate = ROCrate(metadata)
+    misc = crate.get(f"{base_uri}misc/")
+    misc.fetch_remote = True
+    errorpages = crate.get(f"{base_uri}misc/errorpages/")
+    errorpages.fetch_remote = True
+    out_path = tmpdir / 'out_crate'
+    crate.write(out_path)
+
+    assert (out_path / "ro-crate-metadata.json").is_file()
+    assert (out_path / "misc").is_dir()
+    assert (out_path / "misc" / "errorpages").is_dir()
+    assert (out_path / "misc" / "errorpages" / "404.html").is_file()
+    assert (out_path / "misc" / "errorpages" / "500.html").is_file()
