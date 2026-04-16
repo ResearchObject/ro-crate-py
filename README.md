@@ -628,6 +628,7 @@ Options:
 * Copyright 2025-2026 Senckenberg Society for Nature Research (SGN), DE
 * Copyright 2025-2026 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
 * Copyright 2026 Spanish National Research Council (CSIC), ES
+* Copyright 2026 Helmholtz-Zentrum Dresden-Rossendorf (HZDR), DE
 
 Licensed under the
 Apache License, version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>,
