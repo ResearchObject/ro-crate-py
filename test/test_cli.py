@@ -8,6 +8,7 @@
 # Copyright 2025-2026 Senckenberg Society for Nature Research (SGN), DE
 # Copyright 2025-2026 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
 # Copyright 2026 Spanish National Research Council (CSIC), ES
+# Copyright 2026 Helmholtz-Zentrum Dresden-Rossendorf (HZDR), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -119,6 +120,23 @@ def test_cli_init(test_data_dir, helpers, monkeypatch, cwd, gen_preview):
     json_entities = helpers.read_json_entities(crate_dir)
     assert "sort-and-change-case.ga" in json_entities
     assert json_entities["sort-and-change-case.ga"]["@type"] == "File"
+
+
+@pytest.mark.parametrize("version", ["1.0", "1.1"])
+def test_cli_init_version(test_data_dir, helpers, version):
+    crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
+    metadata_path = crate_dir / helpers.METADATA_FILE_NAME
+    metadata_path.unlink()
+    args = ["init", "-c", str(crate_dir), "--crate-version", version]
+
+    CliRunner().invoke(cli, args)
+
+    # The metadata filename changed from `*.jsonld` to `*.json`.
+    # Handling earlier versions, we must be flexible here.
+    # The `next(...)` call might fail with `StopIteration` if the file is missing.
+    # But if so, this is just another test failure.
+    with next(metadata_path.parent.glob(f"{str(metadata_path.name)}*")).open("r") as file:
+        assert json.load(file)["@context"] == f"https://w3id.org/ro/crate/{version}/context"
 
 
 def test_cli_init_exclude(test_data_dir, helpers):

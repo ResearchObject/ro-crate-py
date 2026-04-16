@@ -8,6 +8,7 @@
 # Copyright 2025-2026 Senckenberg Society for Nature Research (SGN), DE
 # Copyright 2025-2026 European Molecular Biology Laboratory (EMBL), Heidelberg, DE
 # Copyright 2026 Spanish National Research Council (CSIC), ES
+# Copyright 2026 Helmholtz-Zentrum Dresden-Rossendorf (HZDR), DE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -93,9 +94,15 @@ def cli():
     metavar="NAME",
     help="Exclude files or directories from the metadata file. NAME may be a single name or a comma-separated list of names.",
 )
+@click.option(
+    "--crate-version",
+    default="1.2",
+    type=str,
+    help="Version of the RO-Crate standard to initialize the crate with.",
+)
 @OPTION_CRATE_PATH
-def init(crate_dir, gen_preview, exclude):
-    crate = ROCrate(crate_dir, init=True, gen_preview=gen_preview, exclude=exclude)
+def init(crate_dir, gen_preview, exclude, crate_version):
+    crate = ROCrate(crate_dir, init=True, gen_preview=gen_preview, exclude=exclude, version=crate_version)
     crate.metadata.write(crate_dir)
     if crate.preview:
         crate.preview.write(crate_dir)
