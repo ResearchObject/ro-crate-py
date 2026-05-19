@@ -34,16 +34,7 @@ Usage examples:
 
     # Generate 100 crates, mix of 1.1 and 1.2, both attached and detached
     python generate_ro_crates.py --count 100 --output-dir ./crates \
-        --versions 1.1 1.2 --crate-types attached detached zip
-
-    # Generate with a fixed random seed for reproducibility
-    python generate_ro_crates.py --count 20 --seed 42 --output-dir ./crates
-
-    # Generate only specific feature profiles
-    python generate_ro_crates.py --count 30 --profiles workflow provenance dataset
-
-    # Verbose mode: print details about each crate
-    python generate_ro_crates.py --count 5 --verbose
+        --versions 1.1 1.2 --crate-types attached detached
 """
 
 import argparse
@@ -290,8 +281,6 @@ def _add_files(
         }
         if rng.random() < 0.4:
             props["license"] = {"@id": rng.choice(LICENSES)}
-        if rng.random() < 0.3:
-            props["keywords"] = rng.sample(KEYWORDS, k=rng.randint(1, 3))
         if base_url:
             # Detached: use absolute URL as @id, no local source file
             url = f"{base_url.rstrip('/')}/{fname}"
@@ -775,16 +764,13 @@ def build_crate(
         root_date = _rand_date()
         root_license = rng.choice(LICENSES)
 
-        crate.root_dataset["name"] = (
-            f"Example RO-Crate #{crate_index}: "
-            f"{', '.join(root_keywords[:2]).title()} Study"
-        )
+        crate.root_dataset["name"] = f"Example RO-Crate #{crate_index}"
         crate.root_dataset["description"] = (
             f"Auto-generated RO-Crate demonstrating: {', '.join(profiles)}."
         )
         crate.root_dataset["datePublished"] = root_date
         crate.root_dataset["license"] = {"@id": root_license}
-        crate.root_dataset["keywords"] = root_keywords
+        crate.root_dataset["keywords"] = ", ".join(root_keywords)
         crate.root_dataset["identifier"] = _rand_doi()
 
         # Track everything added
