@@ -49,6 +49,7 @@ from pathlib import Path
 from typing import Any
 
 from rocrate.model.contextentity import ContextEntity
+from rocrate.model.testservice import get_service, SERVICE_MAP
 from rocrate.rocrate import ROCrate
 from rocrate.utils import iso_now
 
@@ -127,6 +128,7 @@ PLACE_NAMES = [
     "São Paulo, Brazil", "Singapore", "Melbourne, Australia",
     "Toronto, Canada", "Tokyo, Japan",
 ]
+TEST_SERVICES = list(SERVICE_MAP)
 PROFILES = {
     "minimal": "Minimal crate: root entity + a few files, no extras.",
     "files": "Data files with rich file-level metadata.",
@@ -169,9 +171,9 @@ PROFILE_URIS: dict[str, tuple[str, str, str]] = {
         "0.4",
     ),
     "testing": (
-        "https://w3id.org/ro/terms/test",
+        "https://w3id.org/ro/wftest/0.1",
         "Workflow Testing RO-Crate",
-        "1.0",
+        "0.1",
     ),
 }
 
@@ -603,29 +605,23 @@ def _add_subcrate(
 
 
 def _add_testing_metadata(crate: ROCrate, rng: random.Random) -> None:
-    """Adds Life Monitor-style test suite metadata."""
+    """Adds workflow testing metadata."""
     suite_id = f"#test-suite-{_rand_str(5)}"
     instance_id = f"#test-instance-{_rand_str(5)}"
-    definition_id = f"#test-definition-{_rand_str(5)}"
+    service = rng.choice([get_service(crate, _) for _ in TEST_SERVICES])
 
+    crate.add(service)
     crate.add(ContextEntity(crate, suite_id, properties={
         "@type": "TestSuite",
         "name": f"Test suite {_rand_str(4).upper()}",
         "instance": [{"@id": instance_id}],
-        "definition": [{"@id": definition_id}],
     }))
     crate.add(ContextEntity(crate, instance_id, properties={
         "@type": "TestInstance",
         "name": "CI instance",
-        "runsOn": {"@id": "https://github.com/features/actions"},
+        "runsOn": service,
         "url": f"https://ci.example.org/jobs/{_rand_str(8)}",
         "resource": "jobs",
-    }))
-    crate.add(ContextEntity(crate, definition_id, properties={
-        "@type": "TestDefinition",
-        "name": "Planemo test definition",
-        "conformsTo": {"@id": "https://w3id.org/ro/terms/test#PlanemoEngine"},
-        "engineVersion": f">={random.randint(70, 80)}.0",
     }))
     crate.root_dataset["mentions"] = [{"@id": suite_id}]
 
@@ -689,7 +685,6 @@ def _build_metadata_json(crate: ROCrate, profiles: list[str],
     doc = crate.metadata.generate()
 
     # --- 1 & 2: patch @ids in the @graph ---
-    base_context = doc.get("@context", "")
     # The library always emits the root as "./" and the descriptor as
     # "ro-crate-metadata.json" (or "ro-crate-metadata.jsonld" for 1.0).
     lib_descriptor_id = crate.metadata.id        # e.g. "ro-crate-metadata.json"
@@ -717,18 +712,6 @@ def _build_metadata_json(crate: ROCrate, profiles: list[str],
                          and v.get("@id") == lib_root_id else v)
                         for v in val
                     ]
-
-    # --- 3: expand @context when extra namespaces are needed ---
-    extra_contexts = [
-        ctx_url
-        for feature, ctx_url in PROFILE_EXTRA_CONTEXTS.items()
-        if feature in profiles
-    ]
-    if extra_contexts:
-        if isinstance(base_context, list):
-            doc["@context"] = base_context + extra_contexts
-        else:
-            doc["@context"] = [base_context] + extra_contexts
 
     return doc
 
@@ -776,6 +759,7 @@ def build_crate(
         # Track everything added
         people: list = []
         data_entities: list = []
+        we = None
 
         # ---- Apply feature profiles ----
         if "people" in profiles or rng.random() < 0.7:
@@ -833,6 +817,9 @@ def build_crate(
             _add_subcrate(crate, rng, staging_dir)
 
         if "testing" in profiles:
+            if not we:
+                we = _add_workflow(crate, rng, staging_dir, people, base_url=base_url)
+                data_entities.extend(we)
             _add_testing_metadata(crate, rng)
 
         if "license" in profiles:
@@ -842,6 +829,11 @@ def build_crate(
 
         # ---- Add conformsTo for any recognised RO-Crate profiles ----
         _add_profile_conformance(crate, profiles)
+
+        # expand @context when needed
+        for feature, ctx_url in PROFILE_EXTRA_CONTEXTS.items():
+            if feature in profiles:
+                crate.metadata.extra_contexts.append(ctx_url)
 
         # --- Write the crate ---
         if crate_type == "zip":
