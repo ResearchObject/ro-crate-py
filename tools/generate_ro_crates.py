@@ -629,8 +629,9 @@ def _choose_profiles(rng: random.Random, allowed: list[str]) -> list[str]:
     """Pick a random non-empty subset of profiles, always including 'minimal'."""
     chosen = ["minimal"]
     others = [p for p in allowed if p != "minimal"]
-    k = rng.randint(1, min(len(others), 6))
-    chosen += rng.sample(others, k=k)
+    if others:
+        k = rng.randint(1, min(len(others), 6))
+        chosen += rng.sample(others, k=k)
     if "testing" in chosen and "workflow" not in chosen:
         chosen.append("workflow")
     return chosen
@@ -1006,8 +1007,17 @@ def main() -> None:
 
     for i in range(1, args.count + 1):
         version = rng.choice(args.versions)
-        crate_type = rng.choice(args.crate_types)
-        profiles = _choose_profiles(rng, allowed_profiles)
+        crate_types = args.crate_types[:]
+        profiles = allowed_profiles[:]
+        if version != "1.2" and "detached" in crate_types:
+            crate_types.remove("detached")
+        if not crate_types:
+            crate_types = ["attached"]
+        crate_type = rng.choice(crate_types)
+        if version != "1.1" and "testing" in profiles:
+            profiles.remove("testing")
+        if version != "1.1" and "workflow" in profiles:
+            profiles.remove("workflow")
 
         try:
             summary = build_crate(
@@ -1015,7 +1025,7 @@ def main() -> None:
                 output_dir=out,
                 version=version,
                 crate_type=crate_type,
-                profiles=profiles,
+                profiles=_choose_profiles(rng, profiles),
                 rng=rng,
                 verbose=args.verbose,
             )
