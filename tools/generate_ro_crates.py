@@ -165,11 +165,6 @@ PROFILE_URIS: dict[str, tuple[str, str, str]] = {
         "Workflow RO-Crate",
         "1.0",
     ),
-    "provenance": (
-        "https://w3id.org/ro/wfrun/provenance/0.4",
-        "Provenance Run Crate",
-        "0.4",
-    ),
     "testing": (
         "https://w3id.org/ro/wftest/0.1",
         "Workflow Testing RO-Crate",
