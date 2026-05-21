@@ -143,7 +143,6 @@ PROFILES = {
     "software": "SoftwareApplication / SoftwareSourceCode entities.",
     "event": "Event contextual entities.",
     "subcrate": "Nested sub-crates inside the root crate.",
-    "collection": "A Dataset with hasPart references.",
     "funding": "Grant / funder entities.",
     "scholarly": "ScholarlyArticle / publication entities.",
     "testing": "Test-suite metadata (Life Monitor style).",
@@ -560,23 +559,6 @@ def _add_scholarly_article(
     crate.root_dataset["citation"] = {"@id": art_id}
 
 
-def _add_collection(
-    crate: ROCrate,
-    rng: random.Random,
-    data_entities: list,
-) -> None:
-    if not data_entities:
-        return
-    col_id = f"#collection-{_rand_str(6)}"
-    members = rng.sample(data_entities, k=min(len(data_entities), rng.randint(2, 4)))
-    crate.add(ContextEntity(crate, col_id, properties={
-        "@type": "Dataset",
-        "name": "Curated collection",
-        "description": "A logical grouping of selected data entities.",
-        "hasPart": [{"@id": e.id} for e in members],
-    }))
-
-
 def _add_subcrate(
     crate: ROCrate,
     rng: random.Random,
@@ -806,9 +788,6 @@ def build_crate(
 
         if "scholarly" in profiles:
             _add_scholarly_article(crate, rng, people)
-
-        if "collection" in profiles:
-            _add_collection(crate, rng, data_entities)
 
         # subcrate is not meaningful for detached crates; skip silently
         if "subcrate" in profiles and not is_detached:
