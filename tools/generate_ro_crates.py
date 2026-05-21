@@ -631,7 +631,7 @@ def _choose_profiles(rng: random.Random, allowed: list[str]) -> list[str]:
     others = [p for p in allowed if p != "minimal"]
     k = rng.randint(1, min(len(others), 6))
     chosen += rng.sample(others, k=k)
-    if "testing" in chosen:
+    if "testing" in chosen and "workflow" not in chosen:
         chosen.append("workflow")
     return chosen
 
