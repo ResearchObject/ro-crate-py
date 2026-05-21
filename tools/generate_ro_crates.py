@@ -636,6 +636,8 @@ def _choose_profiles(rng: random.Random, allowed: list[str]) -> list[str]:
     others = [p for p in allowed if p != "minimal"]
     k = rng.randint(1, min(len(others), 6))
     chosen += rng.sample(others, k=k)
+    if "testing" in chosen:
+        chosen.append("workflow")
     return chosen
 
 
@@ -817,9 +819,6 @@ def build_crate(
             _add_subcrate(crate, rng, staging_dir)
 
         if "testing" in profiles:
-            if not we:
-                we = _add_workflow(crate, rng, staging_dir, people, base_url=base_url)
-                data_entities.extend(we)
             _add_testing_metadata(crate, rng)
 
         if "license" in profiles:
