@@ -693,10 +693,11 @@ class ROCrate():
         ))
         if isinstance(lang, ComputerLanguage):
             assert lang.crate is self
+            assert self.get(lang.id) is lang
         else:
             lang = get_lang(self, lang, version=lang_version)
             self.add(lang)
-        lang_str = lang.id.rsplit("#", 1)[1]
+        lang_str = lang.id.rsplit("#", 1)[-1]
         workflow.lang = lang
         if main:
             self.mainEntity = workflow

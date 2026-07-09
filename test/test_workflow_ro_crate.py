@@ -24,6 +24,7 @@
 
 import pytest
 
+from rocrate.model import ComputerLanguage
 from rocrate.rocrate import ROCrate, make_workflow_rocrate
 try:
     import galaxy2cwl  # noqa: F401
@@ -158,3 +159,23 @@ def test_cwl_lang_version(test_data_dir, lang_version):
     else:
         assert lang_id == "https://w3id.org/cwl/v1.2/"
         assert lang["version"] == "v1.2"
+
+
+def test_custom_lang(tmpdir):
+    wf_id = 'custom_wf.foo'
+    wf_path = tmpdir / wf_id
+    wf_path.write_text("Step1: foo\nStep2: bar\n")
+    crate = ROCrate()
+    lang_id = "https://example.org/lang/foo"
+    lang = ComputerLanguage(
+        crate,
+        identifier=lang_id,
+        properties={
+            "name": "Foo language",
+            "identifier": {"@id": lang_id},
+            "url": {"@id": lang_id}
+        },
+    )
+    crate.add(lang)
+    workflow = crate.add_workflow(wf_path, wf_id, lang=lang)
+    assert workflow["programmingLanguage"].id == lang_id
