@@ -36,7 +36,8 @@ from .dataset import Dataset
 SUPPORTED_VERSIONS = {
     "1.0", "1.0-DRAFT",
     "1.1", "1.1-DRAFT",
-    "1.2", "1.2-DRAFT"
+    "1.2", "1.2-DRAFT",
+    "1.3"
 }
 DEFAULT_VERSION = "1.2"
 BASENAME = "ro-crate-metadata.json"
