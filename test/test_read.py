@@ -851,6 +851,36 @@ def test_read_version(test_data_dir):
     assert crate.version == "1.2-DRAFT"
 
 
+@pytest.mark.parametrize(("entity_id", "has_part"), [
+    ("missing-type.txt", True),
+    ("#missing-type", False),
+])
+def test_entity_without_type_reports_its_id(entity_id, has_part):
+    root = {
+        "@id": "./",
+        "@type": "Dataset",
+    }
+    if has_part:
+        root["hasPart"] = {"@id": entity_id}
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": "./"},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+            },
+            root,
+            {"@id": entity_id},
+        ],
+    }
+
+    with pytest.raises(ValueError) as exc_info:
+        ROCrate(metadata)
+    assert str(exc_info.value) == f"entity {entity_id!r} has no @type"
+
+
 @pytest.mark.filterwarnings("ignore")
 @pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
 def test_data_entity_not_linked(version):

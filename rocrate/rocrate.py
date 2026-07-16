@@ -246,8 +246,8 @@ class ROCrate():
                 if not is_data_entity(entities[id_]):
                     continue
             entity = entities.pop(id_)
-            assert id_ == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=DataEntity, load_subcrates=self.load_subcrates)
+            assert id_ == entity.pop('@id')
 
             if cls is Subcrate:
 
@@ -288,8 +288,8 @@ class ROCrate():
                     raise ValueError(f"'{id_}' is a data entity but it's not linked to from the root dataset's hasPart")
                 else:
                     warnings.warn(f"'{id_}' looks like a data entity but it's not listed in the root dataset's hasPart")
-            assert identifier == entity.pop('@id')
             cls = pick_type(entity, type_map, fallback=ContextEntity)
+            assert identifier == entity.pop('@id')
             self.add(cls(self, identifier, entity))
 
     @property
