@@ -34,6 +34,7 @@ from itertools import product
 from urllib.error import URLError
 
 from rocrate.model import Dataset, Person
+from rocrate.model.metadata import DEFAULT_VERSION
 from rocrate.rocrate import ROCrate
 
 
@@ -758,7 +759,7 @@ def test_subcrates_creation(test_data_dir, tmpdir, to_zip):
     assert out_subcrate_crate.get("subsubcrate/setup.cfg") is out_subsubf
 
 
-@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2", "1.3"])
 def test_write_version(tmpdir, helpers, version):
     basename = helpers.LEGACY_METADATA_FILE_NAME if version == "1.0" else helpers.METADATA_FILE_NAME
     crate = ROCrate(version=version)
@@ -772,6 +773,10 @@ def test_write_version(tmpdir, helpers, version):
     with open(out_path / basename, "rt") as f:
         data = json.load(f)
     assert data["@context"] == f"https://w3id.org/ro/crate/{version}/context"
+
+
+def test_default_version():
+    assert DEFAULT_VERSION == "1.2"
 
 
 @pytest.mark.parametrize("to_zip", [False, True])
@@ -813,11 +818,12 @@ def test_detached_creation(tmpdir, to_zip):
     assert rp["name"] == name
 
 
-def test_detached_creation_write_detached(tmpdir):
+@pytest.mark.parametrize("version", ["1.2", "1.3"])
+def test_detached_creation_write_detached(tmpdir, version):
     base_uri = "http://example.com/crate/"
     orcid = "https://orcid.org/0000-0002-1825-0097"
     name = "Josiah Carberry"
-    crate = ROCrate(root_dataset_id=base_uri)
+    crate = ROCrate(root_dataset_id=base_uri, version=version)
     crate.add_dataset(f"{base_uri}d1")
     crate.add_file(f"{base_uri}f1")
     crate.add(Person(crate, orcid, properties={"name": name}))
@@ -827,6 +833,7 @@ def test_detached_creation_write_detached(tmpdir):
     rcrate = ROCrate(detached_md_path)
     assert rcrate.source == detached_md_path
     assert rcrate.metadata.source == "ro-crate-metadata.json"
+    assert rcrate.metadata.version == version
     assert rcrate.root_dataset.id == base_uri
     assert rcrate.metadata.id == "ro-crate-metadata.json"
     assert rcrate.metadata["about"] is rcrate.root_dataset
