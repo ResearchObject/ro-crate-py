@@ -122,7 +122,7 @@ def test_cli_init(test_data_dir, helpers, monkeypatch, cwd, gen_preview):
     assert json_entities["sort-and-change-case.ga"]["@type"] == "File"
 
 
-@pytest.mark.parametrize("version", ["1.0", "1.1"])
+@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2", "1.3"])
 def test_cli_init_version(test_data_dir, helpers, version):
     crate_dir = test_data_dir / "ro-crate-galaxy-sortchangecase"
     metadata_path = crate_dir / helpers.METADATA_FILE_NAME

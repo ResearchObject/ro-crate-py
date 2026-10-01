@@ -36,9 +36,10 @@ from .dataset import Dataset
 SUPPORTED_VERSIONS = {
     "1.0", "1.0-DRAFT",
     "1.1", "1.1-DRAFT",
-    "1.2", "1.2-DRAFT"
+    "1.2", "1.2-DRAFT",
+    "1.3", "1.3-DRAFT"
 }
-DEFAULT_VERSION = "1.2"
+DEFAULT_VERSION = "1.3"
 BASENAME = "ro-crate-metadata.json"
 LEGACY_BASENAME = "ro-crate-metadata.jsonld"
 DETACHED_MD_NAME = re.compile(r".*-ro-crate-metadata.json$")

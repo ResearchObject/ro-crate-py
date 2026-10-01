@@ -42,7 +42,7 @@ def test_find_root(root_id, metadata_id):
             "@type": "CreativeWork",
             "about": {"@id": root_id},
             "conformsTo": [
-                {"@id": "https://w3id.org/ro/crate/1.2"},
+                {"@id": "https://w3id.org/ro/crate/1.3"},
                 {"@id": "https://example.org/fancy-ro-crate/1.0"},
             ]
         },
@@ -64,7 +64,7 @@ def test_find_root_bad_entities():
             "@id": "ro-crate-metadata.json",
             "@type": "CreativeWork",
             "about": {"@id": "./"},
-            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.3"},
         },
         "./": {
             "@id": "./",
@@ -100,7 +100,7 @@ def test_find_root_multiple_types():
             "@id": "ro-crate-metadata.json",
             "@type": "CreativeWork",
             "about": {"@id": "./"},
-            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.3"},
         },
         {
             "@id": "./",
