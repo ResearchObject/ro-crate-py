@@ -904,11 +904,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--versions",
         nargs="+",
-        default=["1.2"],
-        choices=["1.0", "1.1", "1.2"],
+        default=["1.3"],
+        choices=["1.0", "1.1", "1.2", "1.3"],
         metavar="VER",
         help="RO-Crate spec version(s) to use. Multiple values rotate randomly. "
-             "Choices: 1.0, 1.1, 1.2 (default: 1.2).",
+             "Choices: 1.0, 1.1, 1.2, 1.3 (default: 1.3).",
     )
     parser.add_argument(
         "--crate-types",

@@ -46,7 +46,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     else:
         crate = ROCrate(crate_dir, gen_preview=gen_preview)
 
-    assert crate.version == "1.2"
+    assert crate.version == "1.3"
     assert set(_["@id"] for _ in crate.default_entities) == {
         "./",
         "ro-crate-metadata.json",
@@ -78,7 +78,7 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
     assert md_prop['@id'] == helpers.METADATA_FILE_NAME
     assert md_prop['@type'] == 'CreativeWork'
     assert md_prop['about'] == {'@id': './'}
-    assert md_prop['conformsTo'] == {'@id': "https://w3id.org/ro/crate/1.2"}
+    assert md_prop['conformsTo'] == {'@id': "https://w3id.org/ro/crate/1.3"}
     assert metadata.root is root
 
     preview = crate.dereference(helpers.PREVIEW_FILE_NAME)
@@ -446,7 +446,7 @@ def test_missing_file(test_data_dir, tmpdir):
     assert (out_path / name).read_text() == text
 
 
-@pytest.mark.parametrize("version", ["1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.1", "1.2", "1.3"])
 def test_generic_data_entity(tmpdir, version):
     rc_id = "#collection"
     metadata = {
@@ -489,14 +489,14 @@ def test_generic_data_entity(tmpdir, version):
     def check_rc():
         rc = crate.dereference(rc_id)
         assert rc is not None
-        if version == "1.2":
+        if version in {"1.2", "1.3"}:
             assert isinstance(rc, ContextEntity)
         else:
             assert isinstance(rc, DataEntity)
         assert rc.id == rc_id
         assert rc.type == "RepositoryCollection"
         assert rc._jsonld["name"] == "Test collection"
-        if version == "1.2":
+        if version in {"1.2", "1.3"}:
             assert not crate.data_entities
             assert crate.contextual_entities == [rc]
         else:
@@ -512,7 +512,7 @@ def test_generic_data_entity(tmpdir, version):
     check_rc()
 
 
-@pytest.mark.parametrize("version", ["1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.1", "1.2", "1.3"])
 def test_root_conformsto(tmpdir, version):
     # actually not a valid workflow ro-crate, but here it does not matter
     profiles = [
@@ -542,7 +542,7 @@ def test_root_conformsto(tmpdir, version):
     assert crate.metadata["conformsTo"] == profiles
 
 
-@pytest.mark.parametrize("version", ["1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.1", "1.2", "1.3"])
 def test_multi_type_context_entity(tmpdir, version):
     id_, type_ = "#xyz", ["Project", "Organization"]
     metadata = {
@@ -574,7 +574,7 @@ def test_multi_type_context_entity(tmpdir, version):
     assert set(entity.type) == set(type_)
 
 
-@pytest.mark.parametrize("version", ["1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.1", "1.2", "1.3"])
 def test_indirect_data_entity(tmpdir, version):
     metadata = {
         "@context": f"https://w3id.org/ro/crate/{version}/context",
@@ -629,7 +629,7 @@ def test_indirect_data_entity(tmpdir, version):
 
 
 @pytest.mark.filterwarnings("ignore")
-@pytest.mark.parametrize("version", ["1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.1", "1.2", "1.3"])
 def test_from_dict(tmpdir, version):
     metadata = {
         "@context": f"https://w3id.org/ro/crate/{version}/context",
@@ -761,7 +761,7 @@ def test_from_dict_remote_uris(tmpdir):
     assert set(crate.contextual_entities) == {p}
 
 
-@pytest.mark.parametrize("version", ["1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.1", "1.2", "1.3"])
 def test_no_data_entity_link_from_file(version):
     metadata = {
         "@context": f"https://w3id.org/ro/crate/{version}/context",
@@ -849,10 +849,12 @@ def test_read_version(test_data_dir):
     assert crate.version == "1.1"
     crate = ROCrate(test_data_dir / "crate-1.2-DRAFT")
     assert crate.version == "1.2-DRAFT"
+    crate = ROCrate(test_data_dir / "crate-1.3-DRAFT")
+    assert crate.version == "1.3-DRAFT"
 
 
 @pytest.mark.filterwarnings("ignore")
-@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2", "1.3"])
 def test_data_entity_not_linked(version):
     metadata = {
         "@context": f"https://w3id.org/ro/crate/{version}/context",
@@ -880,7 +882,7 @@ def test_data_entity_not_linked(version):
             }
         ]
     }
-    if version == "1.2":
+    if version in {"1.2", "1.3"}:
         with pytest.raises(ValueError, match="hasPart"):
             ROCrate(metadata)
     else:
@@ -889,7 +891,7 @@ def test_data_entity_not_linked(version):
         assert f1 in crate.contextual_entities
 
 
-@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2", "1.3"])
 def test_not_data_entity_linked(version):
     metadata = {
         "@context": f"https://w3id.org/ro/crate/{version}/context",
@@ -922,7 +924,7 @@ def test_not_data_entity_linked(version):
     d1 = crate.get("d1")
     assert d1 in crate.data_entities
     f1 = crate.get("#f1.txt")
-    if version == "1.2":
+    if version in {"1.2", "1.3"}:
         assert f1 in crate.contextual_entities
     else:
         assert f1 in crate.data_entities
