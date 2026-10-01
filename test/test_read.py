@@ -843,14 +843,15 @@ def test_init_percent_escape(tmpdir, helpers):
 
 
 def test_read_version(test_data_dir):
-    crate = ROCrate(test_data_dir / "crate-1.0")
-    assert crate.version == "1.0"
-    crate = ROCrate(test_data_dir / "crate-1.1")
-    assert crate.version == "1.1"
-    crate = ROCrate(test_data_dir / "crate-1.2-DRAFT")
-    assert crate.version == "1.2-DRAFT"
-    crate = ROCrate(test_data_dir / "crate-1.3-DRAFT")
-    assert crate.version == "1.3-DRAFT"
+    versions = {
+        "1.0", "1.0-DRAFT",
+        "1.1", "1.1-DRAFT",
+        "1.2", "1.2-DRAFT",
+        "1.3", "1.3-DRAFT"
+    }
+    for v in versions:
+        crate = ROCrate(test_data_dir / f"crate-{v}")
+        assert crate.version == v
 
 
 @pytest.mark.filterwarnings("ignore")
