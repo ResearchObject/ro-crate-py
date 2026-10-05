@@ -1,6 +1,6 @@
 [![Python package](https://github.com/ResearchObject/ro-crate-py/workflows/Python%20package/badge.svg)](https://github.com/ResearchObject/ro-crate-py/actions?query=workflow%3A%22Python+package%22) [![Upload Python Package](https://github.com/ResearchObject/ro-crate-py/workflows/Upload%20Python%20Package/badge.svg)](https://github.com/ResearchObject/ro-crate-py/actions?query=workflow%3A%22Upload+Python+Package%22) [![PyPI version](https://badge.fury.io/py/rocrate.svg)](https://pypi.org/project/rocrate/) [![DOI](https://zenodo.org/badge/216605684.svg)](https://zenodo.org/badge/latestdoi/216605684)
 
-ro-crate-py is a Python library to create and consume [Research Object Crates](https://w3id.org/ro/crate). It supports the current [RO-Crate 1.2](https://w3id.org/ro/crate/1.2) specification as well as the older [RO-Crate 1.1](https://w3id.org/ro/crate/1.1) and [RO-Crate 1.0](https://w3id.org/ro/crate/1.0).
+ro-crate-py is a Python library to create and consume [Research Object Crates](https://w3id.org/ro/crate). It supports the current [RO-Crate 1.3](https://w3id.org/ro/crate/1.3) specification as well as the older [RO-Crate 1.2](https://w3id.org/ro/crate/1.2), [RO-Crate 1.1](https://w3id.org/ro/crate/1.1) and [RO-Crate 1.0](https://w3id.org/ro/crate/1.0).
 
 ## Installation
 
@@ -227,13 +227,13 @@ Note that entities can have multiple types, e.g.:
 
 #### Selecting the RO-Crate specification version
 
-By default, a newly created RO-Crate conforms to the [RO-Crate 1.2](https://w3id.org/ro/crate/1.2) specification, but 1.0 and 1.1 are still supported:
+By default, a newly created RO-Crate conforms to the [RO-Crate 1.3](https://w3id.org/ro/crate/1.3) specification, but 1.0, 1.1 and 1.2 are still supported:
 
 ```pycon
 >>> from rocrate.rocrate import ROCrate
 >>> crate = ROCrate()
 >>> crate.version
-'1.2'
+'1.3'
 >>> crate = ROCrate(version="1.0")
 >>> crate.version
 '1.0'
@@ -312,7 +312,7 @@ In detached crates, _all_ data entities must be web-based, i.e., have an absolut
 file_1 = crate.add_file(f"{url}file_1")  # http://example.com/crate/file_1
 ```
 
-The [recommended way](https://www.researchobject.org/ro-crate/specification/1.2/structure.html#types-of-ro-crate) to store a detached crate on disk is to write a single metadata file called `${prefix}-ro-crate-metadata.json`, where `${prefix}` is a variable. The library supports this through the `write_detached` method, which takes as argument an arbitrary path (a warning will be issued if the path does not follow the above pattern):
+The [recommended way](https://www.researchobject.org/ro-crate/specification/1.3/structure.html#types-of-ro-crate) to store a detached crate on disk is to write a single metadata file called `${prefix}-ro-crate-metadata.json`, where `${prefix}` is a variable. The library supports this through the `write_detached` method, which takes as argument an arbitrary path (a warning will be issued if the path does not follow the above pattern):
 
 ```python
 crate.write_detached("/tmp/example-ro-crate-metadata.json")
@@ -374,7 +374,7 @@ crate_with_subcrates/
     `-- subfile.txt
 ```
 
-In the JSON-LD metadata, the presence of a nested crate rooted at a given directory is indicated by a `conformsTo` pointing to the generic RO-Crate profile `https://w3id.org/ro/crate` (see [Referencing other RO-Crates](https://www.researchobject.org/ro-crate/specification/1.2/data-entities.html#referencing-other-ro-crates)):
+In the JSON-LD metadata, the presence of a nested crate rooted at a given directory is indicated by a `conformsTo` pointing to the generic RO-Crate profile `https://w3id.org/ro/crate` (see [Referencing other RO-Crates](https://www.researchobject.org/ro-crate/specification/1.3/data-entities.html#referencing-other-ro-crates)):
 
 ```json
 {

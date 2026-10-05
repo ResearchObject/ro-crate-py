@@ -33,7 +33,7 @@ from rocrate.utils import get_norm_value
 THIS_DIR = Path(__file__).absolute().parent
 TEST_DATA_NAME = 'test-data'
 BASE_URL = 'https://w3id.org/ro/crate'
-DEFAULT_VERSION = '1.2'
+DEFAULT_VERSION = '1.3'
 LEGACY_VERSION = '1.0'
 
 

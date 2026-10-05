@@ -758,7 +758,7 @@ def test_subcrates_creation(test_data_dir, tmpdir, to_zip):
     assert out_subcrate_crate.get("subsubcrate/setup.cfg") is out_subsubf
 
 
-@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2"])
+@pytest.mark.parametrize("version", ["1.0", "1.1", "1.2", "1.3"])
 def test_write_version(tmpdir, helpers, version):
     basename = helpers.LEGACY_METADATA_FILE_NAME if version == "1.0" else helpers.METADATA_FILE_NAME
     crate = ROCrate(version=version)

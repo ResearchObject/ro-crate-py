@@ -96,7 +96,7 @@ def cli():
 )
 @click.option(
     "--crate-version",
-    default="1.2",
+    default="1.3",
     type=str,
     help="Version of the RO-Crate standard to initialize the crate with.",
 )

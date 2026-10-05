@@ -318,7 +318,7 @@ def test_self_delete(test_data_dir):
 def test_entity_as_mapping(tmpdir, helpers):
     orcid = "https://orcid.org/0000-0002-1825-0097"
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@context": "https://w3id.org/ro/crate/1.3/context",
         "@graph": [
             {"@id": "ro-crate-metadata.json",
              "@type": "CreativeWork",
@@ -327,7 +327,7 @@ def test_entity_as_mapping(tmpdir, helpers):
                  "application/json",
                  {"@id": "https://www.json.org"},
              ],
-             "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}},
+             "conformsTo": {"@id": "https://w3id.org/ro/crate/1.3"}},
             {"@id": "./",
              "@type": "Dataset",
              "correction": [
@@ -562,12 +562,12 @@ def test_value_objects(tmpdir):
     description = "A collection of my pictures"
     date_published = "2024-05-17T01:04:52+01:00"
     metadata = {
-        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@context": "https://w3id.org/ro/crate/1.3/context",
         "@graph": [
             {
                 "@id": "ro-crate-metadata.json",
                 "@type": "CreativeWork",
-                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.3"},
                 "about": {"@id": "./"},
             },
             {
