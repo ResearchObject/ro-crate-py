@@ -44,7 +44,19 @@ BASENAME = "ro-crate-metadata.json"
 LEGACY_BASENAME = "ro-crate-metadata.jsonld"
 DETACHED_MD_NAME = re.compile(r".*-ro-crate-metadata.json$")
 
-WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
+# Mapping from RO-Crate version to Workflow RO-Crate version
+WROC_VERSION_MAP = {
+    "1.0": "1.0",
+    "1.0-DRAFT": "1.0",
+    "1.1": "1.0",
+    "1.1-DRAFT": "1.0",
+    "1.2": None,
+    "1.2-DRAFT": None,
+    "1.3": "1.1",
+    "1.3-DRAFT": "1.1",
+}
+DEFAULT_WROC_VERSION = "1.1"
+WROC_PROFILE_BASE = "https://w3id.org/workflowhub/workflow-ro-crate"
 
 
 class Metadata(File):

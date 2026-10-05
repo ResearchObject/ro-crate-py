@@ -35,11 +35,12 @@ TEST_DATA_NAME = 'test-data'
 BASE_URL = 'https://w3id.org/ro/crate'
 DEFAULT_VERSION = '1.3'
 LEGACY_VERSION = '1.0'
+DEFAULT_WROC_VERSION = "1.1"
 
 
 class Helpers:
 
-    WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
+    WROC_PROFILE_BASE = "https://w3id.org/workflowhub/workflow-ro-crate"
     METADATA_FILE_NAME = 'ro-crate-metadata.json'
     LEGACY_METADATA_FILE_NAME = 'ro-crate-metadata.jsonld'
     WORKFLOW_TYPES = {"File", "SoftwareSourceCode", "ComputationalWorkflow"}
@@ -74,7 +75,7 @@ class Helpers:
             assert data_entity_ids.issubset([_["@id"] for _ in root["hasPart"]])
 
     @classmethod
-    def check_wf_crate(cls, json_entities, wf_file_name, root_id="./"):
+    def check_wf_crate(cls, json_entities, wf_file_name, root_id="./", wroc_version=DEFAULT_WROC_VERSION):
         cls.check_crate(json_entities, root_id=root_id)
         assert json_entities[root_id]["mainEntity"]["@id"] == wf_file_name
         assert wf_file_name in json_entities
@@ -83,7 +84,11 @@ class Helpers:
         assert cls.WORKFLOW_TYPES.issubset(wf_entity["@type"])
         assert "programmingLanguage" in wf_entity
         metadata = json_entities[cls.METADATA_FILE_NAME]
-        assert cls.WORKFLOW_PROFILE in get_norm_value(metadata, "conformsTo")
+        profile_id = f"{cls.WROC_PROFILE_BASE}/{wroc_version}"
+        if wroc_version == "1.0":
+            assert profile_id in get_norm_value(metadata, "conformsTo")
+        else:
+            assert profile_id in get_norm_value(json_entities[root_id], "conformsTo")
 
 
 @pytest.fixture

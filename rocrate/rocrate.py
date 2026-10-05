@@ -57,7 +57,15 @@ from .model import (
     TestSuite,
     WorkflowDescription,
 )
-from .model.metadata import WORKFLOW_PROFILE, TESTING_EXTRA_TERMS, DEFAULT_VERSION, BASENAME, LEGACY_BASENAME
+from .model.metadata import (
+    WROC_VERSION_MAP,
+    DEFAULT_WROC_VERSION,
+    WROC_PROFILE_BASE,
+    TESTING_EXTRA_TERMS,
+    DEFAULT_VERSION,
+    BASENAME,
+    LEGACY_BASENAME,
+)
 from .model.computationalworkflow import galaxy_to_abstract_cwl
 from .model.computerlanguage import get_lang
 from .model.testservice import get_service
@@ -682,6 +690,25 @@ class ROCrate():
         for writeable_entity in self.data_entities + self.default_entities:
             yield from writeable_entity.stream(chunk_size=chunk_size)
 
+    def _add_wroc_profile(self):
+        wroc_version = WROC_VERSION_MAP.get(self.version)
+        if wroc_version is None:
+            warnings.warn(f"RO-Crate version '{self.version}' is not compatible with Workflow RO-Crate")
+            wroc_version = DEFAULT_WROC_VERSION
+        profile_id = f"{WROC_PROFILE_BASE}/{wroc_version}"
+        if wroc_version == "1.0":
+            profiles = set(_.rstrip("/") for _ in get_norm_value(self.metadata, "conformsTo"))
+            profiles.add(profile_id)
+            self.metadata["conformsTo"] = [{"@id": _} for _ in sorted(profiles)]
+        else:
+            if profile_id not in self:
+                profile_entity = self.add(ContextEntity(self, profile_id, properties={
+                    "@type": ["CreativeWork", "Profile"],
+                    "name": "Workflow RO-Crate",
+                    "version": wroc_version,
+                }))
+                self.root_dataset.append_to("conformsTo", profile_entity)
+
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
             main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow,
@@ -701,9 +728,7 @@ class ROCrate():
         workflow.lang = lang
         if main:
             self.mainEntity = workflow
-            profiles = set(_.rstrip("/") for _ in get_norm_value(self.metadata, "conformsTo"))
-            profiles.add(WORKFLOW_PROFILE)
-            self.metadata["conformsTo"] = [{"@id": _} for _ in sorted(profiles)]
+            self._add_wroc_profile()
         if gen_cwl and lang_str != "cwl":
             if lang_str != "galaxy":
                 raise ValueError(f"conversion from {lang.name} to abstract CWL not supported")
