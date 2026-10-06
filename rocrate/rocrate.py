@@ -61,7 +61,10 @@ from .model.metadata import (
     WROC_VERSION_MAP,
     DEFAULT_WROC_VERSION,
     WROC_PROFILE_BASE,
-    TESTING_EXTRA_TERMS,
+    WTROC_VERSION_MAP,
+    DEFAULT_WTROC_VERSION,
+    WTROC_PROFILE_BASE,
+    WTROC_CONTEXT,
     DEFAULT_VERSION,
     BASENAME,
     LEGACY_BASENAME,
@@ -741,6 +744,25 @@ class ROCrate():
             workflow.subjectOf = cwl_workflow
         return workflow
 
+    def _add_wtroc_profile(self):
+        wtroc_version = WTROC_VERSION_MAP.get(self.version)
+        if wtroc_version is None:
+            warnings.warn(f"RO-Crate version '{self.version}' is not compatible with Workflow Testing RO-Crate")
+            wtroc_version = DEFAULT_WTROC_VERSION
+        profile_id = f"{WTROC_PROFILE_BASE}/{wtroc_version}"
+        if wtroc_version == "0.1":
+            pass
+        else:
+            if profile_id not in self:
+                profile_entity = self.add(ContextEntity(self, profile_id, properties={
+                    "@type": ["CreativeWork", "Profile"],
+                    "name": "Workflow Testing RO-Crate",
+                    "version": wtroc_version,
+                }))
+                self.root_dataset.append_to("conformsTo", profile_entity)
+        if WTROC_CONTEXT not in self.metadata.extra_contexts:
+            self.metadata.extra_contexts.append(WTROC_CONTEXT)
+
     def add_test_suite(self, identifier=None, name=None, main_entity=None, properties=None):
         test_ref_prop = "mentions"
         if not main_entity:
@@ -753,7 +775,7 @@ class ROCrate():
         if main_entity:
             suite["mainEntity"] = main_entity
         self.root_dataset.append_to(test_ref_prop, suite)
-        self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
+        self._add_wtroc_profile()
         return suite
 
     def add_test_instance(self, suite, url, resource="", service="jenkins", identifier=None, name=None, properties=None):
@@ -770,7 +792,7 @@ class ROCrate():
         if not properties or "name" not in properties:
             instance.name = name or instance.id.lstrip("#")
         suite.append_to("instance", instance)
-        self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
+        self._add_wtroc_profile()
         return instance
 
     def add_test_definition(
@@ -791,7 +813,7 @@ class ROCrate():
         if engine_version is not None:
             definition.engineVersion = engine_version
         suite.definition = definition
-        self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
+        self._add_wtroc_profile()
         return definition
 
     def add_action(self, instrument, identifier=None, object=None, result=None, properties=None):

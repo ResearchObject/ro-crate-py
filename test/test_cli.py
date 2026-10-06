@@ -30,8 +30,15 @@ import shutil
 
 from rocrate.cli import cli
 from rocrate.model import File
-from rocrate.model.metadata import TESTING_EXTRA_TERMS
+from rocrate.model.metadata import (
+    WROC_PROFILE_BASE,
+    DEFAULT_WROC_VERSION,
+    WTROC_CONTEXT,
+    WTROC_PROFILE_BASE,
+    DEFAULT_WTROC_VERSION,
+)
 from rocrate.rocrate import ROCrate
+from rocrate.utils import get_norm_value
 
 
 def get_command_paths(command):
@@ -289,7 +296,7 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     assert set(json_entities[def_id]["@type"]) == {"File", "TestDefinition"}
     assert json_entities[def_id]["name"] == "foo"
     assert json_entities[def_id]["description"] == "foo bar"
-    # check extra terms
+    # check extra context
     metadata_path = crate_dir / helpers.METADATA_FILE_NAME
     with open(metadata_path, "rt") as f:
         json_data = json.load(f)
@@ -297,8 +304,15 @@ def test_cli_add_test_metadata(test_data_dir, helpers, monkeypatch, cwd):
     context = json_data["@context"]
     assert isinstance(context, list)
     assert len(context) > 1
-    extra_terms = context[1]
-    assert set(TESTING_EXTRA_TERMS.items()).issubset(extra_terms.items())
+    extra_context = context[1]
+    assert extra_context == WTROC_CONTEXT
+    # check profiles
+    json_entities = helpers.read_json_entities(crate_dir)
+    rde = json_entities.get("./")
+    assert "conformsTo" in rde
+    profiles = set(get_norm_value(rde, "conformsTo"))
+    assert f"{WROC_PROFILE_BASE}/{DEFAULT_WROC_VERSION}" in profiles
+    assert f"{WTROC_PROFILE_BASE}/{DEFAULT_WTROC_VERSION}" in profiles
 
 
 def test_cli_add_test_metadata_explicit_ids(test_data_dir, helpers, monkeypatch):
