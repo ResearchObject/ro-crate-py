@@ -57,7 +57,18 @@ from .model import (
     TestSuite,
     WorkflowDescription,
 )
-from .model.metadata import WORKFLOW_PROFILE, TESTING_EXTRA_TERMS, DEFAULT_VERSION, BASENAME, LEGACY_BASENAME
+from .model.metadata import (
+    WROC_VERSION_MAP,
+    DEFAULT_WROC_VERSION,
+    WROC_PROFILE_BASE,
+    WTROC_VERSION_MAP,
+    DEFAULT_WTROC_VERSION,
+    WTROC_PROFILE_BASE,
+    WTROC_CONTEXT,
+    DEFAULT_VERSION,
+    BASENAME,
+    LEGACY_BASENAME,
+)
 from .model.computationalworkflow import galaxy_to_abstract_cwl
 from .model.computerlanguage import get_lang
 from .model.testservice import get_service
@@ -682,6 +693,25 @@ class ROCrate():
         for writeable_entity in self.data_entities + self.default_entities:
             yield from writeable_entity.stream(chunk_size=chunk_size)
 
+    def _add_wroc_profile(self):
+        wroc_version = WROC_VERSION_MAP.get(self.version)
+        if wroc_version is None:
+            warnings.warn(f"RO-Crate version '{self.version}' is not compatible with Workflow RO-Crate")
+            wroc_version = DEFAULT_WROC_VERSION
+        profile_id = f"{WROC_PROFILE_BASE}/{wroc_version}"
+        if wroc_version == "1.0":
+            profiles = set(_.rstrip("/") for _ in get_norm_value(self.metadata, "conformsTo"))
+            profiles.add(profile_id)
+            self.metadata["conformsTo"] = [{"@id": _} for _ in sorted(profiles)]
+        else:
+            if profile_id not in self:
+                profile_entity = self.add(ContextEntity(self, profile_id, properties={
+                    "@type": ["CreativeWork", "Profile"],
+                    "name": "Workflow RO-Crate",
+                    "version": wroc_version,
+                }))
+                self.root_dataset.append_to("conformsTo", profile_entity)
+
     def add_workflow(
             self, source=None, dest_path=None, fetch_remote=False, validate_url=False, properties=None,
             main=False, lang="cwl", lang_version=None, gen_cwl=False, cls=ComputationalWorkflow,
@@ -701,9 +731,7 @@ class ROCrate():
         workflow.lang = lang
         if main:
             self.mainEntity = workflow
-            profiles = set(_.rstrip("/") for _ in get_norm_value(self.metadata, "conformsTo"))
-            profiles.add(WORKFLOW_PROFILE)
-            self.metadata["conformsTo"] = [{"@id": _} for _ in sorted(profiles)]
+            self._add_wroc_profile()
         if gen_cwl and lang_str != "cwl":
             if lang_str != "galaxy":
                 raise ValueError(f"conversion from {lang.name} to abstract CWL not supported")
@@ -715,6 +743,25 @@ class ROCrate():
             )
             workflow.subjectOf = cwl_workflow
         return workflow
+
+    def _add_wtroc_profile(self):
+        wtroc_version = WTROC_VERSION_MAP.get(self.version)
+        if wtroc_version is None:
+            warnings.warn(f"RO-Crate version '{self.version}' is not compatible with Workflow Testing RO-Crate")
+            wtroc_version = DEFAULT_WTROC_VERSION
+        profile_id = f"{WTROC_PROFILE_BASE}/{wtroc_version}"
+        if wtroc_version == "0.1":
+            pass
+        else:
+            if profile_id not in self:
+                profile_entity = self.add(ContextEntity(self, profile_id, properties={
+                    "@type": ["CreativeWork", "Profile"],
+                    "name": "Workflow Testing RO-Crate",
+                    "version": wtroc_version,
+                }))
+                self.root_dataset.append_to("conformsTo", profile_entity)
+        if WTROC_CONTEXT not in self.metadata.extra_contexts:
+            self.metadata.extra_contexts.append(WTROC_CONTEXT)
 
     def add_test_suite(self, identifier=None, name=None, main_entity=None, properties=None):
         test_ref_prop = "mentions"
@@ -728,7 +775,7 @@ class ROCrate():
         if main_entity:
             suite["mainEntity"] = main_entity
         self.root_dataset.append_to(test_ref_prop, suite)
-        self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
+        self._add_wtroc_profile()
         return suite
 
     def add_test_instance(self, suite, url, resource="", service="jenkins", identifier=None, name=None, properties=None):
@@ -745,7 +792,7 @@ class ROCrate():
         if not properties or "name" not in properties:
             instance.name = name or instance.id.lstrip("#")
         suite.append_to("instance", instance)
-        self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
+        self._add_wtroc_profile()
         return instance
 
     def add_test_definition(
@@ -766,7 +813,7 @@ class ROCrate():
         if engine_version is not None:
             definition.engineVersion = engine_version
         suite.definition = definition
-        self.metadata.extra_terms.update(TESTING_EXTRA_TERMS)
+        self._add_wtroc_profile()
         return definition
 
     def add_action(self, instrument, identifier=None, object=None, result=None, properties=None):
@@ -967,8 +1014,9 @@ class Subcrate(Dataset):
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
-                          fetch_remote=False, cwl=None, diagram=None):
-    wf_crate = ROCrate()
+                          fetch_remote=False, cwl=None, diagram=None,
+                          version=DEFAULT_VERSION):
+    wf_crate = ROCrate(version=version)
     workflow_path = Path(workflow_path)
     wf_crate.add_workflow(
         workflow_path, workflow_path.name, fetch_remote=fetch_remote,

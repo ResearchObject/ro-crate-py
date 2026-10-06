@@ -44,7 +44,34 @@ BASENAME = "ro-crate-metadata.json"
 LEGACY_BASENAME = "ro-crate-metadata.jsonld"
 DETACHED_MD_NAME = re.compile(r".*-ro-crate-metadata.json$")
 
-WORKFLOW_PROFILE = "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
+# Mapping from RO-Crate version to Workflow RO-Crate version
+WROC_VERSION_MAP = {
+    "1.0": "1.0",
+    "1.0-DRAFT": "1.0",
+    "1.1": "1.0",
+    "1.1-DRAFT": "1.0",
+    "1.2": None,
+    "1.2-DRAFT": None,
+    "1.3": "1.1",
+    "1.3-DRAFT": "1.1",
+}
+DEFAULT_WROC_VERSION = "1.1"
+WROC_PROFILE_BASE = "https://w3id.org/workflowhub/workflow-ro-crate"
+
+# Mapping from RO-Crate version to Workflow Testing RO-Crate version
+WTROC_VERSION_MAP = {
+    "1.0": "0.1",
+    "1.0-DRAFT": "0.1",
+    "1.1": "0.1",
+    "1.1-DRAFT": "0.1",
+    "1.2": None,
+    "1.2-DRAFT": None,
+    "1.3": "0.2",
+    "1.3-DRAFT": "0.2",
+}
+DEFAULT_WTROC_VERSION = "0.2"
+WTROC_PROFILE_BASE = "https://w3id.org/ro/wftest"
+WTROC_CONTEXT = "https://w3id.org/ro/terms/test"
 
 
 class Metadata(File):
@@ -112,21 +139,3 @@ class Metadata(File):
     @property
     def root(self) -> Dataset:
         return self.crate.root_dataset
-
-
-# https://github.com/ResearchObject/ro-terms/tree/master/test
-TESTING_EXTRA_TERMS = {
-    "TestSuite": "https://w3id.org/ro/terms/test#TestSuite",
-    "TestInstance": "https://w3id.org/ro/terms/test#TestInstance",
-    "TestService": "https://w3id.org/ro/terms/test#TestService",
-    "TestDefinition": "https://w3id.org/ro/terms/test#TestDefinition",
-    "PlanemoEngine": "https://w3id.org/ro/terms/test#PlanemoEngine",
-    "JenkinsService": "https://w3id.org/ro/terms/test#JenkinsService",
-    "TravisService": "https://w3id.org/ro/terms/test#TravisService",
-    "GithubService": "https://w3id.org/ro/terms/test#GithubService",
-    "instance": "https://w3id.org/ro/terms/test#instance",
-    "runsOn": "https://w3id.org/ro/terms/test#runsOn",
-    "resource": "https://w3id.org/ro/terms/test#resource",
-    "definition": "https://w3id.org/ro/terms/test#definition",
-    "engineVersion": "https://w3id.org/ro/terms/test#engineVersion"
-}
