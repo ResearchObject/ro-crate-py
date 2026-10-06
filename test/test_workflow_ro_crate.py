@@ -73,10 +73,11 @@ def test_galaxy_wf_crate(test_data_dir, tmpdir, helpers):
     assert abstract_wf_out_path.exists()
 
 
-def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
+@pytest.mark.parametrize("crate_version", ["1.1", "1.3"])
+def test_cwl_wf_crate(test_data_dir, tmpdir, helpers, crate_version):
     wf_id = 'sample_cwl_wf.cwl'
     wf_path = test_data_dir / wf_id
-    wf_crate = make_workflow_rocrate(wf_path, wf_type='CWL')
+    wf_crate = make_workflow_rocrate(wf_path, wf_type='CWL', version=crate_version)
     assert isinstance(wf_crate, ROCrate)
 
     wf = wf_crate.dereference(wf_id)
@@ -91,7 +92,8 @@ def test_cwl_wf_crate(test_data_dir, tmpdir, helpers):
     out_path.mkdir()
     wf_crate.write(out_path)
     json_entities = helpers.read_json_entities(out_path)
-    helpers.check_wf_crate(json_entities, wf_id)
+    kwargs = {"wroc_version": "1.0"} if crate_version == "1.1" else {}
+    helpers.check_wf_crate(json_entities, wf_id, **kwargs)
 
     wf_out_path = out_path / wf_id
     assert wf_out_path.exists()

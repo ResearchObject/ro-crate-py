@@ -992,8 +992,9 @@ class Subcrate(Dataset):
 
 
 def make_workflow_rocrate(workflow_path, wf_type, include_files=[],
-                          fetch_remote=False, cwl=None, diagram=None):
-    wf_crate = ROCrate()
+                          fetch_remote=False, cwl=None, diagram=None,
+                          version=DEFAULT_VERSION):
+    wf_crate = ROCrate(version=version)
     workflow_path = Path(workflow_path)
     wf_crate.add_workflow(
         workflow_path, workflow_path.name, fetch_remote=fetch_remote,
