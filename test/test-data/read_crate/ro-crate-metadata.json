@@ -14,6 +14,9 @@
         {
             "@id": "./",
             "@type": "Dataset",
+            "conformsTo": {
+                "@id": "https://w3id.org/workflowhub/workflow-ro-crate/1.1"
+            },
             "datePublished": "2020-06-25 17:03:04.098286",
             "hasPart": [
                 {
@@ -44,6 +47,15 @@
             "mainEntity": {
                 "@id": "test_galaxy_wf.ga"
             }
+        },
+        {
+            "@id": "https://w3id.org/workflowhub/workflow-ro-crate/1.1",
+            "@type": [
+                "CreativeWork",
+                "Profile"
+            ],
+            "name": "Workflow RO-Crate",
+            "version": "1.1"
         },
         {
             "@id": "ro-crate-preview.html",

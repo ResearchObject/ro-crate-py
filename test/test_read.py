@@ -62,7 +62,10 @@ def test_crate_dir_loading(test_data_dir, tmpdir, helpers, gen_preview, from_zip
         "with%20space.txt",
         "a%20b/",
     }
-    assert set(_["@id"] for _ in crate.contextual_entities) == {"#joe"}
+    assert set(_["@id"] for _ in crate.contextual_entities) == {
+        "#joe",
+        "https://w3id.org/workflowhub/workflow-ro-crate/1.1",
+    }
 
     root = crate.dereference('./')
     assert crate.root_dataset is root
