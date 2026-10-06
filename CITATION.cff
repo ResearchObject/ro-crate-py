@@ -56,6 +56,6 @@ authors:
     given-names: Laurent
     orcid: https://orcid.org/0000-0001-7686-3249
 title: "ro-crate-py"
-version: 0.15.1
+version: 0.16.0
 doi: 10.5281/zenodo.3956493
-date-released: 2026-07-10
+date-released: 2026-10-06
