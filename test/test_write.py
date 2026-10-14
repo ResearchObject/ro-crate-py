@@ -645,8 +645,8 @@ def test_stream_empty_file(test_data_dir, tmpdir):
     crate = ROCrate()
     crate_dir = test_data_dir / "empty_file_crate"
 
-    filename_empty_file_root = "empty(with_brackets).txt"
-    crate.add_file(crate_dir / filename_empty_file_root)
+    empty_file_name = "empty(with_brackets).txt"
+    crate.add_file(crate_dir / empty_file_name)
     crate.add_directory(crate_dir / "folder")
 
     # write the crate to a zip file
@@ -660,8 +660,10 @@ def test_stream_empty_file(test_data_dir, tmpdir):
         for info in zf.infolist():
             files_in_zip[info.filename] = info.file_size
 
-    # Test that both file size and filename are conserved (no special characters are lost)
-    assert files_in_zip[filename_empty_file_root] == 0
+    # Test that the file name still contains the special characters
+    assert empty_file_name in files_in_zip
+
+    assert files_in_zip[empty_file_name] == 0
     assert files_in_zip["folder/empty_not_listed.txt"] == 0
 
 
