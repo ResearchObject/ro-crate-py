@@ -100,7 +100,7 @@ class File(FileOrDir):
         if isinstance(self.source, StringIO):
             read = read.encode('utf-8')
         while len(read) > 0:
-            yield self.id, read
+            yield unquote(self.id), read
             size += len(read)
             read = stream.read()
             if isinstance(self.source, StringIO):
@@ -126,12 +126,12 @@ class File(FileOrDir):
                 self._jsonld['contentUrl'] = str(url)
                 with urllib.request.urlopen(url) as response:
                     while chunk := response.read(chunk_size):
-                        yield self.id, chunk
+                        yield unquote(self.id), chunk
                         size += len(chunk)
 
                 # yield once for an empty file
                 if size == 0:
-                    yield self.id, b""
+                    yield unquote(self.id), b""
 
                 if self.record_size:
                     self._jsonld['contentSize'] = str(size)
@@ -145,7 +145,7 @@ class File(FileOrDir):
 
         # yield once for an empty file
         if size == 0:
-            yield self.id, b""
+            yield unquote(self.id), b""
 
         if self.record_size:
             self._jsonld['contentSize'] = str(size)
