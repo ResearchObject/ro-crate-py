@@ -1283,3 +1283,28 @@ def test_read_remote_dir_skip_dir_part(tmpdir):
     assert (out_path / "misc" / "errorpages").is_dir()
     assert (out_path / "misc" / "errorpages" / "404.html").is_file()
     assert (out_path / "misc" / "errorpages" / "500.html").is_file()
+
+
+def test_root_id_no_trailing_slash(tmpdir):
+    root_id = "https://example.org/records/123/versions/1"
+    metadata = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": [
+            {
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "about": {"@id": root_id},
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"}
+            },
+            {
+                "@id": root_id,
+                "@type": "Dataset",
+            },
+        ]
+    }
+    crate = ROCrate(metadata)
+    assert crate.metadata["about"] is crate.root_dataset
+    out_path = tmpdir / "ro-crate-metadata.json"
+    crate.write_detached(out_path)
+    crate = ROCrate(out_path)
+    assert crate.metadata["about"] is crate.root_dataset
