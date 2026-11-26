@@ -78,7 +78,8 @@ setup(
         'Laura Rodríguez-Navas',
         'Raül Sirvent',
         'Stian Soiland-Reyes',
-        'Laurent Thomas'
+        'Laurent Thomas',
+        'Joshua Woodcock'
     )),
     python_requires='>=3.11',
     author_email='stain@apache.org',

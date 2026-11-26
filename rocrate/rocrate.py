@@ -227,6 +227,7 @@ class ROCrate():
         metadata_properties = entities.pop(metadata_id)
         version = get_version(metadata_properties) or DEFAULT_VERSION
         self.add(Metadata(self, metadata_id, properties=metadata_properties, version=version))
+        self.metadata["about"] = self.root_dataset
 
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:

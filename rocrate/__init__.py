@@ -50,7 +50,8 @@ __author__ = ", ".join((
     'Laura Rodríguez-Navas',
     'Raül Sirvent',
     'Stian Soiland-Reyes',
-    'Laurent Thomas'
+    'Laurent Thomas',
+    'Joshua Woodcock'
 ))
 __copyright__ = """\
 Copyright 2019-2026 The University of Manchester, UK
