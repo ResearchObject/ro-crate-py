@@ -25,6 +25,7 @@
 # limitations under the License.
 
 from .dataset import Dataset
+#from .entity import Entity
 from ..utils import iso_now
 
 
@@ -49,3 +50,9 @@ class RootDataset(Dataset):
             "datePublished": iso_now(),
         }
         return val
+
+    def format_id(self, identifier):
+        if self.crate.version in ['0.2','1.0','1.1','1.2']:
+            return identifier.rstrip("/") + "/"
+        else:
+            return identifier
