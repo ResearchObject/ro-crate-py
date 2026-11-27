@@ -155,7 +155,7 @@ class ROCrate():
             if root_dataset_id is not None:
                 if root_dataset_id != "./" and not is_url(root_dataset_id):
                     raise ValueError("the root dataset id must be either ./ or an absolute URI")
-            rde = RootDataset(self, root_dataset_id)
+            rde = RootDataset(self, root_dataset_id, version=version)
             md = Metadata(self, properties={"about": rde}, version=version)
             self.add(rde, md)
         elif init:
@@ -173,7 +173,7 @@ class ROCrate():
         top_dir = Path(top_dir)
         if not top_dir.is_dir():
             raise NotADirectoryError(errno.ENOTDIR, f"'{top_dir}': not a directory")
-        self.add(RootDataset(self), Metadata(self, version=version))
+        self.add(RootDataset(self, version=version), Metadata(self, version=version))
         for root, dirs, files in walk(top_dir, exclude=self.exclude):
             root = Path(root)
             for name in dirs:
@@ -225,8 +225,8 @@ class ROCrate():
         parts = as_list(root_entity.pop('hasPart', []))
         metadata_properties = entities.pop(metadata_id)
         version = get_version(metadata_properties) or DEFAULT_VERSION
+        self.add(RootDataset(self, root_id, properties=root_entity, version=version))
         self.add(Metadata(self, metadata_id, properties=metadata_properties, version=version))
-        self.add(RootDataset(self, root_id, properties=root_entity))
 
         preview_entity = entities.pop(Preview.BASENAME, None)
         if preview_entity and not gen_preview:
