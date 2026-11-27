@@ -33,10 +33,10 @@ from .. import vocabs
 
 class Entity(MutableMapping):
 
-    def __init__(self, crate, identifier=None, properties=None):
+    def __init__(self, crate, identifier=None, properties=None, version=None):
         self.crate = crate
         if identifier:
-            self.__id = self.format_id(identifier)
+            self.__id = self.format_id(identifier, version)
         else:
             self.__id = f"#{uuid.uuid4()}"
         self._jsonld = self._empty()
@@ -54,7 +54,7 @@ class Entity(MutableMapping):
 
     # Format the given ID with rules appropriate for this type.
     # For example, Dataset (directory) data entities SHOULD end with /
-    def format_id(self, identifier):
+    def format_id(self, identifier, version):
         return str(identifier)
 
     def __repr__(self):

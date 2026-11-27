@@ -25,13 +25,12 @@
 # limitations under the License.
 
 from .dataset import Dataset
-#from .entity import Entity
 from ..utils import iso_now
 
 
 class RootDataset(Dataset):
 
-    def __init__(self, crate, source=None, dest_path=None, properties=None):
+    def __init__(self, crate, source=None, dest_path=None, properties=None, version=None):
         if source is None and dest_path is None:
             dest_path = "./"
         super().__init__(
@@ -40,7 +39,8 @@ class RootDataset(Dataset):
             dest_path=dest_path,
             fetch_remote=False,
             validate_url=False,
-            properties=properties
+            properties=properties,
+            version=version
         )
 
     def _empty(self):
@@ -51,8 +51,10 @@ class RootDataset(Dataset):
         }
         return val
 
-    def format_id(self, identifier):
-        if self.crate.version in ['0.2','1.0','1.1','1.2']:
+    def format_id(self, identifier, version):
+        if version in ['1.0', '1.0-DRAFT', '1.1', '1.1-DRAFT']:
             return identifier.rstrip("/") + "/"
-        else:
-            return identifier
+        elif identifier == '.':
+            return identifier + "/"
+
+        return identifier

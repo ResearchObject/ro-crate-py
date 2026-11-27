@@ -35,7 +35,7 @@ from ..utils import is_url, Mode
 class FileOrDir(DataEntity):
 
     def __init__(self, crate, source=None, dest_path=None, fetch_remote=False,
-                 validate_url=False, properties=None, record_size=False):
+                 validate_url=False, properties=None, record_size=False, version=None):
         if properties is None:
             properties = {}
         self.fetch_remote = fetch_remote
@@ -58,4 +58,4 @@ class FileOrDir(DataEntity):
                 identifier = os.path.basename(str(source).rstrip("/"))
                 if not crate.mode == Mode.READ:
                     identifier = quote(identifier)
-        super().__init__(crate, identifier, properties)
+        super().__init__(crate, identifier, properties, version)
