@@ -45,7 +45,7 @@ class Dataset(FileOrDir):
         return val
 
     # SHOULD end with /
-    def format_id(self, identifier):
+    def format_id(self, identifier, version=None):
         return identifier.rstrip("/") + "/"
 
     def _write_from_url(self, base_path):
